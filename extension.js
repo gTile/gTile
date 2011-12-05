@@ -341,22 +341,11 @@ Grid.prototype = {
 		for(var index=0; index<gridSettingsButton.length;index++)
 		{
 		    let button = gridSettingsButton[index];
+		    button = new GridSettingsButton(button.text,button.cols,button.rows);
 		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:false,y_fill:false});
 		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
 		    colNum++;
 		}
-		
-		/*let twobytwo = new GridSettingsButton('2x2',2,2);
-		this.bottombar.add(twobytwo.actor,{row:0, col:0,x_fill:false,y_fill:false});
-		twobytwo.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
-		
-		let fourbyfour = new GridSettingsButton('4x4',4,4);
-		this.bottombar.add(fourbyfour.actor,{row:0, col:1,x_fill:false,y_fill:false});
-		fourbyfour.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
-				
-		let sixbysix = new GridSettingsButton('6x6',6,6);
-		this.bottombar.add(sixbysix.actor,{row:0, col:2,x_fill:false,y_fill:false});
-		sixbysix.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));*/
 			
 		this.table = new St.Table({ homogeneous: true,
                                     style_class: 'table',
