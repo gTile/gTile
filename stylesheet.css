@@ -1,0 +1,108 @@
+.grid-title{
+	font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    padding: .5em;
+    text-align:center;
+}
+
+.grid-panel{
+    background-color: rgba(10,10,10,0.7);
+    width:240px;
+    border-radius: 10px;
+}
+
+.table{
+}
+
+.table-element{
+    background-color: rgba(240,240,240,0.4);
+    border-radius: 3px;
+}
+
+.table-element:hover, .table-element:activate
+{
+    background-color: rgba(240,240,240,0.8);
+    border-radius: 3px;
+}
+
+.tiling-icon
+{
+    width: 24px;
+    height: 24px;
+    background-image: url("images/launcher.png");
+}
+
+.tiling-icon:hover,.tiling-icon:activate
+{
+	width: 24px;
+    height: 24px;
+    background-image: url("images/launcher_hover.png");
+}
+
+.close-button
+{
+    width:24px;
+    height:24px;
+    background-image: url("images/close_button.png");
+}
+
+.close-button:hover
+{
+    width:24px;
+    height:24px;
+    background-image: url("images/close_button_hover.png");
+}
+
+.top-box
+{
+    padding:3px
+}
+
+.settings-button
+{
+    background-color: rgba(0,120,255,0.4);
+    color: rgba(255,255,255,0.4);
+    min-width:40px;
+    border-radius:5px;
+    padding:3px;
+    border:1px rgba(0,200,255,0.4);
+}
+
+.settings-button:hover
+{
+    background-color: rgba(0,120,255,0.7);
+    color: rgba(255,255,255,1);
+    min-width:40px;
+    border-radius:5px;
+    padding:3px;
+    border:1px rgba(0,200,255,0.7);
+}
+
+.settings-label
+{
+    
+}
+
+.settings-label:hover
+{
+   
+}
+
+.grid-preview
+{
+     background-color: rgba(241,122,73,0.0);
+     border: rgba(217,108,59,0.0);
+}
+
+.grid-preview:activate
+{
+    background-color: rgba(241,122,73,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+}
+
+.bottom-box
+{
+    height:30px;
+    padding:10px;
+}
