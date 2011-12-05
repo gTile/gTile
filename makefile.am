@@ -1,4 +1,4 @@
-extensionurl = https://github.com/ecyrbe/gnome-shell-extension-weather
+extensionurl = https://github.com/vibou/gTile
 
 # Change these to modify how installation is performed
 topextensiondir = $(datadir)/gnome-shell/extensions
