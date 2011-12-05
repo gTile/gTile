@@ -1,14 +1,43 @@
-Next steps:
-  mkdir vibou.gTile
-  cd vibou.gTile
-  git init
-  touch README
-  git add README
-  git commit -m 'first commit'
-  git remote add origin git@github.com:vibou/vibou.gTile.git
-  git push -u origin master
-      
-Existing Git Repo?
-  cd existing_git_repo
-  git remote add origin git@github.com:vibou/vibou.gTile.git
-  git push -u origin master
+/*****************************************************************
+
+             This extension has been developped by
+                            vibou
+                                
+           With the help of the gnome-shell community
+
+******************************************************************/
+
+To configure gTile open the file extension.js
+go down to SETTINGS comments
+and edit this part of code:
+
+/*****************************************************************
+                            SETTINGS
+*****************************************************************/
+/*INIT SETTINGS HERE TO ADD OR REMOVE SETTINGS BUTTON*/
+/*new GridSettingsButton(LABEL, NBCOL, NBROW) */
+function initSettings()
+{
+    gridSettings[SETTINGS_GRID_SIZE] = [
+        new GridSettingsButton('2x2',2,2),
+        new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('6x6',6,6)
+    ];
+}
+
+
+TO ADD FOR INSTANCE A NEW SETTINGS BUTTON (8x8) DO THIS:
+/*****************************************************************
+                            SETTINGS
+*****************************************************************/
+/*INIT SETTINGS HERE TO ADD OR REMOVE SETTINGS BUTTON*/
+/*new GridSettingsButton(LABEL, NBCOL, NBROW) */
+function initSettings()
+{
+    gridSettings[SETTINGS_GRID_SIZE] = [
+        new GridSettingsButton('2x2',2,2),
+        new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('6x6',6,6),
+         new GridSettingsButton('8x8',8,8)
+    ];
+}
