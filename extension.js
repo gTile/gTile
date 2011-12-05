@@ -18,9 +18,11 @@ const Lang = imports.lang;
 const PanelMenu = imports.ui.panelMenu;
 const DND = imports.ui.dnd;
 const Meta = imports.gi.Meta;
-/*GNOME SETTINGS SUPPORT*/
-const Gio = imports.gi.Gio;
+const Clutter = imports.gi.Clutter;
 
+const SETTINGS_GRID_SIZE = 'grid-size';
+/*COMMING SOON*/
+//const SETTINGS_KEY_BINDING = 'key-binding';
 
 let status;
 let launcher;
@@ -33,34 +35,29 @@ let area;
 let focusMetaWindow = false;
 let focusMetaWindowId = false;
 let tracker;
-let settings;
+let gridSettings = new Object();
 
-/*SETTINGS*/
-const GTILE_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.gTile';
-const KEY_BINDING = '';
-const CUSTOM_GRID_ROW = 'custom-grid-row';
-const CUSTOM_GRID_COL = 'custom-grid-col';
 
-/*SETTINGS VALUE*/
-let customGridRow;
-let customGridCol;
-
+/*****************************************************************
+                            SETTINGS
+*****************************************************************/
+/*INIT SETTINGS HERE TO ADD OR REMOVE SETTINGS BUTTON*/
+/*new GridSettingsButton(LABEL, NBCOL, NBROW) */
+function initSettings()
+{
+    gridSettings[SETTINGS_GRID_SIZE] = [
+        new GridSettingsButton('2x2',2,2),
+        new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('6x6',6,6)
+    ];
+    
+    
+}
 
 /*****************************************************************
                             FUNCTIONS
 *****************************************************************/
-function getSettings(schema) {
-    if (Gio.Settings.list_schemas().indexOf(schema) == -1)
-        throw _("Schema \"%s\" not found.").format(schema);
-    return new Gio.Settings({ schema: schema });
-}
 
-function init_settings()
-{
-    settings = getSettings("org.gnome.shell.extensions.gTile");
-    customGridRow = settings.get_string(CUSTOM_GRID_ROW);
-    customGridCol = settings.get_string(CUSTOM_GRID_COL);
-}
 
 function enable() {
     status = false;
@@ -194,6 +191,7 @@ function toggleTiling()
 
 function initGrids()
 {
+    initSettings();
 	grids = new Array();
 	for(monitorIdx in monitors)
 	{
@@ -336,14 +334,21 @@ Grid.prototype = {
                                     reactive: true,
                                     width:tableWidth,
                                     });		
+		let rowNum = 0;
+		let colNum = 0;
+		let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
 		
-		let twobytwo = new GridSettingsButton('2x2',2,2);
+		for(var index=0; index<gridSettingsButton.length;index++)
+		{
+		    let button = gridSettingsButton[index];
+		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:false,y_fill:false});
+		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
+		    colNum++;
+		}
+		
+		/*let twobytwo = new GridSettingsButton('2x2',2,2);
 		this.bottombar.add(twobytwo.actor,{row:0, col:0,x_fill:false,y_fill:false});
 		twobytwo.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
-		
-		/*let twobytwo = new GridSettingsButton('3x3',3,3);
-		this.bottombar.add(twobytwo.actor,{row:0, col:1,x_fill:false,y_fill:false});
-		twobytwo.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));*/
 		
 		let fourbyfour = new GridSettingsButton('4x4',4,4);
 		this.bottombar.add(fourbyfour.actor,{row:0, col:1,x_fill:false,y_fill:false});
@@ -351,19 +356,6 @@ Grid.prototype = {
 				
 		let sixbysix = new GridSettingsButton('6x6',6,6);
 		this.bottombar.add(sixbysix.actor,{row:0, col:2,x_fill:false,y_fill:false});
-		sixbysix.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
-		
-		if(customGridRow != undefined && customGridCol != undefined)
-		{
-		    let custom = new GridSettingsButton(customGridRow+'x'+customGridCol,customGridRow,customGridCol);
-		    this.bottombar.add(custom.actor,{row:0, col:3,x_fill:false,y_fill:false});
-		    custom.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
-		}
-		
-		
-		
-		/*let sixbysix = new GridSettingsButton('8x8',8,8);
-		this.bottombar.add(sixbysix.actor,{row:0, col:4,x_fill:false,y_fill:false});
 		sixbysix.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));*/
 			
 		this.table = new St.Table({ homogeneous: true,
@@ -744,5 +736,5 @@ GTileButton.prototype = {
 
 function init()
 {
-    init_settings();
+    
 }
