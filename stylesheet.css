@@ -30,14 +30,21 @@
 {
     width: 24px;
     height: 24px;
-    background-image: url("images/launcher.png");
+    background-image: url("images/launcher_16.png");
 }
 
-.tiling-icon:hover,.tiling-icon:activate
+.tiling-icon:hover
 {
 	width: 24px;
     height: 24px;
-    background-image: url("images/launcher_hover.png");
+    background-image: url("images/launcher_16_hover.png");
+}
+
+.tiling-icon:activate
+{
+    width: 24px;
+    height: 24px;
+    background-image: url("images/launcher_16_activated.png");
 }
 
 .close-button
@@ -67,6 +74,27 @@
     border-radius:5px;
     padding:3px;
     border:1px rgba(0,200,255,0.4);
+    height:40px;
+}
+
+.settings-button:activate
+{
+   background-color: rgba(0,120,255,0.7);
+    color: rgba(255,255,255,1);
+    min-width:40px;
+    border-radius:5px;
+    padding:3px;
+    border:1px rgba(0,200,255,0.7);
+}
+
+.settings-button:activate:hover
+{
+    background-color: rgba(30,150,255,0.7);
+    color: rgba(255,255,255,1);
+    min-width:40px;
+    border-radius:5px;
+    padding:3px;
+    border:1px rgba(0,200,255,0.7);
 }
 
 .settings-button:hover

@@ -19,8 +19,12 @@ const PanelMenu = imports.ui.panelMenu;
 const DND = imports.ui.dnd;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
+const Signals = imports.signals;
+const Tweener = imports.ui.tweener;
 
 const SETTINGS_GRID_SIZE = 'grid-size';
+const SETTINGS_AUTO_CLOSE = 'auto-close';
+const SETTINGS_ANIMATION = 'animation';
 /*COMMING SOON*/
 //const SETTINGS_KEY_BINDING = 'key-binding';
 
@@ -36,6 +40,7 @@ let focusMetaWindow = false;
 let focusMetaWindowId = false;
 let tracker;
 let gridSettings = new Object();
+let toggleSettingListener;
 
 
 /*****************************************************************
@@ -45,13 +50,16 @@ let gridSettings = new Object();
 /*new GridSettingsButton(LABEL, NBCOL, NBROW) */
 function initSettings()
 {
+    //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
         new GridSettingsButton('2x2',2,2),
         new GridSettingsButton('4x4',4,4),
         new GridSettingsButton('6x6',6,6)
     ];
     
-    
+     //You can change those settings to set whatever you want by default
+     gridSettings[SETTINGS_AUTO_CLOSE] = true;
+     gridSettings[SETTINGS_ANIMATION] = true;
 }
 
 /*****************************************************************
@@ -70,13 +78,16 @@ function enable() {
 
     area = new St.BoxLayout({style_class: 'grid-preview'});
     launcher = new GTileButton('tiling-icon');
+    
+    initSettings();
     initGrids(); 
 
 	Main.panel._rightBox.insert_actor(launcher.actor, 0);
 }
 
-function disable() {
-    
+function disable() 
+{
+    destroyGrids();
     Main.panel._rightBox.remove_actor(launcher.actor);
     
     if(focusMetaWindowId)
@@ -88,20 +99,47 @@ function disable() {
     focusMetaWindowId = false;
 }
 
+function initGrids()
+{
+	grids = new Array();
+	for(monitorIdx in monitors)
+	{
+		let monitor = monitors[monitorIdx];
+		let grid = new Grid(monitor,"gTile", nbCols, nbRows);
+		let key = getMonitorKey(monitor);
+		grids[key] = grid;
+		grid.actor.set_opacity(0);
+		Main.layoutManager.addChrome(grid.actor, { visibleInFullscreen: true });
+		grid.hide(true);
+	}
+}
+
+function destroyGrids()
+{
+    for(monitorIdx in monitors)
+	{
+		let monitor = monitors[monitorIdx];
+		let key = getMonitorKey(monitor);
+		grid = grids[key];
+		grid.hide(true);
+		Main.layoutManager.removeChrome(grid.actor);
+	}
+}
+
 function _onFocus()
 {
     let window = getFocusApp();
     if(window)
     {   if(focusMetaWindowId)
         {
-            global.log("Disconnect window: "+focusMetaWindow.get_title());
+            //global.log("Disconnect window: "+focusMetaWindow.get_title());
             focusMetaWindow.disconnect(focusMetaWindowId);
         }
 
-        global.log("Connect window: "+window.get_title());
+        //global.log("Connect window: "+window.get_title());
         focusMetaWindow = window;
         focusMetaWindowId = focusMetaWindow.connect('notify::title',Lang.bind(this,this._onFocus));
-        global.log("End Connect window: "+window.get_title());
+        //global.log("End Connect window: "+window.get_title());
 
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
@@ -121,7 +159,7 @@ function _onFocus()
     {
         if(focusMetaWindowId)
         {
-            global.log("Disconnect window: "+focusMetaWindow.get_title());
+            //global.log("Disconnect window: "+focusMetaWindow.get_title());
             focusMetaWindow.disconnect(focusMetaWindowId);
         }
 
@@ -134,9 +172,10 @@ function _onFocus()
 
 
 
-function showTiling()
+function showTiling(immediate)
 {
     focusMetaWindow = getFocusApp();
+    //global.log("focus app: "+focusMetaWindow);
 	if(focusMetaWindow)
 	{	    
 	    Main.uiGroup.add_actor(area);
@@ -145,10 +184,13 @@ function showTiling()
 	        let monitor = monitors[monitorIdx];
 	        let key = getMonitorKey(monitor);
 	        let grid = grids[key];
+	        //global.log("ancestor: "+grid.actor.get_parent());
 	        
-	        Main.layoutManager.addChrome(grid.actor, { visibleInFullscreen: true });
-	        grid.actor.set_position(monitor.x+(Math.floor(monitor.width / 2 - grid.actor.width / 2)),
+	        
+	        grid.set_position(monitor.x+(Math.floor(monitor.width / 2 - grid.actor.width / 2)),
                       Math.floor(monitor.y+(monitor.height / 2 - grid.actor.height / 2) ));
+                    
+            grid.show(immediate); 
 	    }
 	    
 	    this._onFocus();
@@ -156,13 +198,14 @@ function showTiling()
 	}
 }
 
-function hideTiling()
-{
+function hideTiling(immediate)
+{	
 	for(let gridIdx in grids)
 	{
-	    grids[gridIdx].elementsDelegate.resetGrid();
-	    Main.layoutManager.removeChrome(grids[gridIdx].actor);
+	    let grid = grids[gridIdx];
+	    grid.hide(immediate);
 	}
+	
 	Main.uiGroup.remove_actor(this.area);
 	
     if(focusMetaWindowId)
@@ -172,8 +215,9 @@ function hideTiling()
 
     focusMetaWindow = false;
     focusMetaWindowId = false;
-	
-	status = false;
+    
+    launcher.reset();
+    status = false;
 }
 
 function toggleTiling()
@@ -187,19 +231,6 @@ function toggleTiling()
 		showTiling();
 	}
 	return status;
-}
-
-function initGrids()
-{
-    initSettings();
-	grids = new Array();
-	for(monitorIdx in monitors)
-	{
-		let monitor = monitors[monitorIdx];
-		let grid = new Grid(monitor,"gTile", nbCols, nbRows);
-		let key = getMonitorKey(monitor);
-		grids[key] = grid;
-	}
 }
 
 
@@ -260,7 +291,7 @@ TopBar.prototype = {
     {
        
          this._title = app.get_name()+" - "+title;
-          global.log("title: "+this._title);
+          //global.log("title: "+this._title);
          this._stlabel.text = this._title;
          this._icon = app.create_icon_texture(24);
          
@@ -268,6 +299,77 @@ TopBar.prototype = {
          this._iconBin.child = this._icon;
     },
 };
+
+function ToggleSettingsButtonListener()
+{
+    this._init();
+};
+
+ToggleSettingsButtonListener.prototype = {
+    _init : function()
+    {
+        this.actors = new Array();
+    },
+    
+    addActor : function(actor)
+    {
+        actor.connect('update-toggle', Lang.bind(this,this._updateToggle));
+        this.actors.push(actor);
+    },
+    
+    _updateToggle: function()
+    {
+        for(let actorIdx in this.actors)
+        {
+            let actor = this.actors[actorIdx];
+            actor._update();
+        }
+    }
+};
+
+function ToggleSettingsButton(text,property)
+{
+    this._init(text,property);
+    
+};
+
+ToggleSettingsButton.prototype = {
+    _init : function(text,property)
+    {
+        this.text = text;
+        this.actor = new St.Button({style_class: 'settings-button',
+                                                  reactive: true,
+                                                  can_focus:true,
+                                                  track_hover: true});
+        this.label = new St.Label({style_class: 'settings-label', reactive:true, can_focus:true, track_hover:true, text:this.text});
+        this.property = property;
+        this._update();
+        this.actor.add_actor(this.label);
+        this.actor.connect('button-press-event', Lang.bind(this,this._onButtonPress));
+        this.connect('update-toggle', Lang.bind(this,this._update))
+    },
+    
+    _update : function()
+    {
+        if(gridSettings[this.property])
+        {
+            this.actor.add_style_pseudo_class('activate');
+        }
+        else
+        {
+            this.actor.remove_style_pseudo_class('activate');
+        }
+    },
+    
+     _onButtonPress : function()
+    {
+        gridSettings[this.property] = !gridSettings[this.property];
+        global.log(this.property+": "+gridSettings[this.property]);
+        this.emit('update-toggle');
+    }
+};
+
+Signals.addSignalMethods(ToggleSettingsButton.prototype);
 
 function GridSettingsButton(text,cols,rows)
 {
@@ -291,6 +393,7 @@ GridSettingsButton.prototype = {
         this.actor.add_actor(this.label);
         
         this.actor.connect('button-press-event', Lang.bind(this,this._onButtonPress));
+        
     },
     
     _onButtonPress : function()
@@ -298,9 +401,9 @@ GridSettingsButton.prototype = {
         nbCols = this.cols;
         nbRows = this.rows;
         
-        hideTiling();
+        destroyGrids();
         initGrids();
-        showTiling();
+        showTiling(true);
     },
 };
 
@@ -324,6 +427,7 @@ Grid.prototype = {
 		                                track_hover:true});
 		
 		this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
+		this.actor.connect('key-press-event', Lang.bind(this, this._globalKeyPressEvent));
 		
 		this.topbar = new TopBar(title);
 		
@@ -333,7 +437,8 @@ Grid.prototype = {
                                     track_hover: true,
                                     reactive: true,
                                     width:tableWidth,
-                                    });		
+                                    });
+                                    
 		let rowNum = 0;
 		let colNum = 0;
 		let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
@@ -342,11 +447,11 @@ Grid.prototype = {
 		{
 		    let button = gridSettingsButton[index];
 		    button = new GridSettingsButton(button.text,button.cols,button.rows);
-		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:false,y_fill:false});
+		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:true,y_fill:false});
 		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
 		    colNum++;
-		}
-			
+		}		
+		
 		this.table = new St.Table({ homogeneous: true,
                                     style_class: 'table',
                                     can_focus: true,
@@ -354,16 +459,39 @@ Grid.prototype = {
                                     reactive: true,
                                     width:tableWidth,
                                     height:tableHeight
-                                    });                           
-		
+                                    });  
+                                    
 		this.actor.add(this.topbar.actor,{x_fill:true});
 		this.actor.add(this.table,{x_fill:false});
-		this.actor.add(this.bottombar,{x_fill:true});
 		
+				
 		this.monitor = monitor;
 		this.rows = rows;
 		this.title = title;
 		this.cols = cols;
+		
+		if(true)
+		{
+		    if(!toggleSettingListener)
+		    {
+		        toggleSettingListener = new ToggleSettingsButtonListener();
+            }
+            
+		    this.bottombar.set_height(120);
+		    this.bottombar.set_width(tableWidth+20);
+		    let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
+		    this.bottombar.add(toggle.actor,{row:2, col:0,x_fill:true,y_fill:false});
+            toggleSettingListener.addActor(toggle); 
+            
+		    toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
+		    this.bottombar.add(toggle.actor,{row:2, col:2,x_fill:true,y_fill:false});
+            toggleSettingListener.addActor(toggle);
+		}
+		
+		this.actor.add(this.bottombar,{x_fill:true});
+		
+		this.x = 0;
+	    this.y = 0;
 		
 		this.elements = new Array();
 		
@@ -371,6 +499,7 @@ Grid.prototype = {
 		let height = (tableHeight / rows) - 2*borderwidth;
 	    
 	   	this.elementsDelegate = new GridElementDelegate();
+	   	this.elementsDelegate.connect('resize-done', Lang.bind(this, this._onResize));
 		for(let r = 0; r < rows; r++)
 		{
 			for(let c = 0; c < cols; c++)
@@ -383,12 +512,65 @@ Grid.prototype = {
                 let element = new GridElement(monitor,width,height,c,r);
 
                 this.elements[r][c] = element;
-
                 element.actor._delegate = this.elementsDelegate;
                 this.table.add(element.actor,{row: r, col: c,x_fill:false, y_fill:false});
 			}
 		}		
 	},
+	
+	set_position : function (x,y)
+	{
+	    this.x = x;
+	    this.y = y;
+	    this.actor.set_position(x,y);
+	},
+	
+	show : function(immediate)
+	{
+	    let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.5 : 0.2 ;
+	     global.log(time);
+        //this.actor.show();
+        //this.actor.opacity = 255;
+        this.actor.raise_top();
+        Tweener.addTween(this.actor,
+                         { 
+                           time: time,
+                           opacity: 255,
+                           visible: true,
+                           transition: 'easeOutQuad',
+                           onComplete: this._updateChrome,
+                           onCompleteScope: this.actor});
+        
+	},
+	
+	hide : function(immediate)
+	{
+	    let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.5 : 0.2 ;
+	    global.log(time);
+	    Tweener.addTween(this.actor,
+                         { 
+                           time: time,
+                           opacity: 0,
+                           visible: false,
+                           transition: 'easeOutQuad',
+                           onComplete: this._updateChrome,
+                           onCompleteScope: this.actor});
+	},
+	
+	_updateChrome : function()
+	{
+	    this.elementsDelegate._reset();
+	    Main.layoutManager._chrome.updateRegions();
+	},
+	
+	 _onResize: function(actor, event)
+	 {
+        if(gridSettings[SETTINGS_AUTO_CLOSE])
+        {
+            hideTiling();
+        }
+     },
+   
 	
 	_onMouseLeave : function()
 	{
@@ -398,6 +580,18 @@ Grid.prototype = {
 	        this.elementsDelegate._reset();
 	    }
 	},
+	
+	_globalKeyPressEvent : function(actor, event) {
+        let symbol = event.get_key_symbol();
+        global.log("Escape pressed: "+symbol);
+        if (symbol == Clutter.Escape) {
+            
+            hideTiling();    
+            launcher.reset();
+            return true; 
+        }
+        return false;
+    },
 	
 	_onSettingsButton : function()
 	{
@@ -459,6 +653,7 @@ GridElementDelegate.prototype = {
 	    }
 	    else
 	    {
+	        //global.log("resize");
 	        //Check this.activatedActors if equals to nbCols * nbRows
 	        //before doing anything with the window it must be unmaximized
 	        //if so move the window then maximize instead of change size
@@ -479,21 +674,25 @@ GridElementDelegate.prototype = {
             {
                 focusMetaWindow.resize(true,areaWidth-vBorderX,areaHeight-vBorderY);
             }
-
-            this.resetGrid();
-            this.first = false;
-            this.activated = false;
+            
+            this._reset();          
+            this._resizeDone();
 	    }
+	},
+	
+	_resizeDone: function()
+	{
+	    this.emit('resize-done');
 	},
 	
 	_reset: function()
 	{
         this.resetGrid();
+        
         this.activated = false;
         this.first = false;
         this.last = false;
         this.currentElement = false;
-        this.activatedActors=false;
 	},
 	
 	resetGrid: function()
@@ -601,7 +800,6 @@ GridElementDelegate.prototype = {
 	{
 	    if(this.activated)
 	    {
-	         this.resetGrid();
 	         this.refreshGrid(this.first,gridElement);
 	    }
 	    else
@@ -624,6 +822,8 @@ GridElementDelegate.prototype = {
         this.activatedActors=null;
 	}
 };
+
+Signals.addSignalMethods(GridElementDelegate.prototype);
 
 function GridElement(monitor,width,height,coordx,coordy)
 {
@@ -702,11 +902,21 @@ GTileButton.prototype = {
                                                style_class: classname});
                                                
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        
+        
         this.activated = false;
    },
    
+   reset : function()
+   {
+        this.activated = false;
+        launcher.actor.remove_style_pseudo_class('activate');
+   },
+   
    _onButtonPress: function(actor, event){
+        //global.log(this.activated);
         this.activated = toggleTiling();
+        //global.log(this.activated);
         if(this.activated)
         {
             launcher.actor.add_style_pseudo_class('activate');
@@ -716,6 +926,8 @@ GTileButton.prototype = {
             launcher.actor.remove_style_pseudo_class('activate');
         }
    },
+   
+    
    
    _destroy : function()
 	{
