@@ -54,8 +54,11 @@ function initSettings()
     gridSettings[SETTINGS_GRID_SIZE] = [
         new GridSettingsButton('2x2',2,2),
         new GridSettingsButton('4x4',4,4),
-        new GridSettingsButton('6x6',6,6)
+        new GridSettingsButton('6x6',6,6),
     ];
+    
+    //myCustomButton = new GridSettingsButton('Custom',8,8); //Going to be a 8x8 GridSettings
+    //gridSettings[SETTINGS_GRID_SIZE].push(myCustomButton);
     
      //You can change those settings to set whatever you want by default
      gridSettings[SETTINGS_AUTO_CLOSE] = true;
@@ -438,16 +441,31 @@ Grid.prototype = {
                                     reactive: true,
                                     width:tableWidth,
                                     });
+        
+        this.veryBottomBar = new St.Table({ homogeneous: true,
+                                    style_class: 'bottom-box',
+                                    can_focus: true,
+                                    track_hover: true,
+                                    reactive: true,
+                                    width:tableWidth,
+                                    });
                                     
 		let rowNum = 0;
 		let colNum = 0;
+		let maxPerRow = 4;
 		let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
 		
 		for(var index=0; index<gridSettingsButton.length;index++)
 		{
+		    if(colNum>= 4)
+		    {
+		        colNum = 0;
+		        rowNum += 2;
+		    }
+		    
 		    let button = gridSettingsButton[index];
 		    button = new GridSettingsButton(button.text,button.cols,button.rows);
-		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:true,y_fill:false});
+		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:false,y_fill:false});
 		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
 		    colNum++;
 		}		
@@ -463,6 +481,8 @@ Grid.prototype = {
                                     
 		this.actor.add(this.topbar.actor,{x_fill:true});
 		this.actor.add(this.table,{x_fill:false});
+		this.actor.add(this.bottombar,{x_fill:true});		
+		this.actor.add(this.veryBottomBar,{x_fill:true});
 		
 				
 		this.monitor = monitor;
@@ -472,23 +492,24 @@ Grid.prototype = {
 		
 		if(true)
 		{
+		    let nbTotalSettings = 2;
+		
 		    if(!toggleSettingListener)
 		    {
 		        toggleSettingListener = new ToggleSettingsButtonListener();
             }
             
-		    this.bottombar.set_height(120);
-		    this.bottombar.set_width(tableWidth+20);
 		    let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-		    this.bottombar.add(toggle.actor,{row:2, col:0,x_fill:true,y_fill:false});
-            toggleSettingListener.addActor(toggle); 
+		    toggle.actor.width = (tableWidth / nbTotalSettings) - borderwidth*2;
+		    this.veryBottomBar.add(toggle.actor,{row:0, col:0,x_fill:false,y_fill:false});
+            toggleSettingListener.addActor(toggle);
             
 		    toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-		    this.bottombar.add(toggle.actor,{row:2, col:2,x_fill:true,y_fill:false});
+		    toggle.actor.width = (tableWidth / nbTotalSettings) - borderwidth*2;
+		    this.veryBottomBar.add(toggle.actor,{row:0, col:1,x_fill:false,y_fill:false});
             toggleSettingListener.addActor(toggle);
 		}
 		
-		this.actor.add(this.bottombar,{x_fill:true});
 		
 		this.x = 0;
 	    this.y = 0;

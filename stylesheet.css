@@ -74,7 +74,8 @@
     border-radius:5px;
     padding:3px;
     border:1px rgba(0,200,255,0.4);
-    height:40px;
+    max-height:30px;
+    min-height:30px;
 }
 
 .settings-button:activate
@@ -131,6 +132,12 @@
 
 .bottom-box
 {
-    height:30px;
     padding:10px;
+    display:block;
+}
+
+.very-bottom-box
+{
+    padding:60px;
+    display:block;
 }
