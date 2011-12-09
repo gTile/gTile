@@ -37,20 +37,3 @@ function initSettings()
      gridSettings[SETTINGS_AUTO_CLOSE] = true;
      gridSettings[SETTINGS_ANIMATION] = true;
 }
-
-
-TO ADD FOR INSTANCE A NEW SETTINGS BUTTON (8x8) DO THIS:
-/*****************************************************************
-                            SETTINGS
-*****************************************************************/
-/*INIT SETTINGS HERE TO ADD OR REMOVE SETTINGS BUTTON*/
-/*new GridSettingsButton(LABEL, NBCOL, NBROW) */
-function initSettings()
-{
-    gridSettings[SETTINGS_GRID_SIZE] = [
-        new GridSettingsButton('2x2',2,2),
-        new GridSettingsButton('4x4',4,4),
-        new GridSettingsButton('6x6',6,6),
-         new GridSettingsButton('8x8',8,8)
-    ];
-}

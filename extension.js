@@ -53,6 +53,7 @@ function initSettings()
     //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
         new GridSettingsButton('2x2',2,2),
+        new GridSettingsButton('3x2',3,2),
         new GridSettingsButton('4x4',4,4),
         new GridSettingsButton('6x6',6,6),
     ];
@@ -61,7 +62,7 @@ function initSettings()
     //gridSettings[SETTINGS_GRID_SIZE].push(myCustomButton);
     
      //You can change those settings to set whatever you want by default
-     gridSettings[SETTINGS_AUTO_CLOSE] = true;
+     gridSettings[SETTINGS_AUTO_CLOSE] = false;
      gridSettings[SETTINGS_ANIMATION] = true;
 }
 
@@ -146,7 +147,8 @@ function _onFocus()
 
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
-
+        
+        
         for(monitorIdx in monitors)
 	    {
 		    let monitor = monitors[monitorIdx];
@@ -178,8 +180,13 @@ function _onFocus()
 function showTiling(immediate)
 {
     focusMetaWindow = getFocusApp();
+    let wm_class = focusMetaWindow.get_wm_class();
+    let wm_type = focusMetaWindow.get_window_type();
+    let layer = focusMetaWindow.get_layer();
+        
+    //global.log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
     //global.log("focus app: "+focusMetaWindow);
-	if(focusMetaWindow)
+	if(focusMetaWindow && wm_type != 1 && layer > 0)
 	{	    
 	    Main.uiGroup.add_actor(area);
 	    for(monitorIdx in monitors)
@@ -367,7 +374,7 @@ ToggleSettingsButton.prototype = {
      _onButtonPress : function()
     {
         gridSettings[this.property] = !gridSettings[this.property];
-        global.log(this.property+": "+gridSettings[this.property]);
+        //global.log(this.property+": "+gridSettings[this.property]);
         this.emit('update-toggle');
     }
 };
@@ -549,7 +556,7 @@ Grid.prototype = {
 	show : function(immediate)
 	{
 	    let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.5 : 0.2 ;
-	     global.log(time);
+	     //global.log(time);
         //this.actor.show();
         //this.actor.opacity = 255;
         this.actor.raise_top();
@@ -567,7 +574,7 @@ Grid.prototype = {
 	hide : function(immediate)
 	{
 	    let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.5 : 0.2 ;
-	    global.log(time);
+	    //global.log(time);
 	    Tweener.addTween(this.actor,
                          { 
                            time: time,
@@ -580,7 +587,11 @@ Grid.prototype = {
 	
 	_updateChrome : function()
 	{
-	    this.elementsDelegate._reset();
+	    if(this.elementsDelegate)
+	    {
+	        this.elementsDelegate._reset();
+	    }
+	    
 	    Main.layoutManager._chrome.updateRegions();
 	},
 	
@@ -604,7 +615,7 @@ Grid.prototype = {
 	
 	_globalKeyPressEvent : function(actor, event) {
         let symbol = event.get_key_symbol();
-        global.log("Escape pressed: "+symbol);
+        //global.log("Escape pressed: "+symbol);
         if (symbol == Clutter.Escape) {
             
             hideTiling();    
@@ -685,7 +696,9 @@ GridElementDelegate.prototype = {
             [borderX,borderY] = this._getInvisibleBorderPadding(focusMetaWindow);
             [vBorderX,vBorderY] = this._getVisibleBorderPadding(focusMetaWindow);
 
-            focusMetaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+           
+            focusMetaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL); 
+            
             focusMetaWindow.move_frame(true,areaX-borderX,areaY-borderY);
             if(this._allSelected())
             {
@@ -693,8 +706,12 @@ GridElementDelegate.prototype = {
             }
             else
             {
+                       
                 focusMetaWindow.resize(true,areaWidth-vBorderX,areaHeight-vBorderY);
             }
+            
+                        
+            //focusMetaWindow.configure_notify();
             
             this._reset();          
             this._resizeDone();
