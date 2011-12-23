@@ -6,6 +6,13 @@
            With the help of the gnome-shell community
            
 CHANGE LOGS:
+    V9:
+    Now gTile follows your focus window !! Thanks to Claus Beerta he implements it in a branch.
+    I change the implementation so that it works with  multi-screen and I also added animations.
+    
+    However he added the keybinding in settings (into the file extension.js) but it s still buggy I think
+    So I let it for those who wants to try it.
+
     V8:
     Correct bug where Desktop can be tile
     3x2 button added by default

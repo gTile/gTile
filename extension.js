@@ -37,7 +37,8 @@ let nbCols;
 let nbRows;
 let area;
 let focusMetaWindow = false;
-let focusMetaWindowId = false;
+let focusMetaWindowConnections = new Array();
+let focusMetaWindowPrivateConnections = new Array();
 let tracker;
 let gridSettings = new Object();
 let toggleSettingListener;
@@ -64,7 +65,21 @@ function initSettings()
      //You can change those settings to set whatever you want by default
      gridSettings[SETTINGS_AUTO_CLOSE] = false;
      gridSettings[SETTINGS_ANIMATION] = true;
+
+     // Key Binding to Toggle the Window
+     // uncomment this, and set the following command to set the keybinding:
+     //Main.wm.setKeybindingHandler('run_command_9', toggleTiling);
+     
+     /**
+     Use the following command to set the keybinding:
+     
+     % gconftool-2 -s --type string "/apps/metacity/global_keybindings/run_command_9" 'F12'
+     
+     Change the run_command_ to a number that is not used in your Custom Keybindings  (1-9)
+     **/
+
 }
+
 
 /*****************************************************************
                             FUNCTIONS
@@ -89,18 +104,36 @@ function enable() {
 	Main.panel._rightBox.insert_actor(launcher.actor, 0);
 }
 
+function resetFocusMetaWindow()
+{
+    if(focusMetaWindowConnections.length>0)
+    {
+        for(var idx in focusMetaWindowConnections)
+        {
+            focusMetaWindow.disconnect(focusMetaWindowConnections[idx]);
+        }
+    }
+    
+    if(focusMetaWindowPrivateConnections.length>0)
+    {
+        let actor = focusMetaWindow.get_compositor_private();
+        for(var idx in focusMetaWindowPrivateConnections)
+        {
+             actor.disconnect(focusMetaWindowPrivateConnections[idx]);
+        }
+    }
+    
+    focusMetaWindow = false;
+    focusMetaWindowConnections = new Array();
+    focusMetaWindowPrivateConnections = new Array();
+}
+
 function disable() 
 {
     destroyGrids();
     Main.panel._rightBox.remove_actor(launcher.actor);
+    resetFocusMetaWindow();
     
-    if(focusMetaWindowId)
-    {
-        focusMetaWindow.disconnect(focusMetaWindowId);
-    }
-    
-    focusMetaWindow = false;
-    focusMetaWindowId = false;
 }
 
 function initGrids()
@@ -109,7 +142,7 @@ function initGrids()
 	for(monitorIdx in monitors)
 	{
 		let monitor = monitors[monitorIdx];
-		let grid = new Grid(monitor,"gTile", nbCols, nbRows);
+		let grid = new Grid(monitorIdx,monitor,"gTile", nbCols, nbRows);
 		let key = getMonitorKey(monitor);
 		grids[key] = grid;
 		grid.actor.set_opacity(0);
@@ -130,19 +163,76 @@ function destroyGrids()
 	}
 }
 
+function _moveGrids()
+{
+    let window = focusMetaWindow;
+    if(window)
+    {
+        for(var gridIdx in grids)
+        {
+            let grid = grids[gridIdx];
+            let pos_x;
+	        let pos_y;
+	        global.log("grid"+grid);
+	        let monitor = grid.monitor;
+	        if(window.get_monitor() == grid.monitor_idx)
+	        {
+	            pos_x = window.get_outer_rect().width / 2  + window.get_outer_rect().x;
+	            pos_y = window.get_outer_rect().height / 2  + window.get_outer_rect().y;
+	        }
+	        else
+	        {
+	            pos_x =monitor.x + monitor.width/2;
+	            pos_y = monitor.y + monitor.height/2;
+	        }        
+	        
+	        pos_x = Math.floor(pos_x - grid.actor.width / 2);
+	        pos_y = Math.floor(pos_y - grid.actor.height / 2);
+	        
+	        if(gridSettings[SETTINGS_ANIMATION])
+	        {
+	            let time = 0.5 ;
+	            Tweener.addTween(grid.actor,
+                         { 
+                           time: time,
+                           x:pos_x,
+                           y:pos_y,
+                           transition: 'easeOutQuad',
+                           onComplete: _updateChrome,
+                           onCompleteScope: this.actor});
+	        }
+	        else
+	        {
+	            grid.set_position(
+	                pos_x, 
+	               pos_y
+                );
+	        }
+	        
+        }
+    }
+}
+
+function  _updateChrome()
+{
+     Main.layoutManager._chrome.updateRegions();
+}
+
 function _onFocus()
 {
     let window = getFocusApp();
     if(window)
-    {   if(focusMetaWindowId)
-        {
-            //global.log("Disconnect window: "+focusMetaWindow.get_title());
-            focusMetaWindow.disconnect(focusMetaWindowId);
-        }
+    {   
+        resetFocusMetaWindow();
 
         //global.log("Connect window: "+window.get_title());
         focusMetaWindow = window;
-        focusMetaWindowId = focusMetaWindow.connect('notify::title',Lang.bind(this,this._onFocus));
+        focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,this._onFocus)));
+        
+        let actor = focusMetaWindow.get_compositor_private();
+        focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,this._moveGrids)));
+        focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,this._moveGrids)));
+       
         //global.log("End Connect window: "+window.get_title());
 
         let app = tracker.get_window_app(focusMetaWindow);
@@ -159,19 +249,18 @@ function _onFocus()
             else
                 grid.topbar._set_title(title);
 	    }
+	    
+	    _moveGrids();
     }
     else
     {
-        if(focusMetaWindowId)
+        resetFocusMetaWindow();
+        for(var gridIdx in grids)
         {
-            //global.log("Disconnect window: "+focusMetaWindow.get_title());
-            focusMetaWindow.disconnect(focusMetaWindowId);
+            let grid = grids[gridIdx];
+            grid.topbar._set_title('gTile');
         }
-
-        focusMetaWindow = false;
-        focusMetaWindowId = false;
-
-        this.topbar._set_title('gTile');
+        
     }
 }
 
@@ -186,6 +275,7 @@ function showTiling(immediate)
         
     //global.log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
     //global.log("focus app: "+focusMetaWindow);
+    
 	if(focusMetaWindow && wm_type != 1 && layer > 0)
 	{	    
 	    Main.uiGroup.add_actor(area);
@@ -196,9 +286,24 @@ function showTiling(immediate)
 	        let grid = grids[key];
 	        //global.log("ancestor: "+grid.actor.get_parent());
 	        
+	        let window = getFocusApp();
+	        let pos_x;
+	        let pos_y;
+	        if(window.get_monitor() == monitorIdx)
+	        {
+	            pos_x = window.get_outer_rect().width / 2  + window.get_outer_rect().x;
+	            pos_y = window.get_outer_rect().height / 2  + window.get_outer_rect().y;
+	        }
+	        else
+	        {
+	            pos_x =monitor.x + monitor.width/2;
+	            pos_y = monitor.y + monitor.height/2;
+	        }        
 	        
-	        grid.set_position(monitor.x+(Math.floor(monitor.width / 2 - grid.actor.width / 2)),
-                      Math.floor(monitor.y+(monitor.height / 2 - grid.actor.height / 2) ));
+	        grid.set_position(
+	            Math.floor(pos_x - grid.actor.width / 2), 
+	            Math.floor(pos_y - grid.actor.height / 2)
+            );
                     
             grid.show(immediate); 
 	    }
@@ -218,13 +323,7 @@ function hideTiling(immediate)
 	
 	Main.uiGroup.remove_actor(this.area);
 	
-    if(focusMetaWindowId)
-    {
-        focusMetaWindow.disconnect(focusMetaWindowId);
-    }
-
-    focusMetaWindow = false;
-    focusMetaWindowId = false;
+    resetFocusMetaWindow();
     
     launcher.reset();
     status = false;
@@ -417,14 +516,14 @@ GridSettingsButton.prototype = {
     },
 };
 
-function Grid(screen,title,cols,rows)
+function Grid(monitor_idx,screen,title,cols,rows)
 {
-	this._init(screen,title,cols,rows)
+	this._init(monitor_idx,screen,title,cols,rows)
 }
 
 Grid.prototype = {
 
-	_init: function(monitor,title,cols,rows) {
+	_init: function(monitor_idx,monitor,title,cols,rows) {
 
        	let tableWidth	= 220;
 		let tableHeight = 200;
@@ -493,6 +592,7 @@ Grid.prototype = {
 		
 				
 		this.monitor = monitor;
+		this.monitor_idx = monitor_idx;
 		this.rows = rows;
 		this.title = title;
 		this.cols = cols;
