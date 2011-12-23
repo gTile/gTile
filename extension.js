@@ -117,10 +117,14 @@ function resetFocusMetaWindow()
     if(focusMetaWindowPrivateConnections.length>0)
     {
         let actor = focusMetaWindow.get_compositor_private();
-        for(var idx in focusMetaWindowPrivateConnections)
+        if(actor)
         {
-             actor.disconnect(focusMetaWindowPrivateConnections[idx]);
+            for(var idx in focusMetaWindowPrivateConnections)
+            {
+                actor.disconnect(focusMetaWindowPrivateConnections[idx]);
+            }
         }
+        
     }
     
     focusMetaWindow = false;
@@ -230,8 +234,12 @@ function _onFocus()
         focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,this._onFocus)));
         
         let actor = focusMetaWindow.get_compositor_private();
-        focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,this._moveGrids)));
-        focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,this._moveGrids)));
+        if(actor)
+        {
+            focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,this._moveGrids)));
+            focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,this._moveGrids)));
+        }
+        
        
         //global.log("End Connect window: "+window.get_title());
 
