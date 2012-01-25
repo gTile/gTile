@@ -108,6 +108,41 @@
     border:1px rgba(0,200,255,0.7);
 }
 
+.animation-icon
+{
+    background-image: url("images/animation-icon.png");
+    width:48px;
+    height:48px;
+}
+
+.auto-close-icon
+{
+    background-image: url("images/auto-close-icon.png");
+    width:48px;
+    height:48px;
+}
+
+.action-main-list
+{
+    background-image: url("images/autoTile_0.png");
+    width:48px;
+    height:48px;
+}
+
+.action-two-list
+{
+    background-image: url("images/autoTile_1.png");
+    width:48px;
+    height:48px;
+}
+
+.action-scale
+{
+    background-image: url("images/scale-icon.png");
+    width:48px;
+    height:48px;
+}
+
 .settings-label
 {
     

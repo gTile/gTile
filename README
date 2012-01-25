@@ -6,6 +6,8 @@
            With the help of the gnome-shell community
            
 CHANGE LOGS:
+    V10: AutoTile function : 2 new auto tile features + Replace Animation and auto close text by icons
+    
     V9:
     Now gTile follows your focus window !! Thanks to Claus Beerta he implements it in a branch.
     I change the implementation so that it works with  multi-screen and I also added animations.
