@@ -45,10 +45,6 @@ let gridSettings = new Object();
 let toggleSettingListener;
 
 let window_dragging=true;
-/*
-Add calibration
-Add settings 
-*/
 
 /*****************************************************************
                             SETTINGS
@@ -502,6 +498,9 @@ function hideTiling()
     
     launcher.deactivate();
     status = false; 
+    
+    
+    Main.layoutManager._chrome.updateRegions();
 }
 
 function toggleTiling()
@@ -719,7 +718,7 @@ AutoTileMainAndList.prototype = {
         
         move_resize_window(focusMetaWindow,monitor.x,monitor.y+offsetY,monitor.width/2,monitor.height);
         
-        let winHeight = monitor.height/(windows.length );
+        let winHeight = (monitor.height - offsetY)/(windows.length );
         let countWin = 0;
     
         for(let windowIdx in windows)
@@ -772,7 +771,7 @@ AutoTileTwoList.prototype = {
         
         let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
         let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
-        let winHeight = monitor.height/nbWindowOnEachSide;
+        let winHeight = (monitor.height - offsetY)/nbWindowOnEachSide;
         
         let countWin = 0;
         
