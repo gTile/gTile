@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schemalist>
+	<schema path="/org/gnome/shell/extensions/gtile/" id="org.gnome.shell.extensions.gtile" >
+		<key type="as" name="show-toggle-tiling">
+			<default><![CDATA[['<Super>space']]]></default>
+			<summary>The key you want to activate gTile.</summary>
+		</key>
+	</schema>
+</schemalist>

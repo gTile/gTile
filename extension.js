@@ -23,6 +23,7 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
+const Utils = imports.misc.extensionUtils.getCurrentExtension().imports.utils; 
 
 const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
@@ -46,6 +47,15 @@ let toggleSettingListener;
 
 let window_dragging=true;
 
+const mySettings = Utils.getSettings();
+
+const key_bindings = {
+    'show-toggle-tiling': function() {
+        toggleTiling();
+    }
+};
+
+
 /*****************************************************************
                             SETTINGS
 *****************************************************************/
@@ -61,24 +71,13 @@ function initSettings()
         new GridSettingsButton('4x4',4,4),
         new GridSettingsButton('6x6',6,6),
     ];
-    
+
     //myCustomButton = new GridSettingsButton('Custom',8,8); //Going to be a 8x8 GridSettings
     //gridSettings[SETTINGS_GRID_SIZE].push(myCustomButton);
-    
-     //You can change those settings to set whatever you want by default
-        gridSettings[SETTINGS_AUTO_CLOSE] = false;
-        gridSettings[SETTINGS_ANIMATION] = true;
-     // Key Binding to Toggle the Window
-     // uncomment this, and set the following command to set the keybinding:
-     Main.wm.setKeybindingHandler('run_command_9', toggleTiling);
-     
-     /**
-     Use the following command to set the keybinding:
-     
-     % gconftool-2 -s --type string "/apps/metacity/global_keybindings/run_command_9" 'F12'
-     
-     Change the run_command_ to a number that is not used in your Custom Keybindings  (1-9)
-     **/
+
+    //You can change those settings to set whatever you want by default
+    gridSettings[SETTINGS_AUTO_CLOSE] = false;
+    gridSettings[SETTINGS_ANIMATION] = true;
 
 }
 
@@ -88,32 +87,46 @@ function initSettings()
 *****************************************************************/
 function init()
 {
-    
+
 }
 
 function enable() {
     status = false;
     monitors = Main.layoutManager.monitors;
     tracker = Shell.WindowTracker.get_default();
-    tracker.connect('notify::focus-app', Lang.bind(this, this._onFocus));
 
     nbCols = 4;
     nbRows = 4;
 
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
-    
+
     launcher = new GTileButton('tiling-icon');
-    
+
     initSettings();
     initGrids(); 
 
-	Main.panel._rightBox.insert_actor(launcher.actor, 0);
-	
+    tracker.connect('notify::focus-app', Lang.bind(this, this._onFocus));
+
+    Main.panel._rightBox.insert_child_at_index(launcher.actor, 0);	
+
+    // Key Bindings
+    for(key in key_bindings) {
+        global.display.add_keybinding(key,
+            mySettings,
+            Meta.KeyBindingFlags.NONE,
+            key_bindings[key]
+        );
+    }
 }
 
 function disable() 
 {
+    // Key Bindings
+    for(key in key_bindings) {
+        global.display.remove_keybinding(key);
+    }
+
     destroyGrids();
     Main.panel._rightBox.remove_actor(launcher.actor);
     resetFocusMetaWindow();
@@ -1023,7 +1036,7 @@ Grid.prototype = {
 	
 	refresh : function()
 	{
-        this.table.destroy_children();
+        this.table.destroy_all_children();
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
