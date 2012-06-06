@@ -1,49 +1,15 @@
-Author
------
+vibou.gTile
+===========
 
-This extension has been developed by [vibou](https://github.com/vibou) with the
-help of the gnome-shell community. See
-[network](https://github.com/vibou/vibou.gTile/network) for details.
-           
-CHANGE LOGS
------------
-
-
-### V12
-
--   Correct small bug on auto tile where monitor height was considered without gnome-panel on primaryMonitor
-
-### V11
-
--   AutoTile function : 2 new auto tile features + Replace Animation and auto close text by icons
-    
-### V10
- 
--   Now gTile follows your focus window !! Thanks to Claus Beerta he implements it in a branch.
--   I change the implementation so that it works with  multi-screen and I also added animations.
-    
-### V9
-
--   Not validated
-
--   However he added the keybinding in settings (into the file extension.js) but it s still buggy I think
--   So I let it for those who wants to try it.
-
-### V8
-
--   Correct bug where Desktop can be tile
--   3x2 button added by default
-
-### V7
-
--   Add Auto-close once resize
--   Add Smooth animation when toggle extension
--   New icon
-    (/!\ auto-close may cause some bugs so let me know if you had any thanks).
-
+Gnome-shell extension that tiles windows as you like.
 
 This extension is developed at [GitHub](https://extensions.gnome.org/extension/28/gtile/)
 If you are reading this documentation anywhere else, it might be out of date.
+
+See also
+--------
+
+-   [vibou.gtile2](https://github.com/vibou/vibou.gTile2) - gnome shell extension that tiles windows as you like. With gSettings Support
 
 Configration
 ------------
@@ -74,3 +40,46 @@ and edit this part of the code:
          gridSettings[SETTINGS_AUTO_CLOSE] = true;
          gridSettings[SETTINGS_ANIMATION] = true;
     }
+
+Author
+------
+
+This extension has been developed by [vibou](https://github.com/vibou) with the
+help of the gnome-shell community. See
+[network](https://github.com/vibou/vibou.gTile/network) for details.
+           
+CHANGE LOG
+----------
+
+### V12
+
+-   Correct small bug on auto tile where monitor height was considered without gnome-panel on primaryMonitor
+
+### V11
+
+-   AutoTile function : 2 new auto tile features + Replace Animation and auto close text by icons
+    
+### V10
+ 
+-   Now gTile follows your focus window !! Thanks to Claus Beerta he implements it in a branch.
+-   I change the implementation so that it works with  multi-screen and I also added animations.
+    
+### V9
+
+-   Not validated
+
+-   However he added the keybinding in settings (into the file extension.js) but it s still buggy I think
+-   So I let it for those who wants to try it.
+
+### V8
+
+-   Correct bug where Desktop can be tile
+-   3x2 button added by default
+
+### V7
+
+-   Add Auto-close once resize
+-   Add Smooth animation when toggle extension
+-   New icon  
+    (/!\ auto-close may cause some bugs so let me know if you had any thanks).
+
