@@ -17,13 +17,11 @@
 
 .table-element{
     background-color: rgba(240,240,240,0.4);
-    border-radius: 3px;
 }
 
 .table-element:hover, .table-element:activate
 {
     background-color: rgba(240,240,240,0.8);
-    border-radius: 3px;
 }
 
 .tiling-icon
@@ -31,20 +29,22 @@
     width: 24px;
     height: 24px;
     background-image: url("images/launcher_16.png");
+    background-size: 16px 16px;
 }
 
 .tiling-icon:hover
 {
-	width: 24px;
-    height: 24px;
     background-image: url("images/launcher_16_hover.png");
 }
 
 .tiling-icon:activate
 {
-    width: 24px;
-    height: 24px;
     background-image: url("images/launcher_16_activated.png");
+}
+
+.close-button-container
+{
+	background-color: rgba(0,120,255,0);
 }
 
 .close-button
@@ -63,7 +63,7 @@
 
 .top-box
 {
-    padding:3px
+    padding:3px;
 }
 
 .settings-button
@@ -113,6 +113,7 @@
     background-image: url("images/animation-icon.png");
     width:48px;
     height:48px;
+    background-size: 36px 36px;
 }
 
 .auto-close-icon
@@ -120,6 +121,7 @@
     background-image: url("images/auto-close-icon.png");
     width:48px;
     height:48px;
+    background-size: 36px 36px;
 }
 
 .action-main-list
@@ -127,6 +129,7 @@
     background-image: url("images/autoTile_0.png");
     width:48px;
     height:48px;
+    background-size: 36px 36px;
 }
 
 .action-two-list
@@ -134,6 +137,7 @@
     background-image: url("images/autoTile_1.png");
     width:48px;
     height:48px;
+    background-size: 36px 36px;
 }
 
 .action-scale
@@ -141,6 +145,7 @@
     background-image: url("images/scale-icon.png");
     width:48px;
     height:48px;
+ 	background-size: 36px 36px;
 }
 
 .settings-label

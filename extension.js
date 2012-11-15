@@ -55,6 +55,46 @@ const key_bindings = {
     }
 };
 
+const GTileStatusButton = new Lang.Class({
+    Name: 'GTileStatusButton',
+    Extends: PanelMenu.Button,
+    
+    _init: function(classname) {
+    	this.parent(0.0,"gTile",false);
+                       
+    	this.actor.add_style_class_name(classname);
+    	//Done by default in PanelMenuButton - Just need to override the method
+    	//this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+	},
+    
+     reset : function()
+  	 {
+        this.activated = false;
+        launcher.actor.remove_style_pseudo_class('activate');
+   	 },
+   
+    activate : function()
+    {
+        launcher.actor.add_style_pseudo_class('activate');
+    },
+
+    deactivate : function()
+    {
+        launcher.actor.remove_style_pseudo_class('activate');
+    },
+    
+   _onButtonPress: function(actor, event){
+   		global.log("Click Toggle Status");
+        toggleTiling();
+   },
+   
+   _destroy : function()
+	{
+	    this.activated = null;
+	}
+    
+});
+
 
 /*****************************************************************
                             SETTINGS
@@ -101,15 +141,21 @@ function enable() {
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
 
-    launcher = new GTileButton('tiling-icon');
+	global.log("Create Button");
+    launcher = new GTileStatusButton('tiling-icon');//new GTileStatusButton();
 
+	global.log("Init settings");
     initSettings();
+    
+    global.log("Init Grids");
     initGrids(); 
 
+	global.log("Starting...");
     tracker.connect('notify::focus-app', Lang.bind(this, this._onFocus));
+	
+    Main.panel._rightBox.insert_child_at_index(launcher.container, 1);	
 
-    Main.panel._rightBox.insert_child_at_index(launcher.actor, 0);	
-
+	global.log("Init KeyBindings");
     // Key Bindings
     for(key in key_bindings) {
         global.display.add_keybinding(key,
@@ -118,6 +164,8 @@ function enable() {
             key_bindings[key]
         );
     }
+    
+    global.log("Extention Enabled !");
 }
 
 function disable() 
@@ -166,12 +214,15 @@ function initGrids()
 	grids = new Array();
 	for(monitorIdx in monitors)
 	{
+		//global.log("New Grid for monitor "+monitorIdx);
 		let monitor = monitors[monitorIdx];
+		
 		let grid = new Grid(monitorIdx,monitor,"gTile", nbCols, nbRows);
+		
 		let key = getMonitorKey(monitor);
 		grids[key] = grid;
 		
-		Main.layoutManager.addChrome(grid.actor, { visibleInFullscreen: true });
+		Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
 		grid.actor.set_opacity(0);
 		grid.hide(true);
 		grid.connect('hide-tiling',Lang.bind(this,this.hideTiling));
@@ -184,7 +235,7 @@ function destroyGrids()
 	{
 		let monitor = monitors[monitorIdx];
 		let key = getMonitorKey(monitor);
-		grid = grids[key];
+		let grid = grids[key];
 		grid.hide(true);
 		Main.layoutManager.removeChrome(grid.actor);
 	}
@@ -309,8 +360,8 @@ function move_resize_window(metaWindow,x,y,width,height)
     [borderX,borderY] = this._getInvisibleBorderPadding(metaWindow);
     [vBorderX,vBorderY] = this._getVisibleBorderPadding(metaWindow);
 
-    x = x - borderX;
-    y = y - borderY;
+    x = x;// - borderX;
+    y = y;// - borderY;
     
     width = width - vBorderX;
     height = height - vBorderY ;
@@ -568,13 +619,21 @@ TopBar.prototype = {
     _init: function(title) {
    	this.actor = new St.BoxLayout({style_class:'top-box'});
         this._title = title;
+      
         this._stlabel =  new St.Label({style_class: 'grid-title',text: this._title});
-        this._iconBin = new St.Bin({ x_fill: false, y_fill: true });
-        this._closebutton = new GTileButton('close-button');
+       // this._iconBin = new St.Bin({ x_fill: false, y_fill: true });
         
-        this.actor.add(this._iconBin);
-        this.actor.add(this._stlabel,{x_fill: true,expand: true});
-        this.actor.add(this._closebutton.actor,{x_fill: false,expand: false});
+        this._closebutton = new GTileStatusButton('close-button');        
+        this._closebutton.container.add_style_class_name('close-button-container');  
+          
+        //this.actor.add_actor(this._iconBin);         
+        this.actor.add_actor(this._closebutton.container,{x_fill: false,expand: true,x_align:St.Align.END });
+        this.actor.add_actor(this._stlabel,{x_fill: false,expand: false,x_align: St.Align.MIDDLE});      
+        
+        //global.log( this._closebutton.actor);
+     //	this.actor.add_actor(this._closebutton.container,{x_fill: false,expand: true,x_align: 
+        
+       
     },
     
     _set_title : function(title)
@@ -589,10 +648,10 @@ TopBar.prototype = {
          this._title = app.get_name()+" - "+title;
           //global.log("title: "+this._title);
          this._stlabel.text = this._title;
-         this._icon = app.create_icon_texture(24);
+        // this._icon = app.create_icon_texture(24);
          
-         this._iconBin.set_size(24, 24);
-         this._iconBin.child = this._icon;
+         //this._iconBin.set_size(24, 24);
+         //this._iconBin.child = this._icon;
     },
 };
 
@@ -882,7 +941,7 @@ function Grid(monitor_idx,screen,title,cols,rows)
 Grid.prototype = {
 
 	_init: function(monitor_idx,monitor,title,cols,rows) {
-
+		
        	this.tableWidth	= 220;
 		this.tableHeight = 200;
 		this.borderwidth = 2;
@@ -892,6 +951,8 @@ Grid.prototype = {
 		                                reactive:true,
 		                                can_focus:true,
 		                                track_hover:true});
+		
+		
 		
 		this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
 		this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
@@ -918,6 +979,8 @@ Grid.prototype = {
 		let rowNum = 0;
 		let colNum = 0;
 		let maxPerRow = 4;
+		
+		
 		let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
 		
 		for(var index=0; index<gridSettingsButton.length;index++)
@@ -944,10 +1007,10 @@ Grid.prototype = {
                                     height:this.tableHeight
                                     });  
                                     
-		this.actor.add(this.topbar.actor,{x_fill:true});
-		this.actor.add(this.table,{x_fill:false});
-		this.actor.add(this.bottombar,{x_fill:true});		
-		this.actor.add(this.veryBottomBar,{x_fill:true});
+		this.actor.add_actor(this.topbar.actor,{x_fill:true});
+		this.actor.add_actor(this.table,{x_fill:false});
+		this.actor.add_actor(this.bottombar,{x_fill:true});		
+		this.actor.add_actor(this.veryBottomBar,{x_fill:true});
 		
 				
 		this.monitor = monitor;
@@ -999,7 +1062,6 @@ Grid.prototype = {
 	    this.y = 0;
 	    
 	    this.interceptHide = false;
-		
 		this._displayElements();
 		
 		this.normalScaleY = this.actor.scale_y;
@@ -1010,7 +1072,7 @@ Grid.prototype = {
 	{
 	    this.elements = new Array();
 		
-		let width = (this.tableWidth / this.cols) - 2*this.borderwidth;
+		let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
 		let height = (this.tableHeight / this.rows) - 2*this.borderwidth;
 	    
 	   	this.elementsDelegate = new GridElementDelegate();
@@ -1477,46 +1539,5 @@ GridElement.prototype = {
 	
 };
 
-function GTileButton(classname)
-{
-    this._init(classname);
-}
 
-GTileButton.prototype = {
-    __proto__: PanelMenu.ButtonBox.prototype,
-   
-   _init : function(classname){
-         PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true,
-                                               can_focus: true,
-                                               track_hover: true,
-                                               style_class: classname});
-                                               
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-   },
-   
-   reset : function()
-   {
-        this.activated = false;
-        launcher.actor.remove_style_pseudo_class('activate');
-   },
-   
-    activate : function()
-    {
-        launcher.actor.add_style_pseudo_class('activate');
-    },
 
-    deactivate : function()
-    {
-        launcher.actor.remove_style_pseudo_class('activate');
-    },
-   
-   
-   _onButtonPress: function(actor, event){
-        toggleTiling();
-   },
-   
-   _destroy : function()
-	{
-	    this.activated = null;
-	}
-};
