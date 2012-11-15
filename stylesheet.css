@@ -13,6 +13,8 @@
 }
 
 .table{
+	spacing-rows: 2px;
+	spacing-columns: 2px;
 }
 
 .table-element{
@@ -70,21 +72,16 @@
 {
     background-color: rgba(0,120,255,0.4);
     color: rgba(255,255,255,0.4);
-    min-width:40px;
     border-radius:5px;
-    padding:3px;
+    
     border:1px rgba(0,200,255,0.4);
-    max-height:30px;
-    min-height:30px;
 }
 
 .settings-button:activate
 {
    background-color: rgba(0,120,255,0.7);
     color: rgba(255,255,255,1);
-    min-width:40px;
     border-radius:5px;
-    padding:3px;
     border:1px rgba(0,200,255,0.7);
 }
 
@@ -92,9 +89,7 @@
 {
     background-color: rgba(30,150,255,0.7);
     color: rgba(255,255,255,1);
-    min-width:40px;
     border-radius:5px;
-    padding:3px;
     border:1px rgba(0,200,255,0.7);
 }
 
@@ -102,50 +97,47 @@
 {
     background-color: rgba(0,120,255,0.7);
     color: rgba(255,255,255,1);
-    min-width:40px;
-    border-radius:5px;
-    padding:3px;
     border:1px rgba(0,200,255,0.7);
 }
 
 .animation-icon
 {
     background-image: url("images/animation-icon.png");
-    width:48px;
-    height:48px;
     background-size: 36px 36px;
+    height:36px;
+    width:36px;
 }
 
 .auto-close-icon
 {
     background-image: url("images/auto-close-icon.png");
-    width:48px;
-    height:48px;
     background-size: 36px 36px;
+     height:36px;
+    width:36px;
 }
 
 .action-main-list
 {
     background-image: url("images/autoTile_0.png");
-    width:48px;
-    height:48px;
     background-size: 36px 36px;
+     height:36px;
+    width:36px;
 }
 
 .action-two-list
 {
     background-image: url("images/autoTile_1.png");
-    width:48px;
-    height:48px;
     background-size: 36px 36px;
+     height:36px;
+    width:36px;
 }
 
 .action-scale
 {
     background-image: url("images/scale-icon.png");
-    width:48px;
-    height:48px;
  	background-size: 36px 36px;
+ 	 height:36px;
+    width:36px;
 }
 
 .settings-label
@@ -170,14 +162,26 @@
     border: 1px solid rgba(217,108,59,0.8);
 }
 
+.bottom-box-container
+{
+
+	padding:10px 0px 0px 0px;
+}
+
 .bottom-box
 {
-    padding:10px;
-    display:block;
+	spacing-rows: 0px;
+	spacing-columns: 2px;
+}
+
+.very-bottom-box-container
+{
+	padding:2px 0px 10px 0px;
 }
 
 .very-bottom-box
 {
-    padding:60px;
-    display:block;
+    spacing-rows: 0px;
+	spacing-columns: 2px;
 }
+

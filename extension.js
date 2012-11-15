@@ -701,7 +701,7 @@ ToggleSettingsButton.prototype = {
         this.actor.add_actor(this.icon);
         this.property = property;
         this._update();
-        this.actor.add_actor(this.icon);
+        this.actor.add_actor(this.icon,{x_fill:true, y_fill:true});
         this.actor.connect('button-press-event', Lang.bind(this,this._onButtonPress));
         this.connect('update-toggle', Lang.bind(this,this._update))
     },
@@ -942,7 +942,7 @@ Grid.prototype = {
 
 	_init: function(monitor_idx,monitor,title,cols,rows) {
 		
-       	this.tableWidth	= 220;
+       	this.tableWidth	= 240;
 		this.tableHeight = 200;
 		this.borderwidth = 2;
 
@@ -960,21 +960,37 @@ Grid.prototype = {
 		
 		this.topbar = new TopBar(title);
 		
+		this.bottombarContainer = new  St.Bin({ style_class: 'bottom-box-container',
+		                                reactive:true,
+		                                can_focus:true,
+		                                track_hover:true});
+		                                
 		this.bottombar = new St.Table({ homogeneous: true,
                                     style_class: 'bottom-box',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
-                                    width:this.tableWidth,
+                                    width:this.tableWidth-20,
+                                    height:36
                                     });
+                                    
+		this.bottombarContainer.add_actor(this.bottombar,{x_fill:true,y_fill:true})
         
+        this.veryBottomBarContainer = new  St.Bin({ style_class: 'very-bottom-box-container',
+		                                reactive:true,
+		                                can_focus:true,
+		                                track_hover:true});
+		                                
         this.veryBottomBar = new St.Table({ homogeneous: true,
-                                    style_class: 'bottom-box',
+                                    style_class: 'very-bottom-box',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
-                                    width:this.tableWidth,
+                                    width:this.tableWidth-20,
+                                    height:36
                                     });
+                                    
+		this.veryBottomBarContainer.add_actor(this.veryBottomBar,{x_fill:true,y_fill:true})
                                     
 		let rowNum = 0;
 		let colNum = 0;
@@ -993,7 +1009,7 @@ Grid.prototype = {
 		    
 		    let button = gridSettingsButton[index];
 		    button = new GridSettingsButton(button.text,button.cols,button.rows);
-		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:false,y_fill:false});
+		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:true,y_fill:true});
 		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
 		    colNum++;
 		}		
@@ -1009,8 +1025,8 @@ Grid.prototype = {
                                     
 		this.actor.add_actor(this.topbar.actor,{x_fill:true});
 		this.actor.add_actor(this.table,{x_fill:false});
-		this.actor.add_actor(this.bottombar,{x_fill:true});		
-		this.actor.add_actor(this.veryBottomBar,{x_fill:true});
+		this.actor.add_actor(this.bottombarContainer,{x_fill:true});		
+		this.actor.add_actor(this.veryBottomBarContainer,{x_fill:true});
 		
 				
 		this.monitor = monitor;
@@ -1031,25 +1047,19 @@ Grid.prototype = {
             }
             
 		    let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-		    toggle.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-		    this.veryBottomBar.add(toggle.actor,{row:0, col:0,x_fill:false,y_fill:false});
+		    this.veryBottomBar.add(toggle.actor,{row:0, col:0,x_fill:true,y_fill:true});
             toggleSettingListener.addActor(toggle);
             
 		    toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-		    toggle.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-		    this.veryBottomBar.add(toggle.actor,{row:0, col:1,x_fill:false,y_fill:false});
+		    this.veryBottomBar.add(toggle.actor,{row:0, col:1,x_fill:true,y_fill:true});
             toggleSettingListener.addActor(toggle);
             
             let action = new AutoTileMainAndList(this);
-            action.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-            this.veryBottomBar.add(action.actor,{row:0, col:2,x_fill:false,y_fill:false});
-            
+            this.veryBottomBar.add(action.actor,{row:0, col:2,x_fill:true,y_fill:true});            
             action.connect('resize-done', Lang.bind(this,this._onResize));
             
             action = new AutoTileTwoList(this);
-            action.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-            this.veryBottomBar.add(action.actor,{row:0, col:3,x_fill:false,y_fill:false});
-            
+            this.veryBottomBar.add(action.actor,{row:0, col:3,x_fill:true,y_fill:true});            
             action.connect('resize-done', Lang.bind(this,this._onResize));
             
             /*action = new ActionScale(this);
@@ -1073,7 +1083,7 @@ Grid.prototype = {
 	    this.elements = new Array();
 		
 		let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
-		let height = (this.tableHeight / this.rows) - 2*this.borderwidth;
+		let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
 	    
 	   	this.elementsDelegate = new GridElementDelegate();
 	   	this.elementsDelegate.connect('resize-done', Lang.bind(this, this._onResize));
