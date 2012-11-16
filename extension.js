@@ -1014,17 +1014,24 @@ Grid.prototype = {
 		    colNum++;
 		}		
 		
+		this.tableContainer = new  St.Bin({ style_class: 'table-container',
+		                                reactive:true,
+		                                can_focus:true,
+		                                track_hover:true});
+		                                
 		this.table = new St.Table({ homogeneous: true,
                                     style_class: 'table',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
-                                    width:this.tableWidth,
-                                    height:this.tableHeight
+                                    height:this.tableHeight,
+                                    width:this.tableWidth-2
                                     });  
                                     
+		this.tableContainer.add_actor(this.table,{x_fill:true,y_fill:true})
+                                    
 		this.actor.add_actor(this.topbar.actor,{x_fill:true});
-		this.actor.add_actor(this.table,{x_fill:false});
+		this.actor.add_actor(this.tableContainer,{x_fill:true});
 		this.actor.add_actor(this.bottombarContainer,{x_fill:true});		
 		this.actor.add_actor(this.veryBottomBarContainer,{x_fill:true});
 		
@@ -1100,7 +1107,7 @@ Grid.prototype = {
 
                 this.elements[r][c] = element;
                 element.actor._delegate = this.elementsDelegate;
-                this.table.add(element.actor,{row: r, col: c,x_fill:false, y_fill:false});
+                this.table.add(element.actor,{row: r, col: c,x_fill:true, y_fill:true});
                 element.show();
 			}
 		}		
@@ -1481,9 +1488,7 @@ function GridElement(monitor,width,height,coordx,coordy)
 GridElement.prototype = {
      
 	_init: function(monitor,width,height,coordx,coordy) {
-        this.actor = new St.Button({style_class: 'table-element',
-                                                  width: width,
-                                                  height: height,reactive: true,can_focus:true,track_hover: true})
+        this.actor = new St.Button({style_class: 'table-element',reactive: true,can_focus:true,track_hover: true})
 		
 		this.actor.visible = false;
 		this.actor.opacity = 0;

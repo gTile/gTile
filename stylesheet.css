@@ -8,8 +8,14 @@
 
 .grid-panel{
     background-color: rgba(10,10,10,0.7);
+    -webkit-filter: blur(2px);
     width:240px;
     border-radius: 10px;
+}
+
+.table-container
+{
+	
 }
 
 .table{
@@ -72,8 +78,7 @@
 {
     background-color: rgba(0,120,255,0.4);
     color: rgba(255,255,255,0.4);
-    border-radius:5px;
-    
+    border-radius:0px;
     border:1px rgba(0,200,255,0.4);
 }
 
@@ -81,7 +86,6 @@
 {
    background-color: rgba(0,120,255,0.7);
     color: rgba(255,255,255,1);
-    border-radius:5px;
     border:1px rgba(0,200,255,0.7);
 }
 
@@ -89,7 +93,6 @@
 {
     background-color: rgba(30,150,255,0.7);
     color: rgba(255,255,255,1);
-    border-radius:5px;
     border:1px rgba(0,200,255,0.7);
 }
 
