@@ -6,12 +6,7 @@ Gnome-shell extension that tiles windows as you like.
 This extension is developed at [GitHub](https://extensions.gnome.org/extension/28/gtile/)
 If you are reading this documentation anywhere else, it might be out of date.
 
-See also
---------
-
--   [vibou.gtile2](https://github.com/vibou/vibou.gTile2) - gnome shell extension that tiles windows as you like. With gSettings Support
-
-Configration
+Configuration
 ------------
 
 To configure gTile open the file extension.js
@@ -50,6 +45,26 @@ help of the gnome-shell community. See
            
 CHANGE LOG
 ----------
+
+### V17
+
+-   Fix some UI Issues
+
+### V16
+
+-   UI changes
+
+### V15
+
+-   Compatibility Gnome Shell 3.6.1
+	
+### V14
+
+-   Compatibility Gnome Shell 3.4.1 + small bug correction
+
+### V13
+
+-   Add Key binding settings + Compatibility 3.4.1
 
 ### V12
 
