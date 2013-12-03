@@ -4,6 +4,8 @@
                             vibou
                                 
            With the help of the gnome-shell community
+           
+           Edited by Kvis for gnome 3.8
 
 ******************************************************************/
 
@@ -151,12 +153,14 @@ function enable() {
     initGrids(); 
 
 	global.log("Starting...");
-    tracker.connect('notify::focus-app', Lang.bind(this, this._onFocus));
+    tracker.connect('notify::focus-app', Lang.bind(this, _onFocus));
 	
     Main.panel._rightBox.insert_child_at_index(launcher.container, 1);	
 
 	global.log("Init KeyBindings");
     // Key Bindings
+   
+   let key;
     for(key in key_bindings) {
         global.display.add_keybinding(key,
             mySettings,
@@ -212,7 +216,7 @@ function resetFocusMetaWindow()
 function initGrids()
 {
 	grids = new Array();
-	for(monitorIdx in monitors)
+	for(let monitorIdx in monitors)
 	{
 		//global.log("New Grid for monitor "+monitorIdx);
 		let monitor = monitors[monitorIdx];
@@ -225,13 +229,13 @@ function initGrids()
 		Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
 		grid.actor.set_opacity(0);
 		grid.hide(true);
-		grid.connect('hide-tiling',Lang.bind(this,this.hideTiling));
+		grid.connect('hide-tiling',Lang.bind(this,hideTiling));
 	}
 }
 
 function destroyGrids()
 {
-    for(monitorIdx in monitors)
+    for(let monitorIdx in monitors)
 	{
 		let monitor = monitors[monitorIdx];
 		let key = getMonitorKey(monitor);
@@ -248,8 +252,8 @@ function refreshGrids()
         let grid = grids[gridIdx];
         grid.refresh();
     }
-    
-    Main.layoutManager._chrome.updateRegions();
+
+   // Main.layoutManager._chrome.updateRegions();
 }
 
 function moveGrids()
@@ -299,14 +303,14 @@ function moveGrids()
                            x:pos_x,
                            y:pos_y,
                            transition: 'easeOutQuad',
-                           onComplete:this.updateRegions});
+                           onComplete:updateRegions});
         }
     }
 }
 
 function updateRegions()
 {
-    Main.layoutManager._chrome.updateRegions();
+    //Main.layoutManager._chrome.updateRegions();
     refreshGrids();
     for(let idx in grids)
     {
@@ -344,7 +348,7 @@ function _getVisibleBorderPadding (metaWindow) {
 function move_maximize_window(metaWindow,x,y)
 {
     let borderX,borderY,vBorderX,vBorderY;
-    [borderX,borderY] = this._getInvisibleBorderPadding(metaWindow);
+    [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
 
     x = x - borderX;
     y = y - borderY;
@@ -357,8 +361,8 @@ function move_maximize_window(metaWindow,x,y)
 function move_resize_window(metaWindow,x,y,width,height)
 {
     let borderX,borderY,vBorderX,vBorderY;
-    [borderX,borderY] = this._getInvisibleBorderPadding(metaWindow);
-    [vBorderX,vBorderY] = this._getVisibleBorderPadding(metaWindow);
+    [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
+    [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
     x = x;// - borderX;
     y = y;// - borderY;
@@ -457,13 +461,13 @@ function _onFocus()
 
         //global.log("Connect window: "+window.get_title());
         focusMetaWindow = window;
-        focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,this._onFocus)));
+        focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,_onFocus)));
         
         let actor = focusMetaWindow.get_compositor_private();
         if(actor)
         {
-            focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,this.moveGrids)));
-            focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,this.moveGrids)));
+            focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,moveGrids)));
+            focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,moveGrids)));
         }
        
         //global.log("End Connect window: "+window.get_title());
@@ -471,7 +475,7 @@ function _onFocus()
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
         
-        for(monitorIdx in monitors)
+        for(let monitorIdx in monitors)
 	    {
 		    let monitor = monitors[monitorIdx];
 		    let key = getMonitorKey(monitor);
@@ -506,10 +510,10 @@ function showTiling()
         
     //global.log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
     //global.log("focus app: "+focusMetaWindow);
-    this.area.visible = true;
+    area.visible = true;
 	if(focusMetaWindow && wm_type != 1 && layer > 0)
 	{	    
-	     for(monitorIdx in monitors)
+	     for(let monitorIdx in monitors)
 	    {
 	        let monitor = monitors[monitorIdx];
 	        let key = getMonitorKey(monitor);
@@ -539,7 +543,7 @@ function showTiling()
             grid.show(); 
 	    }
 	    
-	    this._onFocus();
+	    _onFocus();
 		status = true;
 		launcher.activate();
 	}
@@ -556,7 +560,7 @@ function hideTiling()
 	    grid.hide(false);
 	}
 	
-	this.area.visible = false;
+	area.visible = false;
 	
     resetFocusMetaWindow();
     
@@ -564,7 +568,7 @@ function hideTiling()
     status = false; 
     
     
-    Main.layoutManager._chrome.updateRegions();
+    //Main.layoutManager._chrome.updateRegions();
 }
 
 function toggleTiling()
@@ -1196,12 +1200,12 @@ Grid.prototype = {
 	        
 	    }
 	    
-	    Main.layoutManager._chrome.updateRegions();
+	    //Main.layoutManager._chrome.updateRegions();
 	},
 	
 	_onShowComplete : function()
 	{
-	    Main.layoutManager._chrome.updateRegions();
+	    //Main.layoutManager._chrome.updateRegions();
 	},
 	
 	 _onResize: function(actor, event)
@@ -1538,7 +1542,7 @@ GridElement.prototype = {
 	
 	_clean : function()
 	{
-	    Main.uiGroup.remove_actor(this.area);
+	    Main.uiGroup.remove_actor(area);
 	},
 	
 	_destroy : function()
@@ -1553,6 +1557,4 @@ GridElement.prototype = {
 	}
 	
 };
-
-
 
