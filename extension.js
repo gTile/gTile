@@ -155,7 +155,7 @@ function enable() {
 	global.log("Starting...");
     tracker.connect('notify::focus-app', Lang.bind(this, _onFocus));
 	
-    Main.panel._rightBox.insert_child_at_index(launcher.container, 1);	
+    Main.panel.addToStatusArea("GTileStatusButton", launcher);	
 
 	global.log("Init KeyBindings");
     // Key Bindings
@@ -180,7 +180,8 @@ function disable()
     }
 
     destroyGrids();
-    Main.panel._rightBox.remove_actor(launcher.actor);
+    launcher.destroy();
+    launcher = null;
     resetFocusMetaWindow();
 }
 
