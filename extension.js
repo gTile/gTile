@@ -153,7 +153,7 @@ function enable() {
     initGrids(); 
 
 	global.log("Starting...");
-    tracker.connect('notify::focus-app', Lang.bind(this, _onFocus));
+	global.display.connect('notify::focus-window', Lang.bind(this, _onFocus))
 	
     Main.panel.addToStatusArea("GTileStatusButton", launcher);	
 
@@ -456,9 +456,11 @@ function getWindowsOfMonitor(monitor)
 function _onFocus()
 {
     let window = getFocusApp();
+	global.log("_onFocus "+window);
+	resetFocusMetaWindow();
     if(window)
     {   
-        resetFocusMetaWindow();
+        
 
         //global.log("Connect window: "+window.get_title());
         focusMetaWindow = window;
@@ -491,7 +493,6 @@ function _onFocus()
     }
     else
     {
-        resetFocusMetaWindow();
         for(var gridIdx in grids)
         {
             let grid = grids[gridIdx];
@@ -592,7 +593,7 @@ function getMonitorKey(monitor)
 }
 
 function getFocusApp()
-{ 
+{
     let windows = global.screen.get_active_workspace().list_windows();
     for ( let i = 0; i < windows.length; ++i ) 
     {
