@@ -47,6 +47,12 @@ let tracker;
 let gridSettings = new Object();
 let toggleSettingListener;
 
+
+//Hangouts workaround
+let excludedApplications = new Array(
+	"Unknown" 
+);
+
 let window_dragging=true;
 
 const mySettings = Utils.getSettings();
@@ -86,7 +92,7 @@ const GTileStatusButton = new Lang.Class({
     },
     
    _onButtonPress: function(actor, event){
-   		global.log("Click Toggle Status");
+   		//global.log("Click Toggle Status");
         toggleTiling();
    },
    
@@ -248,13 +254,13 @@ function destroyGrids()
 
 function refreshGrids()
 {
+	
+	global.log("Refresh");
     for(var gridIdx in grids)
     {
         let grid = grids[gridIdx];
         grid.refresh();
     }
-
-   // Main.layoutManager._chrome.updateRegions();
 }
 
 function moveGrids()
@@ -304,14 +310,15 @@ function moveGrids()
                            x:pos_x,
                            y:pos_y,
                            transition: 'easeOutQuad',
-                           onComplete:updateRegions});
+                           /*onComplete:updateRegions*/});
         }
     }
 }
 
 function updateRegions()
 {
-    //Main.layoutManager._chrome.updateRegions();
+	/*Main.layoutManager._chrome.updateRegions();*/
+
     refreshGrids();
     for(let idx in grids)
     {
@@ -365,8 +372,10 @@ function move_resize_window(metaWindow,x,y,width,height)
     [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
     [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
-    x = x;// - borderX;
-    y = y;// - borderY;
+	global.log(metaWindow.get_title()+" "+borderY);
+
+    x = x  ;//+ (vBorderX - 1);
+    y = y  ;
     
     width = width - vBorderX;
     height = height - vBorderY ;
@@ -399,29 +408,9 @@ function move_resize_window(metaWindow,x,y,width,height)
     });*/
 }
 
-/*function _onMovedAndResize(metaWindow,x,y,width,height)
-{
-    metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL); 
-    metaWindow.unmaximize(Meta.MaximizeFlags.VERTICAL);
-    metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-    
-    let actor = metaWindow.get_compositor_private();
-    actor.x = x;
-    actor.y = y;
-    
-    metaWindow.resize(true,width,height);
-    
-    Tweener.addTween(actor,{
-        time:0.2,
-        transition: "easeOutQuad",
-        opacity:255,
-        onComplete:updateRegions                
-    });   
-}*/
-
 function _isMyWindow(win)
 {
-    global.log("meta-window: "+this.focusMetaWindow+" : "+win.meta_window);
+    //global.log("meta-window: "+this.focusMetaWindow+" : "+win.meta_window);
     return (this.focusMetaWindow == win.meta_window);
 }
 
@@ -430,14 +419,27 @@ function getWindowActor()
     let windows = global.get_window_actors().filter(this._isMyWindow, this);
     focusWindowActor = windows[0];
     
-    global.log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
+    //global.log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
 }
 
 function getNotFocusedWindowsOfMonitor(monitor)
 {
     let windows = global.get_window_actors().filter(function(w) {
-            let wm_type = w.meta_window.get_window_type();
-            return  wm_type != 1 && w.meta_window.get_workspace() == global.screen.get_active_workspace()   && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor && focusMetaWindow != w.meta_window
+		let wm_type = w.meta_window.get_window_type();
+
+		let app = tracker.get_window_app(w.meta_window);
+
+		if(app == null)
+			return false;
+
+		let appName = app.get_name();
+	
+		//global.log("NotFocused - AppName: " + appName);
+
+		let bool = !contains(excludedApplications, appName) && wm_type == Meta.WindowType.NORMAL && w.meta_window.get_workspace() == global.screen.get_active_workspace() && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor && focusMetaWindow != w.meta_window;
+
+		
+		return bool;
         });
         
     return windows;
@@ -455,13 +457,12 @@ function getWindowsOfMonitor(monitor)
 
 function _onFocus()
 {
-    let window = getFocusApp();
-	global.log("_onFocus "+window);
 	resetFocusMetaWindow();
+    let window = getFocusApp();
+	
     if(window)
     {   
-        
-
+		global.log("_onFocus "+window);
         //global.log("Connect window: "+window.get_title());
         focusMetaWindow = window;
         focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,_onFocus)));
@@ -469,8 +470,8 @@ function _onFocus()
         let actor = focusMetaWindow.get_compositor_private();
         if(actor)
         {
-            focusMetaWindowPrivateConnections.push(actor.connect('size-changed',Lang.bind(this,moveGrids)));
-            focusMetaWindowPrivateConnections.push(actor.connect('position-changed',Lang.bind(this,moveGrids)));
+            focusMetaWindowPrivateConnections.push(focusMetaWindow.connect('size-changed',Lang.bind(this,moveGrids)));
+            focusMetaWindowPrivateConnections.push(focusMetaWindow.connect('position-changed',Lang.bind(this,moveGrids)));
         }
        
         //global.log("End Connect window: "+window.get_title());
@@ -493,12 +494,8 @@ function _onFocus()
     }
     else
     {
-        for(var gridIdx in grids)
-        {
-            let grid = grids[gridIdx];
-            grid.topbar._set_title('gTile');
-        }
-        
+		
+		hideTiling();
     }
 }
 
@@ -568,9 +565,7 @@ function hideTiling()
     
     launcher.deactivate();
     status = false; 
-    
-    
-    //Main.layoutManager._chrome.updateRegions();
+  
 }
 
 function toggleTiling()
@@ -592,23 +587,45 @@ function getMonitorKey(monitor)
     return monitor.x+":"+monitor.width+":"+monitor.y+":"+monitor.height;
 }
 
+function contains(a, obj) {
+    var i = a.length;
+    while (i--) {
+       if (a[i] === obj) {
+           return true;
+       }
+    }
+    return false;
+}
+
 function getFocusApp()
 {
+	if(tracker.focus_app == null)
+		return false;
+
+	let focusedAppName = tracker.focus_app.get_name();
+
+	if(contains(excludedApplications, focusedAppName))
+		return false;
+
     let windows = global.screen.get_active_workspace().list_windows();
+	let focusedWindow = false;
     for ( let i = 0; i < windows.length; ++i ) 
     {
             let metaWindow = windows[i];
             if(metaWindow.has_focus())
             {
-                return metaWindow;
+                focusedWindow = metaWindow;
+				break;
             }
     }
-    return false;
+
+
+    return focusedWindow;
 }
 
 function isPrimaryMonitor(monitor)
 {
-    return Main.layoutManager.primaryMonitor == monitor;
+    return Main.layoutManager.primaryMonitor.x == monitor.x;
 }
 
 /*****************************************************************
@@ -791,6 +808,7 @@ AutoTileMainAndList.prototype = {
         
         let monitor = this.grid.monitor;
         let offsetY = (isPrimaryMonitor(monitor)) ? Main.panel.actor.height : 0;
+
         
         let windows = getNotFocusedWindowsOfMonitor(monitor);
         
@@ -798,7 +816,9 @@ AutoTileMainAndList.prototype = {
         
         let winHeight = (monitor.height - offsetY)/(windows.length );
         let countWin = 0;
-    
+
+		//global.log("MonitorHeight: "+monitor.height+":"+windows.length );     
+
         for(let windowIdx in windows)
         {
             let metaWindow = windows[windowIdx].meta_window;
@@ -807,10 +827,10 @@ AutoTileMainAndList.prototype = {
             global.log(metaWindow.get_title()+" "+wm_type+" "+layer);*/
             
             let newOffset = offsetY + (countWin * winHeight);
-            
+            //global.log("newOffset: "+ newOffset);
             reset_window(metaWindow);
             
-            move_resize_window(metaWindow,monitor.x+monitor.width/2,monitor.y+newOffset,monitor.width/2,winHeight);
+            move_resize_window(metaWindow,monitor.x+monitor.width/2,newOffset,monitor.width/2,winHeight);
             countWin++;
         }
         
@@ -899,7 +919,7 @@ ActionScale.prototype = {
      
     _onButtonPress : function()
     {
-       global.log(this.classname + "pressed");
+       //global.log(this.classname + "pressed");
     }
 }
 
@@ -1199,21 +1219,18 @@ Grid.prototype = {
 	    if(!this.interceptHide && this.actor)
 	    {
 	        Main.layoutManager.removeChrome(this.actor);
-	        
 	    }
 	    
-	    //Main.layoutManager._chrome.updateRegions();
 	},
 	
 	_onShowComplete : function()
 	{
-	    //Main.layoutManager._chrome.updateRegions();
 	},
 	
 	 _onResize: function(actor, event)
 	 {
-	    global.log('resize-done: '+actor);
-	    refreshGrids();
+	    //global.log('resize-done: '+actor);
+		updateRegions();
         if(gridSettings[SETTINGS_AUTO_CLOSE])
         {
             this.emit('hide-tiling');
@@ -1307,11 +1324,10 @@ GridElementDelegate.prototype = {
 	    if(this.activated==false)
 	    {
 	         this.activated = true;
+			 gridElement.active = true;
 	         this.activatedActors= new Array();
 	         this.activatedActors.push(gridElement);
 	         this.first = gridElement;
-	         gridElement.actor.add_style_pseudo_class('activate');
-	         gridElement.active = true;
 	    }
 	    else
 	    {
@@ -1446,9 +1462,6 @@ GridElementDelegate.prototype = {
 		    area.x = areaX;
 		    area.y = areaY;
 		}
-		
-				                    
-		
 	},
 	
 	_hideArea : function()
@@ -1462,14 +1475,15 @@ GridElementDelegate.prototype = {
 	    {
 	         this.refreshGrid(this.first,gridElement);
 	    }
-	    else
+	    else if(!this.currentElement || gridElement.id != this.currentElement.id)
 	    {
+			
 	        if(this.currentElement)
 	            this.currentElement._deactivate();
 	        
 	        this.currentElement = gridElement;
-	        this._displayArea(this.currentElement,this.currentElement);
-	        this.currentElement._activate();
+			this.currentElement._activate();
+			this._displayArea(gridElement,gridElement);	
 	    }
 	},
 	
@@ -1503,11 +1517,13 @@ GridElement.prototype = {
 		this.coordy = coordy;
 		this.width = width;
 		this.height = height;
+
+		this.id =  getMonitorKey(monitor)+":"+coordx+":"+coordy;
 		
 		this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 		this.actor.connect('notify::hover', Lang.bind(this, this._onHoverChanged));
 		
-		this.active = false;	
+		this.active = false;
 	},
 	
 	show : function ()
@@ -1524,21 +1540,26 @@ GridElement.prototype = {
 	
 	_onButtonPress : function()
 	{
+		global.log("onButtonPress "+this.id);
 	   this.actor._delegate._onButtonPress(this);
 	},
 	
 	_onHoverChanged : function()
-	{
+	{	
+		global.log("onHoverChanged "+this.id);
 	    this.actor._delegate._onHoverChanged(this);
 	},
 	
 	_activate: function()
 	{
+	   global.log("activate "+this.id);
+
 	   this.actor.add_style_pseudo_class('activate');
 	},
 	
 	_deactivate: function()
 	{
+		global.log("deactivate "+this.id);
 	    this.actor.remove_style_pseudo_class('activate');
 	},
 	

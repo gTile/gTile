@@ -1,3 +1,7 @@
+*{
+z-index: 99;
+}
+
 .grid-title{
 	font-size: 12px;
     font-weight: bold;
@@ -27,7 +31,7 @@
     background-color: rgba(240,240,240,0.4);
 }
 
-.table-element:hover, .table-element:activate
+.table-element:activate
 {
     background-color: rgba(240,240,240,0.8);
 }
