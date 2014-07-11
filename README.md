@@ -45,6 +45,14 @@ help of the gnome-shell community. See
            
 CHANGE LOG
 ----------
+### V21
+
+-   Fix an issue on tracking focused window
+
+
+### V20
+
+-   Add compatibility with Gnome-Shell 10
 
 ### V17
 
