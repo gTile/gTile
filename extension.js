@@ -30,6 +30,7 @@ const Utils = imports.misc.extensionUtils.getCurrentExtension().imports.utils;
 const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
+const SETTINGS_IGNORE_PANEL = 'ignore-panel';
 
 let status;
 let launcher;
@@ -126,6 +127,7 @@ function initSettings()
     //You can change those settings to set whatever you want by default
     gridSettings[SETTINGS_AUTO_CLOSE] = false;
     gridSettings[SETTINGS_ANIMATION] = true;
+    gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
 
 }
 
@@ -865,7 +867,7 @@ AutoTileTwoList.prototype = {
         reset_window(focusMetaWindow);
         
         let monitor = this.grid.monitor;
-        let offsetY = (isPrimaryMonitor(monitor)) ? Main.panel.actor.height : 0;
+        let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
         
         let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
         let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
@@ -1427,7 +1429,7 @@ GridElementDelegate.prototype = {
 	   
 	    let monitor = fromGridElement.monitor;
 	    
-	    let offsetY = (isPrimaryMonitor(monitor)) ? Main.panel.actor.height : 0;
+	    let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
 	    
 	    let areaWidth = (monitor.width/nbCols)*((maxX-minX)+1);
 		let areaHeight = ((monitor.height-offsetY)/nbRows)*((maxY-minY)+1);
