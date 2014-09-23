@@ -166,13 +166,25 @@ function enable() {
 	global.log("Init KeyBindings");
     // Key Bindings
    
-   let key;
+    let key;
     for(key in key_bindings) {
-        global.display.add_keybinding(key,
-            mySettings,
-            Meta.KeyBindingFlags.NONE,
-            key_bindings[key]
-        );
+        if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
+            Main.wm.addKeybinding(
+                key,
+                mySettings,
+                Meta.KeyBindingFlags.NONE,
+                Shell.KeyBindingMode.NORMAL | Shell.KeyBindingMode.MESSAGE_TRAY,
+                key_bindings[key]
+            );
+        }
+        else {
+            global.display.add_keybinding(
+            	key,
+                mySettings,
+                Meta.KeyBindingFlags.NONE,
+                key_bindings[key]
+            );
+        }
     }
     
     global.log("Extention Enabled !");
@@ -182,7 +194,12 @@ function disable()
 {
     // Key Bindings
     for(key in key_bindings) {
-        global.display.remove_keybinding(key);
+        if (Main.wm.removeKeybinding) { // introduced in 3.7.2
+            Main.wm.removeKeybinding(key);
+        }
+        else {
+      	    global.display.remove_keybinding(key);
+        }
     }
 
     destroyGrids();
