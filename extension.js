@@ -72,7 +72,7 @@ const GTileStatusButton = new Lang.Class({
                        
     	this.actor.add_style_class_name(classname);
     	//Done by default in PanelMenuButton - Just need to override the method
-    	//this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 	},
     
      reset : function()
@@ -353,7 +353,7 @@ function reset_window(metaWindow)
 
 function _getInvisibleBorderPadding(metaWindow) {
         let outerRect = metaWindow.get_outer_rect();
-        let inputRect = metaWindow.get_input_rect();
+        let inputRect = metaWindow.get_buffer_rect();
         let [borderX, borderY] = [outerRect.x - inputRect.x,
                                   outerRect.y - inputRect.y];
     
@@ -361,7 +361,7 @@ function _getInvisibleBorderPadding(metaWindow) {
 }
     
 function _getVisibleBorderPadding (metaWindow) {
-        let clientRect = metaWindow.get_rect();
+        let clientRect = metaWindow.get_frame_rect();
         let outerRect = metaWindow.get_outer_rect();
 
         let borderX = outerRect.width - clientRect.width
@@ -403,8 +403,7 @@ function move_resize_window(metaWindow,x,y,width,height)
                 scale: actor.scale_x
             }; TO TEST*/
     
-    metaWindow.resize(true,width,height);
-    metaWindow.move_frame(true,x,y);
+    metaWindow.move_resize_frame(true,x,y,width,height);
     
     /*let actor = metaWindow.get_compositor_private();
                 
