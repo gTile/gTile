@@ -168,7 +168,16 @@ function enable() {
    
     let key;
     for(key in key_bindings) {
-        if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
+        if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
+            Main.wm.addKeybinding(
+                key,
+                mySettings,
+                Meta.KeyBindingFlags.NONE,
+                Shell.ActionMode.NORMAL,
+                key_bindings[key]
+            );
+        }
+        else if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
             Main.wm.addKeybinding(
                 key,
                 mySettings,
