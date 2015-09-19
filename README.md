@@ -11,8 +11,8 @@ Manual Installation
 
 Manual installation requires simply putting the files in the right place:
 
-$ cd ~/.local/share/gnome-shell/extensions
-$ git clone [repo]
+    $ cd ~/.local/share/gnome-shell/extensions
+    $ git clone [repo]
 
 Then run Tweak Tool and enable the extension.
 
