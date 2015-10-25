@@ -29,6 +29,7 @@ z-index: 99;
 
 .table-element{
     background-color: rgba(240,240,240,0.4);
+	margin: 1px;
 }
 
 .table-element:activate

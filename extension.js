@@ -992,64 +992,68 @@ function Grid(monitor_idx,screen,title,cols,rows)
 Grid.prototype = {
 
 	_init: function(monitor_idx,monitor,title,cols,rows) {
-		
+
        	this.tableWidth	= 240;
 		this.tableHeight = 200;
 		this.borderwidth = 2;
 
-		this.actor = new St.BoxLayout({ vertical:true, 
+		this.actor = new St.BoxLayout({ vertical:true,
 		                                style_class: 'grid-panel',
 		                                reactive:true,
 		                                can_focus:true,
 		                                track_hover:true});
-		
-		
-		
+
+
+
 		this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
 		this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 		//this.actor.connect('key-press-event', Lang.bind(this, this._globalKeyPressEvent));
-		
+
 		this.topbar = new TopBar(title);
-		
-		this.bottombarContainer = new  St.Bin({ style_class: 'bottom-box-container',
+
+		this.bottombarContainer = new St.Bin({ style_class: 'bottom-box-container',
 		                                reactive:true,
 		                                can_focus:true,
 		                                track_hover:true});
-		                                
-		this.bottombar = new St.Table({ homogeneous: true,
+
+		this.bottombar = new St.Widget({
                                     style_class: 'bottom-box',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
                                     width:this.tableWidth-20,
-                                    height:36
+                                    height:36,
+                                    layout_manager: new Clutter.TableLayout()
                                     });
-                                    
+        this.bottombar_table_layout = this.bottombar.layout_manager;
+
 		this.bottombarContainer.add_actor(this.bottombar,{x_fill:true,y_fill:true})
-        
+
         this.veryBottomBarContainer = new  St.Bin({ style_class: 'very-bottom-box-container',
 		                                reactive:true,
 		                                can_focus:true,
 		                                track_hover:true});
-		                                
-        this.veryBottomBar = new St.Table({ homogeneous: true,
+
+        this.veryBottomBar = new St.Widget({
                                     style_class: 'very-bottom-box',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
                                     width:this.tableWidth-20,
-                                    height:36
+                                    height:36,
+                                    layout_manager: new Clutter.TableLayout()
                                     });
-                                    
+        this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
+
 		this.veryBottomBarContainer.add_actor(this.veryBottomBar,{x_fill:true,y_fill:true})
-                                    
+
 		let rowNum = 0;
 		let colNum = 0;
 		let maxPerRow = 4;
-		
-		
+
+
 		let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
-		
+
 		for(var index=0; index<gridSettingsButton.length;index++)
 		{
 		    if(colNum>= 4)
@@ -1057,92 +1061,94 @@ Grid.prototype = {
 		        colNum = 0;
 		        rowNum += 2;
 		    }
-		    
+
 		    let button = gridSettingsButton[index];
 		    button = new GridSettingsButton(button.text,button.cols,button.rows);
-		    this.bottombar.add(button.actor,{row:rowNum, col:colNum,x_fill:true,y_fill:true});
+		    this.bottombar_table_layout.pack(button.actor, colNum, rowNum);
 		    button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
 		    colNum++;
-		}		
-		
+		}
+
 		this.tableContainer = new  St.Bin({ style_class: 'table-container',
 		                                reactive:true,
 		                                can_focus:true,
 		                                track_hover:true});
-		                                
-		this.table = new St.Table({ homogeneous: true,
+
+		this.table = new St.Widget({
                                     style_class: 'table',
                                     can_focus: true,
                                     track_hover: true,
                                     reactive: true,
                                     height:this.tableHeight,
-                                    width:this.tableWidth-2
-                                    });  
-                                    
+                                    width:this.tableWidth-2,
+                                    layout_manager: new Clutter.TableLayout()
+                                    });
+        this.table_table_layout = this.table.layout_manager;
+
 		this.tableContainer.add_actor(this.table,{x_fill:true,y_fill:true})
-                                    
+
 		this.actor.add_actor(this.topbar.actor,{x_fill:true});
 		this.actor.add_actor(this.tableContainer,{x_fill:true});
-		this.actor.add_actor(this.bottombarContainer,{x_fill:true});		
+		this.actor.add_actor(this.bottombarContainer,{x_fill:true});
 		this.actor.add_actor(this.veryBottomBarContainer,{x_fill:true});
-		
-				
+
+
 		this.monitor = monitor;
 		this.monitor_idx = monitor_idx;
 		this.rows = rows;
 		this.title = title;
 		this.cols = cols;
-		
+
 		this.isEntered = false;
-		
+
 		if(true)
 		{
 		    let nbTotalSettings = 4;
-		
+
 		    if(!toggleSettingListener)
 		    {
 		        toggleSettingListener = new ToggleSettingsButtonListener();
             }
-            
+
 		    let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-		    this.veryBottomBar.add(toggle.actor,{row:0, col:0,x_fill:true,y_fill:true});
+		    this.veryBottomBar_table_layout.pack(toggle.actor, 0, 0);
             toggleSettingListener.addActor(toggle);
-            
+
 		    toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-		    this.veryBottomBar.add(toggle.actor,{row:0, col:1,x_fill:true,y_fill:true});
+		    this.veryBottomBar_table_layout.pack(toggle.actor, 1, 0);
             toggleSettingListener.addActor(toggle);
-            
+
             let action = new AutoTileMainAndList(this);
-            this.veryBottomBar.add(action.actor,{row:0, col:2,x_fill:true,y_fill:true});            
+            this.veryBottomBar_table_layout.pack(action.actor, 2, 0);
             action.connect('resize-done', Lang.bind(this,this._onResize));
-            
+
             action = new AutoTileTwoList(this);
-            this.veryBottomBar.add(action.actor,{row:0, col:3,x_fill:true,y_fill:true});            
+            this.veryBottomBar_table_layout.pack(action.actor, 3, 0);
             action.connect('resize-done', Lang.bind(this,this._onResize));
-            
+
             /*action = new ActionScale(this);
             action.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-            this.veryBottomBar.add(action.actor,{row:0, col:4,x_fill:false,y_fill:false});   */         
+            this.veryBottomBar.add(action.actor,{row:0, col:4,x_fill:false,y_fill:false});   */
 		}
-		
-		
+
+
 		this.x = 0;
 	    this.y = 0;
-	    
+
 	    this.interceptHide = false;
 		this._displayElements();
-		
+
 		this.normalScaleY = this.actor.scale_y;
 		this.normalScaleX = this.actor.scale_x;
 	},
-	
+
 	_displayElements : function()
 	{
 	    this.elements = new Array();
-		
+
 		let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
 		let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
-	    
+
 	   	this.elementsDelegate = new GridElementDelegate();
 	   	this.elementsDelegate.connect('resize-done', Lang.bind(this, this._onResize));
 		for(let r = 0; r < this.rows; r++)
@@ -1151,19 +1157,19 @@ Grid.prototype = {
 			{
                 if(c == 0)
                 {
-	                this.elements[r] = new Array();					
+	                this.elements[r] = new Array();
                 }
 
                 let element = new GridElement(this.monitor,width,height,c,r);
 
                 this.elements[r][c] = element;
                 element.actor._delegate = this.elementsDelegate;
-                this.table.add(element.actor,{row: r, col: c,x_fill:true, y_fill:true});
+                this.table_table_layout.pack(element.actor, c, r);
                 element.show();
 			}
-		}		
+		}
 	},
-	
+
 	refresh : function()
 	{
         this.table.destroy_all_children();
