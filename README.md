@@ -6,6 +6,17 @@ Gnome-shell extension that tiles windows as you like.
 This extension is developed at [GitHub](https://extensions.gnome.org/extension/28/gtile/)
 If you are reading this documentation anywhere else, it might be out of date.
 
+Manual Installation
+-------------------
+
+Manual installation requires simply putting the files in the right place:
+
+    $ cd ~/.local/share/gnome-shell/extensions
+    $ git clone [repo]
+
+Then run Tweak Tool and enable the extension.
+
+
 Configuration
 ------------
 
