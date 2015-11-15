@@ -31,6 +31,10 @@ const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_IGNORE_PANEL = 'ignore-panel';
+// aaron:
+const SETTINGS_MONITOR_WIDTH = 'monitor-width';
+const SETTINGS_MONITOR_HEIGHT = 'monitor-height';
+const SETTINGS_GRID_SIZE_DEFAULT = 'grid-size-default;
 
 let status;
 let launcher;
@@ -109,9 +113,10 @@ const GTileStatusButton = new Lang.Class({
 function initSettings() {
     //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
-        new GridSettingsButton('6x4',6,4),
+        //new GridSettingsButton('6x4',6,4),
         new GridSettingsButton('8x6',8,6),
         new GridSettingsButton('12x8',12,8),
+        new GridSettingsButton('16x9',16,9),
         new GridSettingsButton('16x12',16,12),
     ];
 
@@ -119,6 +124,15 @@ function initSettings() {
     gridSettings[SETTINGS_AUTO_CLOSE] = true;
     gridSettings[SETTINGS_ANIMATION] = true;
     gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
+
+    // Specify the size of your monitor
+    // (more specifically, this is used to determine the aspect ratio of the tile grid)
+    // (So, 1920x1080 is good for any 16:9 monitor)
+    gridSettings[SETTINGS_MONITOR_WIDTH] = 1920;
+    gridSettings[SETTINGS_MONITOR_HEIGHT] = 1080;
+
+    // Specify the default grid size (instead of 4x4)
+    gridSettings[SETTINGS_GRID_SIZE_DEFAULT] = [16,9];
 }
 
 
@@ -145,6 +159,10 @@ function enable() {
 
     global.log("Init settings");
     initSettings();
+
+    // aaron - Now override cols & rows from above
+    nbCols = gridSettings[SETTINGS_GRID_SIZE_DEFAULT][0];
+    nbRows = gridSettings[SETTINGS_GRID_SIZE_DEFAULT][1];
 
     global.log("Init Grids");
     initGrids();
@@ -891,8 +909,8 @@ function Grid(monitor_idx,screen,title,cols,rows) {
 Grid.prototype = {
     _init: function(monitor_idx,monitor,title,cols,rows) {
 
-        this.tableWidth	= 240;
-        this.tableHeight = 200;
+        this.tableWidth	= 400; // Aaron, bump up the default width from 240
+        this.tableHeight = (this.tableWidth / gridSettings[SETTINGS_MONITOR_WIDTH]) * gridSettings[SETTINGS_MONITOR_HEIGHT];
         this.borderwidth = 2;
 
         this.actor = new St.BoxLayout({ vertical:true,
