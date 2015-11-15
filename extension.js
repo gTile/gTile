@@ -34,7 +34,7 @@ const SETTINGS_IGNORE_PANEL = 'ignore-panel';
 // aaron:
 const SETTINGS_MONITOR_WIDTH = 'monitor-width';
 const SETTINGS_MONITOR_HEIGHT = 'monitor-height';
-const SETTINGS_GRID_SIZE_DEFAULT = 'grid-size-default;
+const SETTINGS_GRID_SIZE_DEFAULT = 'grid-size-default';
 
 let status;
 let launcher;
