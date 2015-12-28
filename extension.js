@@ -31,6 +31,8 @@ const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_IGNORE_PANEL = 'ignore-panel';
+const SETTINGS_Y_OFFSET = 'additional-y-offset';
+const SETTINGS_WINDOW_MARGIN = 'window-margin';
 
 let status;
 let launcher;
@@ -109,16 +111,17 @@ const GTileStatusButton = new Lang.Class({
 function initSettings() {
     //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
+        new GridSettingsButton('8x8',8,8),
         new GridSettingsButton('6x4',6,4),
-        new GridSettingsButton('8x6',8,6),
-        new GridSettingsButton('12x8',12,8),
-        new GridSettingsButton('16x12',16,12),
+        new GridSettingsButton('4x4',4,4),
     ];
 
     //You can change those settings to set whatever you want by default
     gridSettings[SETTINGS_AUTO_CLOSE] = true;
     gridSettings[SETTINGS_ANIMATION] = true;
     gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
+    gridSettings[SETTINGS_Y_OFFSET] = 48;  // bottom offset set this value if you have docking panel
+    gridSettings[SETTINGS_WINDOW_MARGIN] = 3; // small margin offset
 }
 
 
@@ -134,9 +137,6 @@ function enable() {
     monitors = Main.layoutManager.monitors;
     tracker = Shell.WindowTracker.get_default();
 
-    nbCols = 4;
-    nbRows = 4;
-
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
 
@@ -145,6 +145,10 @@ function enable() {
 
     global.log("Init settings");
     initSettings();
+
+    // initialize these from settings, the first set of sizes
+    nbCols = gridSettings[SETTINGS_GRID_SIZE][0].cols;
+    nbRows = gridSettings[SETTINGS_GRID_SIZE][0].rows;
 
     global.log("Init Grids");
     initGrids();
@@ -356,6 +360,24 @@ function move_maximize_window(metaWindow, x, y) {
 
     metaWindow.move_frame(true,x,y);
     metaWindow.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+}
+
+/**
+ * Resizes window considering margin settings
+ * @param metaWindow
+ * @param x
+ * @param y
+ * @param width
+ * @param height
+ */
+function move_resize_window_with_margins(metaWindow, x, y, width, height){
+    move_resize_window(
+        metaWindow,
+        x + gridSettings[SETTINGS_WINDOW_MARGIN],
+        y + gridSettings[SETTINGS_WINDOW_MARGIN],
+        width - gridSettings[SETTINGS_WINDOW_MARGIN] * 2,
+        height - gridSettings[SETTINGS_WINDOW_MARGIN] * 2
+    )
 }
 
 function move_resize_window(metaWindow, x, y, width, height) {
@@ -703,7 +725,7 @@ Signals.addSignalMethods(ToggleSettingsButton.prototype);
 
 function ActionButton(grid, classname) {
     this._init(grid, classname);
-};
+}
 
 ActionButton.prototype = {
     _init: function(grid,classname) {
@@ -752,9 +774,14 @@ AutoTileMainAndList.prototype = {
 
         let windows = getNotFocusedWindowsOfMonitor(monitor);
 
-        move_resize_window(focusMetaWindow,monitor.x,monitor.y+offsetY,monitor.width/2,monitor.height);
+        move_resize_window_with_margins(
+            focusMetaWindow,
+            monitor.x,
+            monitor.y+offsetY,
+            monitor.width/2,
+            monitor.height - gridSettings[SETTINGS_Y_OFFSET] - offsetY);
 
-        let winHeight = (monitor.height - offsetY)/(windows.length );
+        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/(windows.length );
         let countWin = 0;
 
         //global.log("MonitorHeight: "+monitor.height+":"+windows.length );
@@ -769,7 +796,13 @@ AutoTileMainAndList.prototype = {
             //global.log("newOffset: "+ newOffset);
             reset_window(metaWindow);
 
-            move_resize_window(metaWindow,monitor.x+monitor.width/2,newOffset,monitor.width/2,winHeight);
+            move_resize_window_with_margins(
+                metaWindow,
+                monitor.x + monitor.width/2,
+                newOffset,
+                monitor.width/2,
+                winHeight
+            );
             countWin++;
         }
 
@@ -804,17 +837,24 @@ AutoTileTwoList.prototype = {
 
         let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
         let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
-        let winHeight = (monitor.height - offsetY)/nbWindowOnEachSide;
+        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/nbWindowOnEachSide;
 
         let countWin = 0;
 
         let xOffset = countWin%2 * monitor.width/2;
         let yOffset = offsetY + (Math.floor(countWin/2) * winHeight);
 
-        move_resize_window(focusMetaWindow,monitor.x+xOffset,monitor.y+yOffset,monitor.width/2,winHeight);
+        move_resize_window_with_margins(
+            focusMetaWindow,
+            monitor.x+xOffset,
+            monitor.y+yOffset,
+            monitor.width/2,
+            winHeight
+        );
 
         countWin++;
 
+        // todo make function
         for (let windowIdx in windows) {
             let metaWindow = windows[windowIdx].meta_window;
             /*let wm_type = metaWindow.get_window_type();
@@ -826,7 +866,13 @@ AutoTileTwoList.prototype = {
 
             reset_window(metaWindow);
 
-            move_resize_window(metaWindow,monitor.x+xOffset,monitor.y+yOffset,monitor.width/2,winHeight);
+            move_resize_window_with_margins(
+                metaWindow,
+                monitor.x+xOffset,
+                monitor.y+yOffset,
+                monitor.width/2,
+                winHeight
+            );
             countWin++;
         }
 
@@ -1238,7 +1284,7 @@ GridElementDelegate.prototype = {
                 move_maximize_window(focusMetaWindow,areaX,areaY);
             }
             else {
-                move_resize_window(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
+                move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
             }
             //focusMetaWindow.configure_notify();
 
@@ -1308,7 +1354,7 @@ GridElementDelegate.prototype = {
         let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
 
         let areaWidth = (monitor.width/nbCols)*((maxX-minX)+1);
-        let areaHeight = ((monitor.height-offsetY)/nbRows)*((maxY-minY)+1);
+        let areaHeight = ((monitor.height-offsetY)/nbRows)*((maxY-minY)+1) - gridSettings[SETTINGS_Y_OFFSET];
         let areaX = monitor.x + (minX*(monitor.width/nbCols));
         let areaY = offsetY+monitor.y + (minY*((monitor.height-offsetY)/nbRows));
 
