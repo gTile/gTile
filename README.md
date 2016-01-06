@@ -9,12 +9,23 @@ If you are reading this documentation anywhere else, it might be out of date.
 Manual Installation
 -------------------
 
-Manual installation requires simply putting the files in the right place:
+*Gnome* extensions must be in the *Gnome* extentions directory with a subdirectory name
+which matches the **uuid** field of `metadata.json`.
 
-    $ cd ~/.local/share/gnome-shell/extensions
-    $ git clone [repo]
+See https://wiki.gnome.org/Projects/GnomeShell/Extensions for details.
 
-Then run Tweak Tool and enable the extension.
+1. Clone the repository to the *Gnome* extensions folder.
+
+   ```
+   git clone https://github.com/jamesdbrock/vibou.gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
+   ```
+
+2. Restart *Gnome*
+
+   ```
+   Alt-F2
+   Enter a Command: r
+   ```
 
 
 Configuration

@@ -109,10 +109,9 @@ const GTileStatusButton = new Lang.Class({
 function initSettings() {
     //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
-        new GridSettingsButton('6x4',6,4),
-        new GridSettingsButton('8x6',8,6),
-        new GridSettingsButton('12x8',12,8),
-        new GridSettingsButton('16x12',16,12),
+        new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('6x6',6,6),
+        new GridSettingsButton('12x12',12,12),
     ];
 
     //You can change those settings to set whatever you want by default
@@ -134,8 +133,8 @@ function enable() {
     monitors = Main.layoutManager.monitors;
     tracker = Shell.WindowTracker.get_default();
 
-    nbCols = 4;
-    nbRows = 4;
+    nbCols = 6;
+    nbRows = 6;
 
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
