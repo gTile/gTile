@@ -12,7 +12,7 @@ Manual Installation
 Manual installation requires simply putting the files in the right place:
 
     $ cd ~/.local/share/gnome-shell/extensions
-    $ git clone [repo]
+    $ git clone [repo] gTile@vibou
 
 Then run Tweak Tool and enable the extension.
 
