@@ -1354,9 +1354,9 @@ GridElementDelegate.prototype = {
         let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
 
         let areaWidth = (monitor.width/nbCols)*((maxX-minX)+1);
-        let areaHeight = ((monitor.height-offsetY)/nbRows)*((maxY-minY)+1) - gridSettings[SETTINGS_Y_OFFSET];
+        let areaHeight = ((monitor.height-offsetY-gridSettings[SETTINGS_Y_OFFSET])/nbRows)*((maxY-minY)+1);
         let areaX = monitor.x + (minX*(monitor.width/nbCols));
-        let areaY = offsetY+monitor.y + (minY*((monitor.height-offsetY)/nbRows));
+        let areaY = offsetY+monitor.y + (minY*((monitor.height-offsetY-gridSettings[SETTINGS_Y_OFFSET])/nbRows));
 
         return [areaX,areaY,areaWidth,areaHeight];
     },
