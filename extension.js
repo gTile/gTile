@@ -111,17 +111,17 @@ const GTileStatusButton = new Lang.Class({
 function initSettings() {
     //Here is where you add new grid size button
     gridSettings[SETTINGS_GRID_SIZE] = [
-        new GridSettingsButton('8x8',8,8),
-        new GridSettingsButton('6x4',6,4),
         new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('6x4',6,4),
+        new GridSettingsButton('8x6',8,6),
     ];
 
     //You can change those settings to set whatever you want by default
     gridSettings[SETTINGS_AUTO_CLOSE] = true;
     gridSettings[SETTINGS_ANIMATION] = true;
     gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
-    gridSettings[SETTINGS_Y_OFFSET] = 48;  // bottom offset set this value if you have docking panel
-    gridSettings[SETTINGS_WINDOW_MARGIN] = 3; // small margin offset
+    gridSettings[SETTINGS_Y_OFFSET] = 0;  // bottom offset set this value if you have docking panel
+    gridSettings[SETTINGS_WINDOW_MARGIN] = 0; // small margin offset
 }
 
 
