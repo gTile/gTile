@@ -937,8 +937,8 @@ function Grid(monitor_idx,screen,title,cols,rows) {
 Grid.prototype = {
     _init: function(monitor_idx,monitor,title,cols,rows) {
 
-        this.tableWidth	= 240;
-        this.tableHeight = 200;
+        this.tableWidth = 320;
+        this.tableHeight = (this.tableWidth / monitor.width) * monitor.height;
         this.borderwidth = 2;
 
         this.actor = new St.BoxLayout({ vertical:true,

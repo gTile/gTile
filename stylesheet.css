@@ -13,7 +13,7 @@ z-index: 99;
 .grid-panel{
     background-color: rgba(10,10,10,0.7);
     -webkit-filter: blur(2px);
-    width:240px;
+    width:320px;
     border-radius: 10px;
 }
 
