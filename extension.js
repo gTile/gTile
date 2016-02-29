@@ -55,13 +55,10 @@ let tracker;
 let gridSettings = new Object();
 let toggleSettingListener;
 
-
-//Hangouts workaround
+// Hangouts workaround
 let excludedApplications = new Array(
     "Unknown"
 );
-
-let window_dragging = true;
 
 const key_bindings = {
     'show-toggle-tiling': function() {
@@ -344,9 +341,8 @@ function move_resize_window_with_margins(metaWindow, x, y, width, height){
 }
 
 function move_resize_window(metaWindow, x, y, width, height) {
-    let borderX,borderY,vBorderX,vBorderY;
-    [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
-    [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
+    let [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
+    let [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
     global.log(metaWindow.get_title()+" "+borderY);
 
@@ -570,7 +566,7 @@ function getFocusApp() {
 
     let windows = global.screen.get_active_workspace().list_windows();
     let focusedWindow = false;
-    for ( let i = 0; i < windows.length; ++i ) {
+    for (let i = 0; i < windows.length; ++i) {
         let metaWindow = windows[i];
         if (metaWindow.has_focus()) {
             focusedWindow = metaWindow;
@@ -750,7 +746,7 @@ AutoTileMainAndList.prototype = {
             monitor.width/2,
             monitor.height - gridSettings[SETTINGS_Y_OFFSET] - offsetY);
 
-        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/(windows.length );
+        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/(windows.length);
         let countWin = 0;
 
         //global.log("MonitorHeight: "+monitor.height+":"+windows.length );
@@ -1287,19 +1283,18 @@ GridElementDelegate.prototype = {
     },
 
     _getVarFromGridElement: function(fromGridElement, toGridElement) {
-        let maxX = (fromGridElement.coordx >= toGridElement.coordx) ? fromGridElement.coordx : toGridElement.coordx;
-        let minX = (fromGridElement.coordx <= toGridElement.coordx) ? fromGridElement.coordx : toGridElement.coordx;
+        let minX = Math.min(fromGridElement.coordx, toGridElement.coordx);
+        let maxX = Math.max(fromGridElement.coordx, toGridElement.coordx);
 
-        let maxY = (fromGridElement.coordy >= toGridElement.coordy) ? fromGridElement.coordy : toGridElement.coordy;
-        let minY = (fromGridElement.coordy <= toGridElement.coordy) ? fromGridElement.coordy : toGridElement.coordy;
+        let minY = Math.min(fromGridElement.coordy, toGridElement.coordy);
+        let maxY = Math.max(fromGridElement.coordy, toGridElement.coordy);
 
         return [minX,maxX,minY,maxY];
     },
 
     refreshGrid: function(fromGridElement, toGridElement) {
         this._resetGrid();
-        let minX,maxX,minY,maxY;
-        [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
+        let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
         let key = getMonitorKey(fromGridElement.monitor);
         let grid = grids[key];
@@ -1315,8 +1310,7 @@ GridElementDelegate.prototype = {
     },
 
     _computeAreaPositionSize: function(fromGridElement, toGridElement) {
-        let minX,maxX,minY,maxY;
-        [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement,toGridElement);
+        let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement,toGridElement);
 
         let monitor = fromGridElement.monitor;
 

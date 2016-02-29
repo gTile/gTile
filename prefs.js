@@ -13,14 +13,7 @@ const pretty_names = {
 }
 
 function init() {
-}
 
-function append_hotkey(model, settings, name, pretty_name) {
-	let [key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
-
-	let row = model.insert(10);
-
-	model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
 
 function buildPrefsWidget() {
@@ -37,7 +30,7 @@ function buildPrefsWidget() {
 
 	let settings = Settings.get();
 
-	for(key in pretty_names) {
+	for (key in pretty_names) {
 		append_hotkey(model, settings, key, pretty_names[key]);
 	}
 
@@ -76,9 +69,9 @@ function buildPrefsWidget() {
 	cellrend.connect('accel-edited', function(rend, iter, key, mods) {
 		let value = Gtk.accelerator_name(key, mods);
 		
-		let [succ, iter ] = model.get_iter_from_string(iter);
+		let [success, iter] = model.get_iter_from_string(iter);
 		
-		if(!succ) {
+		if (!success) {
 			throw new Error("Something be broken, yo.");
 		}
 
@@ -115,4 +108,12 @@ function buildPrefsWidget() {
 	global.log("Returning.");
 
 	return win;
+}
+
+function append_hotkey(model, settings, name, pretty_name) {
+	let [key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
+
+	let row = model.insert(10);
+
+	model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
