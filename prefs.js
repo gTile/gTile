@@ -1,12 +1,13 @@
+// Library imports
 const GObject = imports.gi.GObject;
 const Gdk = imports.gi.Gdk;
 const Gtk = imports.gi.Gtk;
 
-const Utils = imports.misc.extensionUtils.getCurrentExtension().imports.utils; 
+// Extension imports
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Extension.imports.settings;
 
-// End of imports;
-
-// TODO: Translation Party!
+// Globals
 const pretty_names = {
 	'show-toggle-tiling': 'Display gTile'
 }
@@ -19,8 +20,7 @@ function append_hotkey(model, settings, name, pretty_name) {
 
 	let row = model.insert(10);
 
-	model.set(row, [0, 1, 2, 3], [name, pretty_name, 
-		mods, key ]);
+	model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
 
 function buildPrefsWidget() {
@@ -35,7 +35,7 @@ function buildPrefsWidget() {
 
 	global.log("Modal created.");
 
-	let settings = Utils.getSettings();
+	let settings = Settings.get();
 
 	for(key in pretty_names) {
 		append_hotkey(model, settings, key, pretty_names[key]);

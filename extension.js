@@ -12,6 +12,7 @@
 /*****************************************************************
   CONST & VARS
  *****************************************************************/
+// Library imports
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
@@ -25,8 +26,12 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
-const Utils = imports.misc.extensionUtils.getCurrentExtension().imports.utils;
 
+// Extension imports
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const hotkeys = Extension.imports.hotkeys;
+
+// Globals
 const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
@@ -57,8 +62,6 @@ let excludedApplications = new Array(
 );
 
 let window_dragging = true;
-
-const mySettings = Utils.getSettings();
 
 const key_bindings = {
     'show-toggle-tiling': function() {
@@ -158,53 +161,13 @@ function enable() {
 
     Main.panel.addToStatusArea("GTileStatusButton", launcher);
 
-    // Key Bindings
-    global.log("Init KeyBindings");
-
-    let key;
-    for (key in key_bindings) {
-        if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
-            Main.wm.addKeybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                Shell.ActionMode.NORMAL,
-                key_bindings[key]
-            );
-        }
-        else if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
-            Main.wm.addKeybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                Shell.KeyBindingMode.NORMAL | Shell.KeyBindingMode.MESSAGE_TRAY,
-                key_bindings[key]
-            );
-        }
-        else {
-            global.display.add_keybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                key_bindings[key]
-            );
-        }
-    }
+    hotkeys.bind(key_bindings);
 
     global.log("Extention Enabled !");
 }
 
 function disable() {
-    // Key Bindings
-    for (key in key_bindings) {
-        if (Main.wm.removeKeybinding) { // introduced in 3.7.2
-            Main.wm.removeKeybinding(key);
-        }
-        else {
-            global.display.remove_keybinding(key);
-        }
-    }
-
+    hotkeys.unbind();
     destroyGrids();
     launcher.destroy();
     launcher = null;
@@ -287,7 +250,7 @@ function moveGrids() {
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
             }
             else {
-                pos_x =monitor.x + monitor.width/2;
+                pos_x = monitor.x + monitor.width/2;
                 pos_y = monitor.y + monitor.height/2;
             }
 
@@ -437,20 +400,22 @@ function getWindowActor() {
 
 function getNotFocusedWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
-        let wm_type = w.meta_window.get_window_type();
-
         let app = tracker.get_window_app(w.meta_window);
 
-        if (app == null)
-        return false;
+        if (app == null) {
+            return false;
+        }
 
         let appName = app.get_name();
 
         //global.log("NotFocused - AppName: " + appName);
 
-        let bool = !contains(excludedApplications, appName) && wm_type == Meta.WindowType.NORMAL && w.meta_window.get_workspace() == global.screen.get_active_workspace() && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor && focusMetaWindow != w.meta_window;
-
-        return bool;
+        return !contains(excludedApplications, appName)
+            && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
+            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.showing_on_its_workspace()
+            && monitors[w.meta_window.get_monitor()] == monitor
+            && focusMetaWindow != w.meta_window;
     });
 
     return windows;
@@ -458,8 +423,10 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
 function getWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
-        let wm_type = w.meta_window.get_window_type();
-        return wm_type != 1 && w.meta_window.get_workspace() == global.screen.get_active_workspace() && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor;
+        return w.meta_window.get_window_type() != Meta.WindowType.DESKTOP
+            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.showing_on_its_workspace()
+            && monitors[w.meta_window.get_monitor()] == monitor;
     });
 
     return windows;
@@ -530,7 +497,7 @@ function showTiling() {
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
             }
             else {
-                pos_x =monitor.x + monitor.width/2;
+                pos_x = monitor.x + monitor.width/2;
                 pos_y = monitor.y + monitor.height/2;
             }
 
@@ -591,13 +558,15 @@ function contains(a, obj) {
 }
 
 function getFocusApp() {
-    if (tracker.focus_app == null)
+    if (tracker.focus_app == null) {
         return false;
+    }
 
     let focusedAppName = tracker.focus_app.get_name();
 
-    if (contains(excludedApplications, focusedAppName))
+    if (contains(excludedApplications, focusedAppName)) {
         return false;
+    }
 
     let windows = global.screen.get_active_workspace().list_windows();
     let focusedWindow = false;
@@ -1418,7 +1387,6 @@ Signals.addSignalMethods(GridElementDelegate.prototype);
 function GridElement(monitor, width, height, coordx, coordy) {
     this._init(monitor, width, height, coordx, coordy);
 }
-
 
 GridElement.prototype = {
 
