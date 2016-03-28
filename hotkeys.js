@@ -42,7 +42,7 @@ function bind(key_bindings) {
     }
 }
 
-function unbind() {
+function unbind(key_bindings) {
     global.log("Unbinding keys");
     for (key in key_bindings) {
         if (Main.wm.removeKeybinding) { // introduced in 3.7.2

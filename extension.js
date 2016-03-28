@@ -164,7 +164,7 @@ function enable() {
 }
 
 function disable() {
-    hotkeys.unbind();
+    hotkeys.unbind(key_bindings);
     destroyGrids();
     launcher.destroy();
     launcher = null;
