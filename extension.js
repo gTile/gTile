@@ -37,7 +37,8 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_IGNORE_PANEL = 'ignore-panel';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
-const SETTINGS_INSETS = 'insets';
+const SETTINGS_INSETS_PRIMARY = 'insets-primary';
+const SETTINGS_INSETS_SECONDARY = 'insets-secondary';
 
 let status;
 let launcher;
@@ -121,7 +122,8 @@ function initSettings() {
     gridSettings[SETTINGS_ANIMATION] = true;
     gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
     gridSettings[SETTINGS_WINDOW_MARGIN] = 0; // small margin offset
-    gridSettings[SETTINGS_INSETS] = { top: 0, bottom: 0, left: 0, right: 0 };
+    gridSettings[SETTINGS_INSETS_PRIMARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on primary monitor
+    gridSettings[SETTINGS_INSETS_SECONDARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on secondary monitors
 }
 
 
@@ -582,7 +584,7 @@ function isPrimaryMonitor(monitor) {
 }
 
 function getWorkArea(monitor) {
-    let insets = gridSettings[SETTINGS_INSETS];
+    let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     let topPanelSize = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
     return {
         x: monitor.x + insets.left,
