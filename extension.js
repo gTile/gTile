@@ -12,6 +12,7 @@
 /*****************************************************************
   CONST & VARS
  *****************************************************************/
+// Library imports
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
@@ -25,14 +26,19 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
-const Utils = imports.misc.extensionUtils.getCurrentExtension().imports.utils;
 
+// Extension imports
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const hotkeys = Extension.imports.hotkeys;
+
+// Globals
 const SETTINGS_GRID_SIZE = 'grid-size';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_IGNORE_PANEL = 'ignore-panel';
-const SETTINGS_Y_OFFSET = 'additional-y-offset';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_INSETS_PRIMARY = 'insets-primary';
+const SETTINGS_INSETS_SECONDARY = 'insets-secondary';
 
 let status;
 let launcher;
@@ -50,15 +56,10 @@ let tracker;
 let gridSettings = new Object();
 let toggleSettingListener;
 
-
-//Hangouts workaround
+// Hangouts workaround
 let excludedApplications = new Array(
     "Unknown"
 );
-
-let window_dragging = true;
-
-const mySettings = Utils.getSettings();
 
 const key_bindings = {
     'show-toggle-tiling': function() {
@@ -120,8 +121,9 @@ function initSettings() {
     gridSettings[SETTINGS_AUTO_CLOSE] = true;
     gridSettings[SETTINGS_ANIMATION] = true;
     gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
-    gridSettings[SETTINGS_Y_OFFSET] = 0;  // bottom offset set this value if you have docking panel
     gridSettings[SETTINGS_WINDOW_MARGIN] = 0; // small margin offset
+    gridSettings[SETTINGS_INSETS_PRIMARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on primary monitor
+    gridSettings[SETTINGS_INSETS_SECONDARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on secondary monitors
 }
 
 
@@ -158,53 +160,13 @@ function enable() {
 
     Main.panel.addToStatusArea("GTileStatusButton", launcher);
 
-    // Key Bindings
-    global.log("Init KeyBindings");
-
-    let key;
-    for (key in key_bindings) {
-        if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
-            Main.wm.addKeybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                Shell.ActionMode.NORMAL,
-                key_bindings[key]
-            );
-        }
-        else if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
-            Main.wm.addKeybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                Shell.KeyBindingMode.NORMAL | Shell.KeyBindingMode.MESSAGE_TRAY,
-                key_bindings[key]
-            );
-        }
-        else {
-            global.display.add_keybinding(
-                key,
-                mySettings,
-                Meta.KeyBindingFlags.NONE,
-                key_bindings[key]
-            );
-        }
-    }
+    hotkeys.bind(key_bindings);
 
     global.log("Extention Enabled !");
 }
 
 function disable() {
-    // Key Bindings
-    for (key in key_bindings) {
-        if (Main.wm.removeKeybinding) { // introduced in 3.7.2
-            Main.wm.removeKeybinding(key);
-        }
-        else {
-            global.display.remove_keybinding(key);
-        }
-    }
-
+    hotkeys.unbind(key_bindings);
     destroyGrids();
     launcher.destroy();
     launcher = null;
@@ -287,7 +249,7 @@ function moveGrids() {
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
             }
             else {
-                pos_x =monitor.x + monitor.width/2;
+                pos_x = monitor.x + monitor.width/2;
                 pos_y = monitor.y + monitor.height/2;
             }
 
@@ -381,9 +343,8 @@ function move_resize_window_with_margins(metaWindow, x, y, width, height){
 }
 
 function move_resize_window(metaWindow, x, y, width, height) {
-    let borderX,borderY,vBorderX,vBorderY;
-    [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
-    [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
+    let [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
+    let [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
     global.log(metaWindow.get_title()+" "+borderY);
 
@@ -437,20 +398,22 @@ function getWindowActor() {
 
 function getNotFocusedWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
-        let wm_type = w.meta_window.get_window_type();
-
         let app = tracker.get_window_app(w.meta_window);
 
-        if (app == null)
-        return false;
+        if (app == null) {
+            return false;
+        }
 
         let appName = app.get_name();
 
         //global.log("NotFocused - AppName: " + appName);
 
-        let bool = !contains(excludedApplications, appName) && wm_type == Meta.WindowType.NORMAL && w.meta_window.get_workspace() == global.screen.get_active_workspace() && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor && focusMetaWindow != w.meta_window;
-
-        return bool;
+        return !contains(excludedApplications, appName)
+            && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
+            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.showing_on_its_workspace()
+            && monitors[w.meta_window.get_monitor()] == monitor
+            && focusMetaWindow != w.meta_window;
     });
 
     return windows;
@@ -458,8 +421,10 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
 function getWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
-        let wm_type = w.meta_window.get_window_type();
-        return wm_type != 1 && w.meta_window.get_workspace() == global.screen.get_active_workspace() && w.meta_window.showing_on_its_workspace() && monitors[w.meta_window.get_monitor()] == monitor;
+        return w.meta_window.get_window_type() != Meta.WindowType.DESKTOP
+            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.showing_on_its_workspace()
+            && monitors[w.meta_window.get_monitor()] == monitor;
     });
 
     return windows;
@@ -530,7 +495,7 @@ function showTiling() {
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
             }
             else {
-                pos_x =monitor.x + monitor.width/2;
+                pos_x = monitor.x + monitor.width/2;
                 pos_y = monitor.y + monitor.height/2;
             }
 
@@ -591,17 +556,19 @@ function contains(a, obj) {
 }
 
 function getFocusApp() {
-    if (tracker.focus_app == null)
+    if (tracker.focus_app == null) {
         return false;
+    }
 
     let focusedAppName = tracker.focus_app.get_name();
 
-    if (contains(excludedApplications, focusedAppName))
+    if (contains(excludedApplications, focusedAppName)) {
         return false;
+    }
 
     let windows = global.screen.get_active_workspace().list_windows();
     let focusedWindow = false;
-    for ( let i = 0; i < windows.length; ++i ) {
+    for (let i = 0; i < windows.length; ++i) {
         let metaWindow = windows[i];
         if (metaWindow.has_focus()) {
             focusedWindow = metaWindow;
@@ -614,6 +581,17 @@ function getFocusApp() {
 
 function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x;
+}
+
+function getWorkArea(monitor) {
+    let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
+    let topPanelSize = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
+    return {
+        x: monitor.x + insets.left,
+        y: monitor.y + insets.top + topPanelSize,
+        width: monitor.width - insets.left - insets.right,
+        height: monitor.height - insets.top - insets.bottom - topPanelSize
+    };
 }
 
 /*****************************************************************
@@ -770,18 +748,17 @@ AutoTileMainAndList.prototype = {
         reset_window(focusMetaWindow);
 
         let monitor = this.grid.monitor;
-        let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
-
+        let workArea = getWorkArea(monitor);
         let windows = getNotFocusedWindowsOfMonitor(monitor);
 
         move_resize_window_with_margins(
             focusMetaWindow,
-            monitor.x,
-            monitor.y+offsetY,
-            monitor.width/2,
-            monitor.height - gridSettings[SETTINGS_Y_OFFSET] - offsetY);
+            workArea.x,
+            workArea.y,
+            workArea.width/2,
+            workArea.height);
 
-        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/(windows.length );
+        let winHeight = workArea.height/windows.length;
         let countWin = 0;
 
         //global.log("MonitorHeight: "+monitor.height+":"+windows.length );
@@ -792,15 +769,15 @@ AutoTileMainAndList.prototype = {
             let layer = metaWindow.get_layer();
             global.log(metaWindow.get_title()+" "+wm_type+" "+layer);*/
 
-            let newOffset = offsetY + (countWin * winHeight);
+            let newOffset = workArea.y + (countWin * winHeight);
             //global.log("newOffset: "+ newOffset);
             reset_window(metaWindow);
 
             move_resize_window_with_margins(
                 metaWindow,
-                monitor.x + monitor.width/2,
+                workArea.x + workArea.width/2,
                 newOffset,
-                monitor.width/2,
+                workArea.width/2,
                 winHeight
             );
             countWin++;
@@ -833,22 +810,20 @@ AutoTileTwoList.prototype = {
         reset_window(focusMetaWindow);
 
         let monitor = this.grid.monitor;
-        let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
+        let workArea = getWorkArea(monitor);
 
         let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
+
         let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
-        let winHeight = (monitor.height - offsetY - gridSettings[SETTINGS_Y_OFFSET])/nbWindowOnEachSide;
+        let winHeight = workArea.height/nbWindowOnEachSide;
 
         let countWin = 0;
 
-        let xOffset = countWin%2 * monitor.width/2;
-        let yOffset = offsetY + (Math.floor(countWin/2) * winHeight);
-
         move_resize_window_with_margins(
             focusMetaWindow,
-            monitor.x+xOffset,
-            monitor.y+yOffset,
-            monitor.width/2,
+            workArea.x + countWin%2 * workArea.width/2,
+            workArea.y + (Math.floor(countWin/2) * winHeight),
+            workArea.width/2,
             winHeight
         );
 
@@ -857,20 +832,14 @@ AutoTileTwoList.prototype = {
         // todo make function
         for (let windowIdx in windows) {
             let metaWindow = windows[windowIdx].meta_window;
-            /*let wm_type = metaWindow.get_window_type();
-            let layer = metaWindow.get_layer();
-            global.log(metaWindow.get_title()+" "+wm_type+" "+layer);*/
-
-            xOffset = countWin%2 * monitor.width/2;
-            yOffset = offsetY + (Math.floor(countWin/2) * winHeight);
 
             reset_window(metaWindow);
 
             move_resize_window_with_margins(
                 metaWindow,
-                monitor.x+xOffset,
-                monitor.y+yOffset,
-                monitor.width/2,
+                workArea.x + countWin%2 * workArea.width/2,
+                workArea.y + (Math.floor(countWin/2) * winHeight),
+                workArea.width/2,
                 winHeight
             );
             countWin++;
@@ -936,9 +905,10 @@ function Grid(monitor_idx,screen,title,cols,rows) {
 
 Grid.prototype = {
     _init: function(monitor_idx,monitor,title,cols,rows) {
+        let workArea = getWorkArea(monitor);
 
         this.tableWidth = 320;
-        this.tableHeight = (this.tableWidth / monitor.width) * monitor.height;
+        this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
         this.borderwidth = 2;
 
         this.actor = new St.BoxLayout({ vertical:true,
@@ -1318,19 +1288,18 @@ GridElementDelegate.prototype = {
     },
 
     _getVarFromGridElement: function(fromGridElement, toGridElement) {
-        let maxX = (fromGridElement.coordx >= toGridElement.coordx) ? fromGridElement.coordx : toGridElement.coordx;
-        let minX = (fromGridElement.coordx <= toGridElement.coordx) ? fromGridElement.coordx : toGridElement.coordx;
+        let minX = Math.min(fromGridElement.coordx, toGridElement.coordx);
+        let maxX = Math.max(fromGridElement.coordx, toGridElement.coordx);
 
-        let maxY = (fromGridElement.coordy >= toGridElement.coordy) ? fromGridElement.coordy : toGridElement.coordy;
-        let minY = (fromGridElement.coordy <= toGridElement.coordy) ? fromGridElement.coordy : toGridElement.coordy;
+        let minY = Math.min(fromGridElement.coordy, toGridElement.coordy);
+        let maxY = Math.max(fromGridElement.coordy, toGridElement.coordy);
 
         return [minX,maxX,minY,maxY];
     },
 
     refreshGrid: function(fromGridElement, toGridElement) {
         this._resetGrid();
-        let minX,maxX,minY,maxY;
-        [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
+        let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
         let key = getMonitorKey(fromGridElement.monitor);
         let grid = grids[key];
@@ -1346,17 +1315,16 @@ GridElementDelegate.prototype = {
     },
 
     _computeAreaPositionSize: function(fromGridElement, toGridElement) {
-        let minX,maxX,minY,maxY;
-        [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement,toGridElement);
+        let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement,toGridElement);
 
         let monitor = fromGridElement.monitor;
+        let workArea = getWorkArea(monitor);
 
-        let offsetY = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
+        let areaWidth = (workArea.width/nbCols)*((maxX-minX)+1);
+        let areaHeight = (workArea.height/nbRows)*((maxY-minY)+1);
 
-        let areaWidth = (monitor.width/nbCols)*((maxX-minX)+1);
-        let areaHeight = ((monitor.height-offsetY-gridSettings[SETTINGS_Y_OFFSET])/nbRows)*((maxY-minY)+1);
-        let areaX = monitor.x + (minX*(monitor.width/nbCols));
-        let areaY = offsetY+monitor.y + (minY*((monitor.height-offsetY-gridSettings[SETTINGS_Y_OFFSET])/nbRows));
+        let areaX = workArea.x + (minX*(workArea.width/nbCols));
+        let areaY = workArea.y + (minY*(workArea.height/nbRows));
 
         return [areaX,areaY,areaWidth,areaHeight];
     },
@@ -1418,7 +1386,6 @@ Signals.addSignalMethods(GridElementDelegate.prototype);
 function GridElement(monitor, width, height, coordx, coordy) {
     this._init(monitor, width, height, coordx, coordy);
 }
-
 
 GridElement.prototype = {
 
@@ -1486,4 +1453,3 @@ GridElement.prototype = {
         this.active = null;
     }
 };
-
