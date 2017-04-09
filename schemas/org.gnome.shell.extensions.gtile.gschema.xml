@@ -309,11 +309,9 @@ Do not forget that you can grid dimension is one more then corner coordinate.
 format is 6x4 0:2 3:3
 Grid size can be any, not necessary what you have in grid sizes setting.
 Enjoy!
-Credits for this program are claimed by several people, but who cares!
-Disclaimer:
-This program is not suitable for any purpose.
-License hereby granted for any use of this software, with guarantee 
-it will not fit purpose of aforementioned use.
+This program developed by vibou with help from open source community
+License:
+GPL v3
 "</default>
 		       <summary>Help text how to use gTile</summary>
 		</key>

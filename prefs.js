@@ -112,7 +112,7 @@ function accel_tab(notebook) {
 	cellrend.connect('accel-edited', function(rend, iter, key, mods) {
 		let value = Gtk.accelerator_name(key, mods);
 		
-		let [success, iter] = model.get_iter_from_string(iter);
+		[success, iter] = model.get_iter_from_string(iter);
 		
 		if (!success) {
 			throw new Error("Something be broken, yo.");
