@@ -66,10 +66,10 @@ function buildPrefsWidget() {
 		'accel-mode': Gtk.CellRendererAccelMode.GTK
 	});
 
-	cellrend.connect('accel-edited', function(rend, iter, key, mods) {
+	cellrend.connect('accel-edited', function(rend, str_iter, key, mods) {
 		let value = Gtk.accelerator_name(key, mods);
 		
-		let [success, iter] = model.get_iter_from_string(iter);
+		let [success, iter] = model.get_iter_from_string(str_iter);
 		
 		if (!success) {
 			throw new Error("Something be broken, yo.");
