@@ -2,8 +2,318 @@
 <schemalist>
 	<schema path="/org/gnome/shell/extensions/gtile/" id="org.gnome.shell.extensions.gtile" >
 		<key type="as" name="show-toggle-tiling">
-			<default><![CDATA[['<Super>space']]]></default>
+			<default><![CDATA[['<Super>KP_Enter']]]></default>
 			<summary>The key you want to activate gTile.</summary>
+		</key>
+		<key type="as" name="move-left">
+			<default><![CDATA[['Left']]]></default>
+			<summary>Move window left.</summary>
+		</key>
+		<key type="as" name="move-right">
+			<default><![CDATA[['Right']]]></default>
+			<summary>Move window right.</summary>
+		</key>
+		<key type="as" name="move-up">
+			<default><![CDATA[['Up']]]></default>
+			<summary>Move window up.</summary>
+		</key>
+		<key type="as" name="move-down">
+			<default><![CDATA[['Down']]]></default>
+			<summary>Move window down.</summary>
+		</key>
+		<key type="as" name="resize-left">
+			<default><![CDATA[['<Shift>Left']]]></default>
+			<summary>Resize window - increase width.</summary>
+		</key>
+		<key type="as" name="resize-right">
+			<default><![CDATA[['<Shift>Right']]]></default>
+			<summary>Resize window - decrease width.</summary>
+		</key>
+		<key type="as" name="resize-up">
+			<default><![CDATA[['<Shift>Up']]]></default>
+			<summary>Resize window - increase height.</summary>
+		</key>
+		<key type="as" name="resize-down">
+			<default><![CDATA[['<Shift>Down']]]></default>
+			<summary>Resize window - decrease height.</summary>
+		</key>
+		<key type="as" name="set-tiling">
+		  <default><![CDATA[['Return']]]></default>
+			<summary>Tile window according to selection.</summary>
+		</key>
+		<key type="as" name="cancel-tiling">
+			<default><![CDATA[['Escape']]]></default>
+			<summary>Cancel tiling.</summary>
+		</key>
+		<key type="as" name="change-grid-size">
+		        <default><![CDATA[['Space']]]></default>
+		  	<summary>Loop through grid sizes.</summary>
+		</key>
+
+		<key type="as" name="preset-resize-1">
+		  <default><![CDATA[['<Super><Alt>KP_1']]]></default>
+		  	<summary>Preset resize 1.</summary>
+		</key>
+		<key type="as" name="preset-resize-2">
+		        <default><![CDATA[['<Super><Alt>KP_2']]]></default>
+		  	<summary>Preset resize 2.</summary>
+		</key>
+		<key type="as" name="preset-resize-3">
+		        <default><![CDATA[['<Super><Alt>KP_3']]]></default>
+		  	<summary>Preset resize 3.</summary>
+		</key>		
+		<key type="as" name="preset-resize-4">
+		        <default><![CDATA[['<Super><Alt>KP_4']]]></default>
+		  	<summary>Preset resize 4.</summary>
+		</key>		
+		<key type="as" name="preset-resize-5">
+		        <default><![CDATA[['<Super><Alt>KP_5']]]></default>
+		  	<summary>Preset resize 5.</summary>
+		</key>		
+		<key type="as" name="preset-resize-6">
+		        <default><![CDATA[['<Super><Alt>KP_6']]]></default>
+		  	<summary>Preset resize 6.</summary>
+		</key>		
+		<key type="as" name="preset-resize-7">
+		        <default><![CDATA[['<Super><Alt>KP_7']]]></default>
+		  	<summary>Preset resize 7.</summary>
+		</key>		
+		<key type="as" name="preset-resize-8">
+		        <default><![CDATA[['<Super><Alt>KP_8']]]></default>
+		  	<summary>Preset resize 8.</summary>
+		</key>		
+		<key type="as" name="preset-resize-9">
+		        <default><![CDATA[['<Super><Alt>KP_9']]]></default>
+		  	<summary>Preset resize 9.</summary>
+		</key>		
+		<key type="as" name="preset-resize-10">
+		        <default><![CDATA[['']]]></default>
+		  	<summary>Preset resize 1.</summary>
+		</key>		
+		<key type="as" name="preset-resize-11">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 11.</summary>
+		</key>
+		<key type="as" name="preset-resize-12">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 12.</summary>
+		</key>
+		<key type="as" name="preset-resize-13">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 13.</summary>
+		</key>
+		<key type="as" name="preset-resize-14">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 14.</summary>
+		</key>
+		<key type="as" name="preset-resize-15">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 15.</summary>
+		</key>
+		<key type="as" name="preset-resize-16">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 16.</summary>
+		</key>
+		<key type="as" name="preset-resize-17">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 17.</summary>
+		</key>
+		<key type="as" name="preset-resize-18">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 18.</summary>
+		</key>
+		<key type="as" name="preset-resize-19">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 19.</summary>
+		</key>
+		<key type="as" name="preset-resize-20">
+		      <default><![CDATA[['']]]></default>
+		      <summary>Preset resize 20.</summary>
+		</key>
+		
+		<key type = "s" name="resize1">
+		       <default>'2x2 0:0 0:0'</default>
+  	  	       <summary>Preset resize1 settings (example 6x4 1:2 3:3).</summary>
+		</key>       
+		<key type = "s" name="resize2">
+		       <default>'2x2 0:1 0:1'</default>
+  	  	       <summary>Preset resize2 settings.</summary>
+		</key>       
+		<key type = "s" name="resize3">
+		       <default>'2x2 1:0 1:0'</default>
+  	  	       <summary>Preset resize3 settings.</summary>
+		</key>       
+		<key type = "s" name="resize4">
+		       <default>'2x2 1:1 1:1'</default>
+  	  	       <summary>Preset resize4 settings.</summary>
+		</key>       
+		<key type = "s" name="resize5">
+		       <default>'3x3 0:0 0:2'</default>
+  	  	       <summary>Preset resize5 settings.</summary>
+		</key>   
+		<key type = "s" name="resize6">
+		       <default>'3x3 1:0 1:2'</default>
+  	  	       <summary>Preset resize6 settings.</summary>
+		</key>   
+		<key type = "s" name="resize7">
+		       <default>'3x3 2:0 2:2'</default>
+  	  	       <summary>Preset resize7 settings.</summary>
+		</key>   
+		<key type = "s" name="resize8">
+		       <default>'6x4 0:2 1:3'</default>
+  	  	       <summary>Preset resize8 settings.</summary>
+		</key>   
+		<key type = "s" name="resize9">
+		       <default>'6x4 4:2 5:3'</default>
+  	  	       <summary>Preset resize9 settings.</summary>
+		</key>   
+		<key type = "s" name="resize10">
+		       <default>'11x17 3:5 7:9'</default>
+  	  	       <summary>Preset resize10 settings.</summary>
+		</key>   
+		
+		<key type = "s" name="resize11">
+		       <default>'3x3 0:0 0:0'</default>
+  	  	       <summary>Preset resize11 settings.</summary>
+		</key>   
+		<key type = "s" name="resize12">
+		       <default>'3x3 0:1 0:1'</default>
+  	  	       <summary>Preset resize12 settings.</summary>
+		</key>   
+		<key type = "s" name="resize13">
+		       <default>'3x3 0:2 0:2'</default>
+  	  	       <summary>Preset resize13 settings.</summary>
+		</key>   
+		<key type = "s" name="resize14">
+		       <default>'3x3 1:0 1:0'</default>
+  	  	       <summary>Preset resize14 settings.</summary>
+		</key>   
+		<key type = "s" name="resize15">
+		       <default>'3x3 1:1 1:1'</default>
+  	  	       <summary>Preset resize15 settings.</summary>
+		</key>   
+		<key type = "s" name="resize16">
+		       <default>'3x3 1:2 1:2'</default>
+  	  	       <summary>Preset resize16 settings.</summary>
+		</key>   
+		<key type = "s" name="resize17">
+		       <default>'3x3 2:0 2:0'</default>
+  	  	       <summary>Preset resize17 settings.</summary>
+		</key>   
+		<key type = "s" name="resize18">
+		       <default>'3x3 2:1 2:1'</default>
+  	  	       <summary>Preset resize18 settings.</summary>
+		</key>   
+		<key type = "s" name="resize19">
+		       <default>'3x3 2:2 2:2'</default>
+  	  	       <summary>Preset resize19 settings.</summary>
+		</key>   
+		<key type = "s" name="resize20">
+		       <default>'3x3 1:1 2:2'</default>
+  	  	       <summary>Preset resize20 settings.</summary>
+		</key>   
+		
+		<key type = "s" name="grid-sizes">
+		       <default>'4x4,6x4,8x6,17x11'</default>
+		       <summary>Comma-separated list of grid sizes (like 4x4,6x4,17x11).</summary>
+		</key>
+		<key type = "b" name="auto-close">
+		       <default>true</default>
+		       <summary>Close gTile after window have been resized.</summary>
+		</key>
+		<key type = "b" name="animation">
+		       <default>true</default>
+		       <summary>Make background slection highlight to move more smooth.</summary>
+		</key>
+		<key type = "b" name="top-panel">
+		       <default>true</default>
+		       <summary>Top panel is present on primary monitor.</summary>
+		</key>
+		<key type = "b" name="bottom-panel">
+		       <default>true</default>
+		       <summary>Bottom panel is present on primary monitor.</summary>
+		</key>
+		<key type = "b" name="global-presets">
+		       <default>false</default>
+		       <summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
+		</key>
+		<key type = "i" name="window-margin">
+		       <default>0</default>
+		       <summary>Gaps between windows in the middle of screen</summary>
+		</key>
+		<key type = "i" name="insets-primary-left">
+		       <default>0</default>
+		       <summary>Left gap around border of screen for primary monitor</summary>
+		</key>
+		<key type = "i" name="insets-primary-right">
+		       <default>0</default>
+		       <summary>Right gap around border of screen for primary monitor</summary>
+		</key>
+		<key type = "i" name="insets-primary-top">
+		       <default>0</default>
+		       <summary>Top gap around border of screen for primary monitor</summary>
+		</key>
+		<key type = "i" name="insets-primary-bottom">
+		       <default>0</default>
+		       <summary>Bottom gap around border of screen for primary monitor</summary>
+		</key>
+		<key type = "i" name="insets-secondary-left">
+		       <default>0</default>
+		       <summary>Left gap around border of screen for secondary monitor</summary>
+		</key>
+		<key type = "i" name="insets-secondary-right">
+		       <default>0</default>
+		       <summary>Right gap around border of screen for secondary monitor</summary>
+		</key>
+		<key type = "i" name="insets-secondary-top">
+		       <default>0</default>
+		       <summary>Top gap around border of screen for secondary monitor</summary>
+		</key>
+		<key type = "i" name="insets-secondary-bottom">
+		       <default>0</default>
+		       <summary>Bottom gap around border of screen for secondary monitor</summary>
+		</key>
+		<key type = "b" name="debug">
+		       <default>false</default>
+		       <summary>Put debug lines into global.log. To see, run gnome-shell --replace in terminal</summary>
+		</key> 
+		<key type = "s" name="help-text">
+		       <default>"gTile allow to quickly move/resize/place window on predefined grid,
+with mouse or keyboard, on multiple monitors.
+How to use gTile
+Set focus to window you want to resize (click on it etc)
+Click on icon on toolbar or press Super+Enter (keypad) (configurable)
+You will see gTile dialog popup
+Use mouse and click on desired left corner location,
+Then other corner location, inside gTile window
+Window will resize on second click
+Or
+Use arrows to move window and Shift-arrows to resize window
+  When done, hit Enter - window will resize
+  Hit Escape - to cancel resize
+  Hit Space - change grid in cycle
+  
+You can use Keyboard shortcuts. gTile comes with preconfigured several shortcuts
+Try Super+Alt+1, 2, 3, 4, 5, 6. Change shortcut to fit your needs in preferences.
+Keyboard shortcuts can be Global (works without gTile window)
+or non-global (first show gTile window Super-Enter (keypad)).
+Keyboard Accelerators are reassignable in preferences.
+You have 20 accelerators, should be plenty.
+You can define your own grid sizes, like something odd 17x19
+Prime numbers usually the oddest ones.
+Set it in basic settings - it is comma-separatel list of
+grid sizes like 8x7,3x2,4x6,4x7
+Resize preset format: grid size, left upper corner, right down corner
+Left upper corner is 0:0.
+Do not forget that you can grid dimension is one more then corner coordinate.
+format is 6x4 0:2 3:3
+Grid size can be any, not necessary what you have in grid sizes setting.
+Enjoy!
+This program developed by vibou with help from open source community
+License:
+GPL v3
+"</default>
+		       <summary>Help text how to use gTile</summary>
 		</key>
 	</schema>
 </schemalist>
