@@ -721,11 +721,13 @@ function isPrimaryMonitor(monitor) {
 
 function getWorkArea(monitor) {
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
+    let panelPosition = Main.layoutManager.panelBox.anchor_y == 0 ? St.Side.TOP : St.Side.BOTTOM;
     let topPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_TOP_PANEL]) ? Main.panel.actor.height : 0;
     let bottomPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_BOTTOM_PANEL]) ? Main.panel.actor.height : 0;
+  
     return {
         x: monitor.x + insets.left,
-        y: monitor.y + insets.top + topPanelSize,
+        y: panelPosition == St.Side.TOP ? monitor.y + insets.top + topPanelSize : monitor.y + insets.top,
         width: monitor.width - insets.left - insets.right,
         height: monitor.height - insets.top - insets.bottom - topPanelSize - bottomPanelSize
     };
