@@ -6,6 +6,7 @@
 
   Edited by Kvis for gnome 3.8
   Edited by Lundal for gnome 3.18
+  Edited by Sergey to add keyboard shortcuts and prefs dialog
 
  ******************************************************************/
 
@@ -29,16 +30,28 @@ const Workspace = imports.ui.workspace;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Extension.imports.settings;
 const hotkeys = Extension.imports.hotkeys;
 
 // Globals
-const SETTINGS_GRID_SIZE = 'grid-size';
+const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
-const SETTINGS_IGNORE_PANEL = 'ignore-panel';
+const SETTINGS_TOP_PANEL = 'top-panel';
+const SETTINGS_BOTTOM_PANEL = 'bottom-panel';
+const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
+const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
+const SETTINGS_INSETS_PRIMARY_RIGHT = 'insets-primary-right';
+const SETTINGS_INSETS_PRIMARY_TOP = 'insets-primary-top';
+const SETTINGS_INSETS_PRIMARY_BOTTOM = 'insets-primary-bottom';
 const SETTINGS_INSETS_SECONDARY = 'insets-secondary';
+const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left';
+const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
+const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
+const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
+const SETTINGS_DEBUG = 'debug';
 
 let status;
 let launcher;
@@ -54,7 +67,10 @@ let focusMetaWindowConnections = new Array();
 let focusMetaWindowPrivateConnections = new Array();
 let tracker;
 let gridSettings = new Object();
+let settings = Settings.get();
 let toggleSettingListener;
+let keyControlBound = false;
+let debug = false;
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -62,10 +78,51 @@ let excludedApplications = new Array(
 );
 
 const key_bindings = {
-    'show-toggle-tiling': function() {
-        toggleTiling();
-    }
+    'show-toggle-tiling': function() { toggleTiling(); }
 };
+
+const key_bindings_tiling = {
+    'move-left'       : function() { keyMoveResizeEvent('move'  , 'left' );},    
+    'move-right'      : function() { keyMoveResizeEvent('move'  , 'right');},    
+    'move-up'         : function() { keyMoveResizeEvent('move'  , 'up'   );},    
+    'move-down'       : function() { keyMoveResizeEvent('move'  , 'down' );},
+    'resize-left'     : function() { keyMoveResizeEvent('resize', 'left' );},    
+    'resize-right'    : function() { keyMoveResizeEvent('resize', 'right');},
+    'resize-up'       : function() { keyMoveResizeEvent('resize', 'up'   );},
+    'resize-down'     : function() { keyMoveResizeEvent('resize', 'down' );},
+    'cancel-tiling'   : function() { keyCancelTiling();},
+    'set-tiling'      : function() { keySetTiling()   ;},
+    'change-grid-size': function() { keyChangeTiling();}
+}
+
+const key_bindings_presets = {
+    'preset-resize-1' : function() { presetResize(1)  ;},
+    'preset-resize-2' : function() { presetResize(2)  ;},
+    'preset-resize-3' : function() { presetResize(3)  ;},
+    'preset-resize-4' : function() { presetResize(4)  ;},
+    'preset-resize-5' : function() { presetResize(5)  ;},
+    'preset-resize-6' : function() { presetResize(6)  ;},
+    'preset-resize-7' : function() { presetResize(7)  ;},
+    'preset-resize-8' : function() { presetResize(8)  ;},
+    'preset-resize-9' : function() { presetResize(9)  ;},
+    'preset-resize-10': function() { presetResize(10) ;},
+    'preset-resize-11': function() { presetResize(11) ;},
+    'preset-resize-12': function() { presetResize(12) ;},
+    'preset-resize-13': function() { presetResize(13) ;},
+    'preset-resize-14': function() { presetResize(14) ;},
+    'preset-resize-15': function() { presetResize(15) ;},
+    'preset-resize-16': function() { presetResize(16) ;},
+    'preset-resize-17': function() { presetResize(17) ;},
+    'preset-resize-18': function() { presetResize(18) ;},
+    'preset-resize-19': function() { presetResize(19) ;},
+    'preset-resize-20': function() { presetResize(20) ;}
+}
+
+function log(log_string) {
+    if(debug) {
+        global.log("gTile " + log_string);
+    }
+}
 
 const GTileStatusButton = new Lang.Class({
     Name: 'GTileStatusButton',
@@ -93,7 +150,7 @@ const GTileStatusButton = new Lang.Class({
     },
 
     _onButtonPress: function(actor, event) {
-        //global.log("Click Toggle Status");
+        log("Click Toggle Status on system panel");
         toggleTiling();
     },
 
@@ -103,27 +160,90 @@ const GTileStatusButton = new Lang.Class({
 
 });
 
-
 /*****************************************************************
   SETTINGS
  *****************************************************************/
-/*INIT SETTINGS HERE TO ADD OR REMOVE SETTINGS BUTTON*/
-/*new GridSettingsButton(LABEL, NBCOL, NBROW) */
-function initSettings() {
-    //Here is where you add new grid size button
-    gridSettings[SETTINGS_GRID_SIZE] = [
-        new GridSettingsButton('4x4',4,4),
-        new GridSettingsButton('6x4',6,4),
-        new GridSettingsButton('8x6',8,6),
-    ];
 
-    //You can change those settings to set whatever you want by default
-    gridSettings[SETTINGS_AUTO_CLOSE] = true;
-    gridSettings[SETTINGS_ANIMATION] = true;
-    gridSettings[SETTINGS_IGNORE_PANEL] = false; //Set this to true if you have the top panel hidden
-    gridSettings[SETTINGS_WINDOW_MARGIN] = 0; // small margin offset
-    gridSettings[SETTINGS_INSETS_PRIMARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on primary monitor
-    gridSettings[SETTINGS_INSETS_SECONDARY] = { top: 0, bottom: 0, left: 0, right: 0 }; // Insets on secondary monitors
+function parseTuple(format, delimiter) {
+    // parsing grid size in format XdelimY, like 6x4 or 1:2
+    let gssk = format.split(delimiter);
+    if(gssk.length != 2 
+        || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 40 
+        || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 40) {
+	log("Bad format " + format + ", delimiter " + delimiter);
+	return {X: Number(-1), Y: Number(-1)};
+    }
+    //log("Parsed format " + gssk[0] + delimiter + gssk[1]);
+    return {X: Number(gssk[0]), Y: Number(gssk[1]) };
+}
+
+function initGridSizes(grid_sizes) {
+    gridSettings[SETTINGS_GRID_SIZES] = [
+	new GridSettingsButton('4x4',4,4),
+	new GridSettingsButton('6x4',6,4),
+	new GridSettingsButton('8x6',8,6),
+    ];  
+    let grid_sizes_orig = true;
+    let gss = grid_sizes.split(",");
+    for (var key in gss) {
+        let grid_format = parseTuple(gss[key], "x");
+	if(grid_format.X == -1) {
+	    continue;
+	}
+        if(grid_sizes_orig) {
+	    gridSettings[SETTINGS_GRID_SIZES] = [];
+	    grid_sizes_orig = false;
+	}
+	gridSettings[SETTINGS_GRID_SIZES].push(new GridSettingsButton(grid_format.X + "x" + grid_format.Y, grid_format.X, grid_format.Y));
+    }
+}
+
+function getBoolSetting (settings_string) {
+    gridSettings[settings_string] = settings.get_boolean(settings_string);
+    if(gridSettings[settings_string] === undefined) {
+	log("Undefined settings " + settings_string);
+        gridSettings[settings_string] = false;
+    } else {
+        log(settings_string + " set to " + gridSettings[settings_string]);  
+    }
+}
+
+function getIntSetting (settings_string) {
+    let iss = settings.get_int(settings_string);
+    if(iss === undefined) { 
+	log("Undefined settings " + settings_string);  
+	return 0;
+    } else {
+	log(settings_string + " set to " + iss);  
+	return iss;
+    }
+}
+
+function initSettings() {
+    let gridSizes = settings.get_string(SETTINGS_GRID_SIZES);
+    log(SETTINGS_GRID_SIZES + " set to " + gridSizes);
+    initGridSizes(gridSizes);
+
+    getBoolSetting(SETTINGS_AUTO_CLOSE);
+    getBoolSetting(SETTINGS_ANIMATION);
+    getBoolSetting(SETTINGS_TOP_PANEL);
+    getBoolSetting(SETTINGS_BOTTOM_PANEL);
+    getBoolSetting(SETTINGS_GLOBAL_PRESETS);
+    getBoolSetting(SETTINGS_DEBUG);
+
+    gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
+
+    gridSettings[SETTINGS_INSETS_PRIMARY] = 
+        { top:    getIntSetting(SETTINGS_INSETS_PRIMARY_TOP), 
+	  bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM), 
+	  left:   getIntSetting(SETTINGS_INSETS_PRIMARY_LEFT), 
+	  right:  getIntSetting(SETTINGS_INSETS_PRIMARY_RIGHT) }; // Insets on primary monitor
+    gridSettings[SETTINGS_INSETS_SECONDARY] = 
+        { top:    getIntSetting(SETTINGS_INSETS_SECONDARY_TOP), 
+	  bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM), 
+	  left:   getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT), 
+	  right:  getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT) }; 
+
 }
 
 
@@ -142,31 +262,37 @@ function enable() {
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
 
-    global.log("Create Button");
+    log("Create Button");
     launcher = new GTileStatusButton('tiling-icon');
 
-    global.log("Init settings");
+    log("Init settings");
     initSettings();
+    debug = gridSettings[SETTINGS_DEBUG];
 
     // initialize these from settings, the first set of sizes
-    nbCols = gridSettings[SETTINGS_GRID_SIZE][0].cols;
-    nbRows = gridSettings[SETTINGS_GRID_SIZE][0].rows;
+    nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
+    nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
 
-    global.log("Init Grids");
+    log("Init Grids");
     initGrids();
 
-    global.log("Starting...");
-    global.display.connect('notify::focus-window', Lang.bind(this, _onFocus))
+    log("Starting...");
+    //global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
 
     Main.panel.addToStatusArea("GTileStatusButton", launcher);
 
     hotkeys.bind(key_bindings);
+    if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+        hotkeys.bind(key_bindings_presets);
+    }
 
-    global.log("Extention Enabled !");
+    log("Extention Enabled !");
 }
 
 function disable() {
     hotkeys.unbind(key_bindings);
+    hotkeys.unbind(key_bindings_presets);
+    hotkeys.unbind(key_bindings_tiling);
     destroyGrids();
     launcher.destroy();
     launcher = null;
@@ -174,8 +300,10 @@ function disable() {
 }
 
 function resetFocusMetaWindow() {
+    log("resetFocusMetaWindow");
     if (focusMetaWindowConnections.length>0) {
         for (var idx in focusMetaWindowConnections) {
+	    log("disconnect focusMetaWindowConnections " + idx);
             focusMetaWindow.disconnect(focusMetaWindowConnections[idx]);
         }
     }
@@ -184,6 +312,7 @@ function resetFocusMetaWindow() {
         let actor = focusMetaWindow.get_compositor_private();
         if (actor) {
             for(var idx in focusMetaWindowPrivateConnections) {
+		log("disconnect focusMetaWindowPrivateConnections " + idx);
                 actor.disconnect(focusMetaWindowPrivateConnections[idx]);
             }
         }
@@ -195,9 +324,10 @@ function resetFocusMetaWindow() {
 }
 
 function initGrids() {
+    log("initGrids");
     grids = new Array();
     for (let monitorIdx in monitors) {
-        global.log("New Grid for monitor " + monitorIdx);
+        log("New Grid for monitor " + monitorIdx);
 
         let monitor = monitors[monitorIdx];
 
@@ -224,7 +354,7 @@ function destroyGrids() {
 }
 
 function refreshGrids() {
-    global.log("Refresh");
+    log("Refresh");
     for (var gridIdx in grids) {
         let grid = grids[gridIdx];
         grid.refresh();
@@ -346,7 +476,7 @@ function move_resize_window(metaWindow, x, y, width, height) {
     let [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
     let [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
-    global.log(metaWindow.get_title()+" "+borderY);
+    log(metaWindow.get_title() + " " + borderX + "-" + borderY);
 
     x = x  ;//+ (vBorderX - 1);
     y = y  ;
@@ -385,7 +515,7 @@ function move_resize_window(metaWindow, x, y, width, height) {
 }
 
 function _isMyWindow(win) {
-    //global.log("meta-window: "+this.focusMetaWindow+" : "+win.meta_window);
+    //log("meta-window: "+this.focusMetaWindow+" : "+win.meta_window);
     return (this.focusMetaWindow == win.meta_window);
 }
 
@@ -393,7 +523,7 @@ function getWindowActor() {
     let windows = global.get_window_actors().filter(this._isMyWindow, this);
     focusWindowActor = windows[0];
 
-    //global.log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
+    //log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
 }
 
 function getNotFocusedWindowsOfMonitor(monitor) {
@@ -406,7 +536,7 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
         let appName = app.get_name();
 
-        //global.log("NotFocused - AppName: " + appName);
+        //log("NotFocused - AppName: " + appName);
 
         return !contains(excludedApplications, appName)
             && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
@@ -431,13 +561,14 @@ function getWindowsOfMonitor(monitor) {
 }
 
 function _onFocus() {
+    log("_onFocus");
     resetFocusMetaWindow();
     let window = getFocusApp();
 
     if (window) {
-        global.log("_onFocus "+window);
-        //global.log("Connect window: "+window.get_title());
-        focusMetaWindow = window;
+        log("_onFocus, connecting " + window.get_title());
+        //log("Connect window: "+window.get_title());
+        focusMetaWindow = window;	
         focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,_onFocus)));
 
         let actor = focusMetaWindow.get_compositor_private();
@@ -446,7 +577,7 @@ function _onFocus() {
             focusMetaWindowPrivateConnections.push(focusMetaWindow.connect('position-changed',Lang.bind(this,moveGrids)));
         }
 
-        //global.log("End Connect window: "+window.get_title());
+        //log("End Connect window: "+window.get_title());
 
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
@@ -466,26 +597,28 @@ function _onFocus() {
         moveGrids();
     }
     else {
+        log("No focus window, hide tiling");
         hideTiling();
     }
 }
 
 
 function showTiling() {
+    log("showTiling");
     focusMetaWindow = getFocusApp();
-    let wm_class = focusMetaWindow.get_wm_class();
+    //let wm_class = focusMetaWindow.get_wm_class();
     let wm_type = focusMetaWindow.get_window_type();
     let layer = focusMetaWindow.get_layer();
 
-    //global.log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
-    //global.log("focus app: "+focusMetaWindow);
+    //log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
+    //log("focus app: "+focusMetaWindow);
     area.visible = true;
     if (focusMetaWindow && wm_type != 1 && layer > 0) {
         for (let monitorIdx in monitors) {
             let monitor = monitors[monitorIdx];
             let key = getMonitorKey(monitor);
             let grid = grids[key];
-            //global.log("ancestor: "+grid.actor.get_parent());
+            //log("ancestor: "+grid.actor.get_parent());
 
             let window = getFocusApp();
             let pos_x;
@@ -510,24 +643,27 @@ function showTiling() {
         _onFocus();
         status = true;
         launcher.activate();
+        bindKeyControls();
     }
 
     moveGrids();
 }
 
 function hideTiling() {
+    log("hideTiling");
     for (let gridIdx in grids) {
         let grid = grids[gridIdx];
         grid.elementsDelegate.reset();
         grid.hide(false);
     }
-
+    log("After reseting grid");
     area.visible = false;
 
     resetFocusMetaWindow();
 
     launcher.deactivate();
-    status = false;
+    status = false;    
+    unbindKeyControls();
 }
 
 function toggleTiling() {
@@ -580,19 +716,275 @@ function getFocusApp() {
 }
 
 function isPrimaryMonitor(monitor) {
-    return Main.layoutManager.primaryMonitor.x == monitor.x;
+    return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
 function getWorkArea(monitor) {
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
-    let topPanelSize = (isPrimaryMonitor(monitor) && !gridSettings[SETTINGS_IGNORE_PANEL]) ? Main.panel.actor.height : 0;
     let panelPosition = Main.layoutManager.panelBox.anchor_y == 0 ? St.Side.TOP : St.Side.BOTTOM;
+    let topPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_TOP_PANEL]) ? Main.panel.actor.height : 0;
+    let bottomPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_BOTTOM_PANEL]) ? Main.panel.actor.height : 0;
+  
     return {
         x: monitor.x + insets.left,
         y: panelPosition == St.Side.TOP ? monitor.y + insets.top + topPanelSize : monitor.y + insets.top,
         width: monitor.width - insets.left - insets.right,
-        height: monitor.height - insets.top - insets.bottom - topPanelSize
+        height: monitor.height - insets.top - insets.bottom - topPanelSize - bottomPanelSize
     };
+}
+
+function bindKeyControls() {   
+    if(!keyControlBound) {
+        hotkeys.bind(key_bindings_tiling);
+	log("Connect notify:focus-window");
+	global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
+	if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+	    hotkeys.bind(key_bindings_presets);
+	}	
+        keyControlBound = true;
+    }
+}
+
+function unbindKeyControls() {    
+    if(keyControlBound) {
+	hotkeys.unbind(key_bindings_tiling);
+	log("Disconnect notify:focus-window");
+	global.display.disconnect('notify::focus-window', Lang.bind(this, _onFocus));
+	if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+	    hotkeys.unbind(key_bindings_presets);
+	}
+	keyControlBound = false;
+    }
+}
+
+function keyCancelTiling() {
+    log("Cancel key event");
+    hideTiling();
+}
+
+function keySetTiling() {
+    log("keySetTiling");
+    if (focusMetaWindow) {
+	let mind = focusMetaWindow.get_monitor();
+	let monitor = monitors[mind];
+	let mkey = getMonitorKey(monitor);
+	let grid = grids[mkey];
+	log("In grid " + grid);
+	if(grid.elementsDelegate.currentElement) {
+	    grid.elementsDelegate.currentElement._onButtonPress();
+	}
+    }
+}
+
+function keyChangeTiling() {
+    log("keyChangeTiling");
+    let grid_settings_sizes = gridSettings[SETTINGS_GRID_SIZES];
+    let next_key = 0;
+    let found = false;
+    for (let key in grid_settings_sizes) {
+        if(found) {
+	    next_key = key;
+	    break;
+	}
+	log("Checking grid settings size " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
+	if(grid_settings_sizes[key].cols == nbCols && grid_settings_sizes[key].rows == nbRows) {
+	    found = true;
+	}
+    }
+    log("Found matching grid nbCols " + nbCols + " nbRows " + nbRows + " next key is " + next_key);
+    log("New settings will be nbCols " + grid_settings_sizes[next_key].cols + " nbRows " + grid_settings_sizes[next_key].rows);
+    grid_settings_sizes[next_key]._onButtonPress();
+    log("New settings are nbCols " + nbCols + " nbRows " + nbRows);
+    setInitialSelection();
+}
+
+function setInitialSelection() {  
+    if (!focusMetaWindow) {
+        return;
+    }
+    let mind = focusMetaWindow.get_monitor();
+    let monitor = monitors[mind];
+    let workArea = getWorkArea(monitor);
+
+    let wx = focusMetaWindow.get_frame_rect().x;
+    let wy = focusMetaWindow.get_frame_rect().y;
+    let wwidth = focusMetaWindow.get_frame_rect().width;
+    let wheight = focusMetaWindow.get_frame_rect().height;
+    let mkey = getMonitorKey(monitor);
+    let grid = grids[mkey];
+    let delegate = grid.elementsDelegate;
+
+    log("Set initial selection");
+    log("Focus window position x " + wx + " y " + wy + " width " + wwidth + " height " + wheight); 
+    log("Focus monitor position x " + monitor.x + " y " + monitor.y + " width " + monitor.width + " height " + monitor.height); 
+    log("Workarea position x " + workArea.x + " y " + workArea.y + " width " + workArea.width + " height " + workArea.height); 
+    let wax = Math.max(wx - workArea.x, 0);
+    let way = Math.max(wy - workArea.y, 0);
+    let grid_element_width = Math.floor(workArea.width / nbCols);
+    let grid_element_height = Math.floor(workArea.height / nbRows);
+    log("width " + grid_element_width + " height " + grid_element_height);
+    let lux = Math.min(Math.floor(wax / grid_element_width), nbCols - 1);
+    log("wx " + (wx - workArea.x) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + lux);
+    let luy = Math.min(Math.floor(way / grid_element_height), grid.rows - 1);
+    log("wy " + (wy - workArea.y) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + luy);
+    let rdx = Math.min(Math.floor((wax + wwidth - 1) / grid_element_width), grid.cols - 1);
+    log("wx + wwidth " + (wx + wwidth - workArea.x - 1) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + rdx);
+    let rdy = Math.min(Math.floor((way + wheight - 1) / grid_element_height), grid.rows - 1);
+    log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
+    log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
+    
+    grid.elements[luy] [lux]._onButtonPress();     
+    grid.elements[rdy] [rdx]._onHoverChanged();    
+
+    let cX = delegate.currentElement.coordx;
+    let cY = delegate.currentElement.coordy;
+    let fX = delegate.first.coordx;
+    let fY = delegate.first.coordy;
+
+    log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);      
+}
+
+function keyMoveResizeEvent(type, key) {
+    log("Got key event " + type + " " + key);  
+    if (!focusMetaWindow) {
+        return;
+    }
+    let mind = focusMetaWindow.get_monitor();
+    let monitor = monitors[mind];
+    let mkey = getMonitorKey(monitor);
+    let grid = grids[mkey];
+    let delegate = grid.elementsDelegate;
+    
+    if(!delegate.currentElement) {
+        log("Key event while no mouse activation - set current and second element");
+        setInitialSelection();
+    } else {
+	if(!delegate.first){
+	    log("currentElement is there but no first yet");
+	    delegate.currentElement._onButtonPress();
+	}
+    }
+    if(!delegate.currentElement) {
+	log("gTime currentElement is not set!");
+    }
+    let cX = delegate.currentElement.coordx;
+    let cY = delegate.currentElement.coordy;
+    let fX = delegate.first.coordx;
+    let fY = delegate.first.coordy;
+    
+    log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    log("Grid cols " + nbCols + " rows " + nbRows);
+    if(type == 'move') {	 
+	switch(key) {
+	    case 'right':
+		if(fX < nbCols - 1 && cX < nbCols - 1) {
+		    delegate.first = grid.elements [fY] [fX + 1];
+		    grid.elements[cY] [cX + 1]._onHoverChanged(); 
+		}
+		break;
+	    case 'left':
+		if(fX > 0 && cX > 0) {
+		    delegate.first = grid.elements [fY] [fX - 1];
+		    grid.elements[cY] [cX - 1]._onHoverChanged(); 
+		}
+		break;
+	    case 'up':
+		if(fY > 0 && cY > 0) {
+		    delegate.first = grid.elements [fY - 1] [fX];
+		    grid.elements[cY - 1] [cX]._onHoverChanged(); 
+		}
+		break;
+	    case 'down':
+		if(fY < nbRows - 1 && cY < nbRows - 1) {
+		    delegate.first = grid.elements [fY + 1] [fX];
+		    grid.elements[cY + 1] [cX]._onHoverChanged(); 
+		}
+		break;
+	}      
+    } else {
+	switch(key) {
+	    case 'right':
+		if(cX < nbCols - 1) {
+		    grid.elements[cY] [cX + 1]._onHoverChanged(); 
+		}
+		break;
+	    case 'left':
+		if(cX > 0) {
+		    grid.elements[cY] [cX - 1]._onHoverChanged(); 
+		}
+		break;
+	    case 'up':
+		if(cY > 0 ) {
+		    grid.elements[cY - 1] [cX]._onHoverChanged(); 
+		}
+		break;
+	    case 'down':
+		if(cY < nbRows - 1) {
+		    grid.elements[cY + 1] [cX]._onHoverChanged(); 
+		}
+		break;
+	}
+    }
+    
+    cX = delegate.currentElement.coordx;
+    cY = delegate.currentElement.coordy;
+    fX = delegate.first.coordx;
+    fY = delegate.first.coordy;
+    
+    log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    
+}
+
+function presetResize(preset) {
+    // Expected preset format is XxY x1:y1 x2:y2
+    // XxY is grid size like 6x8
+    // x1:y1 is left upper corner coordinates in grid tiles, starting from 0
+    // x2:y2 is right down corner coordinates in grid tiles
+
+    let window = getFocusApp();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut");
+        return;
+    }
+
+    reset_window(window);
+    
+    let preset_string = settings.get_string("resize" + preset);
+    log("Preset resize " + preset + "  is " + preset_string);  
+    let ps = preset_string.split(" ");
+    if(ps.length != 3) {
+        log("Bad preset " + preset + " settings " + preset_string);
+	return;
+    }
+    let grid_format = parseTuple(ps[0], "x");
+    let luc = parseTuple(ps[1], ":");
+    let rdc = parseTuple(ps[2], ":");
+    log("Parsed " + grid_format.X + "x" + grid_format.Y + " " 
+        + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
+    if  (  grid_format.X < 1 || luc.X < 0 || rdc.X < 0 
+        || grid_format.Y < 1 || luc.Y < 0 || rdc.Y < 0 
+        || grid_format.X <= luc.X || grid_format.X <= rdc.X 
+        || grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y 
+        || luc.X > rdc.X || luc.Y > rdc.Y) {
+        log("Bad preset " + preset + " settings " + preset_string);
+	return;      
+    }
+    log("Parsed preset " + preset + " " + grid_format.X + "x" + grid_format.Y +
+        " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
+    
+    let mind = window.get_monitor();
+    let monitor = monitors[mind];
+    let work_area = getWorkArea(monitor);
+    let grid_element_width = Math.floor(work_area.width / grid_format.X);
+    let grid_element_height = Math.floor(work_area.height / grid_format.Y);
+    
+    let wx = work_area.x + luc.X * grid_element_width + gridSettings[SETTINGS_WINDOW_MARGIN];
+    let wy = work_area.y + luc.Y * grid_element_height + gridSettings[SETTINGS_WINDOW_MARGIN];
+    let ww = (rdc.X + 1 - luc.X) * grid_element_width - 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
+    let wh = (rdc.Y + 1 - luc.Y) * grid_element_height- 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
+    
+    log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);    
+    window.move_resize_frame(true, wx, wy, ww, wh);
 }
 
 /*****************************************************************
@@ -619,7 +1011,7 @@ TopBar.prototype = {
         this.actor.add_actor(this._closebutton.container,{x_fill: false, expand: true, x_align:St.Align.END});
         this.actor.add_actor(this._stlabel,{x_fill: false, expand: false, x_align: St.Align.MIDDLE});
 
-        //global.log( this._closebutton.actor);
+        //log( this._closebutton.actor);
         //this.actor.add_actor(this._closebutton.container,{x_fill: false,expand: true,x_align:
     },
 
@@ -630,7 +1022,7 @@ TopBar.prototype = {
 
     _set_app: function(app, title) {
         this._title = app.get_name()+" - "+title;
-        //global.log("title: "+this._title);
+        log("title: "+this._title);
         this._stlabel.text = this._title;
         // this._icon = app.create_icon_texture(24);
 
@@ -654,6 +1046,7 @@ ToggleSettingsButtonListener.prototype = {
     },
 
     _updateToggle: function() {
+        log("_updateToggle");
         for (let actorIdx in this.actors) {
             let actor = this.actors[actorIdx];
             actor._update();
@@ -685,6 +1078,7 @@ ToggleSettingsButton.prototype = {
     },
 
     _update : function() {
+        log("_update event");
         if (gridSettings[this.property]) {
             this.actor.add_style_pseudo_class('activate');
         }
@@ -695,7 +1089,7 @@ ToggleSettingsButton.prototype = {
 
     _onButtonPress : function() {
         gridSettings[this.property] = !gridSettings[this.property];
-        //global.log(this.property+": "+gridSettings[this.property]);
+        log("" + this.property+": "+gridSettings[this.property]);
         this.emit('update-toggle');
     }
 };
@@ -762,16 +1156,16 @@ AutoTileMainAndList.prototype = {
         let winHeight = workArea.height/windows.length;
         let countWin = 0;
 
-        //global.log("MonitorHeight: "+monitor.height+":"+windows.length );
+        //log("MonitorHeight: "+monitor.height+":"+windows.length );
 
         for (let windowIdx in windows) {
             let metaWindow = windows[windowIdx].meta_window;
             /*let wm_type = metaWindow.get_window_type();
             let layer = metaWindow.get_layer();
-            global.log(metaWindow.get_title()+" "+wm_type+" "+layer);*/
+            log("" + metaWindow.get_title()+" "+wm_type+" "+layer);*/
 
             let newOffset = workArea.y + (countWin * winHeight);
-            //global.log("newOffset: "+ newOffset);
+            //log("newOffset: "+ newOffset);
             reset_window(metaWindow);
 
             move_resize_window_with_margins(
@@ -866,7 +1260,7 @@ ActionScale.prototype = {
     },
 
     _onButtonPress: function() {
-        //global.log(this.classname + "pressed");
+        //log("" + this.classname + "pressed");
     }
 }
 
@@ -921,7 +1315,6 @@ Grid.prototype = {
 
         this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
-        //this.actor.connect('key-press-event', Lang.bind(this, this._globalKeyPressEvent));
 
         this.topbar = new TopBar(title);
 
@@ -967,7 +1360,7 @@ Grid.prototype = {
         let colNum = 0;
         let maxPerRow = 4;
 
-        let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZE];
+        let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZES];
 
         for (var index=0; index<gridSettingsButton.length;index++) {
             if (colNum>= 4) {
@@ -1012,7 +1405,7 @@ Grid.prototype = {
         this.rows = rows;
         this.title = title;
         this.cols = cols;
-
+	
         this.isEntered = false;
 
         if (true) {
@@ -1122,9 +1515,10 @@ Grid.prototype = {
     },
 
     hide: function(immediate) {
+      log("hide " + immediate);
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.3 : 0;
-        //global.log(time);
+        //log("" + time);
         if (time > 0) {
             Tweener.addTween(this.actor, {
                 time: time,
@@ -1154,7 +1548,7 @@ Grid.prototype = {
     },
 
     _onResize: function(actor, event) {
-        //global.log('resize-done: '+actor);
+        log("resize-done: "+actor);
         updateRegions();
         if (gridSettings[SETTINGS_AUTO_CLOSE]) {
             this.emit('hide-tiling');
@@ -1162,6 +1556,7 @@ Grid.prototype = {
     },
 
     _onMouseEnter: function() {
+        log("onMouseEnter");
         if (!this.isEntered) {
             this.elementsDelegate.reset();
             this.isEntered = true;
@@ -1169,23 +1564,13 @@ Grid.prototype = {
     },
 
     _onMouseLeave: function() {
+        log("onMouseLeave");
         let [x, y, mask] = global.get_pointer();
         if ( this.elementsDelegate && (x <= this.actor.x || x>= (this.actor.x+this.actor.width)) || (y <=this.actor.y || y >= (this.actor.y+this.height)) ) {
             this.isEntered = false;
             this.elementsDelegate.reset();
             refreshGrids();
         }
-    },
-
-    _globalKeyPressEvent: function(actor, event) {
-        let symbol = event.get_key_symbol();
-        //global.log("Escape pressed: "+symbol);
-        if (symbol == Clutter.Escape) {
-            hideTiling();
-            launcher.reset();
-            return true;
-        }
-        return false;
     },
 
     _onSettingsButton: function() {
@@ -1220,7 +1605,6 @@ GridElementDelegate.prototype = {
     _init: function() {
         this.activated = false;
         this.first = false;
-        this.last = false;
         this.currentElement = false;
         this.activatedActors=false;
     },
@@ -1230,6 +1614,9 @@ GridElementDelegate.prototype = {
     },
 
     _onButtonPress: function(gridElement) {
+        if(!this.currentElement) {
+	    this.currentElement = gridElement;
+	}
         if (this.activated==false) {
             this.activated = true;
             gridElement.active = true;
@@ -1238,7 +1625,7 @@ GridElementDelegate.prototype = {
             this.first = gridElement;
         }
         else {
-            //global.log("resize");
+            log("resize");
             //Check this.activatedActors if equals to nbCols * nbRows
             //before doing anything with the window it must be unmaximized
             //if so move the window then maximize instead of change size
@@ -1264,6 +1651,7 @@ GridElementDelegate.prototype = {
     },
 
     _resizeDone: function() {
+        log("resizeDone, emitting signal");
         this.emit('resize-done');
     },
 
@@ -1272,7 +1660,6 @@ GridElementDelegate.prototype = {
 
         this.activated = false;
         this.first = false;
-        this.last = false;
         this.currentElement = false;
     },
 
@@ -1354,13 +1741,14 @@ GridElementDelegate.prototype = {
         }
     },
 
-    _hideArea: function() {
+    _hideArea: function() { 
         area.remove_style_pseudo_class('activate');
     },
 
     _onHoverChanged: function(gridElement) {
         if(this.activated) {
             this.refreshGrid(this.first,gridElement);
+            this.currentElement = gridElement;
         }
         else if (!this.currentElement || gridElement.id != this.currentElement.id) {
             if (this.currentElement) {
@@ -1368,15 +1756,14 @@ GridElementDelegate.prototype = {
             }
 
             this.currentElement = gridElement;
-            this.currentElement._activate();
-            this._displayArea(gridElement,gridElement);
+            this.currentElement._activate();	    
+            this._displayArea(gridElement,gridElement);	    
         }
     },
 
     _destroy: function() {
         this.activated = null;
         this.first = null;
-        this.last = null;
         this.currentElement = null;
         this.activatedActors=null;
     }
@@ -1420,23 +1807,23 @@ GridElement.prototype = {
     },
 
     _onButtonPress: function() {
-        global.log("onButtonPress "+this.id);
+        log("onButtonPress "+this.id);
         this.actor._delegate._onButtonPress(this);
     },
 
     _onHoverChanged: function() {
-        global.log("onHoverChanged "+this.id);
+        log("onHoverChanged "+this.id);
         this.actor._delegate._onHoverChanged(this);
     },
 
     _activate: function() {
-        global.log("activate "+this.id);
+        log("activate "+this.id);
 
         this.actor.add_style_pseudo_class('activate');
     },
 
     _deactivate: function() {
-        global.log("deactivate "+this.id);
+        log("deactivate "+this.id);
         this.actor.remove_style_pseudo_class('activate');
     },
 
