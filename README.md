@@ -17,7 +17,7 @@ See https://wiki.gnome.org/Projects/GnomeShell/Extensions for details.
 1. Clone the repository to the *Gnome* extensions folder.
 
    ```
-   git clone https://github.com/lundal/vibou.gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
+   git clone https://github.com/vibou/vibou.gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
    ```
 
 2. Restart *Gnome*
