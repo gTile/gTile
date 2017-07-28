@@ -7,12 +7,26 @@ const Shell = imports.gi.Shell;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 
+// Copy from extention.js
+const SETTINGS_DEBUG = 'debug';
+
 // Globals
 const mySettings = Settings.get();
 
+let debug=false;
+
+function log(log_string) {
+    if(debug) {
+        global.log("gTile " + log_string);
+    }
+}
+
 function bind(key_bindings) {
-    global.log("Binding keys");
+    debug = mySettings.get_boolean(SETTINGS_DEBUG);
+
+    log("Binding keys");
     for (var key in key_bindings) {
+        log("Binding key: " + key);
         if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
             Main.wm.addKeybinding(
                 key,
@@ -43,8 +57,10 @@ function bind(key_bindings) {
 }
 
 function unbind(key_bindings) {
-    global.log("Unbinding keys");
-    for (key in key_bindings) {
+    debug = mySettings.get_boolean(SETTINGS_DEBUG);
+    log("Unbinding keys");
+    for (var key in key_bindings) {
+        log("Unbinding key: " + key);
         if (Main.wm.removeKeybinding) { // introduced in 3.7.2
             Main.wm.removeKeybinding(key);
         }
