@@ -1,15 +1,16 @@
 {
   "shell-version": [
+    "3.26",    
+    "3.25",    
     "3.24",
     "3.22",
-    "3.21.91",
     "3.20",
     "3.18",
     "3.16",
     "3.14"
   ],
-  "uuid": "gTile@vibou",
+  "uuid": "gTile@gTile.github.com",
   "name": "gTile",
-  "description": "Tile windows on a grid. It even supports multiscreen! (See README file for configuration)",
-  "url": "https://github.com/vibou/vibou.gTile"
+  "description": "Tile windows on a grid.",
+  "url": "https://github.com/gTile"
 }

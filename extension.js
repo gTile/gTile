@@ -65,7 +65,6 @@ let focusMetaWindow = false;
 let focusWindowActor = false;
 let focusMetaWindowConnections = new Array();
 let focusMetaWindowPrivateConnections = new Array();
-let tracker;
 let gridSettings = new Object();
 let settings = Settings.get();
 let toggleSettingListener;
@@ -91,7 +90,7 @@ const key_bindings_tiling = {
     'resize-up'       : function() { keyMoveResizeEvent('resize', 'up'   );},
     'resize-down'     : function() { keyMoveResizeEvent('resize', 'down' );},
     'cancel-tiling'   : function() { keyCancelTiling();},
-    'set-tiling'      : function() { keySetTiling()   ;},
+    'set-tiling'      : function() { keySetTiling();},
     'change-grid-size': function() { keyChangeTiling();}
 }
 
@@ -115,7 +114,17 @@ const key_bindings_presets = {
     'preset-resize-17': function() { presetResize(17) ;},
     'preset-resize-18': function() { presetResize(18) ;},
     'preset-resize-19': function() { presetResize(19) ;},
-    'preset-resize-20': function() { presetResize(20) ;}
+    'preset-resize-20': function() { presetResize(20) ;},
+    'preset-resize-21': function() { presetResize(21) ;},
+    'preset-resize-22': function() { presetResize(22) ;},
+    'preset-resize-23': function() { presetResize(23) ;},
+    'preset-resize-24': function() { presetResize(24) ;},
+    'preset-resize-25': function() { presetResize(25) ;},
+    'preset-resize-26': function() { presetResize(26) ;},
+    'preset-resize-27': function() { presetResize(27) ;},
+    'preset-resize-28': function() { presetResize(28) ;},
+    'preset-resize-29': function() { presetResize(29) ;},
+    'preset-resize-30': function() { presetResize(30) ;}
 }
 
 function log(log_string) {
@@ -181,7 +190,7 @@ function initGridSizes(grid_sizes) {
     gridSettings[SETTINGS_GRID_SIZES] = [
 	new GridSettingsButton('4x4',4,4),
 	new GridSettingsButton('6x4',6,4),
-	new GridSettingsButton('8x6',8,6),
+	new GridSettingsButton('9x9',8,6),
     ];  
     let grid_sizes_orig = true;
     let gss = grid_sizes.split(",");
@@ -721,13 +730,11 @@ function isPrimaryMonitor(monitor) {
 
 function getWorkArea(monitor) {
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
-    let panelPosition = Main.layoutManager.panelBox.anchor_y == 0 ? St.Side.TOP : St.Side.BOTTOM;
     let topPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_TOP_PANEL]) ? Main.panel.actor.height : 0;
     let bottomPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_BOTTOM_PANEL]) ? Main.panel.actor.height : 0;
-  
     return {
         x: monitor.x + insets.left,
-        y: panelPosition == St.Side.TOP ? monitor.y + insets.top + topPanelSize : monitor.y + insets.top,
+        y: monitor.y + insets.top + topPanelSize,
         width: monitor.width - insets.left - insets.right,
         height: monitor.height - insets.top - insets.bottom - topPanelSize - bottomPanelSize
     };
