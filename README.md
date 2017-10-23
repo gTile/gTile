@@ -12,14 +12,14 @@ This extension is developed at [GitHub](https://github.com/gTile)
 For configuration, please use preferences dialog (Gnome Tweak Tool->Extensions->gTile->Preferences->Help).
 You will find there help and usage hints.
 
-Prefered installation is from [Gnome Extensions](https://extentions.gnome.org)
+Prefered installation is from [Gnome Extensions](https://extensions.gnome.org)
 
 You can install manually latest stable version from GitHub master branch:
 
 1. Clone the repository to the *Gnome* extensions folder.
 
    ```
-   git clone https://github.com/gTile/master.git ~/.local/share/gnome-shell/extensions/gTile
+   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile
    ```
 
 2. Restart *Gnome*
