@@ -34,7 +34,7 @@ const pretty_names = {
 	'show-toggle-tiling': 'Display gTile',
 	'set-tiling'	    : 'Set tiling',
 	'cancel-tiling'     : 'Cancel tiling',
-    'change-grid-size'  : 'Change grid size',
+	'change-grid-size'  : 'Change grid size',
 	'resize-left'       : 'Resize horizontal narrower',         
 	'resize-right'      : 'Resize horizontal wider',         
 	'resize-up'         : 'Resize vertical higher',
