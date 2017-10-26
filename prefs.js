@@ -58,7 +58,17 @@ const pretty_names = {
 	'preset-resize-17'  : 'Preset resize 17',
 	'preset-resize-18'  : 'Preset resize 18',
 	'preset-resize-19'  : 'Preset resize 19',
-	'preset-resize-20'  : 'Preset resize 20'
+	'preset-resize-20'  : 'Preset resize 20',
+	'preset-resize-21'  : 'Preset resize 21',
+	'preset-resize-22'  : 'Preset resize 22',
+	'preset-resize-23'  : 'Preset resize 23',
+	'preset-resize-24'  : 'Preset resize 24',
+	'preset-resize-25'  : 'Preset resize 25',
+	'preset-resize-26'  : 'Preset resize 26',
+	'preset-resize-27'  : 'Preset resize 27',
+	'preset-resize-28'  : 'Preset resize 28',
+	'preset-resize-29'  : 'Preset resize 29',
+	'preset-resize-30'  : 'Preset resize 30'
 } 
 
 function init() {
@@ -145,7 +155,7 @@ function accel_tab(notebook) {
   
 	let ks_window = new Gtk.ScrolledWindow({'vexpand': true});
         ks_window.add(ks_grid);
-	let ks_label = new Gtk.Label({ label: "Acelerators", use_markup: false, halign: Gtk.Align.START })	
+	let ks_label = new Gtk.Label({ label: "Accelerators", use_markup: false, halign: Gtk.Align.START })	
 	notebook.append_page(ks_window, ks_label);	  
 }
 
@@ -187,7 +197,7 @@ function presets_tab(notebook) {
 	text = "Resize presets (grid size and 2 corners, 2x2 0:1 0:1 is left bottom quarter)";
 	pr_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
 
-	for (var ind = 1; ind <= 20; ind++) {
+	for (var ind = 1; ind <= 30; ind++) {
 	    add_text ("Preset resize " + ind, SETTINGS_PRESET_RESIZE + ind, pr_grid, settings, 20);
 	}
 	let pr_window = new Gtk.ScrolledWindow({'vexpand': true});
