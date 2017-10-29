@@ -9,8 +9,10 @@
     "3.16",
     "3.14"
   ],
-  "uuid": "gTile@gTile.github.com",
+  "uuid": "gTile@gtile.github.com",
   "name": "gTile",
   "description": "Tile windows on a grid.",
-  "url": "https://github.com/gTile"
+  "url": "https://github.com/gTile",
+  "settings-schema": "org.gnome.shell.extensions.gtile",
+  "version": 2
 }
