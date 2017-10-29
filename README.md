@@ -19,15 +19,12 @@ You can install manually latest stable version from GitHub master branch:
 1. Clone the repository to the *Gnome* extensions folder.
 
    ```
-   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile
+   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@gtile.github.com
    ```
 
-2. Restart *Gnome*
+2. Login/logout.
 
-   ```
-   Alt-F2
-   Enter a Command: r
-   ```
+3. Activate gTile in Gnome tweak tool->Extensions->Gtile
 
 Author and License
 
