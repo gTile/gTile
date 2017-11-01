@@ -310,11 +310,11 @@
 			<summary>Top panel is present on primary monitor.</summary>
 		</key>
 		<key type = "b" name="bottom-panel">
-			<default>true</default>
+			<default>false</default>
 			<summary>Bottom panel is present on primary monitor.</summary>
 		</key>
 		<key type = "b" name="global-presets">
-			<default>false</default>
+			<default>true</default>
 			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
 		</key>
 		<key type = "i" name="window-margin">
