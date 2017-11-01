@@ -101,9 +101,10 @@ Default shortcuts for Super+Alt+[1..9(keypad)]
 gTile is intended to **supplement** existing Gnome-shell keyboard shortcuts.
 
 Here are some useful Gnome built-ins to keep in mind when configuring gTile:
-* Super + Up/Down - Toggle Maximize
+* Super + Up - Maximize
+* Super + Down - Un-Maximize (return to size and position previous to maximizing)
 * Super + Left/Right - left/right half of screen
-* Shift + Super + Up/Down/Left/Right] - move window to adjacent monitor
+* Shift + Super + Up/Down/Left/Right] - move window to adjacent monitor/workspace 
 
 
 ## Source code
