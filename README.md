@@ -18,7 +18,7 @@ You can alternatively manually install the latest version from GitHub master bra
 1. Clone the repository to the *Gnome* extensions folder.
 
    ```
-   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@gtile.github.com
+   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
    ```
 
 2. Restart *Gnome* (only on X11, on Wayland you will have to log out and log back in)
