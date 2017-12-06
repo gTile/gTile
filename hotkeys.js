@@ -1,11 +1,26 @@
 // Library imports
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
-const Shell = imports.gi.Shell;
+try {
+    const Shell = imports.gi.Shell;
+} catch (e) {
+    const Shell = imports.gi.Cinnamon;
+}
+
 
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Extension.imports.settings;
+try {
+    const ExtensionUtils = imports.misc.extensionUtils;
+} catch (e) {
+}
+
+if (typeof ExtensionUtils !== 'undefined') {
+    const Extension = ExtensionUtils.getCurrentExtension();
+    const Settings = Extension.imports.settings;
+} else {
+    const Extension = imports.ui.extensionSystem.extensions['gTile@vibou'];
+    const Settings = imports.ui.settings;
+}
 
 // Copy from extention.js
 const SETTINGS_DEBUG = 'debug';

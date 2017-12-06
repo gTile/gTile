@@ -16,11 +16,9 @@
 // Library imports
 const St = imports.gi.St;
 const Main = imports.ui.main;
-const Shell = imports.gi.Shell;
 const WindowManager = imports.ui.windowManager;
 const MessageTray = imports.ui.messageTray;
 const Lang = imports.lang;
-const PanelMenu = imports.ui.panelMenu;
 const DND = imports.ui.dnd;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
@@ -28,10 +26,32 @@ const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
 
+try {
+    const Shell = imports.gi.Shell;
+} catch (e) {
+    const Shell = imports.gi.Cinnamon;
+}
+try {
+    const PanelMenu = imports.ui.panelMenu;
+} catch (e) {
+}
+
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Extension.imports.settings;
-const hotkeys = Extension.imports.hotkeys;
+try {
+    const ExtensionUtils = imports.misc.extensionUtils;
+} catch (e) {
+}
+
+if ( typeof ExtensionUtils !== 'undefined' ){
+    const Extension = ExtensionUtils.getCurrentExtension();
+    const Settings = Extension.imports.settings;
+    const hotkeys = Extension.imports.hotkeys;
+} else {
+    const Extension = imports.ui.extensionSystem.extensions['gTile@vibou'];
+    const Settings = imports.ui.settings;
+    const hotkeys = Extension.hotkeys;
+}
+
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -133,42 +153,43 @@ function log(log_string) {
     }
 }
 
-const GTileStatusButton = new Lang.Class({
-    Name: 'GTileStatusButton',
-    Extends: PanelMenu.Button,
+if ( PanelMenu ){
+    const GTileStatusButton = new Lang.Class({
+        Name: 'GTileStatusButton',
+        Extends: PanelMenu.Button,
 
-    _init: function(classname) {
-        this.parent(0.0, "gTile", false);
+        _init: function(classname) {
+            this.parent(0.0, "gTile", false);
 
-        this.actor.add_style_class_name(classname);
-        //Done by default in PanelMenuButton - Just need to override the method
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-    },
+            this.actor.add_style_class_name(classname);
+            //Done by default in PanelMenuButton - Just need to override the method
+            this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        },
 
-    reset: function() {
-        this.activated = false;
-        launcher.actor.remove_style_pseudo_class('activate');
-    },
+        reset: function() {
+            this.activated = false;
+            launcher.actor.remove_style_pseudo_class('activate');
+        },
 
-    activate: function() {
-        launcher.actor.add_style_pseudo_class('activate');
-    },
+        activate: function() {
+            launcher.actor.add_style_pseudo_class('activate');
+        },
 
-    deactivate: function() {
-        launcher.actor.remove_style_pseudo_class('activate');
-    },
+        deactivate: function() {
+            launcher.actor.remove_style_pseudo_class('activate');
+        },
 
-    _onButtonPress: function(actor, event) {
-        log("Click Toggle Status on system panel");
-        toggleTiling();
-    },
+        _onButtonPress: function(actor, event) {
+            log("Click Toggle Status on system panel");
+            toggleTiling();
+        },
 
-    _destroy: function() {
-        this.activated = null;
-    }
+        _destroy: function() {
+            this.activated = null;
+        }
 
-});
-
+    });
+}
 /*****************************************************************
   SETTINGS
  *****************************************************************/
@@ -272,7 +293,9 @@ function enable() {
     Main.uiGroup.add_actor(area);
 
     log("Create Button");
-    launcher = new GTileStatusButton('tiling-icon');
+    if ( PanelMenu ){
+        launcher = new GTileStatusButton('tiling-icon');
+    }
 
     log("Init settings");
     initSettings();
@@ -287,8 +310,9 @@ function enable() {
 
     log("Starting...");
     //global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
-
-    Main.panel.addToStatusArea("GTileStatusButton", launcher);
+    if ( PanelMenu ){
+        Main.panel.addToStatusArea("GTileStatusButton", launcher);
+    }
 
     hotkeys.bind(key_bindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
@@ -1011,11 +1035,13 @@ TopBar.prototype = {
         this._stlabel =  new St.Label({style_class: 'grid-title', text: this._title});
         // this._iconBin = new St.Bin({ x_fill: false, y_fill: true });
 
-        this._closebutton = new GTileStatusButton('close-button');
-        this._closebutton.container.add_style_class_name('close-button-container');
+        if ( PanelMenu ){        
+            this._closebutton = new GTileStatusButton('close-button');
+            this._closebutton.container.add_style_class_name('close-button-container');
 
-        //this.actor.add_actor(this._iconBin);
-        this.actor.add_actor(this._closebutton.container,{x_fill: false, expand: true, x_align:St.Align.END});
+            //this.actor.add_actor(this._iconBin);
+            this.actor.add_actor(this._closebutton.container,{x_fill: false, expand: true, x_align:St.Align.END});
+        }
         this.actor.add_actor(this._stlabel,{x_fill: false, expand: false, x_align: St.Align.MIDDLE});
 
         //log( this._closebutton.actor);
