@@ -1,5 +1,10 @@
 CHANGE LOG
 ----------
+### V26
+-   Event connection leak on focus-window
+-   Autodetect panels on screen, removed settings TopPanel and Bottom Panel
+-   Support screen rotation for keyboard shortcuts
+-   Sort preset keys in preferences
 
 ### V25
 

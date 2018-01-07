@@ -355,7 +355,7 @@
 		</key>
 		<key type = "b" name="debug">
 			<default>false</default>
-			<summary>Put debug lines into global.log. To see, run gnome-shell --replace in terminal</summary>
+			<summary>Put debug lines into global.log. To see, run journalctl /usr/bin/gnome-shell -f in terminal</summary>
 		</key> 
 			<key type = "s" name="help-text">
 			<default>"gTile allow to quickly move/resize/place window on predefined grid,
@@ -413,6 +413,9 @@ Default grid is 8x6, but you can change it from preconfigured list with space.
 Escape will cancel, and Enter will finish window placement.
 
 Change shortcut to fit your needs in preferences.
+Tweaks->Extensions->gTile->preferences
+For changes to take effect, disable and enable gTile in 
+Tweaks->Extensions->gTile->Off/On
 You can change both keys and what it is doing.
 Keyboard shortcuts can be Global (works without gTile window)
 or non-global (first show gTile window Super-Enter (keypad)).
@@ -442,10 +445,24 @@ Other notes: Space defined as key binding to change-tiling. Gnome does not allow
 to do global binding on Space, it will be shown as disabled in preferences
 and cannot be redefined. But, nevertheless it works.
 
+Development and debugging.
+To see debug messages, check debug in preferences. It will produce some amount of logging, 
+do not use it in regular work. After enablign debug, you can see messages in terminal:
+journalctl /usr/bin/gnome-shell -f
+For development, you can see and edit code at ~/.local/share/gnome-shell/extensions/gTile@vibou
+For code changes to take effect, you need to login with Xorg session:
+on login screen, select preferences and choose Xorg.
+Then after code changes restart gnome-shell: Alt-F2 r
+Code changes will go into effect.
+After changing XML schemas/org.gnome.shell.extensions.gtile.gschema.xml, you need to produce
+compiled schema:
+glib-compile-schemas ~/.local/share/gnome-shell/extensions/gTile@vibou/schemas
+Again restart of gnome-shell require for changes to take an effect.
+
 Enjoy!
 This program originally developed by vibou, now supported by open source community
 License:
-GPL v3
+GPL v2
 "</default>
 			<summary>Help text how to use gTile</summary>
 		</key>

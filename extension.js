@@ -37,8 +37,6 @@ const hotkeys = Extension.imports.hotkeys;
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
-const SETTINGS_TOP_PANEL = 'top-panel';
-const SETTINGS_BOTTOM_PANEL = 'bottom-panel';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
@@ -58,13 +56,13 @@ let launcher;
 let grids;
 let monitors;
 let tracker;
-let nbCols;
-let nbRows;
+let nbCols = 0;
+let nbRows = 0;
 let area;
 let focusMetaWindow = false;
 let focusWindowActor = false;
-let focusMetaWindowConnections = new Array();
-let focusMetaWindowPrivateConnections = new Array();
+let focusConnect = false;
+let monitorChangedConnect = false;
 let gridSettings = new Object();
 let settings = Settings.get();
 let toggleSettingListener;
@@ -159,7 +157,7 @@ const GTileStatusButton = new Lang.Class({
     },
 
     _onButtonPress: function(actor, event) {
-        log("Click Toggle Status on system panel");
+        log("_onButtonPress Click Toggle Status on system panel");
         toggleTiling();
     },
 
@@ -179,8 +177,8 @@ function parseTuple(format, delimiter) {
     if(gssk.length != 2 
         || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 40 
         || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 40) {
-	log("Bad format " + format + ", delimiter " + delimiter);
-	return {X: Number(-1), Y: Number(-1)};
+        log("Bad format " + format + ", delimiter " + delimiter);
+        return {X: Number(-1), Y: Number(-1)};
     }
     //log("Parsed format " + gssk[0] + delimiter + gssk[1]);
     return {X: Number(gssk[0]), Y: Number(gssk[1]) };
@@ -188,22 +186,22 @@ function parseTuple(format, delimiter) {
 
 function initGridSizes(grid_sizes) {
     gridSettings[SETTINGS_GRID_SIZES] = [
-	new GridSettingsButton('8x6',8,6),
-	new GridSettingsButton('6x4',6,4),
-	new GridSettingsButton('4x4',4,4),
+        new GridSettingsButton('8x6',8,6),
+        new GridSettingsButton('6x4',6,4),
+        new GridSettingsButton('4x4',4,4),
     ];  
     let grid_sizes_orig = true;
     let gss = grid_sizes.split(",");
     for (var key in gss) {
         let grid_format = parseTuple(gss[key], "x");
-	if(grid_format.X == -1) {
-	    continue;
-	}
+        if(grid_format.X == -1) {
+            continue;
+        }
         if(grid_sizes_orig) {
-	    gridSettings[SETTINGS_GRID_SIZES] = [];
-	    grid_sizes_orig = false;
-	}
-	gridSettings[SETTINGS_GRID_SIZES].push(new GridSettingsButton(grid_format.X + "x" + grid_format.Y, grid_format.X, grid_format.Y));
+            gridSettings[SETTINGS_GRID_SIZES] = [];
+            grid_sizes_orig = false;
+        }
+        gridSettings[SETTINGS_GRID_SIZES].push(new GridSettingsButton(grid_format.X + "x" + grid_format.Y, grid_format.X, grid_format.Y));
     }
 }
 
@@ -213,45 +211,49 @@ function getBoolSetting (settings_string) {
 	log("Undefined settings " + settings_string);
         gridSettings[settings_string] = false;
     } else {
-        log(settings_string + " set to " + gridSettings[settings_string]);  
+        //log(settings_string + " set to " + gridSettings[settings_string]);  
     }
 }
 
 function getIntSetting (settings_string) {
     let iss = settings.get_int(settings_string);
     if(iss === undefined) { 
-	log("Undefined settings " + settings_string);  
-	return 0;
+        log("Undefined settings " + settings_string);  
+        return 0;
     } else {
-	log(settings_string + " set to " + iss);  
-	return iss;
+        //log(settings_string + " set to " + iss);  
+        return iss;
     }
 }
 
 function initSettings() {
+    log("Init settings");
     let gridSizes = settings.get_string(SETTINGS_GRID_SIZES);
     log(SETTINGS_GRID_SIZES + " set to " + gridSizes);
     initGridSizes(gridSizes);
 
     getBoolSetting(SETTINGS_AUTO_CLOSE);
     getBoolSetting(SETTINGS_ANIMATION);
-    getBoolSetting(SETTINGS_TOP_PANEL);
-    getBoolSetting(SETTINGS_BOTTOM_PANEL);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
-    getBoolSetting(SETTINGS_DEBUG);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
 
     gridSettings[SETTINGS_INSETS_PRIMARY] = 
         { top:    getIntSetting(SETTINGS_INSETS_PRIMARY_TOP), 
-	  bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM), 
-	  left:   getIntSetting(SETTINGS_INSETS_PRIMARY_LEFT), 
-	  right:  getIntSetting(SETTINGS_INSETS_PRIMARY_RIGHT) }; // Insets on primary monitor
+        bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM), 
+        left:   getIntSetting(SETTINGS_INSETS_PRIMARY_LEFT), 
+        right:  getIntSetting(SETTINGS_INSETS_PRIMARY_RIGHT) }; // Insets on primary monitor
     gridSettings[SETTINGS_INSETS_SECONDARY] = 
         { top:    getIntSetting(SETTINGS_INSETS_SECONDARY_TOP), 
-	  bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM), 
-	  left:   getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT), 
-	  right:  getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT) }; 
+        bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM), 
+        left:   getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT), 
+        right:  getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT) }; 
+
+    // initialize these from settings, the first set of sizes
+    if(nbCols == 0 || nbRows == 0) {
+        nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
+        nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
+    }
 
 }
 
@@ -264,29 +266,24 @@ function init() {
 }
 
 function enable() {
+    log("Extension start enabling");
+    getBoolSetting(SETTINGS_DEBUG);
+    debug = gridSettings[SETTINGS_DEBUG];
+
     status = false;
     monitors = Main.layoutManager.monitors;
     tracker = Shell.WindowTracker.get_default();
 
-    area = new St.BoxLayout({style_class: 'grid-preview'});
-    Main.uiGroup.add_actor(area);
-
-    log("Create Button");
-    launcher = new GTileStatusButton('tiling-icon');
-
-    log("Init settings");
     initSettings();
-    debug = gridSettings[SETTINGS_DEBUG];
-
-    // initialize these from settings, the first set of sizes
-    nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
-    nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
-
-    log("Init Grids");
-    initGrids();
 
     log("Starting...");
-    //global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
+
+    area = new St.BoxLayout({style_class: 'grid-preview'});
+    Main.uiGroup.add_actor(area);
+    initGrids();
+    
+    log("Create Button");
+    launcher = new GTileStatusButton('tiling-icon');
 
     Main.panel.addToStatusArea("GTileStatusButton", launcher);
 
@@ -294,42 +291,40 @@ function enable() {
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
         hotkeys.bind(key_bindings_presets);
     }
-
-    log("Extention Enabled !");
+    if(!monitorChangedConnect) {
+        log("Connect monitor-changed signal");
+        monitorChangedConnect = Main.layoutManager.connect('notify:monitor-changed', Lang.bind(this, _onMonitorChanged));
+    }
+    log("Extention Enabled!");
 }
 
 function disable() {
+    log("Extension start disabling");
     hotkeys.unbind(key_bindings);
     hotkeys.unbind(key_bindings_presets);
-    hotkeys.unbind(key_bindings_tiling);
+    if(keyControlBound) {
+        hotkeys.unbind(key_bindings_tiling);
+        keyControlBound = false;
+    }
     destroyGrids();
     launcher.destroy();
     launcher = null;
     resetFocusMetaWindow();
+    if(monitorChangedConnect) {
+        log("Disonnect monitor-changed signal");
+        Main.layoutManager.disconnect(monitorChangedConnect);
+        monitorChangedConnect = false;
+    }
+    log("Extention Disabled!");
+}
+
+function _onMonitorChanged() {
+    log("monitor-changed signal");
 }
 
 function resetFocusMetaWindow() {
     log("resetFocusMetaWindow");
-    if (focusMetaWindowConnections.length>0) {
-        for (var idx in focusMetaWindowConnections) {
-	    log("disconnect focusMetaWindowConnections " + idx);
-            focusMetaWindow.disconnect(focusMetaWindowConnections[idx]);
-        }
-    }
-
-    if (focusMetaWindowPrivateConnections.length>0) {
-        let actor = focusMetaWindow.get_compositor_private();
-        if (actor) {
-            for(var idx in focusMetaWindowPrivateConnections) {
-		log("disconnect focusMetaWindowPrivateConnections " + idx);
-                actor.disconnect(focusMetaWindowPrivateConnections[idx]);
-            }
-        }
-    }
-
     focusMetaWindow = false;
-    focusMetaWindowConnections = new Array();
-    focusMetaWindowPrivateConnections = new Array();
 }
 
 function initGrids() {
@@ -348,8 +343,10 @@ function initGrids() {
         Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
         grid.actor.set_opacity(0);
         grid.hide(true);
-        grid.connect('hide-tiling', Lang.bind(this, hideTiling));
+        log("Connect hide-tiling");
+        grid.connectHideTiling = grid.connect('hide-tiling', Lang.bind(this, hideTiling));
     }
+    log("Init grid done");
 }
 
 function destroyGrids() {
@@ -487,40 +484,13 @@ function move_resize_window(metaWindow, x, y, width, height) {
 
     log(metaWindow.get_title() + " " + borderX + "-" + borderY);
 
-    x = x  ;//+ (vBorderX - 1);
+    x = x  ;
     y = y  ;
 
     width = width - vBorderX;
     height = height - vBorderY ;
 
-    /* To TEST
-    win._overviewHint = {
-        x: actor.x,
-        y: actor.y,
-        scale: actor.scale_x
-    };
-    */
-
     metaWindow.move_resize_frame(true,x,y,width,height);
-
-    /*
-    let actor = metaWindow.get_compositor_private();
-
-    let origX = actor.x;
-    let origY = actor.y;
-
-    actor.x = origX;
-    actor.y = origY;
-
-    Tweener.addTween(
-        actor,{
-            time:0.2,
-            transition: "easeOutQuad",
-            opacity:0,
-            onComplete:_onMovedAndResize,
-            onCompleteParams: [metaWindow,x,y,width,height]
-        });
-    */
 }
 
 function _isMyWindow(win) {
@@ -570,23 +540,13 @@ function getWindowsOfMonitor(monitor) {
 }
 
 function _onFocus() {
-    log("_onFocus");
+    log("_onFocus ");
     resetFocusMetaWindow();
     let window = getFocusApp();
 
-    if (window) {
-        log("_onFocus, connecting " + window.get_title());
-        //log("Connect window: "+window.get_title());
+    if (window && status) {
+        log("_onFocus " + window.get_title());
         focusMetaWindow = window;	
-        focusMetaWindowConnections.push(focusMetaWindow.connect('notify::title',Lang.bind(this,_onFocus)));
-
-        let actor = focusMetaWindow.get_compositor_private();
-        if (actor) {
-            focusMetaWindowPrivateConnections.push(focusMetaWindow.connect('size-changed',Lang.bind(this,moveGrids)));
-            focusMetaWindowPrivateConnections.push(focusMetaWindow.connect('position-changed',Lang.bind(this,moveGrids)));
-        }
-
-        //log("End Connect window: "+window.get_title());
 
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
@@ -604,10 +564,13 @@ function _onFocus() {
         }
 
         moveGrids();
-    }
-    else {
-        log("No focus window, hide tiling");
-        hideTiling();
+    } else {
+        if(status) {
+            log("No focus window, hide tiling");
+            hideTiling();
+        } else {
+            log("tiling window not active");
+        }
     }
 }
 
@@ -615,12 +578,9 @@ function _onFocus() {
 function showTiling() {
     log("showTiling");
     focusMetaWindow = getFocusApp();
-    //let wm_class = focusMetaWindow.get_wm_class();
     let wm_type = focusMetaWindow.get_window_type();
     let layer = focusMetaWindow.get_layer();
 
-    //log("type:"+wm_type+" class:"+wm_class+" layer:"+layer);
-    //log("focus app: "+focusMetaWindow);
     area.visible = true;
     if (focusMetaWindow && wm_type != 1 && layer > 0) {
         for (let monitorIdx in monitors) {
@@ -649,8 +609,8 @@ function showTiling() {
             grid.show();
         }
 
-        _onFocus();
         status = true;
+        _onFocus();
         launcher.activate();
         bindKeyControls();
     }
@@ -665,7 +625,6 @@ function hideTiling() {
         grid.elementsDelegate.reset();
         grid.hide(false);
     }
-    log("After reseting grid");
     area.visible = false;
 
     resetFocusMetaWindow();
@@ -729,38 +688,45 @@ function isPrimaryMonitor(monitor) {
 }
 
 function getWorkArea(monitor) {
+    let wkspace = global.screen.get_active_workspace();
+    let work_area = wkspace.get_work_area_for_monitor(monitor);
+    log("getWorkArea for monitor " + monitor.x + " " + monitor.y + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
-    let topPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_TOP_PANEL]) ? Main.panel.actor.height : 0;
-    let bottomPanelSize = (isPrimaryMonitor(monitor) && gridSettings[SETTINGS_BOTTOM_PANEL]) ? Main.panel.actor.height : 0;
     return {
-        x: monitor.x + insets.left,
-        y: monitor.y + insets.top + topPanelSize,
-        width: monitor.width - insets.left - insets.right,
-        height: monitor.height - insets.top - insets.bottom - topPanelSize - bottomPanelSize
+        x: work_area.x + insets.left,
+        y: work_area.y + insets.top,
+        width: work_area.width - insets.left - insets.right,
+        height: work_area.height - insets.top - insets.bottom
     };
 }
 
 function bindKeyControls() {   
     if(!keyControlBound) {
         hotkeys.bind(key_bindings_tiling);
-	log("Connect notify:focus-window");
-	global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
-	if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-	    hotkeys.bind(key_bindings_presets);
-	}	
+        log("Connect notify:focus-window");
+        if(focusConnect) {
+            global.display.disconnect(focusConnect);
+        }    
+        focusConnect = global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
+        if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+            hotkeys.bind(key_bindings_presets);
+        }	
         keyControlBound = true;
     }
 }
 
 function unbindKeyControls() {    
     if(keyControlBound) {
-	hotkeys.unbind(key_bindings_tiling);
-	log("Disconnect notify:focus-window");
-	global.display.disconnect('notify::focus-window', Lang.bind(this, _onFocus));
-	if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-	    hotkeys.unbind(key_bindings_presets);
-	}
-	keyControlBound = false;
+        hotkeys.unbind(key_bindings_tiling);
+        if(focusConnect) {
+            log("Disconnect notify:focus-window");        
+            global.display.disconnect(focusConnect);
+            focusConnect = false;
+        }
+        if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+            hotkeys.unbind(key_bindings_presets);
+        }
+        keyControlBound = false;
     }
 }
 
@@ -772,14 +738,14 @@ function keyCancelTiling() {
 function keySetTiling() {
     log("keySetTiling");
     if (focusMetaWindow) {
-	let mind = focusMetaWindow.get_monitor();
-	let monitor = monitors[mind];
-	let mkey = getMonitorKey(monitor);
-	let grid = grids[mkey];
-	log("In grid " + grid);
-	if(grid.elementsDelegate.currentElement) {
-	    grid.elementsDelegate.currentElement._onButtonPress();
-	}
+        let mind = focusMetaWindow.get_monitor();
+        let monitor = monitors[mind];
+        let mkey = getMonitorKey(monitor);
+        let grid = grids[mkey];
+        log("In grid " + grid);
+        if(grid.elementsDelegate.currentElement) {
+            grid.elementsDelegate.currentElement._onButtonPress();
+        }
     }
 }
 
@@ -790,13 +756,13 @@ function keyChangeTiling() {
     let found = false;
     for (let key in grid_settings_sizes) {
         if(found) {
-	    next_key = key;
-	    break;
-	}
-	log("Checking grid settings size " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
-	if(grid_settings_sizes[key].cols == nbCols && grid_settings_sizes[key].rows == nbRows) {
-	    found = true;
-	}
+            next_key = key;
+            break;
+        }
+        log("Checking grid settings size " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
+        if(grid_settings_sizes[key].cols == nbCols && grid_settings_sizes[key].rows == nbRows) {
+            found = true;
+        }
     }
     log("Found matching grid nbCols " + nbCols + " nbRows " + nbRows + " next key is " + next_key);
     log("New settings will be nbCols " + grid_settings_sizes[next_key].cols + " nbRows " + grid_settings_sizes[next_key].rows);
@@ -866,10 +832,10 @@ function keyMoveResizeEvent(type, key) {
         log("Key event while no mouse activation - set current and second element");
         setInitialSelection();
     } else {
-	if(!delegate.first){
-	    log("currentElement is there but no first yet");
-	    delegate.currentElement._onButtonPress();
-	}
+        if(!delegate.first){
+            log("currentElement is there but no first yet");
+            delegate.currentElement._onButtonPress();
+        }
     }
     if(!delegate.currentElement) {
 	log("gTime currentElement is not set!");
@@ -882,55 +848,55 @@ function keyMoveResizeEvent(type, key) {
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
     if(type == 'move') {	 
-	switch(key) {
-	    case 'right':
-		if(fX < nbCols - 1 && cX < nbCols - 1) {
-		    delegate.first = grid.elements [fY] [fX + 1];
-		    grid.elements[cY] [cX + 1]._onHoverChanged(); 
-		}
-		break;
-	    case 'left':
-		if(fX > 0 && cX > 0) {
-		    delegate.first = grid.elements [fY] [fX - 1];
-		    grid.elements[cY] [cX - 1]._onHoverChanged(); 
-		}
-		break;
-	    case 'up':
-		if(fY > 0 && cY > 0) {
-		    delegate.first = grid.elements [fY - 1] [fX];
-		    grid.elements[cY - 1] [cX]._onHoverChanged(); 
-		}
-		break;
-	    case 'down':
-		if(fY < nbRows - 1 && cY < nbRows - 1) {
-		    delegate.first = grid.elements [fY + 1] [fX];
-		    grid.elements[cY + 1] [cX]._onHoverChanged(); 
-		}
-		break;
-	}      
-    } else {
-	switch(key) {
-	    case 'right':
-		if(cX < nbCols - 1) {
-		    grid.elements[cY] [cX + 1]._onHoverChanged(); 
-		}
-		break;
-	    case 'left':
-		if(cX > 0) {
-		    grid.elements[cY] [cX - 1]._onHoverChanged(); 
-		}
-		break;
-	    case 'up':
-		if(cY > 0 ) {
-		    grid.elements[cY - 1] [cX]._onHoverChanged(); 
-		}
-		break;
-	    case 'down':
-		if(cY < nbRows - 1) {
-		    grid.elements[cY + 1] [cX]._onHoverChanged(); 
-		}
-		break;
-	}
+        switch(key) {
+            case 'right':
+            if(fX < nbCols - 1 && cX < nbCols - 1) {
+                delegate.first = grid.elements [fY] [fX + 1];
+                grid.elements[cY] [cX + 1]._onHoverChanged(); 
+            }
+            break;
+            case 'left':
+            if(fX > 0 && cX > 0) {
+                delegate.first = grid.elements [fY] [fX - 1];
+                grid.elements[cY] [cX - 1]._onHoverChanged(); 
+            }
+            break;
+            case 'up':
+            if(fY > 0 && cY > 0) {
+                delegate.first = grid.elements [fY - 1] [fX];
+                grid.elements[cY - 1] [cX]._onHoverChanged(); 
+            }
+            break;
+            case 'down':
+            if(fY < nbRows - 1 && cY < nbRows - 1) {
+                delegate.first = grid.elements [fY + 1] [fX];
+                grid.elements[cY + 1] [cX]._onHoverChanged(); 
+            }
+            break;
+        }      
+        } else {
+        switch(key) {
+            case 'right':
+            if(cX < nbCols - 1) {
+                grid.elements[cY] [cX + 1]._onHoverChanged(); 
+            }
+            break;
+            case 'left':
+            if(cX > 0) {
+                grid.elements[cY] [cX - 1]._onHoverChanged(); 
+            }
+            break;
+            case 'up':
+            if(cY > 0 ) {
+                grid.elements[cY - 1] [cX]._onHoverChanged(); 
+            }
+            break;
+            case 'down':
+            if(cY < nbRows - 1) {
+                grid.elements[cY + 1] [cX]._onHoverChanged(); 
+            }
+            break;
+        }
     }
     
     cX = delegate.currentElement.coordx;
@@ -974,7 +940,7 @@ function presetResize(preset) {
         || grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y 
         || luc.X > rdc.X || luc.Y > rdc.Y) {
         log("Bad preset " + preset + " settings " + preset_string);
-	return;      
+        return;      
     }
     log("Parsed preset " + preset + " " + grid_format.X + "x" + grid_format.Y +
         " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
@@ -984,7 +950,6 @@ function presetResize(preset) {
     let work_area = getWorkArea(monitor);
     let grid_element_width = Math.floor(work_area.width / grid_format.X);
     let grid_element_height = Math.floor(work_area.height / grid_format.Y);
-    
     let wx = work_area.x + luc.X * grid_element_width + gridSettings[SETTINGS_WINDOW_MARGIN];
     let wy = work_area.y + luc.Y * grid_element_height + gridSettings[SETTINGS_WINDOW_MARGIN];
     let ww = (rdc.X + 1 - luc.X) * grid_element_width - 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
@@ -1009,17 +974,13 @@ TopBar.prototype = {
         this._title = title;
 
         this._stlabel =  new St.Label({style_class: 'grid-title', text: this._title});
-        // this._iconBin = new St.Bin({ x_fill: false, y_fill: true });
 
         this._closebutton = new GTileStatusButton('close-button');
         this._closebutton.container.add_style_class_name('close-button-container');
 
-        //this.actor.add_actor(this._iconBin);
-        this.actor.add_actor(this._closebutton.container,{x_fill: false, expand: true, x_align:St.Align.END});
-        this.actor.add_actor(this._stlabel,{x_fill: false, expand: false, x_align: St.Align.MIDDLE});
+        this.actor.add_actor(this._closebutton.container);
+        this.actor.add_actor(this._stlabel);
 
-        //log( this._closebutton.actor);
-        //this.actor.add_actor(this._closebutton.container,{x_fill: false,expand: true,x_align:
     },
 
     _set_title: function(title) {
@@ -1031,10 +992,7 @@ TopBar.prototype = {
         this._title = app.get_name()+" - "+title;
         log("title: "+this._title);
         this._stlabel.text = this._title;
-        // this._icon = app.create_icon_texture(24);
 
-        //this._iconBin.set_size(24, 24);
-        //this._iconBin.child = this._icon;
     },
 };
 
@@ -1048,12 +1006,13 @@ ToggleSettingsButtonListener.prototype = {
     },
 
     addActor: function(actor) {
-               actor.connect('update-toggle', Lang.bind(this, this._updateToggle));
-               this.actors.push(actor);
+        log("ToggleSettingsButtonListener Connect update-toggle");
+        actor.connect('update-toggle', Lang.bind(this, this._updateToggle));
+        this.actors.push(actor);
     },
 
     _updateToggle: function() {
-        log("_updateToggle");
+        log("ToggleSettingsButtonListener _updateToggle");
         for (let actorIdx in this.actors) {
             let actor = this.actors[actorIdx];
             actor._update();
@@ -1074,29 +1033,29 @@ ToggleSettingsButton.prototype = {
             can_focus:true,
             track_hover: true
         });
-        this.label = new St.Label({style_class: 'settings-label', reactive:true, can_focus:true, track_hover:true, text: this.text});
+        this.label = new St.Label({style_class: 'settings-label', reactive:true, can_focus:true,  track_hover:true, text: this.text});
         this.icon = new St.BoxLayout({style_class: this.text+"-icon", reactive:true, can_focus:true, track_hover:true});
         this.actor.add_actor(this.icon);
         this.property = property;
         this._update();
-        this.actor.add_actor(this.icon, {x_fill:true, y_fill:true});
+        log("ToggleSettingsButton Connect button-press-event");
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        log("ToggleSettingsButton Connect update-toggle");
         this.connect('update-toggle', Lang.bind(this, this._update))
     },
 
     _update : function() {
-        log("_update event");
+        log("ToggleSettingsButton _update event " + this.property);
         if (gridSettings[this.property]) {
             this.actor.add_style_pseudo_class('activate');
-        }
-        else {
+        } else {
             this.actor.remove_style_pseudo_class('activate');
         }
     },
 
     _onButtonPress : function() {
         gridSettings[this.property] = !gridSettings[this.property];
-        log("" + this.property+": "+gridSettings[this.property]);
+        log("ToggleSettingsButton _onButtonPress " + this.property+": "+gridSettings[this.property] + ", emitting signal update-toggle");
         this.emit('update-toggle');
     }
 };
@@ -1119,11 +1078,12 @@ ActionButton.prototype = {
         this.icon = new St.BoxLayout({style_class: classname, reactive:true, can_focus:true, track_hover:true });
         this.actor.add_actor(this.icon);
 
-        this.actor.add_actor(this.icon);
+        log("ActionButton Connect button-press-event");
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
     },
 
     _onButtonPress: function() {
+        log("ActionButton _onButtonPress Emitting signal button-press-event");
         this.emit('button-press-event');
     }
 };
@@ -1140,6 +1100,7 @@ AutoTileMainAndList.prototype = {
     _init: function(grid, classname) {
         ActionButton.prototype._init.call(this, grid, classname);
         this.classname = classname;
+        log("AutoTileMainAndList connect button-press-event");
         this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
     },
 
@@ -1167,12 +1128,8 @@ AutoTileMainAndList.prototype = {
 
         for (let windowIdx in windows) {
             let metaWindow = windows[windowIdx].meta_window;
-            /*let wm_type = metaWindow.get_window_type();
-            let layer = metaWindow.get_layer();
-            log("" + metaWindow.get_title()+" "+wm_type+" "+layer);*/
 
             let newOffset = workArea.y + (countWin * winHeight);
-            //log("newOffset: "+ newOffset);
             reset_window(metaWindow);
 
             move_resize_window_with_margins(
@@ -1185,6 +1142,7 @@ AutoTileMainAndList.prototype = {
             countWin++;
         }
 
+        log("AutoTileMainAndList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
     }
 }
@@ -1201,6 +1159,7 @@ AutoTileTwoList.prototype = {
     _init : function(grid,classname) {
         ActionButton.prototype._init.call(this, grid, classname);
         this.classname = classname;
+        log("AutoTileTwoList connect button-press-event");
         this.connect('button-press-event',Lang.bind(this,this._onButtonPress));
     },
 
@@ -1247,6 +1206,7 @@ AutoTileTwoList.prototype = {
             countWin++;
         }
 
+        log("AutoTileTwoList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
     }
 }
@@ -1307,6 +1267,7 @@ function Grid(monitor_idx,screen,title,cols,rows) {
 
 Grid.prototype = {
     _init: function(monitor_idx,monitor,title,cols,rows) {
+        this.connectHideTiling = false;
         let workArea = getWorkArea(monitor);
 
         this.tableWidth = 320;
@@ -1342,7 +1303,7 @@ Grid.prototype = {
         });
         this.bottombar_table_layout = this.bottombar.layout_manager;
 
-        this.bottombarContainer.add_actor(this.bottombar,{x_fill:true,y_fill:true})
+        this.bottombarContainer.add_actor(this.bottombar);
 
         this.veryBottomBarContainer = new St.Bin({ style_class: 'very-bottom-box-container',
             reactive:true,
@@ -1361,14 +1322,13 @@ Grid.prototype = {
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
 
-        this.veryBottomBarContainer.add_actor(this.veryBottomBar,{x_fill:true,y_fill:true})
+        this.veryBottomBarContainer.add_actor(this.veryBottomBar);
 
         let rowNum = 0;
         let colNum = 0;
         let maxPerRow = 4;
 
         let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZES];
-
         for (var index=0; index<gridSettingsButton.length;index++) {
             if (colNum>= 4) {
                 colNum = 0;
@@ -1398,14 +1358,12 @@ Grid.prototype = {
             layout_manager: new Clutter.TableLayout()
         });
         this.table_table_layout = this.table.layout_manager;
+        this.tableContainer.add_actor(this.table);
 
-        this.tableContainer.add_actor(this.table,{x_fill:true,y_fill:true})
-
-        this.actor.add_actor(this.topbar.actor,{x_fill:true});
-        this.actor.add_actor(this.tableContainer,{x_fill:true});
-        this.actor.add_actor(this.bottombarContainer,{x_fill:true});
-        this.actor.add_actor(this.veryBottomBarContainer,{x_fill:true});
-
+        this.actor.add_actor(this.topbar.actor);
+        this.actor.add_actor(this.tableContainer);
+        this.actor.add_actor(this.bottombarContainer);
+        this.actor.add_actor(this.veryBottomBarContainer);
 
         this.monitor = monitor;
         this.monitor_idx = monitor_idx;
@@ -1415,34 +1373,27 @@ Grid.prototype = {
 	
         this.isEntered = false;
 
-        if (true) {
-            let nbTotalSettings = 4;
+        let nbTotalSettings = 4;
 
-            if (!toggleSettingListener) {
-                toggleSettingListener = new ToggleSettingsButtonListener();
-            }
-
-            let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-            this.veryBottomBar_table_layout.pack(toggle.actor, 0, 0);
-            toggleSettingListener.addActor(toggle);
-
-            toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-            this.veryBottomBar_table_layout.pack(toggle.actor, 1, 0);
-            toggleSettingListener.addActor(toggle);
-
-            let action = new AutoTileMainAndList(this);
-            this.veryBottomBar_table_layout.pack(action.actor, 2, 0);
-            action.connect('resize-done', Lang.bind(this,this._onResize));
-
-            action = new AutoTileTwoList(this);
-            this.veryBottomBar_table_layout.pack(action.actor, 3, 0);
-            action.connect('resize-done', Lang.bind(this,this._onResize));
-
-            /*action = new ActionScale(this);
-            action.actor.width = (this.tableWidth / nbTotalSettings) - this.borderwidth*2;
-            this.veryBottomBar.add(action.actor,{row:0, col:4,x_fill:false,y_fill:false});   */
+        if (!toggleSettingListener) {
+            toggleSettingListener = new ToggleSettingsButtonListener();
         }
 
+        let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
+        this.veryBottomBar_table_layout.pack(toggle.actor, 0, 0);
+        toggleSettingListener.addActor(toggle);
+
+        toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
+        this.veryBottomBar_table_layout.pack(toggle.actor, 1, 0);
+        toggleSettingListener.addActor(toggle);
+
+        let action = new AutoTileMainAndList(this);
+        this.veryBottomBar_table_layout.pack(action.actor, 2, 0);
+        action.connect('resize-done', Lang.bind(this,this._onResize));
+
+        action = new AutoTileTwoList(this);
+        this.veryBottomBar_table_layout.pack(action.actor, 3, 0);
+        action.connect('resize-done', Lang.bind(this,this._onResize));
 
         this.x = 0;
         this.y = 0;
@@ -1525,7 +1476,7 @@ Grid.prototype = {
       log("hide " + immediate);
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.3 : 0;
-        //log("" + time);
+        //log("hide " + time);
         if (time > 0) {
             Tweener.addTween(this.actor, {
                 time: time,
@@ -1558,6 +1509,7 @@ Grid.prototype = {
         log("resize-done: "+actor);
         updateRegions();
         if (gridSettings[SETTINGS_AUTO_CLOSE]) {
+            log("Emitting hide-tiling");
             this.emit('hide-tiling');
         }
     },
@@ -1573,7 +1525,7 @@ Grid.prototype = {
     _onMouseLeave: function() {
         log("onMouseLeave");
         let [x, y, mask] = global.get_pointer();
-        if ( this.elementsDelegate && (x <= this.actor.x || x>= (this.actor.x+this.actor.width)) || (y <=this.actor.y || y >= (this.actor.y+this.height)) ) {
+        if ( this.elementsDelegate && (x <= this.actor.x || x>= (this.actor.x+this.actor.width)) || (y <=this.actor.y || y >= (this.actor.y+this.actor.height)) ) {
             this.isEntered = false;
             this.elementsDelegate.reset();
             refreshGrids();
@@ -1585,6 +1537,7 @@ Grid.prototype = {
     },
 
     _destroy: function() {
+        log("Grid _destroy");
         for (let r in this.elements) {
             for (let c in this.elements[r]) {
                 this.elements[r][c]._destroy();
@@ -1598,6 +1551,8 @@ Grid.prototype = {
         this.rows = null;
         this.title = null;
         this.cols = null;
+        log("Disconnect hide-tiling");
+        this.disconnect(this.connectHideTiling);
     }
 };
 
@@ -1622,8 +1577,8 @@ GridElementDelegate.prototype = {
 
     _onButtonPress: function(gridElement) {
         if(!this.currentElement) {
-	    this.currentElement = gridElement;
-	}
+            this.currentElement = gridElement;
+        }
         if (this.activated==false) {
             this.activated = true;
             gridElement.active = true;
@@ -1640,8 +1595,6 @@ GridElementDelegate.prototype = {
 
             reset_window(focusMetaWindow);
 
-            //focusMetaWindow.move_anchor_point_from_gravity(Clutter.Gravity.CENTER);
-
             let areaWidth,areaHeight,areaX,areaY;
             [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(this.first,gridElement);
 
@@ -1651,14 +1604,13 @@ GridElementDelegate.prototype = {
             else {
                 move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
             }
-            //focusMetaWindow.configure_notify();
 
             this._resizeDone();
         }
     },
 
     _resizeDone: function() {
-        log("resizeDone, emitting signal");
+        log("resizeDone, emitting signal resize-done");
         this.emit('resize-done');
     },
 
@@ -1825,7 +1777,6 @@ GridElement.prototype = {
 
     _activate: function() {
         log("activate "+this.id);
-
         this.actor.add_style_pseudo_class('activate');
     },
 
