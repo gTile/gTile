@@ -343,7 +343,7 @@ function initGrids() {
         Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
         grid.actor.set_opacity(0);
         grid.hide(true);
-        log("Connect hide-tiling");
+        log("Connect hide-tiling for monitor " + monitorIdx);
         grid.connectHideTiling = grid.connect('hide-tiling', Lang.bind(this, hideTiling));
     }
     log("Init grid done");
@@ -578,6 +578,10 @@ function _onFocus() {
 function showTiling() {
     log("showTiling");
     focusMetaWindow = getFocusApp();
+    if(!focusMetaWindow) {
+        log("No focus window");
+        return;
+    }
     let wm_type = focusMetaWindow.get_window_type();
     let layer = focusMetaWindow.get_layer();
 
@@ -687,10 +691,25 @@ function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
-function getWorkArea(monitor) {
+function getWorkAreaByMonitor(monitor) {
+    for (let monitor_idx in monitors) {
+        let mon  = monitors[monitor_idx];
+        if(mon.x == monitor.x && mon.y == monitor.y) {
+            return getWorkArea(monitor, monitor_idx);
+        }
+    }
+    return false;
+}
+
+function getWorkAreaByMonitorIdx(monitor_idx) {
+    let monitor = monitors[monitor_idx];
+    return getWorkArea(monitor, monitor_idx);
+}
+
+function getWorkArea(monitor, monitor_idx) {
     let wkspace = global.screen.get_active_workspace();
-    let work_area = wkspace.get_work_area_for_monitor(monitor);
-    log("getWorkArea for monitor " + monitor.x + " " + monitor.y + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
+    let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
+    log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     return {
         x: work_area.x + insets.left,
@@ -777,7 +796,7 @@ function setInitialSelection() {
     }
     let mind = focusMetaWindow.get_monitor();
     let monitor = monitors[mind];
-    let workArea = getWorkArea(monitor);
+    let workArea = getWorkArea(monitor, mind);
 
     let wx = focusMetaWindow.get_frame_rect().x;
     let wy = focusMetaWindow.get_frame_rect().y;
@@ -946,8 +965,7 @@ function presetResize(preset) {
         " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
     
     let mind = window.get_monitor();
-    let monitor = monitors[mind];
-    let work_area = getWorkArea(monitor);
+    let work_area = getWorkAreaByMonitorIdx(mind);
     let grid_element_width = Math.floor(work_area.width / grid_format.X);
     let grid_element_height = Math.floor(work_area.height / grid_format.Y);
     let wx = work_area.x + luc.X * grid_element_width + gridSettings[SETTINGS_WINDOW_MARGIN];
@@ -1111,7 +1129,7 @@ AutoTileMainAndList.prototype = {
         reset_window(focusMetaWindow);
 
         let monitor = this.grid.monitor;
-        let workArea = getWorkArea(monitor);
+        let workArea = getWorkAreaByMonitor(monitor);
         let windows = getNotFocusedWindowsOfMonitor(monitor);
 
         move_resize_window_with_margins(
@@ -1171,7 +1189,7 @@ AutoTileTwoList.prototype = {
         reset_window(focusMetaWindow);
 
         let monitor = this.grid.monitor;
-        let workArea = getWorkArea(monitor);
+        let workArea = getWorkAreaByMonitor(monitor);
 
         let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
 
@@ -1268,7 +1286,7 @@ function Grid(monitor_idx,screen,title,cols,rows) {
 Grid.prototype = {
     _init: function(monitor_idx,monitor,title,cols,rows) {
         this.connectHideTiling = false;
-        let workArea = getWorkArea(monitor);
+        let workArea = getWorkArea(monitor, monitor_idx);
 
         this.tableWidth = 320;
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
@@ -1665,7 +1683,7 @@ GridElementDelegate.prototype = {
         let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement,toGridElement);
 
         let monitor = fromGridElement.monitor;
-        let workArea = getWorkArea(monitor);
+        let workArea = getWorkAreaByMonitor(monitor);
 
         let areaWidth = (workArea.width/nbCols)*((maxX-minX)+1);
         let areaHeight = (workArea.height/nbRows)*((maxY-minY)+1);
