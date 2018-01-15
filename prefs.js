@@ -88,7 +88,7 @@ function accel_tab(notebook) {
         GObject.TYPE_INT
     ]);
 
-    for (key in pretty_names) {
+    for (let key in pretty_names) {
         append_hotkey(model, settings, key, pretty_names[key]);
     }
 
@@ -147,7 +147,7 @@ function accel_tab(notebook) {
 
     treeview.append_column(col);
 
-    text = "Keyboard shortcuts. Arrows are used to move window and are not re-assignable.";
+    let text = "Keyboard shortcuts. Arrows are used to move window and are not re-assignable.";
     ks_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
     ks_grid.add(treeview);
 
@@ -190,7 +190,7 @@ function presets_tab(notebook) {
                                   row_spacing: 6,
                                   column_spacing: 6 });
 
-    text = "Resize presets (grid size and 2 corners, 2x2 0:1 0:1 is left bottom quarter)";
+    let text = "Resize presets (grid size and 2 corners, 2x2 0:1 0:1 is left bottom quarter)";
     pr_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
 
     for (var ind = 1; ind <= 30; ind++) {
