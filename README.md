@@ -32,6 +32,7 @@ You can alternatively manually install the latest version from GitHub master bra
 ## Configuration
 
 For configuration, please use the built-in preferences dialog (Gnome Tweak Tool -> Extensions -> gTile -> Preferences).
+For configuration changes to take effect, disable/enable gTile (Gnome Tweak Tool -> Extensions -> gTile -> Off/On )
 In the *Help* tab you will find help and usage hints.
 
 * Keyboard shortcuts:
@@ -110,6 +111,8 @@ Here are some useful Gnome built-ins to keep in mind when configuring gTile:
 ## Source code
 
 This extension is developed at [GitHub](https://github.com/gTile/gtile).
+
+See gTile help in Preferences for info on development and debugging.
 
 It was originally developed by [vibou](https://github.com/vibou) with help from multiple contributors, and is now community supported.
 
