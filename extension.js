@@ -62,7 +62,6 @@ let area;
 let focusMetaWindow = false;
 let focusWindowActor = false;
 let focusConnect = false;
-let monitorChangedConnect = false;
 let gridSettings = new Object();
 let settings = Settings.get();
 let toggleSettingListener;
@@ -291,10 +290,6 @@ function enable() {
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
         hotkeys.bind(key_bindings_presets);
     }
-    if(!monitorChangedConnect) {
-        log("Connect monitor-changed signal");
-        monitorChangedConnect = Main.layoutManager.connect('notify:monitor-changed', Lang.bind(this, _onMonitorChanged));
-    }
     log("Extention Enabled!");
 }
 
@@ -310,16 +305,7 @@ function disable() {
     launcher.destroy();
     launcher = null;
     resetFocusMetaWindow();
-    if(monitorChangedConnect) {
-        log("Disonnect monitor-changed signal");
-        Main.layoutManager.disconnect(monitorChangedConnect);
-        monitorChangedConnect = false;
-    }
     log("Extention Disabled!");
-}
-
-function _onMonitorChanged() {
-    log("monitor-changed signal");
 }
 
 function resetFocusMetaWindow() {
