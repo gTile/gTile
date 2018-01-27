@@ -51,6 +51,9 @@ const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
 
+// Emitted when a new monitor is connected. See gnome-shell/js/ui/layout.js.
+const MONITORS_CHANGED_EVENT = 'monitors-changed';
+
 let status;
 let launcher;
 let grids;
@@ -293,7 +296,9 @@ function enable() {
     }
     if(!monitorChangedConnect) {
         log("Connect monitor-changed signal");
-        monitorChangedConnect = Main.layoutManager.connect('notify:monitor-changed', Lang.bind(this, _onMonitorChanged));
+        monitorChangedConnect = Main.layoutManager.connect(
+            MONITORS_CHANGED_EVENT,
+            Lang.bind(this, _onMonitorChanged));
     }
     log("Extention Enabled!");
 }
@@ -687,30 +692,34 @@ function getFocusApp() {
     return focusedWindow;
 }
 
+function activeMonitors() {
+  return Main.layoutManager.monitors;
+}
+
 function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
 function getWorkAreaByMonitor(monitor) {
-    for (let monitor_idx in monitors) {
-        let mon  = monitors[monitor_idx];
+    for (let i = 0; i < activeMonitors().length; i++) {
+        const mon = activeMonitors()[i];
         if(mon.x == monitor.x && mon.y == monitor.y) {
-            return getWorkArea(monitor, monitor_idx);
+            return getWorkArea(monitor, i);
         }
     }
     return false;
 }
 
 function getWorkAreaByMonitorIdx(monitor_idx) {
-    let monitor = monitors[monitor_idx];
+    let monitor = activeMonitors()[monitor_idx];
     return getWorkArea(monitor, monitor_idx);
 }
 
 function getWorkArea(monitor, monitor_idx) {
-    let wkspace = global.screen.get_active_workspace();
-    let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
+    const wkspace = global.screen.get_active_workspace();
+    const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
     log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
-    let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
+    const insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     return {
         x: work_area.x + insets.left,
         y: work_area.y + insets.top,
