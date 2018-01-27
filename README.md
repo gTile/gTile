@@ -36,19 +36,19 @@ For configuration changes to take effect, disable/enable gTile (Gnome Tweak Tool
 In the *Help* tab you will find help and usage hints.
 
 * Keyboard shortcuts:
-	* Can be assigned from the preferences window (*Accelerators* tab)
-	* Both the key combinations and the respective function are configurable
-	* Can be Global (can be used directly without the main gTile window)
-	* Can be non-global (can only be used when the gTile window is shown)
-	* Up to 30 accelerators can be configured, which should be plenty
+    * Can be assigned from the preferences window (*Accelerators* tab)
+    * Both the key combinations and the respective function are configurable
+    * Can be Global (can be used directly without the main gTile window)
+    * Can be non-global (can only be used when the gTile window is shown)
+    * Up to 30 accelerators can be configured, which should be plenty
 * Grid schemes:
-	* Are defined in the preferences window (*Basic* tab)
-	* Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
+    * Are defined in the preferences window (*Basic* tab)
+    * Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
 * Resize presets:
-	* Are defined in the preferences window (*Reset presets* tab) 
-	* Format: grid size, top left corner, bottom right corner
-	* Format examples: "2x2 0:1 0:1" or "6x4 0:2 3:3"
-	* Grids setup here size can be of any size, not necessarily what you have set up in grid sizes settings
+    * Are defined in the preferences window (*Reset presets* tab)
+    * Format: grid size, top left corner, bottom right corner
+    * Format examples: "2x2 0:1 0:1" or "6x4 0:2 3:3"
+    * Grids setup here size can be of any size, not necessarily what you have set up in grid sizes settings
 
 
 ## Usage with interface
@@ -105,7 +105,7 @@ Here are some useful Gnome built-ins to keep in mind when configuring gTile:
 * Super + Up - Maximize
 * Super + Down - Un-Maximize (return to size and position previous to maximizing)
 * Super + Left/Right - left/right half of screen
-* Shift + Super + Up/Down/Left/Right] - move window to adjacent monitor/workspace 
+* Shift + Super + Up/Down/Left/Right] - move window to adjacent monitor/workspace
 
 
 ## Source code

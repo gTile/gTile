@@ -3,7 +3,7 @@ z-index: 99;
 }
 
 .grid-title{
-	font-size: 12px;
+        font-size: 12px;
     font-weight: bold;
     color: #ffffff;
     padding: .5em;
@@ -19,17 +19,17 @@ z-index: 99;
 
 .table-container
 {
-	
+
 }
 
 .table{
-	spacing-rows: 2px;
-	spacing-columns: 2px;
+        spacing-rows: 2px;
+        spacing-columns: 2px;
 }
 
 .table-element{
     background-color: rgba(240,240,240,0.4);
-	margin: 1px;
+        margin: 1px;
 }
 
 .table-element:activate
@@ -57,7 +57,7 @@ z-index: 99;
 
 .close-button-container
 {
-	background-color: rgba(0,120,255,0);
+        background-color: rgba(0,120,255,0);
 }
 
 .close-button
@@ -143,19 +143,19 @@ z-index: 99;
 .action-scale
 {
     background-image: url("images/scale-icon.png");
- 	background-size: 36px 36px;
- 	 height:36px;
+        background-size: 36px 36px;
+         height:36px;
     width:36px;
 }
 
 .settings-label
 {
-    
+
 }
 
 .settings-label:hover
 {
-   
+
 }
 
 .grid-preview
@@ -173,23 +173,22 @@ z-index: 99;
 .bottom-box-container
 {
 
-	padding:10px 0px 0px 0px;
+        padding:10px 0px 0px 0px;
 }
 
 .bottom-box
 {
-	spacing-rows: 0px;
-	spacing-columns: 2px;
+        spacing-rows: 0px;
+        spacing-columns: 2px;
 }
 
 .very-bottom-box-container
 {
-	padding:2px 0px 10px 0px;
+        padding:2px 0px 10px 0px;
 }
 
 .very-bottom-box
 {
     spacing-rows: 0px;
-	spacing-columns: 2px;
+        spacing-columns: 2px;
 }
-

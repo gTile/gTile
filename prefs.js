@@ -30,11 +30,11 @@ const SETTINGS_HELP_TEXT = 'help-text';
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
-    'set-tiling'	    : 'Set tiling',
+    'set-tiling'            : 'Set tiling',
     'cancel-tiling'     : 'Cancel tiling',
     'change-grid-size'  : 'Change grid size',
-    'resize-left'       : 'Resize horizontal narrower',         
-    'resize-right'      : 'Resize horizontal wider',         
+    'resize-left'       : 'Resize horizontal narrower',
+    'resize-right'      : 'Resize horizontal wider',
     'resize-up'         : 'Resize vertical higher',
     'resize-down'       : 'Resize vertical lower',
     'preset-resize-1'   : 'Preset resize 1',
@@ -67,7 +67,7 @@ const pretty_names = {
     'preset-resize-28'  : 'Preset resize 28',
     'preset-resize-29'  : 'Preset resize 29',
     'preset-resize-30'  : 'Preset resize 30'
-} 
+}
 
 function init() {
 
@@ -77,7 +77,7 @@ function accel_tab(notebook) {
     let settings = Settings.get();
     let ks_grid = new Gtk.Grid({ orientation: Gtk.Orientation.VERTICAL,
                                     row_spacing: 6,
-                                    column_spacing: 6 });	
+                                    column_spacing: 6 });
 
     let model = new Gtk.ListStore();
 
@@ -123,7 +123,7 @@ function accel_tab(notebook) {
 
         let [success, iter] = model.get_iter_from_string(str_iter);
 
-        
+
         if (!success) {
             throw new Error("Something be broken, yo.");
         }
@@ -148,13 +148,13 @@ function accel_tab(notebook) {
     treeview.append_column(col);
 
     let text = "Keyboard shortcuts. Arrows are used to move window and are not re-assignable.";
-    ks_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
+    ks_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));
     ks_grid.add(treeview);
 
     let ks_window = new Gtk.ScrolledWindow({'vexpand': true});
         ks_window.add(ks_grid);
-    let ks_label = new Gtk.Label({ label: "Accelerators", use_markup: false, halign: Gtk.Align.START })	
-    notebook.append_page(ks_window, ks_label);	  
+    let ks_label = new Gtk.Label({ label: "Accelerators", use_markup: false, halign: Gtk.Align.START })
+    notebook.append_page(ks_window, ks_label);
 }
 
 function basics_tab(notebook) {
@@ -166,22 +166,22 @@ function basics_tab(notebook) {
 
     let text = "For changes in this and other tabs to take effect - disable and enable gTile in Gnome Tweak Tool(Tweaks)->Extensions->gTile->Off/On";
 
-    bs_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
+    bs_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));
 
     add_check("Auto close"          , SETTINGS_AUTO_CLOSE      , bs_grid, settings);
     add_check("Animation"           , SETTINGS_ANIMATION       , bs_grid, settings);
 
-    add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES      , bs_grid, settings, 30);	
+    add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES      , bs_grid, settings, 30);
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
     text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
-    bs_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
+    bs_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));
 
     let bs_window = new Gtk.ScrolledWindow({'vexpand': true});
     bs_window.add(bs_grid);
-    let bs_label = new Gtk.Label({ label: "Basic", use_markup: false, halign: Gtk.Align.START })		
-    notebook.append_page(bs_window, bs_label);	
+    let bs_label = new Gtk.Label({ label: "Basic", use_markup: false, halign: Gtk.Align.START })
+    notebook.append_page(bs_window, bs_label);
 }
 
 function presets_tab(notebook) {
@@ -191,15 +191,15 @@ function presets_tab(notebook) {
                                   column_spacing: 6 });
 
     let text = "Resize presets (grid size and 2 corners, 2x2 0:1 0:1 is left bottom quarter)";
-    pr_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
+    pr_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));
 
     for (var ind = 1; ind <= 30; ind++) {
         add_text ("Preset resize " + ind, SETTINGS_PRESET_RESIZE + ind, pr_grid, settings, 20);
     }
     let pr_window = new Gtk.ScrolledWindow({'vexpand': true});
-        pr_window.add(pr_grid);	
-    let pr_label = new Gtk.Label({ label: "Resize presets", use_markup: false, halign: Gtk.Align.START })	
-    notebook.append_page(pr_window, pr_label);		
+        pr_window.add(pr_grid);
+    let pr_label = new Gtk.Label({ label: "Resize presets", use_markup: false, halign: Gtk.Align.START })
+    notebook.append_page(pr_window, pr_label);
 }
 
 function margins_tab(notebook) {
@@ -209,7 +209,7 @@ function margins_tab(notebook) {
                                     column_spacing: 6 });
 
     let text = "Window margins and invisible borders around screen.";
-    mg_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
+    mg_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));
     add_int  ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 100, 1, 10);
     add_int  ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 100, 1, 10);
     add_int  ("Insets primary right"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 100, 1, 10);
@@ -221,9 +221,9 @@ function margins_tab(notebook) {
     add_int  ("Insets secondary bottom"  , SETTINGS_INSETS_SECONDARY_BOTTOM , mg_grid, settings, 0, 100, 1, 10);
 
     let mg_window = new Gtk.ScrolledWindow({'vexpand': true});
-        mg_window.add(mg_grid);	
-    let mg_label = new Gtk.Label({ label: "Margins", use_markup: false, halign: Gtk.Align.START })	
-    notebook.append_page(mg_window, mg_label);	
+        mg_window.add(mg_grid);
+    let mg_label = new Gtk.Label({ label: "Margins", use_markup: false, halign: Gtk.Align.START })
+    notebook.append_page(mg_window, mg_label);
 }
 
 function help_tab(notebook) {
@@ -238,9 +238,9 @@ function help_tab(notebook) {
         this.text_view = new Gtk.TextView ({
             buffer: buffer,
             editable: false,
-            wrap_mode: Gtk.WrapMode.WORD });	
+            wrap_mode: Gtk.WrapMode.WORD });
     let hl_window = new Gtk.ScrolledWindow({'vexpand': true});
-        hl_window.add(text_view);	
+        hl_window.add(text_view);
     let hl_label = new Gtk.Label({ label: "Help", use_markup: false, halign: Gtk.Align.START });
     notebook.append_page(hl_window, hl_label);
 }
@@ -252,14 +252,14 @@ function buildPrefsWidget() {
     basics_tab(notebook);
     accel_tab(notebook);
     presets_tab(notebook);
-    margins_tab(notebook);	
+    margins_tab(notebook);
     help_tab(notebook);
 
         let main_vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL,
                                         spacing: 10,
                                         border_width: 10});
 
-    main_vbox.pack_start(notebook, true, true, 0);	
+    main_vbox.pack_start(notebook, true, true, 0);
 
     main_vbox.show_all();
 
@@ -269,7 +269,7 @@ function buildPrefsWidget() {
 function add_check(check_label, SETTINGS, grid, settings) {
     let check = new Gtk.CheckButton({ label: check_label, margin_top: 6 });
     settings.bind(SETTINGS, check, 'active', Gio.SettingsBindFlags.DEFAULT);
-    grid.add(check);  
+    grid.add(check);
 }
 
 function add_int(int_label, SETTINGS, grid, settings, minv, maxv, incre, page) {
@@ -334,4 +334,3 @@ function append_hotkey(model, settings, name, pretty_name) {
 
     model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
-
