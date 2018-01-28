@@ -23,17 +23,18 @@ export class TileSpec {
                 [this.rdc.x, this.rdc.y].join(':')].join(' ');
     }
 
-    toFrameRect(workArea: Rect, margin: Size) {
+    toFrameRect(workArea: Rect) {
         const elemSize = new Size(
             Math.floor(workArea.size.width / this.gridWidth),
             Math.floor(workArea.size.height / this.gridHeight));
         return new Rect(
             new XY(
-                workArea.origin.x + margin.width + this.luc.x * elemSize.width,
-                workArea.origin.y + margin.height + this.luc.y * elemSize.height),
-            new Size((this.rdc.x + 1 - this.luc.x) * elemSize.width - 2 * margin.width,
-                     (this.rdc.y + 1 - this.luc.y) * elemSize.height- 2 * margin.height));
+                workArea.origin.x  + this.luc.x * elemSize.width,
+                workArea.origin.y  + this.luc.y * elemSize.height),
+            new Size((this.rdc.x + 1 - this.luc.x) * elemSize.width,
+                     (this.rdc.y + 1 - this.luc.y) * elemSize.height));
     }
+
 }
 
 export class XY {
@@ -47,7 +48,100 @@ export class XY {
     toString() {
         return 'XY(' + [this.x, this.y].join(', ') + ')';
     }
+
+    dot(b: XY) {
+        return this.x*b.x + this.y*b.y;
+    }
+
+    unit() {
+        const norm = this.l2norm()
+        return new XY(this.x/norm, this.y/norm);
+    }
+
+    l2norm() {
+        return Math.sqrt(this.l2normSquared());
+    }
+
+    l2normSquared() {
+        return this.dot(this);
+    }
+
+    scale(s: number) {
+        return new XY(this.x*s, this.y*s)
+    }
+
+    project(b: XY): XY {
+        return b.scale(this.dot(b)/b.l2normSquared())
+    }
+
+    scalarProjection(b: XY): number {
+        return this.dot(b.unit())
+    }
+
+    minus(b: XY) {
+        return new XY(this.x - b.x, this.y - b.y)
+    }
+
+    plus(b: XY) {
+        return new XY(this.x + b.x, this.y + b.y)
+    }
 }
+
+const ADJOIN_DOT_PRODUCT_TOL = .02;
+
+export class LineSegment {
+    a: XY;
+    b: XY;
+    static fromTwoPoints(a: XY, b: XY) {
+        const l = new LineSegment();
+        l.a = a
+        l.b = b
+        return l
+    }
+
+    direction() {
+        return this.b.minus(this.a).unit()
+    }
+
+    adjoins(other: LineSegment, distTol: number) {
+        const otherDir = other.direction();
+        const unitDot = this.direction().dot(otherDir);
+        if (!withinTol(Math.abs(unitDot), 1, ADJOIN_DOT_PRODUCT_TOL)) {
+            return false
+        }
+        // Basically parallel. Now measure the perpendicular distance between
+        // this.a and other.a->b.
+        const d = this.a.minus(other.a)
+        const perpDist = Math.abs(d.scalarProjection(otherDir));
+        return withinTol(perpDist, 0, distTol)
+    }
+
+    // https://math.stackexchange.com/questions/210848/finding-the-shortest-distance-between-two-lines
+    distance(other: LineSegment) {
+        const x1 = this.a;
+        const x2 = this.b
+        const x = x1.minus(x2)
+        const y1 = other.a;
+        const d = x1.minus(y1)
+        const xparallel = x.scale(d.dot(x)/x.l2normSquared())
+        return d.minus(xparallel).l2norm()
+    }
+}
+
+/*export class Line {
+    origin: XY;
+    direction: XY;
+    static fromTwoPoints(a: XY, b: XY) {
+        const l = new Line();
+        l.origin = a
+        l.direction = b.minus(a).unit()
+        return l
+    }
+
+}
+*/
+
+
 
 export class Size {
     width: number;
@@ -85,7 +179,59 @@ export class Rect {
                 close(this.size.width,  r.size.width) &&
                 close(this.size.height,  r.size.height));
     }
+
+    inset(s: Size) {
+        return new Rect(
+            new XY(this.origin.x + s.width, this.origin.y + s.height),
+            new Size(this.size.width - 2*s.width,
+                     this.size.height - 2*s.height));
+    }
+
+    edges() {
+        const down = new XY(0, this.size.height);
+        const right = new XY(this.size.width, 0);
+        const seg = (a: XY, b: XY) => LineSegment.fromTwoPoints(a, b);
+        // a---b
+        // c---d
+        const a = this.origin;
+        const b = a.plus(right)
+        const c = a.plus(down)
+        const d = c.plus(right)
+
+        const rv = new Edges();
+        rv.top = seg(a, b);
+        rv.right = seg(b, d);
+        rv.bottom = seg(c, d);
+        rv.left = seg(a, c);
+        return rv;
+    }
 }
+
+export enum Side {
+    Top = 1,
+    Right,
+    Bottom,
+    Left,
+}
+
+export class Edges {
+    top: LineSegment;
+    right: LineSegment;
+    bottom: LineSegment;
+    left: LineSegment;
+
+    getSide(s: Side) {
+        switch (s) {
+        case Side.Top:    return this.top;
+        case Side.Right:  return this.right;
+        case Side.Bottom: return this.bottom;
+        case Side.Left:   return this.left;
+        }
+        return undefined;
+    }
+}
+
+
 
 /** parsePreset parses a string like "8x8 0:0 0:7, 8x8 0:0 2:7" */
 export function parsePreset(preset: string) {
@@ -125,4 +271,8 @@ function parseTuple(unparsed: string, delim: string) {
         throw new Error("All elements of tuple must be intgers in [0, 40] : " + unparsed)
     }
     return new XY(numbers[0], numbers[1]);
+}
+
+function withinTol(a: number, b: number, tol: number) {
+    return Math.abs(a - b) <= tol;
 }

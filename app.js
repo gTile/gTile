@@ -4,6 +4,7 @@ import {
   } from "appwrapper";
 
 import * as tspec from "./tilespec"
+import * as resizelib from "./resize"
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -27,6 +28,8 @@ const SETTINGS_DEBUG = 'debug';
 // should be more than 0 because windows may slightly adjust themselves after
 // a move. For example, the terminal will resize to fit a line of text.
 const PRESET_CYCLING_PIXEL_TOLERANCE = 20;
+
+const ADJUST_NEIGHBORS = true;
 
 
 // Emitted when a new monitor is connected. See gnome-shell/js/ui/layout.js.
@@ -484,27 +487,44 @@ function getWindowActor() {
     //log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
 }
 
-function getNotFocusedWindowsOfMonitor(monitor) {
-    let windows = global.get_window_actors().filter(function(w) {
-        let app = tracker.get_window_app(w.meta_window);
+function getNotFocusedWindowActorsOfMonitor(monitor) {
+    return getNotFocusedWindowActorsOfMonitorIndex(monitor.index);
+}
 
+function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
+    const focus = getFocusWindow();
+    return global.get_window_actors().filter(function(w) {
+        const metaWin = w.meta_window;
+
+        let app = tracker.get_window_app(metaWin);
         if (app == null) {
             return false;
         }
-
         let appName = app.get_name();
 
-        //log("NotFocused - AppName: " + appName);
+
+        log("NotFocused - AppName: " + appName +
+            "normal = " + (metaWin.get_window_type() == Meta.WindowType.NORMAL) +
+            " showing on wkspace " + metaWin.showing_on_its_workspace());
+        const criteria = [
+            !excludedApplications[appName],
+              metaWin.get_window_type() == Meta.WindowType.NORMAL,
+              metaWin.get_workspace() == global.screen.get_active_workspace(),
+              metaWin.showing_on_its_workspace(),
+              metaWin.get_monitor() == monitorIndex,
+              focus != metaWin
+        ];
+        log("criteria: " + JSON.stringify(criteria));
+        log("monitor =  " + JSON.stringify(monitorIndex) + " vs. " +
+            metaWin.get_monitor());
 
         return !excludedApplications[appName]
-            && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
-            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
-            && w.meta_window.showing_on_its_workspace()
-            && monitors[w.meta_window.get_monitor()] == monitor
-            && focusMetaWindow != w.meta_window;
+            && metaWin.get_window_type() == Meta.WindowType.NORMAL
+            && metaWin.get_workspace() == global.screen.get_active_workspace()
+            && metaWin.showing_on_its_workspace()
+            && metaWin.get_monitor() == monitorIndex
+            && focus != metaWin;
     });
-
-    return windows;
 }
 
 function getWindowsOfMonitor(monitor) {
@@ -940,12 +960,13 @@ function presetResize(preset) {
       return;
     }
 
-    const workArea = workAreaRectByMonitorIndex(window.get_monitor());
+    const monitorIndex = window.get_monitor();
     const margin = new tspec.Size(
         gridSettings[SETTINGS_WINDOW_MARGIN],
         gridSettings[SETTINGS_WINDOW_MARGIN]);
+    const workArea = workAreaRectByMonitorIndex(monitorIndex).inset(margin);
 
-    const candidateRects = specs.map(spec => spec.toFrameRect(workArea, margin));
+    const candidateRects = specs.map(spec => spec.toFrameRect(workArea));
 
     // If the window is currently exactly the same size as a candidate rect,
     // use the next spec. Otherwise, use the first.
@@ -957,10 +978,16 @@ function presetResize(preset) {
         wrect + "] against [" + candidateRects.join(', ') + "]; got index " + matchIndex);
 
     const nextIndex = matchIndex === -1 ? 0 : (matchIndex + 1) % specs.length;
-    const spec = specs[nextIndex];
     const rect = candidateRects[nextIndex];
 
-    window.move_resize_frame(true, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+    if (!ADJUST_NEIGHBORS) {
+        moveWindowToRect(window, rect);
+        return;
+    }
+
+    const otherWindows = getNotFocusedWindowActorsOfMonitorIndex(monitorIndex)
+        .map(wa => wa.meta_window);
+    moveWindowToRectAndAdjustNeighbors(window, rect, otherWindows, workArea);
 }
 
 /*****************************************************************
@@ -1116,7 +1143,7 @@ AutoTileMainAndList.prototype = {
 
         let monitor = this.grid.monitor;
         let workArea = getWorkAreaByMonitor(monitor);
-        let windows = getNotFocusedWindowsOfMonitor(monitor);
+        let windows = getNotFocusedWindowActorsOfMonitor(monitor);
 
         move_resize_window_with_margins(
             focusMetaWindow,
@@ -1177,7 +1204,7 @@ AutoTileTwoList.prototype = {
         let monitor = this.grid.monitor;
         let workArea = getWorkAreaByMonitor(monitor);
 
-        let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
+        let windows = getNotFocusedWindowActorsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
 
         let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
         let winHeight = workArea.height/nbWindowOnEachSide;
@@ -1803,3 +1830,27 @@ GridElement.prototype = {
         this.active = null;
     }
 };
+
+function moveWindowToRect(window, rect) {
+    window.move_resize_frame(
+        true,
+        rect.origin.x,
+        rect.origin.y,
+        rect.size.width,
+        rect.size.height);
+}
+
+function moveWindowToRectAndAdjustNeighbors(window, rect, otherWindows, workArea) {
+    const move = new resizelib.MoveSpec(windowFrameRect(window), rect);
+    const otherRects = otherWindows.map(windowFrameRect);
+    log('windows.length = ' + otherWindows.length);
+    moveWindowToRect(window, rect);
+    const moves = resizelib.coincidentEdgeMoves(move, otherRects, workArea);
+    for (let i = 0; i < otherRects.length; i++) {
+        if (!moves[i]) {
+          continue;
+        }
+        log('moving window ' + i + 'to ' + moves[i].final);
+        moveWindowToRect(otherWindows[i], moves[i].final);
+    }
+}
