@@ -54,7 +54,7 @@ function enable() {
 }
 
 function disable() {
-  appPromise.then(app => app.enable())
+  appPromise.then(app => app.disable())
     .catch(x => {
       logLoadError('problem loading app: '+ x);
       throw x;
