@@ -7,7 +7,5 @@
     "allowUnreachableCode": true,
     "allowUnusedLabels": true,
     "outFile": "index.js"
-  },
-  "files": [
-  ]
+  }
 }

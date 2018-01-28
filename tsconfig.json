@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+  }
+}
