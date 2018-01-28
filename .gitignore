@@ -1,5 +1,11 @@
 # Package specific
 compiled_typescript.js
+bazel-gTile
+*.lock
+
+tilespec.js
+tilespec.spec.js
+resize.js
 
 # Legacy
 

@@ -1,5 +1,7 @@
 const System = imports.compiled_typescript.System;
 
+tile
+
 describe('Prep', function() {
   it("System should not be null", function() {
     expect(System).not.toBe(null);
@@ -13,7 +15,7 @@ describe('Loader', function() {
   });
 });
 
-System.import('tilespec').then((tilespec) => {
+System.import('tilespeco').then((tilespec) => {
 describe("TileSpec", function() {
   it("tilespec.parsePreset should work", function () {
     const roundtrip = function(s) {

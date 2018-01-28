@@ -71,7 +71,8 @@ export class XY {
     }
 
     project(b: XY): XY {
-        return b.scale(this.dot(b)/b.l2normSquared())
+        return b.scale(
+            this.dot(b)/b.l2normSquared());
     }
 
     scalarProjection(b: XY): number {
@@ -107,24 +108,29 @@ export class LineSegment {
         const otherDir = other.direction();
         const unitDot = this.direction().dot(otherDir);
         if (!withinTol(Math.abs(unitDot), 1, ADJOIN_DOT_PRODUCT_TOL)) {
-            return false
+            return false;
         }
-        // Basically parallel. Now measure the perpendicular distance between
-        // this.a and other.a->b.
-        const d = this.a.minus(other.a)
-        const perpDist = Math.abs(d.scalarProjection(otherDir));
-        return withinTol(perpDist, 0, distTol)
+        return this.lineDistance(other) < distTol
     }
 
-    // https://math.stackexchange.com/questions/210848/finding-the-shortest-distance-between-two-lines
-    distance(other: LineSegment) {
-        const x1 = this.a;
-        const x2 = this.b
-        const x = x1.minus(x2)
-        const y1 = other.a;
-        const d = x1.minus(y1)
-        const xparallel = x.scale(d.dot(x)/x.l2normSquared())
-        return d.minus(xparallel).l2norm()
+    // The distance between the lines of two line segments. If lines are not
+    // (close to) parallel, 0 is returned
+    lineDistance(other: LineSegment) {
+        return this.perpVectorBetweenLines(other).l2norm();
+    }
+
+    // The perpendicular vector between the lines of two line segments. If lines
+    // are not (close to) parallel, [0, 0] is returned
+    perpVectorBetweenLines(other: LineSegment) {
+        const otherDir = other.direction();
+        const unitDot = this.direction().dot(otherDir);
+        if (!withinTol(Math.abs(unitDot), 1, ADJOIN_DOT_PRODUCT_TOL)) {
+            return new XY(0, 0);
+        }
+        // Basically parallel. Now measure the perpendicular distance between
+        // this.a->other.a and other.a->other.b.
+        const d = other.a.minus(this.a)
+        return d.minus(d.project(otherDir));
     }
 }
 
@@ -208,10 +214,10 @@ export class Rect {
 }
 
 export enum Side {
-    Top = 1,
-    Right,
-    Bottom,
-    Left,
+    Top = "TOP",
+    Right = "RIGHT",
+    Bottom = "BOTTOM",
+    Left = "LEFT",
 }
 
 export class Edges {
@@ -229,6 +235,19 @@ export class Edges {
         }
     }
 }
+
+export function* adjoiningEdges(a: Edges, b: Edges, distTol: number) {
+    const sides = [Side.Top, Side.Bottom, Side.Left, Side.Right];
+
+    for (let sa of sides) {
+        for (let sb of sides) {
+            if (a.getSide(sa).adjoins(b.getSide(sb), distTol)) {
+                yield [sa, sb];
+            }
+        }
+    }
+}
+
 
 
 

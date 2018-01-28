@@ -24,18 +24,6 @@ export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, w
     return result;
 }
 
-function* adjoiningEdges(a: Edges, b: Edges) {
-    const sides = [Side.Top, Side.Bottom, Side.Left, Side.Right];
-
-    for (let sa of sides) {
-        for (let sb of sides) {
-            if (a.getSide(sa).adjoins(b.getSide(sb), 20)) {
-                yield [sa, sb];
-            }
-        }
-    }
-}
-
 /*
 export function isZero(spec: TileSpec) {
     return spec.gridWidth === 0;

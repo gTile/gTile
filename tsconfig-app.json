@@ -4,9 +4,12 @@
     "target": "es5",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
     "module": "system",                     /* Specify module code generation: 'none', commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
     "lib": ["es6"],                           /* Specify library files to be included in the compilation:  */
+    "declaration": false,                   /* Generates corresponding '.d.ts' file. */
+    "outFile": "./compiled_typescript.js",              /* Concatenate and emit output to single file. */
 
     "strict": true,                            /* Enable all strict type-checking options. */
     "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
+    "allowJs": true                       /* Allow javascript files to be compiled. */
 
     // "checkJs": true,                       /* Report errors in .js files. */
     // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
@@ -49,5 +52,12 @@
     /* Experimental Options */
     // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
-}
+},
+  "files": [
+    //"common.js",
+    "system-production.src.js",
+    "resize.ts",
+    "tilespec.ts",
+    "app.js"
+  ]
 }

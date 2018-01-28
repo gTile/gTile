@@ -1,0 +1,22 @@
+{
+    "name": "example",
+    "version": "0.0.1",
+    "description": "Demo of bazel rules for angular",
+    "license": "Apache 2.0",
+    "dependencies": {
+        "@bazel/ibazel": "0.3.1",
+        "@types/jasmine": "2.8.6",
+        "typescript": "2.6.2"
+    },
+    "scripts": {
+        "serve": "ibazel run //src:devserver",
+        "pree2e": "bazel build test/...",
+        "e2e": "concurrently \"bazel run //src:prodserver\" \"while ! nc -z 127.0.0.1 8080; do sleep 1; done && protractor\" --kill-others --success first",
+
+        "prebuildifier": "bazel build @com_github_bazelbuild_buildtools//buildifier",
+        "buildifier": "note: working around https://github.com/alexeagle/angular-bazel-example/issues/60",
+        "buildifier": "find . -type f \\( -name BUILD -or -name BUILD.bazel \\) ! -path \"./node_modules/*\" | xargs $(bazel info bazel-bin)/external/com_github_bazelbuild_buildtools/buildifier/*/buildifier",
+        "format": "git-clang-format",
+        "precommit": "check-clang-format \"yarn format\""
+    }
+}

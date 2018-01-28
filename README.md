@@ -144,4 +144,15 @@ To test the library, follow the installation instructions for
 jasmine extension_test.js
 ```
 
+## Building and testing with Bazel
+
+Run this rather than any npm commands. You do not need npm installed on your
+machine, nor any other libraries.
+
+```shell
+bazel run @yarn//:yarn
+```
+
+
+
 ## Enjoy!
