@@ -56,6 +56,7 @@
     //"common.js",
     "system-production.src.js",
     "resize.ts",
-    "tilespec.ts"
+    "tilespec.ts",
+    "app.js"
   ]
 }
