@@ -51,9 +51,9 @@ let keyControlBound = false;
 let debug = false;
 
 // Hangouts workaround
-let excludedApplications = new Array(
-    "Unknown"
-);
+let excludedApplications = {
+    "Unknown": true
+};
 
 const key_bindings = {
     'show-toggle-tiling': function() { toggleTiling(); }
@@ -496,7 +496,7 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
         //log("NotFocused - AppName: " + appName);
 
-        return !contains(excludedApplications, appName)
+        return !excludedApplications[appName]
             && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
             && w.meta_window.get_workspace() == global.screen.get_active_workspace()
             && w.meta_window.showing_on_its_workspace()
@@ -521,7 +521,7 @@ function getWindowsOfMonitor(monitor) {
 function _onFocus() {
     log("_onFocus ");
     resetFocusMetaWindow();
-    let window = getFocusApp();
+    let window = getFocusWindow();
 
     if (window && status) {
         log("_onFocus " + window.get_title());
@@ -556,7 +556,7 @@ function _onFocus() {
 
 function showTiling() {
     log("showTiling");
-    focusMetaWindow = getFocusApp();
+    focusMetaWindow = getFocusWindow();
     if(!focusMetaWindow) {
         log("No focus window");
         return;
@@ -572,7 +572,7 @@ function showTiling() {
             let grid = grids[key];
             //log("ancestor: "+grid.actor.get_parent());
 
-            let window = getFocusApp();
+            let window = getFocusWindow();
             let pos_x;
             let pos_y;
             if (window.get_monitor() == monitorIdx) {
@@ -642,28 +642,14 @@ function contains(a, obj) {
     return false;
 }
 
-function getFocusApp() {
-    if (tracker.focus_app == null) {
-        return false;
+function getFocusWindow() {
+    const focus_app = tracker.focus_app;
+    if (!focus_app || excludedApplications[focus_app.get_name()]) {
+        return null;
     }
 
-    let focusedAppName = tracker.focus_app.get_name();
-
-    if (contains(excludedApplications, focusedAppName)) {
-        return false;
-    }
-
-    let windows = global.screen.get_active_workspace().list_windows();
-    let focusedWindow = false;
-    for (let i = 0; i < windows.length; ++i) {
-        let metaWindow = windows[i];
-        if (metaWindow.has_focus()) {
-            focusedWindow = metaWindow;
-            break;
-        }
-    }
-
-    return focusedWindow;
+    return global.screen.get_active_workspace().list_windows()
+        .find(w => w.has_focus());
 }
 
 function activeMonitors() {
@@ -933,7 +919,7 @@ function presetResize(preset) {
     // x1:y1 is left upper corner coordinates in grid tiles, starting from 0
     // x2:y2 is right down corner coordinates in grid tiles
 
-    let window = getFocusApp();
+    let window = getFocusWindow();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut");
         return;
