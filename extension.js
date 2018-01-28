@@ -85,6 +85,10 @@ const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
 
+// When matching window rectangles, use this as the max pixel delta.  This value
+// should be more than 0 because windows may slightly adjust themselves after
+// a move. For example, the terminal will resize to fit a line of text.
+const PRESET_CYCLING_PIXEL_TOLERANCE = 20;
 
 
 // Emitted when a new monitor is connected. See gnome-shell/js/ui/layout.js.
@@ -1003,25 +1007,6 @@ function presetResize(preset) {
 
     reset_window(window);
 
-    log("register = " + Extension.imports.gtileslib.System.getConfig());
-    log("system has tilespec? " + System.registry.has('tilespec'));
-    log("system has ./tilespec? " + System.registry.has('./tilespec'));
-    log("system has https://iodb.org/tilespec? " + System.registry.has('https://iodb.org/tilespec'));
-    log("System.listKeys() = " + System.listKeys());
-    log("System.listKeys() length " + System.listKeys().length);
-    for (let key of System.registry.keys()) {
-      log("System.registry.keys() contains  " + key);
-    }
-    const p = System.import("tilespec");
-    p.then((x) => log('TILESPEC RESOLVED'))
-     .catch((x) => log('TILESPEC RESOLVE FAILED'));
-    globalP = p;
-    log("tried to import, got  " + p);
-    log("resolveSync(tilespec) = " + System.resolveSync('tilespec'));
-    tspec = System.registry.get(System.resolveSync('tilespec'));
-
-
-
     let presetString = settings.get_string("resize" + preset);
     log("Preset resize " + preset + "  is " + presetString);
     let specs;
@@ -1045,7 +1030,11 @@ function presetResize(preset) {
     // If the window is currently exactly the same size as a candidate rect,
     // use the next spec. Otherwise, use the first.
     const wrect = windowFrameRect(window);
-    let matchIndex = candidateRects.findIndex(crect => crect.equal(wrect));
+    let matchIndex = candidateRects.findIndex(
+        crect => crect.equal(wrect, PRESET_CYCLING_PIXEL_TOLERANCE));
+
+    log("Tried to match window rect [" +
+        wrect + "] against [" + candidateRects.join(', ') + "]; got index " + matchIndex);
 
     const nextIndex = matchIndex === -1 ? 0 : (matchIndex + 1) % specs.length;
     const spec = specs[nextIndex];

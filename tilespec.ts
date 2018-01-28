@@ -78,11 +78,12 @@ export class Rect {
         return [this.origin, this.size].join(' ');
     }
 
-    equal(r: Rect) {
-        return (this.origin.x === r.origin.x &&
-                this.origin.y === r.origin.y &&
-                this.size.width === r.size.width &&
-                this.size.height === r.size.height);
+    equal(r: Rect, tol: number) {
+        const close = (a: number, b: number) => Math.abs(a - b) <= tol;
+        return (close(this.origin.x, r.origin.x) &&
+                close(this.origin.y,  r.origin.y) &&
+                close(this.size.width,  r.size.width) &&
+                close(this.size.height,  r.size.height));
     }
 }
 

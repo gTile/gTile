@@ -957,15 +957,6 @@ RegisterLoader$1.prototype.register = function (key, deps, declare) {
   }
 };
 
-RegisterLoader$1.prototype.listKeys = function () {
-  const state = this[REGISTER_INTERNAL];
-  const result = [];
-  for (var key in state.records) {
-    result.push(key);
-  }
-  return result;
-};
-
 /*
  * System.registerDyanmic
  */
@@ -1764,10 +1755,6 @@ systemJSPrototype.getConfig = function (name) {
     depCache: depCache,
     map: map
   };
-};
-
-systemJSPrototype.listKeys = function () {
-  return RegisterLoader$1.prototype.listKeys.call(this);
 };
 
 // ensure System.register and System.registerDynamic decanonicalize
