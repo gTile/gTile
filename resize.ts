@@ -1,4 +1,4 @@
-import { TileSpec, Rect, XY } from "./tilespec"
+import { TileSpec, Rect, XY, Side, Edges } from "./tilespec"
 
 /** The vector space representation of moving window */
 export class MoveSpec {
@@ -24,8 +24,16 @@ export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, w
     return result;
 }
 
-function adjoiningEdges(a: Rect, b: Rect) {
+function* adjoiningEdges(a: Edges, b: Edges) {
+    const sides = [Side.Top, Side.Bottom, Side.Left, Side.Right];
 
+    for (let sa of sides) {
+        for (let sb of sides) {
+            if (a.getSide(sa).adjoins(b.getSide(sb), 20)) {
+                yield [sa, sb];
+            }
+        }
+    }
 }
 
 /*

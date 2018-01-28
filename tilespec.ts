@@ -220,14 +220,13 @@ export class Edges {
     bottom: LineSegment;
     left: LineSegment;
 
-    getSide(s: Side) {
+    getSide(s: Side): LineSegment {
         switch (s) {
         case Side.Top:    return this.top;
         case Side.Right:  return this.right;
         case Side.Bottom: return this.bottom;
         case Side.Left:   return this.left;
         }
-        return undefined;
     }
 }
 
