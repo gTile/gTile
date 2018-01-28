@@ -32,6 +32,7 @@ const Workspace = imports.ui.workspace;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 const hotkeys = Extension.imports.hotkeys;
+const tspec = Extension.imports.tilespec;
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -715,6 +716,21 @@ function getWorkAreaByMonitorIdx(monitor_idx) {
     return getWorkArea(monitor, monitor_idx);
 }
 
+function workAreaRectByMonitorIndex(monitor_idx) {
+    const monitor = activeMonitors()[monitor_idx];
+    const waLegacy = getWorkArea(monitor, monitor_idx);
+    return new tspec.Rect(
+      new tspec.XY(waLegacy.x, waLegacy.y),
+      new tspec.Size(waLegacy.width, waLegacy.height));
+}
+
+function windowFrameRect(window) {
+  const grect = window.get_frame_rect();
+  return new tspec.Rect(
+      new tspec.XY(grect.x, grect.y),
+      new tspec.Size(grect.width, grect.height));
+}
+
 function getWorkArea(monitor, monitor_idx) {
     const wkspace = global.screen.get_active_workspace();
     const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
@@ -950,40 +966,36 @@ function presetResize(preset) {
 
     reset_window(window);
 
-    let preset_string = settings.get_string("resize" + preset);
-    log("Preset resize " + preset + "  is " + preset_string);
-    let ps = preset_string.split(" ");
-    if(ps.length != 3) {
-        log("Bad preset " + preset + " settings " + preset_string);
-        return;
+    let presetString = settings.get_string("resize" + preset);
+    log("Preset resize " + preset + "  is " + presetString);
+    let specs;
+    try {
+      specs = tspec.parsePreset(presetString);
+    } catch (e) {
+      log("Problem parsing preset: " + e);
+      return;
     }
-    let grid_format = parseTuple(ps[0], "x");
-    let luc = parseTuple(ps[1], ":");
-    let rdc = parseTuple(ps[2], ":");
-    log("Parsed " + grid_format.X + "x" + grid_format.Y + " "
-        + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
-    if  (  grid_format.X < 1 || luc.X < 0 || rdc.X < 0
-        || grid_format.Y < 1 || luc.Y < 0 || rdc.Y < 0
-        || grid_format.X <= luc.X || grid_format.X <= rdc.X
-        || grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y
-        || luc.X > rdc.X || luc.Y > rdc.Y) {
-        log("Bad preset " + preset + " settings " + preset_string);
-        return;
+    if (!specs) {
+      return;
     }
-    log("Parsed preset " + preset + " " + grid_format.X + "x" + grid_format.Y +
-        " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
 
-    let mind = window.get_monitor();
-    let work_area = getWorkAreaByMonitorIdx(mind);
-    let grid_element_width = Math.floor(work_area.width / grid_format.X);
-    let grid_element_height = Math.floor(work_area.height / grid_format.Y);
-    let wx = work_area.x + luc.X * grid_element_width + gridSettings[SETTINGS_WINDOW_MARGIN];
-    let wy = work_area.y + luc.Y * grid_element_height + gridSettings[SETTINGS_WINDOW_MARGIN];
-    let ww = (rdc.X + 1 - luc.X) * grid_element_width - 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
-    let wh = (rdc.Y + 1 - luc.Y) * grid_element_height- 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
+    const workArea = workAreaRectByMonitorIndex(window.get_monitor());
+    const margin = new tspec.Size(
+        gridSettings[SETTINGS_WINDOW_MARGIN],
+        gridSettings[SETTINGS_WINDOW_MARGIN]);
 
-    log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
-    window.move_resize_frame(true, wx, wy, ww, wh);
+    const candidateRects = specs.map(spec => spec.toFrameRect(workArea, margin));
+
+    // If the window is currently exactly the same size as a candidate rect,
+    // use the next spec. Otherwise, use the first.
+    const wrect = windowFrameRect(window);
+    let matchIndex = candidateRects.findIndex(crect => crect.equal(wrect));
+
+    const nextIndex = matchIndex === -1 ? 0 : (matchIndex + 1) % specs.length;
+    const spec = specs[nextIndex];
+    const rect = candidateRects[nextIndex];
+
+    window.move_resize_frame(true, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
 /*****************************************************************

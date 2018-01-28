@@ -118,5 +118,30 @@ It was originally developed by [vibou](https://github.com/vibou) with help from 
 
 gTile is licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html)
 
+### Typescript compilation
+
+The repository contains TypeScript files (.ts) and compiled versions of these
+files. If you wish to modify the .ts files, you will need to install `tsc`, the
+TypeScript compiler:
+
+```shell
+npm install -g typescript
+```
+
+Then run the compiler in the root of the gTiles repo. The `--watch` argument
+will automatically compile
+
+```shell
+tsc --watch
+```
+
+### Tests
+
+To test the library, follow the installation instructions for
+[jasmine-gjs](https://github.com/ptomato/jasmine-gjs). Then, run
+
+```shell
+jasmine extension_test.js
+```
 
 ## Enjoy!

@@ -5,57 +5,123 @@
  * The syntax
  */
 class TileSpec {
-    rows: Number;
-    cols: Number
+    gridWidth: number;
+    gridHeight: number;
     luc: XY;
     rdc: XY;
 
-    //    constructor(x: Number, y: Number, lucX: Number, lucY: Number, rdcX: Number, rdcY: Number) {
-    constructor(rows: Number, cols: Number, luc, rdc: XY) {
-        this.rows = rows
-        this.cols = cols;
+    constructor(gridWidth: number, gridHeight: number, luc: XY, rdc: XY) {
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
         this.luc = luc;
         this.rdc = rdc;
+    }
+
+    toString() {
+        return [[this.gridWidth, this.gridHeight].join('x'),
+                [this.luc.x, this.luc.y].join(':'),
+                [this.rdc.x, this.rdc.y].join(':')].join(' ');
+    }
+
+    toFrameRect(workArea: Rect, margin: Size) {
+        const elemSize = new Size(
+            Math.floor(workArea.size.width / this.gridWidth),
+            Math.floor(workArea.size.height / this.gridHeight));
+        return new Rect(
+            new XY(
+                workArea.origin.x + margin.width + this.luc.x * elemSize.width,
+                workArea.origin.y + margin.height + this.luc.y * elemSize.height),
+            new Size((this.rdc.x + 1 - this.luc.x) * elemSize.width - 2 * margin.width,
+                     (this.rdc.y + 1 - this.luc.y) * elemSize.height- 2 * margin.height));
     }
 }
 
 class XY {
-    x: Number;
-    y: Number;
-    constructor(x, y: Number) {
-        this.x, this.y = x, y;
+    x: number;
+    y: number;
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    toString() {
+        return 'XY(' + [this.x, this.y].join(', ') + ')';
     }
 }
 
-/** parsePreset parses a string like "0x0" */
+class Size {
+    width: number;
+    height: number;
+    constructor(width: number, height: number) {
+        this.width = width;
+        this.height = height;
+    }
+
+    toString() {
+        return [this.width, this.height].join('x')
+    }
+}
+
+/**
+ * A screen rectangle. A (0, 0) origin represents the top left of a display
+ * area. Units are typically pixels.
+ */
+class Rect {
+    origin: XY;
+    size: Size;
+    constructor(origin: XY, size: Size) {
+        this.origin = origin;
+        this.size = size;
+    }
+
+    toString() {
+        return [this.origin, this.size].join(' ');
+    }
+
+    equal(r: Rect) {
+        return (this.origin.x === r.origin.x &&
+                this.origin.y === r.origin.y &&
+                this.size.width === r.size.width &&
+                this.size.height === r.size.height);
+    }
+}
+
+/** parsePreset parses a string like "8x8 0:0 0:7, 8x8 0:0 2:7" */
 function parsePreset(preset: string) {
-    const ps = preset.split(" ");
+    return preset.split(",")
+        .map(x => x.trim())
+        .map(parseSinglePreset);
+}
+
+function parseSinglePreset(preset: string) {
+    const ps = preset.trim().split(" ");
     if(ps.length != 3) {
         throw new Error("Bad preset: " + preset);
     }
-    const grid_format = parseTuple(ps[0], "x");
+    const gridFormat = parseTuple(ps[0], "x");
     const luc = parseTuple(ps[1], ":");
     const rdc = parseTuple(ps[2], ":");
 
-    //log("Parsed " + grid_format.x + "x" + grid_format.y + " "
-        //+ luc.x + ":" + luc.y + " " + rdc.x + ":" + rdc.y);
-    if  (  grid_format.x < 1 || luc.x < 0 || rdc.x < 0
-        || grid_format.y < 1 || luc.y < 0 || rdc.y < 0
-        || grid_format.x <= luc.x || grid_format.x <= rdc.x
-        || grid_format.y <= luc.y || grid_format.y <= rdc.y
+    if  (  gridFormat.x < 1 || luc.x < 0 || rdc.x < 0
+        || gridFormat.y < 1 || luc.y < 0 || rdc.y < 0
+        || gridFormat.x <= luc.x || gridFormat.x <= rdc.x
+        || gridFormat.y <= luc.y || gridFormat.y <= rdc.y
         || luc.x > rdc.x || luc.y > rdc.y) {
         throw new Error("Bad preset: " + preset);
     }
-    return new TileSpec(grid_format.x, grid_format.y, luc, rdc);
+    return new TileSpec(gridFormat.x, gridFormat.y, luc, rdc);
 }
 
-function parseTuple(format, delimiter) {
-    // parsing grid size in format XdelimY, like 6x4 or 1:2
-    let gssk = format.split(delimiter);
-    if(gssk.length != 2
-        || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 40
-        || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 40) {
-        throw new Error("Bad format " + format + ", delimiter " + delimiter);
+function parseTuple(unparsed: string, delim: string) {
+    // parsing grid size in unparsed XdelimY, like 6x4 or 1:2
+    const gssk = unparsed.split(delim);
+
+    if(gssk.length != 2) {
+        throw new Error("Failed to split " + unparsed + " by delimiter " + delim + " into two numbers");
     }
-    return new XY(Number(gssk[0]), Number(gssk[1]));
+    const numbers = gssk.map(Number);
+    if (numbers.some(n => isNaN(n) || n < 0 || n > 40)) {
+        throw new Error("All elements of tuple must be intgers in [0, 40] : " + unparsed)
+    }
+    return new XY(numbers[0], numbers[1]);
 }
