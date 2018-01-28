@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "amd",
+    "rootDir": ".",
+    "allowJs": true,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+    "outFile": "index.js"
+  },
+  "files": [
+  ]
+}
