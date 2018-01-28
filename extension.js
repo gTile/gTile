@@ -32,7 +32,40 @@ const Workspace = imports.ui.workspace;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 const hotkeys = Extension.imports.hotkeys;
-const tspec = Extension.imports.tilespec;
+const System = Extension.imports.compiled_typescript.System;
+
+let appPromise = null;
+
+function init() {
+  appPromise = Promise.all(['tilespec'].map(x => System.import(x)))
+    .then(libs => loadApp.apply(this, libs))
+    .catch(x => {
+      logLoadError('problem loading libraries: '+ x);
+      throw x;
+    });
+}
+
+function enable() {
+  appPromise.then(app => app.enable())
+    .catch(x => {
+      logLoadError('problem loading app: '+ x);
+      throw x;
+    });
+}
+
+function disable() {
+  appPromise.then(app => app.enable())
+    .catch(x => {
+      logLoadError('problem loading app: '+ x);
+      throw x;
+    });
+}
+
+function logLoadError(msg) {
+  global.log("gTile: load error " + msg);
+}
+
+function loadApp(tspec) {
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -51,6 +84,8 @@ const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
+
+
 
 // Emitted when a new monitor is connected. See gnome-shell/js/ui/layout.js.
 const MONITORS_CHANGED_EVENT = 'monitors-changed';
@@ -952,6 +987,8 @@ function keyMoveResizeEvent(type, key) {
 
 }
 
+let globalP = null;
+
 function presetResize(preset) {
     // Expected preset format is XxY x1:y1 x2:y2
     // XxY is grid size like 6x8
@@ -965,6 +1002,25 @@ function presetResize(preset) {
     }
 
     reset_window(window);
+
+    log("register = " + Extension.imports.gtileslib.System.getConfig());
+    log("system has tilespec? " + System.registry.has('tilespec'));
+    log("system has ./tilespec? " + System.registry.has('./tilespec'));
+    log("system has https://iodb.org/tilespec? " + System.registry.has('https://iodb.org/tilespec'));
+    log("System.listKeys() = " + System.listKeys());
+    log("System.listKeys() length " + System.listKeys().length);
+    for (let key of System.registry.keys()) {
+      log("System.registry.keys() contains  " + key);
+    }
+    const p = System.import("tilespec");
+    p.then((x) => log('TILESPEC RESOLVED'))
+     .catch((x) => log('TILESPEC RESOLVE FAILED'));
+    globalP = p;
+    log("tried to import, got  " + p);
+    log("resolveSync(tilespec) = " + System.resolveSync('tilespec'));
+    tspec = System.registry.get(System.resolveSync('tilespec'));
+
+
 
     let presetString = settings.get_string("resize" + preset);
     log("Preset resize " + preset + "  is " + presetString);
@@ -1838,3 +1894,6 @@ GridElement.prototype = {
         this.active = null;
     }
 };
+
+  return {enable: enable, disable: disable };
+}

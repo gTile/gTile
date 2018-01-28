@@ -4,7 +4,7 @@
  *
  * The syntax
  */
-class TileSpec {
+export class TileSpec {
     gridWidth: number;
     gridHeight: number;
     luc: XY;
@@ -36,7 +36,7 @@ class TileSpec {
     }
 }
 
-class XY {
+export class XY {
     x: number;
     y: number;
     constructor(x: number, y: number) {
@@ -49,7 +49,7 @@ class XY {
     }
 }
 
-class Size {
+export class Size {
     width: number;
     height: number;
     constructor(width: number, height: number) {
@@ -66,7 +66,7 @@ class Size {
  * A screen rectangle. A (0, 0) origin represents the top left of a display
  * area. Units are typically pixels.
  */
-class Rect {
+export class Rect {
     origin: XY;
     size: Size;
     constructor(origin: XY, size: Size) {
@@ -87,7 +87,7 @@ class Rect {
 }
 
 /** parsePreset parses a string like "8x8 0:0 0:7, 8x8 0:0 2:7" */
-function parsePreset(preset: string) {
+export function parsePreset(preset: string) {
     return preset.split(",")
         .map(x => x.trim())
         .map(parseSinglePreset);
