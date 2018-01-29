@@ -44,6 +44,9 @@ export class XY {
         this.x = x;
         this.y = y;
     }
+    clone() {
+        return new XY(this.x, this.y);
+    }
 
     toString() {
         return 'XY(' + [this.x, this.y].join(', ') + ')';
@@ -156,6 +159,10 @@ export class Size {
         this.width = width;
         this.height = height;
     }
+    clone() {
+        return new Size(this.width, this.height);
+    }
+
 
     toString() {
         return [this.width, this.height].join('x')
@@ -172,6 +179,9 @@ export class Rect {
     constructor(origin: XY, size: Size) {
         this.origin = origin;
         this.size = size;
+    }
+    clone() {
+        return new Rect(this.origin.clone(), this.size.clone());
     }
 
     toString() {
@@ -210,6 +220,41 @@ export class Rect {
         rv.bottom = seg(c, d);
         rv.left = seg(a, c);
         return rv;
+    }
+
+    translate(vec: XY) {
+        return new Rect(this.origin.plus(vec), this.size);
+    }
+
+    // Increases or decreases the size of the rectangle by moving one of its
+    // edges d units along the postive x or y axis, where positive x is right
+    // and positive y is down.
+    translateEdge(side: Side, d: number): Rect {
+        const [w, h] = [this.size.width, this.size.height];
+        switch (side) {
+        case Side.Top:
+            return new Rect(this.origin.plus(new XY(0, d)), new Size(w, h-d));
+        case Side.Bottom:
+            return new Rect(this.origin,                    new Size(w, h+d));
+        case Side.Right:
+            return new Rect(this.origin,                    new Size(w+d, h));
+        case Side.Left:
+            return new Rect(this.origin.plus(new XY(d, 0)), new Size(w-d, h));
+        default:
+            throw TypeError('bad side type ' + side);
+        }
+            /*
+
+        const d = (side === Side.Top || side === Side.Bottom) ?
+            new XY(0, sizeDelta) :
+            new XY(sizeDelta, 0);
+        const size = new Size(this.size.width+d.x, this.size.height+d.y)
+
+        if (side === Side.Bottom || side === Side.Right) {
+            return new Rect(this.origin, size);
+        }
+        return new Rect(this.origin.plus(d),  size);
+*/
     }
 }
 

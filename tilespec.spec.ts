@@ -87,6 +87,56 @@ describe("adjoiningEdges", function() {
                 [Side.Right, Side.Right],
             ]);
     });
+
+    it("rect adjoins with a shifted copy (shift right)", function() {
+        const b = a.translate(new XY(a.size.width, 20));
+        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+            .toEqual([
+                [Side.Right, Side.Left],
+            ]);
+    });
+    it("rect adjoins with a shifted copy (shift down)", function() {
+        const b = a.translate(new XY(20, a.size.height));
+        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+            .toEqual([
+                [Side.Bottom, Side.Top],
+            ]);
+    });
+    it("rect adjoins with a shifted copy (shift left)", function() {
+        const b = a.translate(new XY(-a.size.width,20));
+        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+            .toEqual([
+                [Side.Left, Side.Right],
+            ]);
+    });
+    it("rect adjoins with a shifted copy (shift up)", function() {
+        const b = a.translate(new XY(32, -a.size.height));
+        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+            .toEqual([
+                [Side.Top, Side.Bottom],
+            ]);
+    });
+});
+
+describe("Rect.translateEdge", function() {
+    const a = new Rect(new XY(10, 10), new Size(42, 80));
+
+    it("increase bottom", function() {
+        expect(a.translateEdge(Side.Bottom, 4))
+            .toEqual(new Rect(new XY(10, 10), new Size(42, 84)));
+    });
+    it("increase top", function() {
+        expect(a.translateEdge(Side.Top, 4))
+            .toEqual(new Rect(new XY(10, 14), new Size(42, 76)));
+    });
+    it("increase right", function() {
+        expect(a.translateEdge(Side.Right, 4))
+            .toEqual(new Rect(new XY(10, 10), new Size(46, 80)));
+    });
+    it("increase left", function() {
+        expect(a.translateEdge(Side.Left, -3))
+            .toEqual(new Rect(new XY(7, 10), new Size(45, 80)));
+    });
 });
 
 function asArray<T>(x: Array<T>): Array<T> {
