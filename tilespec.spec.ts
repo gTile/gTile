@@ -139,6 +139,21 @@ describe("Rect.translateEdge", function() {
     });
 });
 
+describe("Rect.intersection", function() {
+    const a = new Rect(new XY(10, 100), new Size(42, 80));
+    const b = new Rect(new XY(40, 99), new Size(42, 80));
+
+    it("area of intersection", function() {
+        expect(a.intersection(b).size.area())
+            .toEqual(79*12);
+    });
+
+    it("intersection", function() {
+        expect(a.intersection(b))
+            .toEqual(new Rect(new XY(40, 100), new Size(12, 79)));
+    });
+});
+
 function asArray<T>(x: Array<T>): Array<T> {
     let list = [];
     for (let item of x) {

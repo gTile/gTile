@@ -1,4 +1,4 @@
-import { TileSpec, Rect, XY, Side, Edges } from "./tilespec"
+import { TileSpec, Rect, Size, XY, Side, Edges, adjoiningEdges } from "./tilespec"
 
 /** The vector space representation of moving window */
 export class MoveSpec {
@@ -12,71 +12,96 @@ export class MoveSpec {
     isZero() {
         return this.initial.equal(this.final, 1);
     }
+
+    edgeTranslationDistance(side: Side): number {
+        const initEdge = this.initial.edges().getSide(side);
+        const finalEdge = this.final.edges().getSide(side);
+        const translationAxis = (side === Side.Top || side === Side.Bottom) ?
+            new XY(0, 1) : new XY(1, 0);
+        const displacementA = finalEdge.a.minus(initEdge.a);
+        return displacementA.scalarProjection(translationAxis);
+    }
 }
 
-export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, workArea: Rect) {
+export class CoincidentMoveOptions {
+    minSize: Size
+
+    constructor(min: Size) {
+        this.minSize = min
+    }
+}
+
+export const DEFAULT_COINCIDENT_MOVE_OPTIONS = new CoincidentMoveOptions(
+    new Size(200, 200)
+);
+
+/**
+ * Given the move of one window, find coincident edges of other windows and
+ * suggest moves if appropriate.
+ */
+export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, workArea: Rect, opts: CoincidentMoveOptions) {
     //const result: Array<MoveSpec> = otherWindows.map(x => null);
     const result: { [s: number]: MoveSpec  } = {};
 
-    if (otherWindows.length === 3) {
-        result[1] = move;
+    const workAreaPixels = workArea.size.area();
+    if (workAreaPixels < opts.minSize.area()) {
+        return result;
     }
+
+    for (let i = 0; i < otherWindows.length; i++) {
+        const suggestion = coincidentEdgeMove(move, otherWindows[i], workArea, opts);
+        if (suggestion) {
+            result[i] = new MoveSpec(otherWindows[i], suggestion);
+        }
+    }
+
     return result;
 }
 
-/*
-export function isZero(spec: TileSpec) {
-    return spec.gridWidth === 0;
-}
+const TOL = .04;
 
-function (workArea: Rect, margin: Size, totalWindowCount: number): Array<TileSpec> {
+function coincidentEdgeMove(move: MoveSpec, otherWindow: Rect, workArea: Rect, opts: CoincidentMoveOptions) {
+    const initialEdges = move.initial.edges();
 
-}
-
-function mainAndListRects(workArea: Rect, margin: Size, totalWindowCount: number): Array<TileSpec> {
-    if (totalWindowCount === 0) {
-        return [];
-    }
-
-    if (!focusMetaWindow) {
-        return;
-    }
-        reset_window(focusMetaWindow);
-
-        let monitor = this.grid.monitor;
-        let workArea = getWorkAreaByMonitor(monitor);
-        let windows = getNotFocusedWindowsOfMonitor(monitor);
-
-        move_resize_window_with_margins(
-            focusMetaWindow,
-            workArea.x,
-            workArea.y,
-            workArea.width/2,
-            workArea.height);
-
-        let winHeight = workArea.height/windows.length;
-        let countWin = 0;
-
-        //log("MonitorHeight: "+monitor.height+":"+windows.length );
-
-        for (let windowIdx in windows) {
-            let metaWindow = windows[windowIdx].meta_window;
-
-            let newOffset = workArea.y + (countWin * winHeight);
-            reset_window(metaWindow);
-
-            move_resize_window_with_margins(
-                metaWindow,
-                workArea.x + workArea.width/2,
-                newOffset,
-                workArea.width/2,
-                winHeight
-            );
-            countWin++;
+    // Return a score from 0 to 1.
+    const scoreCandidate = (r: Rect) => {
+        if (tooSmall(r.size, opts)) {
+            return 0
+        }
+        const wsIsect = r.intersection(workArea);
+        if (wsIsect.size.area() / r.size.area() < .08) {
+            return 0
         }
 
-        log("AutoTileMainAndList _onButtonPress Emitting signal resize-done");
-        this.emit('resize-done');
+        return 1;
     }
+
+    let candidateRect = otherWindow;
+    let anyCoincident = false;
+    let currentScore = 0.1;
+    // For each matching edge, compute the translation amount from the
+    // move. Use this to translate otherWindow.
+    for (const [moveRectSide, otherEdgeSide] of
+         adjoiningEdges(move.initial.edges(), otherWindow.edges(), TOL)) {
+        if (moveRectSide === otherEdgeSide) {
+            continue;
+        }
+        const moveTrans = move.edgeTranslationDistance(moveRectSide);
+        const r = candidateRect.translateEdge(otherEdgeSide, moveTrans);
+        const score = scoreCandidate(r);
+        if (score >= currentScore) {
+            currentScore = score;
+            candidateRect = r;
+            anyCoincident = true;
+        }
+    }
+    if (anyCoincident) {
+        return candidateRect;
+    }
+    return null;
 }
-*/
+
+function tooSmall(s: Size, opts: CoincidentMoveOptions) {
+    return s.width < opts.minSize.width ||
+        s.height < opts.minSize.height;
+}

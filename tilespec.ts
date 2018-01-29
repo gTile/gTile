@@ -137,21 +137,6 @@ export class LineSegment {
     }
 }
 
-/*export class Line {
-    origin: XY;
-    direction: XY;
-    static fromTwoPoints(a: XY, b: XY) {
-        const l = new Line();
-        l.origin = a
-        l.direction = b.minus(a).unit()
-        return l
-    }
-
-}
-*/
-
-
-
 export class Size {
     width: number;
     height: number;
@@ -166,6 +151,10 @@ export class Size {
 
     toString() {
         return [this.width, this.height].join('x')
+    }
+
+    area() {
+        return this.width*this.height;
     }
 }
 
@@ -243,6 +232,40 @@ export class Rect {
         default:
             throw TypeError('bad side type ' + side);
         }
+    }
+
+    topLeft() {
+        return this.origin
+    }
+
+    topRight() {
+        return this.origin.plus(new XY(this.size.width, 0))
+    }
+
+    bottomRight() {
+        return this.origin.plus(new XY(this.size.width, this.size.height))
+    }
+
+    bottomLeft() {
+        return this.origin.plus(new XY(0, this.size.height))
+    }
+
+    intersection(other: Rect): Rect {
+        // Not optimized, but that's not necessary.
+        const origin = new XY(Math.max(this.topLeft().x, other.topLeft().x),
+                              Math.max(this.topLeft().y, other.topLeft().y));
+        const br = new XY(Math.min(this.bottomRight().x, other.bottomRight().x),
+                          Math.min(this.bottomRight().y, other.bottomRight().y));
+        const sizeXY = br.minus(origin);
+        const size = new Size(sizeXY.x, sizeXY.y);
+        if (size.width < 0 || size.height < 0) {
+            return new Rect(new XY(0, 0), new Size(0, 0));
+        }
+        return new Rect(origin, size);
+    }
+
+    valid() {
+        return this.size.width >= 0 && this.size.height >= 0
     }
 }
 

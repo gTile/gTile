@@ -1845,7 +1845,8 @@ function moveWindowToRectAndAdjustNeighbors(window, rect, otherWindows, workArea
     const otherRects = otherWindows.map(windowFrameRect);
     log('windows.length = ' + otherWindows.length);
     moveWindowToRect(window, rect);
-    const moves = resizelib.coincidentEdgeMoves(move, otherRects, workArea);
+    const moves = resizelib.coincidentEdgeMoves(
+        move, otherRects, workArea, resizelib.DEFAULT_COINCIDENT_MOVE_OPTIONS);
     for (let i = 0; i < otherRects.length; i++) {
         if (!moves[i]) {
           continue;

@@ -21,10 +21,23 @@ ts_library(
 )
 
 ts_library(
+    name = "resize_lib",
+    srcs = ["resize.ts"],
+    tsconfig = "//:tsconfig.json",
+    deps = [":tilespec_lib"],
+)
+
+ts_library(
     name = "tests",
     testonly = 1,
-    srcs = ["tilespec.spec.ts"],
-    deps = [":tilespec_lib"],
+    srcs = [
+        "resize.spec.ts",
+        "tilespec.spec.ts",
+    ],
+    deps = [
+        ":resize_lib",
+        ":tilespec_lib",
+    ],
 )
 
 ts_web_test(
