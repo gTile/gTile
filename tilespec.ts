@@ -243,18 +243,6 @@ export class Rect {
         default:
             throw TypeError('bad side type ' + side);
         }
-            /*
-
-        const d = (side === Side.Top || side === Side.Bottom) ?
-            new XY(0, sizeDelta) :
-            new XY(sizeDelta, 0);
-        const size = new Size(this.size.width+d.x, this.size.height+d.y)
-
-        if (side === Side.Bottom || side === Side.Right) {
-            return new Rect(this.origin, size);
-        }
-        return new Rect(this.origin.plus(d),  size);
-*/
     }
 }
 
