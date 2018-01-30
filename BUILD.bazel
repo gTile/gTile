@@ -1,6 +1,37 @@
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//:__subpackages__"])
 
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@build_bazel_rules_typescript//:defs.bzl", "ts_library", "ts_web_test")
+
+# Building the distribution.
+
+# Install the extension to ~/.local/share/gnome-shell/extensions
+sh_binary(
+    name = "install-extension",
+    srcs = ["install-extension.sh"],
+    data = [":dist"],
+)
+
+# Output a dist.tar.gz folder to bazel-bin for distribution.
+pkg_tar(
+    name = "dist",
+    srcs = [":dist_files"],
+    extension = "tar.gz",
+    mode = "0444",
+    strip_prefix = ".",
+)
+
+filegroup(
+    name = "dist_files",
+    srcs = [
+        "compiled_typescript.js",
+        "extension.js",
+        "hotkeys.js",
+        "metadata.json",
+        "schemas/gschemas.compiled",
+        "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
+    ],
+)
 
 exports_files(["tsconfig.json"])
 

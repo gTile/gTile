@@ -153,6 +153,9 @@ machine, nor any other libraries.
 bazel run @yarn//:yarn
 ```
 
+### Install
+
+bazel run :copy-to-extensions-folder
 
 
 ## Enjoy!
