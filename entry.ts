@@ -1,12 +1,6 @@
 import { enable as e, disable as d } from "./app"
 
-function init() {
-}
+// GJS import system
+declare function registerExtension(i:Function, e:Function, d:Function);
 
-function enable() {
-    e();
-}
-
-function disable() {
-    d();
-}
+registerExtension(function() {}, e, d);

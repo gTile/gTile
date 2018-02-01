@@ -155,7 +155,27 @@ bazel run @yarn//:yarn
 
 ### Install
 
-bazel run :copy-to-extensions-folder
+```shell
+bazel run :install-extension
+```
+
+
+Solution
+
+
+```js
+const extToplevel = {};
+
+function init() {}
+function enable() { extToplevel.enable(); }
+function disable() { extToplevel.disable(); }
+
+// ...
+    extToplevel.init = function () { };
+    extToplevel.enable = enable;
+    extToplevel.disable = disable;
+
+```
 
 
 ## Enjoy!
