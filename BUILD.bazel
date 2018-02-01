@@ -2,6 +2,7 @@ package(default_visibility = ["//:__subpackages__"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@build_bazel_rules_typescript//:defs.bzl", "ts_library", "ts_web_test")
+load("@build_bazel_rules_nodejs//:defs.bzl", "rollup_bundle")
 
 # Building the distribution.
 
@@ -33,7 +34,10 @@ filegroup(
     ],
 )
 
-exports_files(["tsconfig.json"])
+exports_files([
+    "tsconfig.json",
+    "tsconfig-app.json",
+])
 
 # NOTE: this will move to node_modules/BUILD in a later release
 filegroup(
@@ -43,6 +47,23 @@ filegroup(
         "node_modules/**/*.d.ts",
         "node_modules/**/*.json",
     ]),
+)
+
+ts_library(
+    name = "app_lib",
+    srcs = ["app.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
+        ":resize_lib",
+        ":tilespec_lib",
+    ],
+)
+
+ts_library(
+    name = "entry_lib",
+    srcs = ["entry.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [":app_lib"],
 )
 
 ts_library(

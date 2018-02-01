@@ -1,10 +1,30 @@
-import {
-    Clutter, DND, Lang, Main, MessageTray, Meta, PanelMenu, Shell, Signals, St, Tweener, WindowManager, Workspace,
-    Settings, hotkeys
-  } from "appwrapper";
-
 import * as tspec from "./tilespec"
 import * as resizelib from "./resize"
+
+// GJS import system
+declare var imports:any;
+declare var global:any;
+
+// Library imports
+const St = imports.gi.St;
+const Main = imports.ui.main;
+const Shell = imports.gi.Shell;
+const WindowManager = imports.ui.windowManager;
+const MessageTray = imports.ui.messageTray;
+const Lang = imports.lang;
+const PanelMenu = imports.ui.panelMenu;
+const DND = imports.ui.dnd;
+const Meta = imports.gi.Meta;
+const Clutter = imports.gi.Clutter;
+const Signals = imports.signals;
+const Tweener = imports.ui.tweener;
+const Workspace = imports.ui.workspace;
+
+// Extension imports
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Extension.imports.settings;
+const hotkeys = Extension.imports.hotkeys;
+
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -245,6 +265,9 @@ function initSettings() {
 /*****************************************************************
   FUNCTIONS
  *****************************************************************/
+export function init() {
+}
+
 export function enable() {
     log("Extension start enabling");
     getBoolSetting(SETTINGS_DEBUG);
@@ -354,7 +377,7 @@ function moveGrids() {
         return;
     }
 
-    let window = focusMetaWindow;
+    let window:any = focusMetaWindow;
     if (window) {
         for (var gridIdx in grids) {
             let grid = grids[gridIdx];
@@ -672,7 +695,7 @@ function getFocusWindow() {
         .find(w => w.has_focus());
 }
 
-function activeMonitors() {
+function activeMonitors():Array<any> {
   return Main.layoutManager.monitors;
 }
 
