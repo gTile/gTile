@@ -25,6 +25,27 @@ describe("coincidentEdgeMoves", function() {
                     new Rect(new XY(95, 10), new Size(205, 190)))
             });
     });
+    it("edge translations uniform", function() {
+        const move = new MoveSpec(
+            new Rect(new XY(0, 579), new Size(1280, 1572)),
+            new Rect(new XY(0, 579), new Size(1180, 1572)));
+        // Other windows
+        const otherWindows = [
+            new Rect(new XY(1280, 579), new Size(1280, 786)),
+            new Rect(new XY(1280, 579), new Size(1280, 786)),
+            new Rect(new XY(1280, 1365), new Size(1280, 786))];
+        const shifted = [
+            new Rect(new XY(1180, 579), new Size(1380, 786)),
+            new Rect(new XY(1180, 579), new Size(1380, 786)),
+            new Rect(new XY(1180, 1365), new Size(1380, 786))];
+        const workArea = new Rect(new XY(0, 579), new Size(2560, 1573));
+        expect(coincidentEdgeMoves(move, otherWindows, workArea, opts))
+            .toEqual({
+                0: new MoveSpec(otherWindows[0], shifted[0]),
+                1: new MoveSpec(otherWindows[1], shifted[1]),
+                2: new MoveSpec(otherWindows[2], shifted[2]),
+            });
+    });
 
 });
 
