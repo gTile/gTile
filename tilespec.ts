@@ -292,16 +292,18 @@ export class Edges {
     }
 }
 
-export function* adjoiningEdges(a: Edges, b: Edges, distTol: number) {
+export function adjoiningEdges(a: Edges, b: Edges, distTol: number) {
     const sides = [Side.Top, Side.Bottom, Side.Left, Side.Right];
 
+    const result = [];
     for (let sa of sides) {
         for (let sb of sides) {
             if (a.getSide(sa).adjoins(b.getSide(sb), distTol)) {
-                yield [sa, sb];
+                result.push([sa, sb]);
             }
         }
     }
+    return result;
 }
 
 
