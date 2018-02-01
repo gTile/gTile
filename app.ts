@@ -25,6 +25,13 @@ const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 const hotkeys = Extension.imports.hotkeys;
 
+interface WorkArea {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -63,15 +70,15 @@ let tracker;
 let nbCols = 0;
 let nbRows = 0;
 let area;
-let focusMetaWindow = false;
-let focusWindowActor = false;
-let focusConnect = false;
+let focusMetaWindow:any;
+let focusWindowActor:any;
+let focusConnect:any = false;
 let monitorChangedConnect = false;
 let gridSettings = new Object();
 let settings = Settings.get();
-let toggleSettingListener;
-let keyControlBound = false;
-let debug = false;
+let toggleSettingListener:any;
+let keyControlBound:any = false;
+let debug:boolean = false;
 
 // Hangouts workaround
 let excludedApplications = {
@@ -377,44 +384,45 @@ function moveGrids() {
         return;
     }
 
-    let window:any = focusMetaWindow;
-    if (window) {
-        for (var gridIdx in grids) {
-            let grid = grids[gridIdx];
-            let pos_x;
-            let pos_y;
+    const window = focusMetaWindow;
+    if (!window) {
+        return;
+    }
+    for (var gridIdx in grids) {
+        let grid = grids[gridIdx];
+        let pos_x;
+        let pos_y;
 
-            let monitor = grid.monitor;
-            if (window.get_monitor() == grid.monitor_idx) {
-                pos_x = window.get_frame_rect().width / 2  + window.get_frame_rect().x;
-                pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
-            }
-            else {
-                pos_x = monitor.x + monitor.width/2;
-                pos_y = monitor.y + monitor.height/2;
-            }
-
-            pos_x = Math.floor(pos_x - grid.actor.width / 2);
-            pos_y = Math.floor(pos_y - grid.actor.height / 2);
-
-            if (window.get_monitor() == grid.monitor_idx) {
-                pos_x = (pos_x < monitor.x) ? monitor.x : pos_x;
-                pos_x = ((pos_x + grid.actor.width) >  (monitor.width+monitor.x)) ?  monitor.x + monitor.width - grid.actor.width : pos_x;
-                pos_y = (pos_y < monitor.y) ? monitor.y : pos_y;
-                pos_y = ((pos_y + grid.actor.height) > (monitor.height+monitor.y)) ? monitor.y + monitor.height - grid.actor.height : pos_y;
-            }
-
-            let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
-
-            Tweener.addTween(
-                grid.actor, {
-                    time: time,
-                    x:pos_x,
-                    y:pos_y,
-                    transition: 'easeOutQuad',
-                    /*onComplete:updateRegions*/
-                });
+        let monitor = grid.monitor;
+        if (window.get_monitor() == grid.monitor_idx) {
+            pos_x = window.get_frame_rect().width / 2  + window.get_frame_rect().x;
+            pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
         }
+        else {
+            pos_x = monitor.x + monitor.width/2;
+            pos_y = monitor.y + monitor.height/2;
+        }
+
+        pos_x = Math.floor(pos_x - grid.actor.width / 2);
+        pos_y = Math.floor(pos_y - grid.actor.height / 2);
+
+        if (window.get_monitor() == grid.monitor_idx) {
+            pos_x = (pos_x < monitor.x) ? monitor.x : pos_x;
+            pos_x = ((pos_x + grid.actor.width) >  (monitor.width+monitor.x)) ?  monitor.x + monitor.width - grid.actor.width : pos_x;
+            pos_y = (pos_y < monitor.y) ? monitor.y : pos_y;
+            pos_y = ((pos_y + grid.actor.height) > (monitor.height+monitor.y)) ? monitor.y + monitor.height - grid.actor.height : pos_y;
+        }
+
+        let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
+
+        Tweener.addTween(
+            grid.actor, {
+                time: time,
+                x:pos_x,
+                y:pos_y,
+                transition: 'easeOutQuad',
+                /*onComplete:updateRegions*/
+            });
     }
 }
 
@@ -703,14 +711,14 @@ function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
-function getWorkAreaByMonitor(monitor) {
+function getWorkAreaByMonitor(monitor):WorkArea {
     for (let i = 0; i < activeMonitors().length; i++) {
         const mon = activeMonitors()[i];
         if(mon.x == monitor.x && mon.y == monitor.y) {
             return getWorkArea(monitor, i);
         }
     }
-    return false;
+    return null;
 }
 
 function getWorkAreaByMonitorIdx(monitor_idx) {
@@ -733,7 +741,7 @@ function windowFrameRect(window) {
       new tspec.Size(grect.width, grect.height));
 }
 
-function getWorkArea(monitor, monitor_idx) {
+function getWorkArea(monitor, monitor_idx): WorkArea {
     const wkspace = global.screen.get_active_workspace();
     const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
     log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
@@ -798,7 +806,7 @@ function keySetTiling() {
 function keyChangeTiling() {
     log("keyChangeTiling");
     let grid_settings_sizes = gridSettings[SETTINGS_GRID_SIZES];
-    let next_key = 0;
+    let next_key:string|number = 0;
     let found = false;
     for (let key in grid_settings_sizes) {
         if(found) {
@@ -1470,7 +1478,7 @@ Grid.prototype = {
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (c == 0) {
-                    this.elements[r] = new Array();
+                    this.elements[r] = [];
                 }
 
                 let element = new GridElement(this.monitor,width,height,c,r);
@@ -1612,7 +1620,7 @@ Grid.prototype = {
 
 Signals.addSignalMethods(Grid.prototype);
 
-function GridElementDelegate(rows, cols, width, height) {
+function GridElementDelegate() {
     this._init();
 }
 

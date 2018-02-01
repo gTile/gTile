@@ -4,9 +4,9 @@ function init() {
 }
 
 function enable() {
-    appEnable();
+    e();
 }
 
 function disable() {
-    appDisable();
+    d();
 }
