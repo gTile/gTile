@@ -13,13 +13,8 @@ EXTDIR="$HOME/.local/share/gnome-shell/extensions/gTile@vibou"
 
 if [ -d "$EXTDIR" ]; then
     # If $EXTDIR exists...
-    echo "$EXTDIR exists, delete? "
-    select yn in "Yes" "No"; do
-        case $yn in
-            Yes ) rm -R -f "$EXTDIR"; break;;
-            No ) echo "Exiting."; exit;;
-        esac
-    done
+    echo "$EXTDIR exists, deleting "
+    rm -R -f "$EXTDIR"
 fi
 
 mkdir -p "$EXTDIR"
