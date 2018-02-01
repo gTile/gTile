@@ -514,8 +514,6 @@ function _isMyWindow(win) {
 function getWindowActor() {
     let windows = global.get_window_actors().filter(this._isMyWindow, this);
     focusWindowActor = windows[0];
-
-    //log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
 }
 
 function getNotFocusedWindowActorsOfMonitor(monitor) {
@@ -534,9 +532,6 @@ function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
         let appName = app.get_name();
 
 
-        log("NotFocused - AppName: " + appName +
-            "normal = " + (metaWin.get_window_type() == Meta.WindowType.NORMAL) +
-            " showing on wkspace " + metaWin.showing_on_its_workspace());
         const criteria = [
             !excludedApplications[appName],
               metaWin.get_window_type() == Meta.WindowType.NORMAL,
@@ -545,9 +540,6 @@ function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
               metaWin.get_monitor() == monitorIndex,
               focus != metaWin
         ];
-        log("criteria: " + JSON.stringify(criteria));
-        log("monitor =  " + JSON.stringify(monitorIndex) + " vs. " +
-            metaWin.get_monitor());
 
         return !excludedApplications[appName]
             && metaWin.get_window_type() == Meta.WindowType.NORMAL
@@ -1874,7 +1866,6 @@ function moveWindowToRect(window, rect) {
 function moveWindowToRectAndAdjustNeighbors(window, rect, otherWindows, workArea) {
     const move = new resizelib.MoveSpec(windowFrameRect(window), rect);
     const otherRects = otherWindows.map(windowFrameRect);
-    log('windows.length = ' + otherWindows.length);
     moveWindowToRect(window, rect);
     const moves = resizelib.coincidentEdgeMoves(
         move, otherRects, workArea, resizelib.DEFAULT_COINCIDENT_MOVE_OPTIONS);
