@@ -112,15 +112,6 @@ rollup_bundle(
 )
 
 concat(
-    name = "extension3",
-    srcs = [
-        "bundle.js",
-        "setup.js",
-    ],
-    out = "extension3.js",
-)
-
-concat(
     name = "extension",
     srcs = [
         # Order matters here. Setup.js must come first.
