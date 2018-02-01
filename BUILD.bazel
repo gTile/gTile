@@ -37,7 +37,6 @@ filegroup(
         "schemas/gschemas.compiled",
         "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
         "settings.js",
-        "setup.js",
     ],
 )
 
