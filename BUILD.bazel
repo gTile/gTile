@@ -116,6 +116,7 @@ concat(
     name = "extension",
     srcs = [
         # Order matters here. Setup.js must come first.
+        "polyfill.js",
         "setup.js",
         "bundle.js",
     ],
