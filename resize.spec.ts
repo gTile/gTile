@@ -2,22 +2,20 @@ import {LineSegment, XY, parsePreset, adjoiningEdges, Edges, Side, Rect, Size} f
 import {coincidentEdgeMoves, MoveSpec, CoincidentMoveOptions} from './resize';
 
 const opts = new CoincidentMoveOptions(
-    new Size(.1, .1)
-);
+    new Size(.1, .1), .01);
 
 describe("coincidentEdgeMoves", function() {
-    const move = new MoveSpec(
-        new Rect(new XY(10, 10), new Size(90, 190)),
-        new Rect(new XY(5, 10), new Size(90, 190)));
-
-    const workArea = new Rect(new XY(0, 0), new Size(10000, 10000));
-
     it("move rect shares right edge with left edge of other window", function() {
+        const move = new MoveSpec(
+            new Rect(new XY(10, 10), new Size(90, 190)),
+            new Rect(new XY(5, 10), new Size(90, 190)));
+
+        const workArea = new Rect(new XY(0, 0), new Size(10000, 10000));
+
         // A rect that shares a full left edge with the right edge of the moved
         // rectangle should have its left edge adjusted.
         const other = new Rect(new XY(100, 10), new Size(200, 190));
 
-        //expect(adjoiningEdges(move.initial.
         expect(coincidentEdgeMoves(move, [other], workArea, opts))
             .toEqual({
                 0: new MoveSpec(
@@ -46,7 +44,31 @@ describe("coincidentEdgeMoves", function() {
                 2: new MoveSpec(otherWindows[2], shifted[2]),
             });
     });
+});
 
+describe("coincidentEdgeMoves - tolerance handling", function() {
+    const workArea = new Rect(new XY(0, 0), new Size(10000, 10000));
+    const move = new MoveSpec(
+        new Rect(new XY(10, 10), new Size(90, 190)),
+        new Rect(new XY(5, 10), new Size(90, 190)));
+    // A rect that shares a full left edge with the right edge of the moved
+    // rectangle should have its left edge adjusted.
+    const other = new Rect(new XY(115, 10), new Size(200, 190));
+    it("move rect shares right edge with left edge of other window - within tolerance", function() {
+        const opts = new CoincidentMoveOptions(new Size(.1, .1), 20.01);
+        expect(coincidentEdgeMoves(move, [other], workArea, opts))
+            .toEqual({
+                0: new MoveSpec(
+                    other,
+                    new Rect(new XY(110, 10), new Size(205, 190)))
+            });
+    });
+
+    it("move rect shares right edge with left edge of other window - out of tolerance", function() {
+        const opts = new CoincidentMoveOptions(new Size(.1, .1), 10);
+        expect(coincidentEdgeMoves(move, [other], workArea, opts))
+            .toEqual({});
+    });
 });
 
 const sides = [Side.Top, Side.Right, Side.Bottom, Side.Left];

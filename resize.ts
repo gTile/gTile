@@ -25,15 +25,17 @@ export class MoveSpec {
 
 export class CoincidentMoveOptions {
     minSize: Size
+    maxEdgeDistance: number
 
-    constructor(min: Size) {
+    constructor(min: Size, maxEdgeDistance: number) {
         this.minSize = min
+        this.maxEdgeDistance = maxEdgeDistance;
     }
 }
 
 export const DEFAULT_COINCIDENT_MOVE_OPTIONS = new CoincidentMoveOptions(
-    new Size(200, 200)
-);
+    new Size(200, 200),
+    30);
 
 /**
  * Given the move of one window, find coincident edges of other windows and
@@ -58,8 +60,6 @@ export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, w
     return result;
 }
 
-const TOL = .04;
-
 function coincidentEdgeMove(move: MoveSpec, otherWindow: Rect, workArea: Rect, opts: CoincidentMoveOptions) {
     const initialEdges = move.initial.edges();
 
@@ -82,7 +82,7 @@ function coincidentEdgeMove(move: MoveSpec, otherWindow: Rect, workArea: Rect, o
     // For each matching edge, compute the translation amount from the
     // move. Use this to translate otherWindow.
     for (const [moveRectSide, otherEdgeSide] of
-         adjoiningEdges(move.initial.edges(), otherWindow.edges(), TOL)) {
+         adjoiningEdges(move.initial.edges(), otherWindow.edges(), opts.maxEdgeDistance)) {
         if (moveRectSide === otherEdgeSide) {
             continue;
         }
