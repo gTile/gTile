@@ -133,7 +133,7 @@ const key_bindings_presets = {
     'preset-resize-27': function() { presetResize(27) ;},
     'preset-resize-28': function() { presetResize(28) ;},
     'preset-resize-29': function() { presetResize(29) ;},
-    'preset-resize-30': function() { presetResize(30) ;}
+    'preset-resize-30': function() { moveWindowToNextMonitor(); }
 }
 
 function log(log_string) {
@@ -1011,6 +1011,34 @@ function presetResize(preset) {
     const otherWindows = getNotFocusedWindowActorsOfMonitorIndex(monitorIndex)
         .map(wa => wa.meta_window);
     moveWindowToRectAndAdjustNeighbors(window, rect, otherWindows, workArea);
+}
+
+// Move the window to the next monitor.
+function moveWindowToNextMonitor() {
+    let window = getFocusWindow();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut");
+        return;
+    }
+
+    reset_window(window);
+
+    const numMonitors = activeMonitors().length;
+    if (numMonitors == 0) {
+        return;
+    }
+
+    const ts = tspec.parsePreset("5x5 1:1 3:3")[0];
+
+    const srcMonitorIndex = window.get_monitor();
+    const dstMonitorIndex = (srcMonitorIndex + 1) % numMonitors;
+
+    const margin = new tspec.Size(
+        gridSettings[SETTINGS_WINDOW_MARGIN],
+        gridSettings[SETTINGS_WINDOW_MARGIN]);
+    const workArea = workAreaRectByMonitorIndex(dstMonitorIndex).inset(margin);
+    const rect = ts.toFrameRect(workArea);
+    moveWindowToRect(window, rect);
 }
 
 /*****************************************************************

@@ -310,7 +310,7 @@ export function adjoiningEdges(a: Edges, b: Edges, distTol: number) {
 
 
 /** parsePreset parses a string like "8x8 0:0 0:7, 8x8 0:0 2:7" */
-export function parsePreset(preset: string) {
+export function parsePreset(preset: string): Array<TileSpec> {
     return preset.split(",")
         .map(x => x.trim())
         .map(parseSinglePreset);
