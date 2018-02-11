@@ -22,6 +22,7 @@ before_install:
   - sudo dpkg -i bazel_0.7.0-linux-x86_64.deb
 
 script:
+  - bazel run @yarn//:yarn
   - bazel test ...
   - bazel build ...
 
