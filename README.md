@@ -1,5 +1,7 @@
 # gTile
 
+[![Build Status](https://travis-ci.org/gonzojive/gTile.svg?branch=bazelify)](https://travis-ci.org/gonzojive/gTile)
+
 Gnome-shell extension that improves window tiling capabilities of stock gnome-shell.
 
 gTile is used to moves/resize windows on a configurable grid scheme.
@@ -11,22 +13,38 @@ This extension is particularly useful for window management on (multiple) large 
 
 ## Installation
 
+
+### Preferred: Installation from Gnome Extensions
+
 Preferred installation is from [Gnome Extensions](https://extensions.gnome.org)
 
-You can alternatively manually install the latest version from GitHub master branch:
+
+### Installation from Source
+
+You can alternatively manually install the latest version from GitHub:
 
 1. Clone the repository to the *Gnome* extensions folder.
 
-   ```
-   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
-   ```
+```shell
+git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
+```
 
-2. Restart *Gnome* (only on X11, on Wayland you will have to log out and log back in)
+2. Set up dependencies.
 
-   ```
-   Alt-F2
-   Enter a Command: r
-   ```
+``shell
+bazel run @yarn//:yarn # Set up the workspace
+```
+
+3. Build and install
+
+```shell
+bazel run :install-extension
+```
+
+4. Restart *Gnome* (only on X11, on Wayland you will have to log out and log back in):
+
+   1. Hit `Alt-F2`
+   2. Type `r` and hit enter
 
 
 ## Configuration
@@ -118,39 +136,27 @@ It was originally developed by [vibou](https://github.com/vibou) with help from 
 
 gTile is licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html)
 
-### Typescript compilation
+### Typescript
 
-The repository contains TypeScript files (.ts) and compiled versions of these
-files. If you wish to modify the .ts files, you will need to install `tsc`, the
-TypeScript compiler:
-
-```shell
-npm install -g typescript
-```
-
-Then run the compiler in the root of the gTiles repo. The `--watch` argument
-will automatically compile
-
-```shell
-tsc --watch
-```
-
-### Tests
-
-To test the library, follow the installation instructions for
-[jasmine-gjs](https://github.com/ptomato/jasmine-gjs). Then, run
-
-```shell
-jasmine extension_test.js
-```
+The repository contains TypeScript files (`.ts`) that are compiled and bundled
+by [Bazel](http://bazel.io).
 
 ## Building and testing with Bazel
 
-Run this rather than any npm commands. You do not need npm installed on your
-machine, nor any other libraries.
+You do not need npm installed on your machine, nor any other libraries. However,
+you do need to install bazel.
+
+### One-time setup
 
 ```shell
 bazel run @yarn//:yarn
+```
+
+### Build/Test
+
+```shell
+bazel build ...
+bazel test ...
 ```
 
 ### Install
@@ -158,24 +164,3 @@ bazel run @yarn//:yarn
 ```shell
 bazel run :install-extension
 ```
-
-
-Solution
-
-
-```js
-const extToplevel = {};
-
-function init() {}
-function enable() { extToplevel.enable(); }
-function disable() { extToplevel.disable(); }
-
-// ...
-    extToplevel.init = function () { };
-    extToplevel.enable = enable;
-    extToplevel.disable = disable;
-
-```
-
-
-## Enjoy!
