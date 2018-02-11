@@ -29,13 +29,15 @@ You can alternatively manually install the latest version from GitHub:
 git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
 ```
 
-2. Set up dependencies.
+2. Set up workspace dependencies. If you forget to run this command, bazel will
+   give errors.
 
-``shell
-bazel run @yarn//:yarn # Set up the workspace
+```shell
+bazel run @yarn//:yarn
 ```
 
 3. Build and install
+
 
 ```shell
 bazel run :install-extension
