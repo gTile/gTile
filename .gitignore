@@ -1,6 +1,6 @@
 # Package specific
 compiled_typescript.js
-bazel-gTile
+bazel-*
 *.lock
 
 tilespec.js

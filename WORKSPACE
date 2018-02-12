@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "build_bazel_rules_nodejs",
     remote = "https://github.com/bazelbuild/rules_nodejs.git",
-    commit = "230d39a391226f51c03448f91eb61370e2e58c42",
+    commit = "920232176dac3fdabf742d14ad1b1e74676b63d5",
 )
 
 load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
