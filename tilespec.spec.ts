@@ -1,4 +1,4 @@
-import {LineSegment, XY, parsePreset, adjoiningEdges, Edges, Side, Rect, Size} from './tilespec';
+import {LineSegment, XY, parsePreset, adjoiningSides, Edges, Side, Rect, Size} from './tilespec';
 
 describe('1 = 1', () => {
     it('should do that', () => {
@@ -67,19 +67,19 @@ describe("TileSpec.LineSegment", function() {
     });
 });
 
-describe("adjoiningEdges", function() {
+describe("adjoiningSides", function() {
     const a = new Rect(new XY(10, 10), new Size(90, 190));
     const tol = .01;
 
     it("inset rect does not have adjoining edges", function() {
         const aInsert = a.inset(new Size(5, 5));
-        expect(asArray(adjoiningEdges(a.edges(), aInsert.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), aInsert.edges(), tol)))
             .toEqual([]);
     });
 
     it("rect adjoins with its own edges", function() {
         const aInsert = a.inset(new Size(0, 0));
-        expect(asArray(adjoiningEdges(a.edges(), aInsert.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), aInsert.edges(), tol)))
             .toEqual([
                 [Side.Top, Side.Top],
                 [Side.Bottom, Side.Bottom],
@@ -90,28 +90,28 @@ describe("adjoiningEdges", function() {
 
     it("rect adjoins with a shifted copy (shift right)", function() {
         const b = a.translate(new XY(a.size.width, 20));
-        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), b.edges(), tol)))
             .toEqual([
                 [Side.Right, Side.Left],
             ]);
     });
     it("rect adjoins with a shifted copy (shift down)", function() {
         const b = a.translate(new XY(20, a.size.height));
-        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), b.edges(), tol)))
             .toEqual([
                 [Side.Bottom, Side.Top],
             ]);
     });
     it("rect adjoins with a shifted copy (shift left)", function() {
         const b = a.translate(new XY(-a.size.width,20));
-        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), b.edges(), tol)))
             .toEqual([
                 [Side.Left, Side.Right],
             ]);
     });
     it("rect adjoins with a shifted copy (shift up)", function() {
         const b = a.translate(new XY(32, -a.size.height));
-        expect(asArray(adjoiningEdges(a.edges(), b.edges(), tol)))
+        expect(asArray(adjoiningSides(a.edges(), b.edges(), tol)))
             .toEqual([
                 [Side.Top, Side.Bottom],
             ]);

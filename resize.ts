@@ -1,4 +1,4 @@
-import { TileSpec, Rect, Size, XY, Side, Edges, adjoiningEdges } from "./tilespec"
+import { TileSpec, Rect, Size, XY, Side, Edges, adjoiningSides } from "./tilespec"
 
 /** The vector space representation of moving window */
 export class MoveSpec {
@@ -81,12 +81,23 @@ function coincidentEdgeMove(move: MoveSpec, otherWindow: Rect, workArea: Rect, o
     let currentScore = 0.1;
     // For each matching edge, compute the translation amount from the
     // move. Use this to translate otherWindow.
+    const moveInitialEdges = move.initial.edges();
+    const otherEdges = otherWindow.edges();
     for (const [moveRectSide, otherEdgeSide] of
-         adjoiningEdges(move.initial.edges(), otherWindow.edges(), opts.maxEdgeDistance)) {
+         adjoiningSides(moveInitialEdges, otherEdges, opts.maxEdgeDistance)) {
         if (moveRectSide === otherEdgeSide) {
             continue;
         }
-        const moveTrans = move.edgeTranslationDistance(moveRectSide);
+        // residualVec is the normal vector from otherEdge -> moveEdge.
+        const residualVec = otherEdges
+            .getSide(otherEdgeSide)
+            .perpVectorBetweenLines(moveInitialEdges.getSide(moveRectSide));
+        const edgeTranslationAxis =
+            (moveRectSide === Side.Left || moveRectSide == Side.Right) ?
+            new XY(1, 0) : new XY(0, 1);
+        const residualTrans = residualVec.dot(edgeTranslationAxis);
+
+        const moveTrans = move.edgeTranslationDistance(moveRectSide) + residualTrans;
         const r = candidateRect.translateEdge(otherEdgeSide, moveTrans);
         const score = scoreCandidate(r);
         if (score >= currentScore) {

@@ -108,12 +108,12 @@ export class LineSegment {
     }
 
     adjoins(other: LineSegment, distTol: number) {
-        const otherDir = other.direction();
-        const unitDot = this.direction().dot(otherDir);
-        if (!withinTol(Math.abs(unitDot), 1, ADJOIN_DOT_PRODUCT_TOL)) {
-            return false;
-        }
-        return this.lineDistance(other) < distTol
+        return this.parallels(other) && this.lineDistance(other) < distTol
+    }
+
+    parallels(other: LineSegment) {
+        const unitDot = this.direction().dot(other.direction());
+        return withinTol(Math.abs(unitDot), 1, ADJOIN_DOT_PRODUCT_TOL);
     }
 
     // The distance between the lines of two line segments. If lines are not
@@ -292,13 +292,15 @@ export class Edges {
     }
 }
 
-export function adjoiningEdges(a: Edges, b: Edges, distTol: number) {
+export function adjoiningSides(a: Edges, b: Edges, distTol: number) {
     const sides = [Side.Top, Side.Bottom, Side.Left, Side.Right];
 
     const result = [];
     for (let sa of sides) {
         for (let sb of sides) {
-            if (a.getSide(sa).adjoins(b.getSide(sb), distTol)) {
+            const sega = a.getSide(sa);
+            const segb = b.getSide(sb);
+            if (sega.adjoins(segb, distTol)) {
                 result.push([sa, sb]);
             }
         }
