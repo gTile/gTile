@@ -9,9 +9,11 @@
     "3.20", 
     "3.22", 
     "3.24", 
-    "3.26"
+    "3.26",
+    "3.27",
+    "3.28"
   ], 
   "url": "https://github.com/gTile", 
   "uuid": "gTile@vibou", 
-  "version": 26
+  "version": 28
 }

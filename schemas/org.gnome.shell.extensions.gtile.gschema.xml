@@ -170,6 +170,46 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Preset resize 30.</summary>
 		</key>
+		<key type="as" name="autotile-main">
+			<default><![CDATA[['<Super>1']]]></default>
+			<summary>Autotile 1.</summary>
+		</key>
+		<key type="as" name="autotile-2">
+			<default><![CDATA[['<Super>2']]]></default>
+			<summary>Autotile 2.</summary>
+		</key>
+		<key type="as" name="autotile-3">
+			<default><![CDATA[['<Super>3']]]></default>
+			<summary>Autotile 3.</summary>
+		</key>
+		<key type="as" name="autotile-4">
+			<default><![CDATA[['<Super>4']]]></default>
+			<summary>Autotile 4.</summary>
+		</key>
+		<key type="as" name="autotile-5">
+			<default><![CDATA[['<Super>5']]]></default>
+			<summary>Autotile 5.</summary>
+		</key>
+		<key type="as" name="autotile-6">
+			<default><![CDATA[['<Super>6']]]></default>
+			<summary>Autotile 6.</summary>
+		</key>
+		<key type="as" name="autotile-7">
+			<default><![CDATA[['<Super>7']]]></default>
+			<summary>Autotile 7.</summary>
+		</key>
+		<key type="as" name="autotile-8">
+			<default><![CDATA[['<Super>8']]]></default>
+			<summary>Autotile 8.</summary>
+		</key>
+		<key type="as" name="autotile-9">
+			<default><![CDATA[['<Super>9']]]></default>
+			<summary>Autotile 9.</summary>
+		</key>
+		<key type="as" name="autotile-10">
+			<default><![CDATA[['<Super>0']]]></default>
+			<summary>Autotile 10.</summary>
+		</key>
 		
 		<key type = "s" name="resize1">
 			<default>'2x2 0:1 0:1'</default>
@@ -305,13 +345,9 @@
 			<default>true</default>
 			<summary>Make background slection highlight to move more smooth.</summary>
 		</key>
-		<key type = "b" name="top-panel">
+		<key type = "b" name="show-icon">
 			<default>true</default>
-			<summary>Top panel is present on primary monitor.</summary>
-		</key>
-		<key type = "b" name="bottom-panel">
-			<default>false</default>
-			<summary>Bottom panel is present on primary monitor.</summary>
+			<summary>Show gTile icon on a panel.</summary>
 		</key>
 		<key type = "b" name="global-presets">
 			<default>true</default>
@@ -356,8 +392,8 @@
 		<key type = "b" name="debug">
 			<default>false</default>
 			<summary>Put debug lines into global.log. To see, run journalctl /usr/bin/gnome-shell -f in terminal</summary>
-		</key> 
-			<key type = "s" name="help-text">
+		</key>
+		<key type = "s" name="help-text">
 			<default>"gTile allow to quickly move/resize/place window on predefined grid,
 with mouse or keyboard, on multiple monitors.
 How to use gTile
@@ -430,6 +466,11 @@ Left upper corner is 0:0.
 Do not forget that you can grid dimension is one more then corner coordinate.
 format is 6x4 0:2 3:3
 Grid size can be any, not necessary what you have in grid sizes setting.
+
+AutoTiling
+You can call AutoTiling by pressing Super + 1 - 0, total 10 options available.
+Or, you can press one of two autotile buttons.
+gTile window shold be active.
 
 gTile intended to supplement existing Gnome keyboard shortcuts.
 Here are some useful Gnome built-in:

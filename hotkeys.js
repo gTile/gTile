@@ -26,7 +26,7 @@ function bind(key_bindings) {
 
     log("Binding keys");
     for (var key in key_bindings) {
-        log("Binding key: " + key);
+        //log("Binding key: " + key);
         if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
             Main.wm.addKeybinding(
                 key,
@@ -60,7 +60,7 @@ function unbind(key_bindings) {
     debug = mySettings.get_boolean(SETTINGS_DEBUG);
     log("Unbinding keys");
     for (var key in key_bindings) {
-        log("Unbinding key: " + key);
+        //log("Unbinding key: " + key);
         if (Main.wm.removeKeybinding) { // introduced in 3.7.2
             Main.wm.removeKeybinding(key);
         }

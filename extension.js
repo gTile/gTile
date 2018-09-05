@@ -37,6 +37,7 @@ const hotkeys = Extension.imports.hotkeys;
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
+const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
@@ -78,17 +79,27 @@ const key_bindings = {
 };
 
 const key_bindings_tiling = {
-    'move-left'       : function() { keyMoveResizeEvent('move'  , 'left' );},    
-    'move-right'      : function() { keyMoveResizeEvent('move'  , 'right');},    
-    'move-up'         : function() { keyMoveResizeEvent('move'  , 'up'   );},    
+    'move-left'       : function() { keyMoveResizeEvent('move'  , 'left' );},
+    'move-right'      : function() { keyMoveResizeEvent('move'  , 'right');},
+    'move-up'         : function() { keyMoveResizeEvent('move'  , 'up'   );},
     'move-down'       : function() { keyMoveResizeEvent('move'  , 'down' );},
-    'resize-left'     : function() { keyMoveResizeEvent('resize', 'left' );},    
+    'resize-left'     : function() { keyMoveResizeEvent('resize', 'left' );},
     'resize-right'    : function() { keyMoveResizeEvent('resize', 'right');},
     'resize-up'       : function() { keyMoveResizeEvent('resize', 'up'   );},
     'resize-down'     : function() { keyMoveResizeEvent('resize', 'down' );},
     'cancel-tiling'   : function() { keyCancelTiling();},
     'set-tiling'      : function() { keySetTiling();},
-    'change-grid-size': function() { keyChangeTiling();}
+    'change-grid-size': function() { keyChangeTiling();},
+    'autotile-main'	  : function() { AutoTileMain();},
+    'autotile-2'	  : function() { AutoTileNCols(2);},
+    'autotile-3'	  : function() { AutoTileNCols(3);},
+    'autotile-4'	  : function() { AutoTileNCols(4);},
+    'autotile-5'	  : function() { AutoTileNCols(5);},
+    'autotile-6'	  : function() { AutoTileNCols(6);},
+    'autotile-7'	  : function() { AutoTileNCols(7);},
+    'autotile-8'	  : function() { AutoTileNCols(8);},
+    'autotile-9'	  : function() { AutoTileNCols(9);},
+    'autotile-10'	  : function() { AutoTileNCols(10);}
 }
 
 const key_bindings_presets = {
@@ -233,6 +244,7 @@ function initSettings() {
 
     getBoolSetting(SETTINGS_AUTO_CLOSE);
     getBoolSetting(SETTINGS_ANIMATION);
+	getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
@@ -280,11 +292,13 @@ function enable() {
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
     initGrids();
-    
+
     log("Create Button");
     launcher = new GTileStatusButton('tiling-icon');
 
-    Main.panel.addToStatusArea("GTileStatusButton", launcher);
+	if(gridSettings[SETTINGS_SHOW_ICON]) {
+		Main.panel.addToStatusArea("GTileStatusButton", launcher);
+	}
 
     hotkeys.bind(key_bindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
@@ -346,7 +360,7 @@ function destroyGrids() {
 }
 
 function refreshGrids() {
-    log("Refresh");
+    log("refreshGrids");
     for (var gridIdx in grids) {
         let grid = grids[gridIdx];
         grid.refresh();
@@ -401,7 +415,7 @@ function moveGrids() {
 
 function updateRegions() {
     /*Main.layoutManager._chrome.updateRegions();*/
-
+	log("updateRegions");
     refreshGrids();
     for (let idx in grids) {
         let grid = grids[idx];
@@ -695,7 +709,7 @@ function getWorkAreaByMonitorIdx(monitor_idx) {
 function getWorkArea(monitor, monitor_idx) {
     let wkspace = global.screen.get_active_workspace();
     let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
-    log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
+    //log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     return {
         x: work_area.x + insets.left,
@@ -705,13 +719,13 @@ function getWorkArea(monitor, monitor_idx) {
     };
 }
 
-function bindKeyControls() {   
+function bindKeyControls() {
     if(!keyControlBound) {
         hotkeys.bind(key_bindings_tiling);
-        log("Connect notify:focus-window");
+        //log("Connect notify:focus-window");
         if(focusConnect) {
             global.display.disconnect(focusConnect);
-        }    
+        }
         focusConnect = global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             hotkeys.bind(key_bindings_presets);
@@ -720,11 +734,11 @@ function bindKeyControls() {
     }
 }
 
-function unbindKeyControls() {    
+function unbindKeyControls() {
     if(keyControlBound) {
         hotkeys.unbind(key_bindings_tiling);
         if(focusConnect) {
-            log("Disconnect notify:focus-window");        
+            log("Disconnect notify:focus-window");
             global.display.disconnect(focusConnect);
             focusConnect = false;
         }
@@ -811,6 +825,8 @@ function setInitialSelection() {
     log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
     log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
     
+	grid.forceGridElementDelegate(lux, luy, rdx, rdy);
+	
     grid.elements[luy] [lux]._onButtonPress();     
     grid.elements[rdy] [rdx]._onHoverChanged();    
 
@@ -1109,49 +1125,59 @@ AutoTileMainAndList.prototype = {
     },
 
     _onButtonPress: function() {
-        if (!focusMetaWindow) {
-                return;
-        }
-        reset_window(focusMetaWindow);
-
-        let monitor = this.grid.monitor;
-        let workArea = getWorkAreaByMonitor(monitor);
-        let windows = getNotFocusedWindowsOfMonitor(monitor);
-
-        move_resize_window_with_margins(
-            focusMetaWindow,
-            workArea.x,
-            workArea.y,
-            workArea.width/2,
-            workArea.height);
-
-        let winHeight = workArea.height/windows.length;
-        let countWin = 0;
-
-        //log("MonitorHeight: "+monitor.height+":"+windows.length );
-
-        for (let windowIdx in windows) {
-            let metaWindow = windows[windowIdx].meta_window;
-
-            let newOffset = workArea.y + (countWin * winHeight);
-            reset_window(metaWindow);
-
-            move_resize_window_with_margins(
-                metaWindow,
-                workArea.x + workArea.width/2,
-                newOffset,
-                workArea.width/2,
-                winHeight
-            );
-            countWin++;
-        }
-
+		AutoTileMain();
         log("AutoTileMainAndList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
     }
 }
 
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
+
+function AutoTileMain() {
+	log("AutoTileMain");
+    let window = getFocusApp();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut AutoTileMain");
+        return;
+    }
+
+    reset_window(window);
+    let mind = window.get_monitor();
+    let work_area = getWorkAreaByMonitorIdx(mind);
+
+	let monitor = monitors[mind];
+	let workArea = getWorkAreaByMonitor(monitor);
+	let windows = getNotFocusedWindowsOfMonitor(monitor);
+
+	move_resize_window_with_margins(
+		focusMetaWindow,
+		workArea.x,
+		workArea.y,
+		workArea.width/2,
+		workArea.height);
+
+	let winHeight = workArea.height/windows.length;
+	let countWin = 0;
+
+	log("AutoTileMain MonitorHeight: "+monitor.height+":"+windows.length );
+
+	for (let windowIdx in windows) {
+		let metaWindow = windows[windowIdx].meta_window;
+
+		let newOffset = workArea.y + (countWin * winHeight);
+		reset_window(metaWindow);
+
+		move_resize_window_with_margins(
+			metaWindow,
+			workArea.x + workArea.width/2,
+			newOffset,
+			workArea.width/2,
+			winHeight
+		);
+		countWin++;
+	}	
+	log("AutoTileMain done");
+}
 
 function AutoTileTwoList(grid) {
     this._init(grid,"action-two-list");
@@ -1168,71 +1194,64 @@ AutoTileTwoList.prototype = {
     },
 
     _onButtonPress: function() {
-        if (!focusMetaWindow) {
-            return;
-        }
-
-        reset_window(focusMetaWindow);
-
-        let monitor = this.grid.monitor;
-        let workArea = getWorkAreaByMonitor(monitor);
-
-        let windows = getNotFocusedWindowsOfMonitor(monitor);//getWindowsOfMonitor(monitor);
-
-        let nbWindowOnEachSide = Math.ceil((windows.length + 1) / 2);
-        let winHeight = workArea.height/nbWindowOnEachSide;
-
-        let countWin = 0;
-
-        move_resize_window_with_margins(
-            focusMetaWindow,
-            workArea.x + countWin%2 * workArea.width/2,
-            workArea.y + (Math.floor(countWin/2) * winHeight),
-            workArea.width/2,
-            winHeight
-        );
-
-        countWin++;
-
-        // todo make function
-        for (let windowIdx in windows) {
-            let metaWindow = windows[windowIdx].meta_window;
-
-            reset_window(metaWindow);
-
-            move_resize_window_with_margins(
-                metaWindow,
-                workArea.x + countWin%2 * workArea.width/2,
-                workArea.y + (Math.floor(countWin/2) * winHeight),
-                workArea.width/2,
-                winHeight
-            );
-            countWin++;
-        }
-
+		log("AutotileTwoList");
+		AutoTileNCols(2);
         log("AutoTileTwoList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
+		log("Autotile2 done");
     }
 }
 
 Signals.addSignalMethods(AutoTileTwoList.prototype);
 
-function ActionScale(grid) {
-    this._init(grid,"action-scale");
-}
-
-ActionScale.prototype = {
-    __proto__: ActionButton.prototype,
-
-    _init: function(grid, classname) {
-        ActionButton.prototype._init.call(this, grid, classname);
-        this.classname = classname;
-        this.connect('button-press-event',Lang.bind(this,this._onButtonPress));
-    },
-
-    _onButtonPress: function() {
-        //log("" + this.classname + "pressed");
+function AutoTileNCols(cols) {
+	log("AutoTileNCols " + cols);
+    let window = getFocusApp();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut AutoTileNCols");
+        return;
     }
+
+    reset_window(window);
+    let mind = window.get_monitor();
+    let work_area = getWorkAreaByMonitorIdx(mind);
+
+	let monitor = monitors[mind];
+	let workArea = getWorkAreaByMonitor(monitor);
+	let windows = getNotFocusedWindowsOfMonitor(monitor);
+	
+	let nbWindowOnEachSide = Math.ceil((windows.length + 1) / cols);
+	let winHeight = workArea.height/nbWindowOnEachSide;
+
+	let countWin = 0;
+
+	move_resize_window_with_margins(
+		focusMetaWindow,
+		workArea.x + countWin%cols * workArea.width/cols,
+		workArea.y + (Math.floor(countWin/cols) * winHeight),
+		workArea.width/cols,
+		winHeight
+	);
+
+	countWin++;
+
+	// todo make function
+	for (let windowIdx in windows) {
+		let metaWindow = windows[windowIdx].meta_window;
+
+		reset_window(metaWindow);
+
+		move_resize_window_with_margins(
+			metaWindow,
+			workArea.x + countWin%cols * workArea.width/cols,
+			workArea.y + (Math.floor(countWin/cols) * winHeight),
+			workArea.width/cols,
+			winHeight
+		);
+		countWin++;
+	}
+	
+	log("AutoTileNCols done");
 }
 
 function GridSettingsButton(text,cols,rows) {
@@ -1431,10 +1450,27 @@ Grid.prototype = {
                 element.show();
             }
         }
+        //log("Grid _displayElements end");
     },
 
+	forceGridElementDelegate: function(x,y,w,h) {
+		//log("Grid forceGridElementDelegate " + x + ":" + y + " - " + w + ":" + h);
+		this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
+	},
+	
     refresh: function() {
+		//log("Grid refresh")
+		//this.elementsDelegate._logActiveActors("Grid refresh active actors");
+		this.elementsDelegate._resetGrid();
+		//log("Grid refresh disconnect grid elements");
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                this.elements[r][c]._disconnect();
+            }
+        }
+		//log("Grid refresh destroy_all_children");
         this.table.destroy_all_children();
+		//log("Grid refresh destroy_all_children done");
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
@@ -1519,7 +1555,7 @@ Grid.prototype = {
     },
 
     _onMouseEnter: function() {
-        log("onMouseEnter");
+        //log("onMouseEnter");
         if (!this.isEntered) {
             this.elementsDelegate.reset();
             this.isEntered = true;
@@ -1527,7 +1563,7 @@ Grid.prototype = {
     },
 
     _onMouseLeave: function() {
-        log("onMouseLeave");
+        //log("onMouseLeave");
         let [x, y, mask] = global.get_pointer();
         if ( this.elementsDelegate && (x <= this.actor.x || x>= (this.actor.x+this.actor.width)) || (y <=this.actor.y || y >= (this.actor.y+this.actor.height)) ) {
             this.isEntered = false;
@@ -1580,10 +1616,13 @@ GridElementDelegate.prototype = {
     },
 
     _onButtonPress: function(gridElement) {
+		log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
+		//this._logActiveActors("GridElementDelegate _onButtonPress active actors");
         if(!this.currentElement) {
             this.currentElement = gridElement;
         }
         if (this.activated==false) {
+			log("GridElementDelegate first activation");
             this.activated = true;
             gridElement.active = true;
             this.activatedActors= new Array();
@@ -1591,7 +1630,7 @@ GridElementDelegate.prototype = {
             this.first = gridElement;
         }
         else {
-            log("resize");
+            log("GridElementDelegate resize");
             //Check this.activatedActors if equals to nbCols * nbRows
             //before doing anything with the window it must be unmaximized
             //if so move the window then maximize instead of change size
@@ -1608,6 +1647,7 @@ GridElementDelegate.prototype = {
             else {
                 move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
             }
+			//this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
 
             this._resizeDone();
         }
@@ -1619,6 +1659,7 @@ GridElementDelegate.prototype = {
     },
 
     reset: function() {
+		//log("GridElementsDelegate reset");
         this._resetGrid();
 
         this.activated = false;
@@ -1626,9 +1667,26 @@ GridElementDelegate.prototype = {
         this.currentElement = false;
     },
 
+	/*
+	_logActiveActors: function(prefixString) {
+		let activeActorsString ="count:(" + this.activatedActors.length+")";
+        for (var act in this.activatedActors) {
+			activeActorsString = activeActorsString + "," + this.activatedActors[act].id + "-";
+            if(this.activatedActors[act].active) {
+				activeActorsString = activeActorsString +"A";
+			} else {
+				activeActorsString = activeActorsString +"U";				
+			}
+        }
+        log(prefixString + " " + activeActorsString);		
+	},
+	*/
     _resetGrid: function() {
+		//log("GridElementDelegate _resetGrid");
+		//this._logActiveActors("GridElementDelegate _resetGrid Active actors before");
         this._hideArea();
         if (this.currentElement) {
+			//log("GridElementDelegate _resetGrid deactivating currentElement " + this.currentElement.id);
             this.currentElement._deactivate();
         }
 
@@ -1636,6 +1694,7 @@ GridElementDelegate.prototype = {
             this.activatedActors[act]._deactivate();
         }
         this.activatedActors = new Array();
+		//this._logActiveActors("GridElementDelegate _resetGrid Active actors after");
     },
 
     _getVarFromGridElement: function(fromGridElement, toGridElement) {
@@ -1649,6 +1708,7 @@ GridElementDelegate.prototype = {
     },
 
     refreshGrid: function(fromGridElement, toGridElement) {
+		//log("GridElementDelegate refreshGrid " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         this._resetGrid();
         let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
@@ -1661,6 +1721,8 @@ GridElementDelegate.prototype = {
                 this.activatedActors.push(element);
             }
         }
+
+		//this._logActiveActors("GridElementDelegate _refreshGrid Active actors after");
 
         this._displayArea(fromGridElement, toGridElement);
     },
@@ -1680,12 +1742,25 @@ GridElementDelegate.prototype = {
         return [areaX,areaY,areaWidth,areaHeight];
     },
 
+	forceArea: function(fromGridElement, toGridElement) {
+		//log("GridElementDelegate _forceArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+        let areaWidth,areaHeight,areaX,areaY;
+        [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
+		//log("GridElementDelegate forceArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
+		area.width = areaWidth;
+		area.height = areaHeight;
+		area.x = areaX;
+		area.y = areaY;		
+	},
+
     _displayArea: function(fromGridElement, toGridElement) {
+		//log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
 
         area.add_style_pseudo_class('activate');
 
+		//log("GridElementDelegate _displayArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
         if (gridSettings[SETTINGS_ANIMATION]) {
             Tweener.addTween(area, {
                 time: 0.2,
@@ -1709,16 +1784,19 @@ GridElementDelegate.prototype = {
     },
 
     _onHoverChanged: function(gridElement) {
+		//log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if(this.activated) {
             this.refreshGrid(this.first,gridElement);
             this.currentElement = gridElement;
         }
         else if (!this.currentElement || gridElement.id != this.currentElement.id) {
             if (this.currentElement) {
+				//log("GridElementDelegate _onHoverChange currentElement deactivating" + this.currentElement.id);
                 this.currentElement._deactivate();
             }
 
             this.currentElement = gridElement;
+			//log("GridElementDelegate _onHoverChange currentElement new activating" + this.currentElement.id);
             this.currentElement._activate();	    
             this._displayArea(gridElement,gridElement);	    
         }
@@ -1751,10 +1829,10 @@ GridElement.prototype = {
         this.width = width;
         this.height = height;
 
-        this.id =  getMonitorKey(monitor)+":"+coordx+":"+coordy;
+        this.id =  getMonitorKey(monitor)+"-"+coordx+":"+coordy;
 
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-        this.actor.connect('notify::hover', Lang.bind(this, this._onHoverChanged));
+        this.hoverConnect = this.actor.connect('notify::hover', Lang.bind(this, this._onHoverChanged));
 
         this.active = false;
     },
@@ -1770,29 +1848,43 @@ GridElement.prototype = {
     },
 
     _onButtonPress: function() {
-        log("onButtonPress "+this.id);
+        //log("GridElement _onButtonPress "+this.id);
         this.actor._delegate._onButtonPress(this);
     },
 
     _onHoverChanged: function() {
-        log("onHoverChanged "+this.id);
+        //log("GridElement _onHoverChanged "+this.id);
         this.actor._delegate._onHoverChanged(this);
     },
 
     _activate: function() {
-        log("activate "+this.id);
-        this.actor.add_style_pseudo_class('activate');
+        //log("GridElement activate "+this.id);
+		if(!this.active) {
+			this.actor.add_style_pseudo_class('activate');
+			this.active = true;
+		//} else {
+		//	log("GridElement activate - already active "+this.id);
+		}
     },
 
     _deactivate: function() {
-        log("deactivate "+this.id);
-        this.actor.remove_style_pseudo_class('activate');
+        //log("GridElement deactivate "+this.id);
+		if(this.active) {
+			this.actor.remove_style_pseudo_class('activate');
+			this.active = false;
+		//} else {
+		//	log("GridElement deactivate - already inactive "+this.id);
+		}
     },
 
     _clean: function() {
         Main.uiGroup.remove_actor(area);
     },
 
+	_disconnect: function() {
+		this.actor.disconnect(this.hoverConnect);
+	},
+	
     _destroy: function() {
         this.monitor = null;
         this.coordx = null;
