@@ -13,6 +13,7 @@ const Settings = Extension.imports.settings;
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
+const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_PRESET_RESIZE = 'resize';
@@ -33,8 +34,18 @@ const pretty_names = {
     'set-tiling'	    : 'Set tiling',
     'cancel-tiling'     : 'Cancel tiling',
     'change-grid-size'  : 'Change grid size',
-    'resize-left'       : 'Resize horizontal narrower',         
-    'resize-right'      : 'Resize horizontal wider',         
+	'autotile-main'		: 'Autotile Main',
+	'autotile-2'		: 'Autotile 2 cols',
+	'autotile-3'		: 'Autotile 3 cols',
+	'autotile-4'		: 'Autotile 4 cols',
+	'autotile-5'		: 'Autotile 5 cols',
+	'autotile-6'		: 'Autotile 6 cols',
+	'autotile-7'		: 'Autotile 7 cols',
+	'autotile-8'		: 'Autotile 8 cols',
+	'autotile-9'		: 'Autotile 9 cols',
+	'autotile-10'		: 'Autotile 10 cols',
+    'resize-left'       : 'Resize horizontal narrower',
+    'resize-right'      : 'Resize horizontal wider',
     'resize-up'         : 'Resize vertical higher',
     'resize-down'       : 'Resize vertical lower',
     'preset-resize-1'   : 'Preset resize 1',
@@ -123,7 +134,7 @@ function accel_tab(notebook) {
 
         let [success, iter] = model.get_iter_from_string(str_iter);
 
-        
+
         if (!success) {
             throw new Error("Something be broken, yo.");
         }
@@ -170,6 +181,7 @@ function basics_tab(notebook) {
 
     add_check("Auto close"          , SETTINGS_AUTO_CLOSE      , bs_grid, settings);
     add_check("Animation"           , SETTINGS_ANIMATION       , bs_grid, settings);
+	add_check("Show icon"			, SETTINGS_SHOW_ICON	   , bs_grid, settings);
 
     add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES      , bs_grid, settings, 30);	
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
@@ -210,15 +222,15 @@ function margins_tab(notebook) {
 
     let text = "Window margins and invisible borders around screen.";
     mg_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START }));	
-    add_int  ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets primary right"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets primary top"       , SETTINGS_INSETS_PRIMARY_TOP      , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets primary bottom"    , SETTINGS_INSETS_PRIMARY_BOTTOM   , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets secondary left"    , SETTINGS_INSETS_SECONDARY_LEFT   , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets secondary right"   , SETTINGS_INSETS_SECONDARY_RIGHT  , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets secondary top"     , SETTINGS_INSETS_SECONDARY_TOP    , mg_grid, settings, 0, 100, 1, 10);
-    add_int  ("Insets secondary bottom"  , SETTINGS_INSETS_SECONDARY_BOTTOM , mg_grid, settings, 0, 100, 1, 10);
+    add_int  ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets primary right"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets primary top"       , SETTINGS_INSETS_PRIMARY_TOP      , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets primary bottom"    , SETTINGS_INSETS_PRIMARY_BOTTOM   , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets secondary left"    , SETTINGS_INSETS_SECONDARY_LEFT   , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets secondary right"   , SETTINGS_INSETS_SECONDARY_RIGHT  , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets secondary top"     , SETTINGS_INSETS_SECONDARY_TOP    , mg_grid, settings, 0, 240, 1, 10);
+    add_int  ("Insets secondary bottom"  , SETTINGS_INSETS_SECONDARY_BOTTOM , mg_grid, settings, 0, 240, 1, 10);
 
     let mg_window = new Gtk.ScrolledWindow({'vexpand': true});
         mg_window.add(mg_grid);	
@@ -330,7 +342,7 @@ const TextEntry = new Lang.Class({
 function append_hotkey(model, settings, name, pretty_name) {
     let [key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
 
-    let row = model.insert(40);
+    let row = model.insert(55);
 
     model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }

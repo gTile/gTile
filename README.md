@@ -41,6 +41,7 @@ In the *Help* tab you will find help and usage hints.
 	* Can be Global (can be used directly without the main gTile window)
 	* Can be non-global (can only be used when the gTile window is shown)
 	* Up to 30 accelerators can be configured, which should be plenty
+	* Up to 10 accelerators for AutoTiling
 * Grid schemes:
 	* Are defined in the preferences window (*Basic* tab)
 	* Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
@@ -96,6 +97,13 @@ Default shortcuts for Super+Alt+[1..9(keypad)]
 
 **Note:** Preconfigured keyboard shortcuts are optimized for horizontal screens.
 
+## AutoTiling
+
+You can do auto tiling for all windows on screen
+
+1. Activate gTile by pressing <Super>KP_Enter or clicking on gTile icon
+2. Click on one of 2 autotile buttons, or
+2. Press one of <Super>1 - 0 (total 10 available)
 
 ## Overlap with stock Gnome-shell shortcuts
 

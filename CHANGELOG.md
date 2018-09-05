@@ -1,6 +1,17 @@
 CHANGE LOG
 ----------
+
+### V28
+
+-   Increase max margins to 240 - fix #40
+-   Added 10 keyboard accelerators for AutoTiling - fix #32
+-   Allow to hide icon - fix #37
+-   Fix floating background window jumps
+-   Fix reference to invalid objects that happens in mouse resize
+-   Gnome-shell version support to 28
+
 ### V26
+
 -   Event connection leak on focus-window
 -   Autodetect panels on screen, removed settings TopPanel and Bottom Panel
 -   Support screen rotation for keyboard shortcuts
