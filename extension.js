@@ -27,6 +27,8 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
+// Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
+const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
@@ -519,7 +521,7 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
         return !contains(excludedApplications, appName)
             && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
-            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.get_workspace() == WorkspaceManager.get_active_workspace()
             && w.meta_window.showing_on_its_workspace()
             && monitors[w.meta_window.get_monitor()] == monitor
             && focusMetaWindow != w.meta_window;
@@ -531,7 +533,7 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 function getWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
         return w.meta_window.get_window_type() != Meta.WindowType.DESKTOP
-            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.get_workspace() == WorkspaceManager.get_active_workspace()
             && w.meta_window.showing_on_its_workspace()
             && monitors[w.meta_window.get_monitor()] == monitor;
     });
@@ -674,7 +676,7 @@ function getFocusApp() {
         return false;
     }
 
-    let windows = global.screen.get_active_workspace().list_windows();
+    let windows = WorkspaceManager.get_active_workspace().list_windows();
     let focusedWindow = false;
     for (let i = 0; i < windows.length; ++i) {
         let metaWindow = windows[i];
@@ -707,7 +709,7 @@ function getWorkAreaByMonitorIdx(monitor_idx) {
 }
 
 function getWorkArea(monitor, monitor_idx) {
-    let wkspace = global.screen.get_active_workspace();
+    let wkspace = WorkspaceManager.get_active_workspace();
     let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
     //log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
