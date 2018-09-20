@@ -28,7 +28,14 @@ const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
 // Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
-const WorkspaceManager = global.screen || global.workspace_manager;
+// At GNOME 3.30, `TypeError: global.screen is undefined` occured
+var wsm;
+if ( "screen" in global ){
+    wsm = global.screen;
+} else {
+    wsm = global.workspace_manager;
+}
+const WorkspaceManager = wsm;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
