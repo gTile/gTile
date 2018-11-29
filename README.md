@@ -58,6 +58,12 @@ In the *Help* tab you will find help and usage hints.
 2. Click on the gTile icon on the tool bar, or press `Super+Enter` (default)
 3. The gTile dialog pop-up will show up in the center of your screen
 
+What these buttons do:
+
+- ![Toggle animation icon](https://github.com/paulodeleo/gTile/raw/master/images/animation-icon.png) <- this one toggles the animation of the changes to the preview drawing.
+
+- ![Toggle auto-close icon](https://github.com/paulodeleo/gTile/raw/master/images/auto-close-icon.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
+
 ### Using the mouse
 
 4. Use the mouse cursor to click on one of the desired corner coordinates, and then the other corner coordinates
