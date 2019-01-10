@@ -78,7 +78,7 @@ const pretty_names = {
     'preset-resize-28'  : 'Preset resize 28',
     'preset-resize-29'  : 'Preset resize 29',
     'preset-resize-30'  : 'Preset resize 30'
-} 
+}
 
 function init() {
 
@@ -166,7 +166,7 @@ function accel_tab(notebook) {
     let ks_window = new Gtk.ScrolledWindow({'vexpand': true});
         ks_window.add(ks_grid);
     let ks_label = new Gtk.Label({ label: "Accelerators", use_markup: false, halign: Gtk.Align.START });
-    notebook.append_page(ks_window, ks_label);	  
+    notebook.append_page(ks_window, ks_label);
 }
 
 function basics_tab(notebook) {
@@ -206,6 +206,7 @@ function presets_tab(notebook) {
                                   column_spacing: 6 });
 
     let text = "Resize presets (grid size and 2 corners, 2x2 0:1 0:1 is left bottom quarter)";
+    let text = "Resize presets (grid size and 2 corner tiles, e.g. '2x2 0:1 0:1' is left bottom quarter)";
     pr_grid.add(new Gtk.Label({ label: text, use_markup: false, halign: Gtk.Align.START,
                                 justify: Gtk.Justification.LEFT, wrap: true }));
 
@@ -286,7 +287,7 @@ function buildPrefsWidget() {
 function add_check(check_label, SETTINGS, grid, settings) {
     let check = new Gtk.CheckButton({ label: check_label, margin_top: 6 });
     settings.bind(SETTINGS, check, 'active', Gio.SettingsBindFlags.DEFAULT);
-    grid.add(check);  
+    grid.add(check);
 }
 
 function add_int(int_label, SETTINGS, grid, settings, minv, maxv, incre, page) {

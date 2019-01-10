@@ -934,8 +934,8 @@ function keyMoveResizeEvent(type, key) {
 function presetResize(preset) {
     // Expected preset format is XxY x1:y1 x2:y2
     // XxY is grid size like 6x8
-    // x1:y1 is left upper corner coordinates in grid tiles, starting from 0
-    // x2:y2 is right down corner coordinates in grid tiles
+    // x1:y1 is left upper corner tile coordinates in grid tiles, starting from 0
+    // x2:y2 is right down corner tile coordinates in grid tiles
 
     let window = getFocusApp();
     if (!window) {

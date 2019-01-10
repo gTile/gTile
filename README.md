@@ -47,7 +47,7 @@ In the *Help* tab you will find help and usage hints.
 	* Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
 * Resize presets:
 	* Are defined in the preferences window (*Reset presets* tab) 
-	* Format: grid size, top left corner, bottom right corner
+	* Format: grid size, top left corner tile, bottom right corner tile
 	* Format examples: "2x2 0:1 0:1" or "6x4 0:2 3:3"
 	* Grids setup here size can be of any size, not necessarily what you have set up in grid sizes settings
 
@@ -57,6 +57,12 @@ In the *Help* tab you will find help and usage hints.
 1. Make sure the window you want to resize has focus
 2. Click on the gTile icon on the tool bar, or press `Super+Enter` (default)
 3. The gTile dialog pop-up will show up in the center of your screen
+
+What these buttons do:
+
+- ![Toggle animation icon](https://github.com/paulodeleo/gTile/raw/master/images/animation-icon.png) <- this one toggles the animation of the changes to the preview drawing.
+
+- ![Toggle auto-close icon](https://github.com/paulodeleo/gTile/raw/master/images/auto-close-icon.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
 
 ### Using the mouse
 
