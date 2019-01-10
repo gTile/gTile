@@ -665,6 +665,10 @@ function contains(a, obj) {
     return false;
 }
 
+/**
+ * Get focused window by iterating though the windows on the active workspace.
+ * @returns {Object} The focussed window object. False if no focussed window was found. 
+ */
 function getFocusApp() {
     if (tracker.focus_app == null) {
         return false;
@@ -689,6 +693,11 @@ function getFocusApp() {
     return focusedWindow;
 }
 
+/**
+ * Determine if the given monitor is the primary monitor.
+ * @param {Object} monitor The given monitor to evaluate.
+ * @returns {boolean} True if the given monitor is the primary monitor.
+ * */
 function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
@@ -785,7 +794,7 @@ function keyChangeTiling() {
             found = true;
         }
     }
-    log("Found matching grid nbCols " + nbCols + " nbRows " + nbRows + " next key is " + next_key);
+    log("found matching grid nbCols " + nbCols + " nbRows " + nbRows + " next key is " + next_key);
     log("New settings will be nbCols " + grid_settings_sizes[next_key].cols + " nbRows " + grid_settings_sizes[next_key].rows);
     grid_settings_sizes[next_key]._onButtonPress();
     log("New settings are nbCols " + nbCols + " nbRows " + nbRows);
@@ -931,43 +940,53 @@ function keyMoveResizeEvent(type, key) {
 
 }
 
+/**
+ * Resize window to the given preset.
+ * @param  {number}  Identifier of the resize preset (1 - 30)
+ */
 function presetResize(preset) {
-    // Expected preset format is XxY x1:y1 x2:y2
-    // XxY is grid size like 6x8
-    // x1:y1 is left upper corner tile coordinates in grid tiles, starting from 0
-    // x2:y2 is right down corner tile coordinates in grid tiles
 
+    // Check if there's a focusable window
     let window = getFocusApp();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut");
         return;
     }
 
+    // Ensure that the window is not maximized
     reset_window(window);
 
+    // Fetch, parse and validate the given preset.
+    // Expected preset format is "XxY x1:y1 x2:y2":
+    //  - XxY is grid size like 6x8
+    //  - x1:y1 is left upper corner tile coordinates in grid tiles, starting from 0
+    //  - x2:y2 is right down corner tile coordinates in grid tiles
     let preset_string = settings.get_string("resize" + preset);
     log("Preset resize " + preset + "  is " + preset_string);
     let ps = preset_string.split(" ");
     if(ps.length != 3) {
         log("Bad preset " + preset + " settings " + preset_string);
-	return;
+	    return;
     }
+
+    // actually parse the preset string (format, left-upper-corner, right-down-corner)
     let grid_format = parseTuple(ps[0], "x");
     let luc = parseTuple(ps[1], ":");
     let rdc = parseTuple(ps[2], ":");
     log("Parsed " + grid_format.X + "x" + grid_format.Y + " "
         + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
-    if  (  grid_format.X < 1 || luc.X < 0 || rdc.X < 0
-        || grid_format.Y < 1 || luc.Y < 0 || rdc.Y < 0
-        || grid_format.X <= luc.X || grid_format.X <= rdc.X
-        || grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y
-        || luc.X > rdc.X || luc.Y > rdc.Y) {
+    if  (   grid_format.X < 1 || luc.X < 0 || rdc.X < 0 ||
+            grid_format.Y < 1 || luc.Y < 0 || rdc.Y < 0 ||
+            grid_format.X <= luc.X || grid_format.X <= rdc.X ||
+            grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y ||
+            luc.X > rdc.X || luc.Y > rdc.Y) {
         log("Bad preset " + preset + " settings " + preset_string);
         return;
     }
     log("Parsed preset " + preset + " " + grid_format.X + "x" + grid_format.Y +
         " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
 
+    // do the maths to resize the window
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
     let grid_element_width = Math.floor(work_area.width / grid_format.X);
@@ -977,6 +996,7 @@ function presetResize(preset) {
     let ww = (rdc.X + 1 - luc.X) * grid_element_width - 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
     let wh = (rdc.Y + 1 - luc.Y) * grid_element_height- 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
 
+    // resize window to the given preset dimensions
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     window.move_resize_frame(true, wx, wy, ww, wh);
 }
