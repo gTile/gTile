@@ -70,6 +70,8 @@ let settings = Settings.get();
 let toggleSettingListener;
 let keyControlBound = false;
 let debug = false;
+let lastPreset;
+let currentPresetVariant = 0;
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -92,16 +94,16 @@ const key_bindings_tiling = {
     'cancel-tiling'   : function() { keyCancelTiling();},
     'set-tiling'      : function() { keySetTiling();},
     'change-grid-size': function() { keyChangeTiling();},
-    'autotile-main'	  : function() { AutoTileMain();},
-    'autotile-2'	  : function() { AutoTileNCols(2);},
-    'autotile-3'	  : function() { AutoTileNCols(3);},
-    'autotile-4'	  : function() { AutoTileNCols(4);},
-    'autotile-5'	  : function() { AutoTileNCols(5);},
-    'autotile-6'	  : function() { AutoTileNCols(6);},
-    'autotile-7'	  : function() { AutoTileNCols(7);},
-    'autotile-8'	  : function() { AutoTileNCols(8);},
-    'autotile-9'	  : function() { AutoTileNCols(9);},
-    'autotile-10'	  : function() { AutoTileNCols(10);}
+    'autotile-main'   : function() { AutoTileMain();},
+    'autotile-2'      : function() { AutoTileNCols(2);},
+    'autotile-3'      : function() { AutoTileNCols(3);},
+    'autotile-4'      : function() { AutoTileNCols(4);},
+    'autotile-5'      : function() { AutoTileNCols(5);},
+    'autotile-6'      : function() { AutoTileNCols(6);},
+    'autotile-7'      : function() { AutoTileNCols(7);},
+    'autotile-8'      : function() { AutoTileNCols(8);},
+    'autotile-9'      : function() { AutoTileNCols(9);},
+    'autotile-10'     : function() { AutoTileNCols(10);}
 }
 
 const key_bindings_presets = {
@@ -220,7 +222,7 @@ function initGridSizes(grid_sizes) {
 function getBoolSetting (settings_string) {
     gridSettings[settings_string] = settings.get_boolean(settings_string);
     if(gridSettings[settings_string] === undefined) {
-	log("Undefined settings " + settings_string);
+    log("Undefined settings " + settings_string);
         gridSettings[settings_string] = false;
     } else {
         //log(settings_string + " set to " + gridSettings[settings_string]);
@@ -246,7 +248,7 @@ function initSettings() {
 
     getBoolSetting(SETTINGS_AUTO_CLOSE);
     getBoolSetting(SETTINGS_ANIMATION);
-	getBoolSetting(SETTINGS_SHOW_ICON);
+    getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
@@ -298,9 +300,9 @@ function enable() {
     log("Create Button");
     launcher = new GTileStatusButton('tiling-icon');
 
-	if(gridSettings[SETTINGS_SHOW_ICON]) {
-		Main.panel.addToStatusArea("GTileStatusButton", launcher);
-	}
+    if(gridSettings[SETTINGS_SHOW_ICON]) {
+        Main.panel.addToStatusArea("GTileStatusButton", launcher);
+    }
 
     Hotkeys.bind(key_bindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
@@ -417,7 +419,7 @@ function moveGrids() {
 
 function updateRegions() {
     /*Main.layoutManager._chrome.updateRegions();*/
-	log("updateRegions");
+    log("updateRegions");
     refreshGrids();
     for (let idx in grids) {
         let grid = grids[idx];
@@ -836,7 +838,7 @@ function setInitialSelection() {
     log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
     log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
 
-	grid.forceGridElementDelegate(lux, luy, rdx, rdy);
+    grid.forceGridElementDelegate(lux, luy, rdx, rdy);
 
     grid.elements[luy] [lux]._onButtonPress();
     grid.elements[rdy] [rdx]._onHoverChanged();
@@ -870,7 +872,7 @@ function keyMoveResizeEvent(type, key) {
         }
     }
     if(!delegate.currentElement) {
-	log("gTime currentElement is not set!");
+        log("gTime currentElement is not set!");
     }
     let cX = delegate.currentElement.coordx;
     let cY = delegate.currentElement.coordy;
@@ -957,22 +959,50 @@ function presetResize(preset) {
     reset_window(window);
 
     // Fetch, parse and validate the given preset.
-    // Expected preset format is "XxY x1:y1 x2:y2":
+    // Expected preset format is "XxY x1:y1 x2:y2[,x1:y1 x2:y2]":
     //  - XxY is grid size like 6x8
     //  - x1:y1 is left upper corner tile coordinates in grid tiles, starting from 0
     //  - x2:y2 is right down corner tile coordinates in grid tiles
+    //  - a preset can define multiple variants (e.g. "3x2 0:0 0:1,0:0 1:1,0:0 2:1")
+    //  - variants can be activated using the same shortcut consecutively
     let preset_string = settings.get_string("resize" + preset);
     log("Preset resize " + preset + "  is " + preset_string);
-    let ps = preset_string.split(" ");
+    let ps_variants = preset_string.split(",");
+
+    // retrieve and validate preset string / first preset variant
+    let ps = ps_variants[0].split(" ");
     if(ps.length != 3) {
         log("Bad preset " + preset + " settings " + preset_string);
-	    return;
+        return;
     }
 
-    // actually parse the preset string (format, left-upper-corner, right-down-corner)
+    // parse the preset string (grid size, left-upper-corner, right-down-corner)
     let grid_format = parseTuple(ps[0], "x");
     let luc = parseTuple(ps[1], ":");
     let rdc = parseTuple(ps[2], ":");
+
+    // handle preset variants (if there are any)
+    ps_variant_count = ps_variants.length;
+    if(ps_variant_count > 1) {
+        if(preset == lastPreset) {
+            // same preset: increase variant counter, but consider upper boundary
+            currentPresetVariant = (currentPresetVariant + 1) % ps_variant_count;
+        } else {
+            // new preset: update lastPreset and reset variant counter
+            currentPresetVariant = 0;
+        }
+    } else {
+        currentPresetVariant = 0;
+    }
+    //log("Current Preset Variant: " + currentPresetVariant);
+
+    // retrieve current preset variant
+    if(currentPresetVariant > 0) {
+        ps = ps_variants[currentPresetVariant].split(" ");
+        luc = parseTuple(ps[0], ":");
+        rdc = parseTuple(ps[1], ":");
+    }
+
     log("Parsed " + grid_format.X + "x" + grid_format.Y + " "
         + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
     if  (   grid_format.X < 1 || luc.X < 0 || rdc.X < 0 ||
@@ -999,6 +1029,7 @@ function presetResize(preset) {
     // resize window to the given preset dimensions
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     window.move_resize_frame(true, wx, wy, ww, wh);
+    lastPreset = preset;
 }
 
 /*****************************************************************
@@ -1147,7 +1178,7 @@ AutoTileMainAndList.prototype = {
     },
 
     _onButtonPress: function() {
-		AutoTileMain();
+        AutoTileMain();
         log("AutoTileMainAndList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
     }
@@ -1156,7 +1187,7 @@ AutoTileMainAndList.prototype = {
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
 function AutoTileMain() {
-	log("AutoTileMain");
+    log("AutoTileMain");
     let window = getFocusApp();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut AutoTileMain");
@@ -1167,38 +1198,38 @@ function AutoTileMain() {
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
 
-	let monitor = monitors[mind];
-	let workArea = getWorkAreaByMonitor(monitor);
-	let windows = getNotFocusedWindowsOfMonitor(monitor);
+    let monitor = monitors[mind];
+    let workArea = getWorkAreaByMonitor(monitor);
+    let windows = getNotFocusedWindowsOfMonitor(monitor);
 
-	move_resize_window_with_margins(
-		focusMetaWindow,
-		workArea.x,
-		workArea.y,
-		workArea.width/2,
-		workArea.height);
+    move_resize_window_with_margins(
+        focusMetaWindow,
+        workArea.x,
+        workArea.y,
+        workArea.width/2,
+        workArea.height);
 
-	let winHeight = workArea.height/windows.length;
-	let countWin = 0;
+    let winHeight = workArea.height/windows.length;
+    let countWin = 0;
 
-	log("AutoTileMain MonitorHeight: "+monitor.height+":"+windows.length );
+    log("AutoTileMain MonitorHeight: "+monitor.height+":"+windows.length );
 
-	for (let windowIdx in windows) {
-		let metaWindow = windows[windowIdx].meta_window;
+    for (let windowIdx in windows) {
+        let metaWindow = windows[windowIdx].meta_window;
 
-		let newOffset = workArea.y + (countWin * winHeight);
-		reset_window(metaWindow);
+        let newOffset = workArea.y + (countWin * winHeight);
+        reset_window(metaWindow);
 
-		move_resize_window_with_margins(
-			metaWindow,
-			workArea.x + workArea.width/2,
-			newOffset,
-			workArea.width/2,
-			winHeight
-		);
-		countWin++;
-	}
-	log("AutoTileMain done");
+        move_resize_window_with_margins(
+            metaWindow,
+            workArea.x + workArea.width/2,
+            newOffset,
+            workArea.width/2,
+            winHeight
+        );
+        countWin++;
+    }
+    log("AutoTileMain done");
 }
 
 function AutoTileTwoList(grid) {
@@ -1216,18 +1247,18 @@ AutoTileTwoList.prototype = {
     },
 
     _onButtonPress: function() {
-		log("AutotileTwoList");
-		AutoTileNCols(2);
+        log("AutotileTwoList");
+        AutoTileNCols(2);
         log("AutoTileTwoList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
-		log("Autotile2 done");
+        log("Autotile2 done");
     }
 }
 
 Signals.addSignalMethods(AutoTileTwoList.prototype);
 
 function AutoTileNCols(cols) {
-	log("AutoTileNCols " + cols);
+    log("AutoTileNCols " + cols);
     let window = getFocusApp();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut AutoTileNCols");
@@ -1238,42 +1269,42 @@ function AutoTileNCols(cols) {
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
 
-	let monitor = monitors[mind];
-	let workArea = getWorkAreaByMonitor(monitor);
-	let windows = getNotFocusedWindowsOfMonitor(monitor);
+    let monitor = monitors[mind];
+    let workArea = getWorkAreaByMonitor(monitor);
+    let windows = getNotFocusedWindowsOfMonitor(monitor);
 
-	let nbWindowOnEachSide = Math.ceil((windows.length + 1) / cols);
-	let winHeight = workArea.height/nbWindowOnEachSide;
+    let nbWindowOnEachSide = Math.ceil((windows.length + 1) / cols);
+    let winHeight = workArea.height/nbWindowOnEachSide;
 
-	let countWin = 0;
+    let countWin = 0;
 
-	move_resize_window_with_margins(
-		focusMetaWindow,
-		workArea.x + countWin%cols * workArea.width/cols,
-		workArea.y + (Math.floor(countWin/cols) * winHeight),
-		workArea.width/cols,
-		winHeight
-	);
+    move_resize_window_with_margins(
+        focusMetaWindow,
+        workArea.x + countWin%cols * workArea.width/cols,
+        workArea.y + (Math.floor(countWin/cols) * winHeight),
+        workArea.width/cols,
+        winHeight
+    );
 
-	countWin++;
+    countWin++;
 
-	// todo make function
-	for (let windowIdx in windows) {
-		let metaWindow = windows[windowIdx].meta_window;
+    // todo make function
+    for (let windowIdx in windows) {
+        let metaWindow = windows[windowIdx].meta_window;
 
-		reset_window(metaWindow);
+        reset_window(metaWindow);
 
-		move_resize_window_with_margins(
-			metaWindow,
-			workArea.x + countWin%cols * workArea.width/cols,
-			workArea.y + (Math.floor(countWin/cols) * winHeight),
-			workArea.width/cols,
-			winHeight
-		);
-		countWin++;
-	}
+        move_resize_window_with_margins(
+            metaWindow,
+            workArea.x + countWin%cols * workArea.width/cols,
+            workArea.y + (Math.floor(countWin/cols) * winHeight),
+            workArea.width/cols,
+            winHeight
+        );
+        countWin++;
+    }
 
-	log("AutoTileNCols done");
+    log("AutoTileNCols done");
 }
 
 function GridSettingsButton(text,cols,rows) {
@@ -1475,24 +1506,24 @@ Grid.prototype = {
         //log("Grid _displayElements end");
     },
 
-	forceGridElementDelegate: function(x,y,w,h) {
-		//log("Grid forceGridElementDelegate " + x + ":" + y + " - " + w + ":" + h);
-		this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
-	},
+    forceGridElementDelegate: function(x,y,w,h) {
+        //log("Grid forceGridElementDelegate " + x + ":" + y + " - " + w + ":" + h);
+        this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
+    },
 
     refresh: function() {
-		//log("Grid refresh")
-		//this.elementsDelegate._logActiveActors("Grid refresh active actors");
-		this.elementsDelegate._resetGrid();
-		//log("Grid refresh disconnect grid elements");
+        //log("Grid refresh")
+        //this.elementsDelegate._logActiveActors("Grid refresh active actors");
+        this.elementsDelegate._resetGrid();
+        //log("Grid refresh disconnect grid elements");
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 this.elements[r][c]._disconnect();
             }
         }
-		//log("Grid refresh destroy_all_children");
+        //log("Grid refresh destroy_all_children");
         this.table.destroy_all_children();
-		//log("Grid refresh destroy_all_children done");
+        //log("Grid refresh destroy_all_children done");
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
@@ -1638,13 +1669,13 @@ GridElementDelegate.prototype = {
     },
 
     _onButtonPress: function(gridElement) {
-		log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
-		//this._logActiveActors("GridElementDelegate _onButtonPress active actors");
+        log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
+        //this._logActiveActors("GridElementDelegate _onButtonPress active actors");
         if(!this.currentElement) {
             this.currentElement = gridElement;
         }
         if (this.activated==false) {
-			log("GridElementDelegate first activation");
+            log("GridElementDelegate first activation");
             this.activated = true;
             gridElement.active = true;
             this.activatedActors= new Array();
@@ -1669,7 +1700,7 @@ GridElementDelegate.prototype = {
             else {
                 move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
             }
-			//this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
+            //this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
 
             this._resizeDone();
         }
@@ -1681,7 +1712,7 @@ GridElementDelegate.prototype = {
     },
 
     reset: function() {
-		//log("GridElementsDelegate reset");
+        //log("GridElementsDelegate reset");
         this._resetGrid();
 
         this.activated = false;
@@ -1689,26 +1720,26 @@ GridElementDelegate.prototype = {
         this.currentElement = false;
     },
 
-	/*
-	_logActiveActors: function(prefixString) {
-		let activeActorsString ="count:(" + this.activatedActors.length+")";
+    /*
+    _logActiveActors: function(prefixString) {
+        let activeActorsString ="count:(" + this.activatedActors.length+")";
         for (var act in this.activatedActors) {
-			activeActorsString = activeActorsString + "," + this.activatedActors[act].id + "-";
+            activeActorsString = activeActorsString + "," + this.activatedActors[act].id + "-";
             if(this.activatedActors[act].active) {
-				activeActorsString = activeActorsString +"A";
-			} else {
-				activeActorsString = activeActorsString +"U";
-			}
+                activeActorsString = activeActorsString +"A";
+            } else {
+                activeActorsString = activeActorsString +"U";
+            }
         }
         log(prefixString + " " + activeActorsString);
-	},
-	*/
+    },
+    */
     _resetGrid: function() {
-		//log("GridElementDelegate _resetGrid");
-		//this._logActiveActors("GridElementDelegate _resetGrid Active actors before");
+        //log("GridElementDelegate _resetGrid");
+        //this._logActiveActors("GridElementDelegate _resetGrid Active actors before");
         this._hideArea();
         if (this.currentElement) {
-			//log("GridElementDelegate _resetGrid deactivating currentElement " + this.currentElement.id);
+            //log("GridElementDelegate _resetGrid deactivating currentElement " + this.currentElement.id);
             this.currentElement._deactivate();
         }
 
@@ -1716,7 +1747,7 @@ GridElementDelegate.prototype = {
             this.activatedActors[act]._deactivate();
         }
         this.activatedActors = new Array();
-		//this._logActiveActors("GridElementDelegate _resetGrid Active actors after");
+        //this._logActiveActors("GridElementDelegate _resetGrid Active actors after");
     },
 
     _getVarFromGridElement: function(fromGridElement, toGridElement) {
@@ -1730,7 +1761,7 @@ GridElementDelegate.prototype = {
     },
 
     refreshGrid: function(fromGridElement, toGridElement) {
-		//log("GridElementDelegate refreshGrid " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+        //log("GridElementDelegate refreshGrid " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         this._resetGrid();
         let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
@@ -1744,7 +1775,7 @@ GridElementDelegate.prototype = {
             }
         }
 
-		//this._logActiveActors("GridElementDelegate _refreshGrid Active actors after");
+        //this._logActiveActors("GridElementDelegate _refreshGrid Active actors after");
 
         this._displayArea(fromGridElement, toGridElement);
     },
@@ -1764,25 +1795,25 @@ GridElementDelegate.prototype = {
         return [areaX,areaY,areaWidth,areaHeight];
     },
 
-	forceArea: function(fromGridElement, toGridElement) {
-		//log("GridElementDelegate _forceArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+    forceArea: function(fromGridElement, toGridElement) {
+        //log("GridElementDelegate _forceArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
-		//log("GridElementDelegate forceArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
-		area.width = areaWidth;
-		area.height = areaHeight;
-		area.x = areaX;
-		area.y = areaY;
-	},
+        //log("GridElementDelegate forceArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
+        area.width = areaWidth;
+        area.height = areaHeight;
+        area.x = areaX;
+        area.y = areaY;
+    },
 
     _displayArea: function(fromGridElement, toGridElement) {
-		//log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+        //log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
 
         area.add_style_pseudo_class('activate');
 
-		//log("GridElementDelegate _displayArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
+        //log("GridElementDelegate _displayArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
         if (gridSettings[SETTINGS_ANIMATION]) {
             Tweener.addTween(area, {
                 time: 0.2,
@@ -1806,19 +1837,19 @@ GridElementDelegate.prototype = {
     },
 
     _onHoverChanged: function(gridElement) {
-		//log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
+        //log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if(this.activated) {
             this.refreshGrid(this.first,gridElement);
             this.currentElement = gridElement;
         }
         else if (!this.currentElement || gridElement.id != this.currentElement.id) {
             if (this.currentElement) {
-				//log("GridElementDelegate _onHoverChange currentElement deactivating" + this.currentElement.id);
+                //log("GridElementDelegate _onHoverChange currentElement deactivating" + this.currentElement.id);
                 this.currentElement._deactivate();
             }
 
             this.currentElement = gridElement;
-			//log("GridElementDelegate _onHoverChange currentElement new activating" + this.currentElement.id);
+            //log("GridElementDelegate _onHoverChange currentElement new activating" + this.currentElement.id);
             this.currentElement._activate();
             this._displayArea(gridElement,gridElement);
         }
@@ -1881,31 +1912,31 @@ GridElement.prototype = {
 
     _activate: function() {
         //log("GridElement activate "+this.id);
-		if(!this.active) {
-			this.actor.add_style_pseudo_class('activate');
-			this.active = true;
-		//} else {
-		//	log("GridElement activate - already active "+this.id);
-		}
+        if(!this.active) {
+            this.actor.add_style_pseudo_class('activate');
+            this.active = true;
+        //} else {
+        //  log("GridElement activate - already active "+this.id);
+        }
     },
 
     _deactivate: function() {
         //log("GridElement deactivate "+this.id);
-		if(this.active) {
-			this.actor.remove_style_pseudo_class('activate');
-			this.active = false;
-		//} else {
-		//	log("GridElement deactivate - already inactive "+this.id);
-		}
+        if(this.active) {
+            this.actor.remove_style_pseudo_class('activate');
+            this.active = false;
+        //} else {
+        //  log("GridElement deactivate - already inactive "+this.id);
+        }
     },
 
     _clean: function() {
         Main.uiGroup.remove_actor(area);
     },
 
-	_disconnect: function() {
-		this.actor.disconnect(this.hoverConnect);
-	},
+    _disconnect: function() {
+        this.actor.disconnect(this.hoverConnect);
+    },
 
     _destroy: function() {
         this.monitor = null;
