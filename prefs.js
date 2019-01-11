@@ -273,9 +273,9 @@ function buildPrefsWidget() {
     margins_tab(notebook);	
     help_tab(notebook);
 
-        let main_vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL,
-                                        spacing: 10,
-                                        border_width: 10});
+    let main_vbox = new Gtk.Box({   orientation: Gtk.Orientation.VERTICAL,
+                                    spacing: 10,
+                                    border_width: 10});
 
     main_vbox.pack_start(notebook, true, true, 0);	
 
