@@ -189,7 +189,7 @@ const GTileStatusButton = new Lang.Class({
 
 function parseTuple(format, delimiter) {
     // parsing grid size in format XdelimY, like 6x4 or 1:2
-    let gssk = format.split(delimiter);
+    let gssk = format.trim().split(delimiter);
     if(gssk.length != 2
         || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 40
         || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 40) {
@@ -972,7 +972,7 @@ function presetResize(preset) {
     let ps_variants = preset_string.split(",");
 
     // retrieve and validate preset string / first preset variant
-    let ps = ps_variants[0].split(" ");
+    let ps = ps_variants[0].trim().split(" ");
     if(ps.length != 3) {
         log("Bad preset " + preset + " settings " + preset_string);
         return;
@@ -1000,7 +1000,7 @@ function presetResize(preset) {
 
     // retrieve current preset variant
     if(preset_current_variant > 0) {
-        ps = ps_variants[preset_current_variant].split(" ");
+        ps = ps_variants[preset_current_variant].trim().split(" ");
 
         if(ps.length == 3) {
             // handle complete variant definitions
