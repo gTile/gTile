@@ -47,9 +47,10 @@ In the *Help* tab you will find help and usage hints.
 	* Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
 * Resize presets:
 	* Are defined in the preferences window (*Reset presets* tab) 
-	* Format: grid size, top left corner tile, bottom right corner tile
-	* Format examples: "2x2 0:1 0:1" or "6x4 0:2 3:3"
-	* Grids setup here size can be of any size, not necessarily what you have set up in grid sizes settings
+	* Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
+	* Format examples: `2x2 0:1 0:1` or `6x4 0:2 3:3,0:0 3:3,3x2 0:0 1:1`
+  * Grid size format variants can either reuse the last grid format or define a new grid.
+	* Grids defined here can be of any size, not necessarily what you have set up in grid sizes settings
 
 
 ## Usage with interface
