@@ -70,8 +70,10 @@ let settings = Settings.get();
 let toggleSettingListener;
 let keyControlBound = false;
 let debug = false;
-let lastPreset;
-let currentPresetVariant = 0;
+
+let preset_last_index;
+let preset_current_variant = 0;
+let preset_last_grid_format;
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -984,23 +986,37 @@ function presetResize(preset) {
     // handle preset variants (if there are any)
     ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
-        if(preset == lastPreset) {
+        if(preset == preset_last_index) {
             // same preset: increase variant counter, but consider upper boundary
-            currentPresetVariant = (currentPresetVariant + 1) % ps_variant_count;
+            preset_current_variant = (preset_current_variant + 1) % ps_variant_count;
         } else {
-            // new preset: update lastPreset and reset variant counter
-            currentPresetVariant = 0;
+            // new preset: update preset_last_index and reset variant counter
+            preset_current_variant = 0;
         }
     } else {
-        currentPresetVariant = 0;
+        preset_current_variant = 0;
     }
-    //log("Current Preset Variant: " + currentPresetVariant);
+    //log("Current Preset Variant: " + preset_current_variant);
 
     // retrieve current preset variant
-    if(currentPresetVariant > 0) {
-        ps = ps_variants[currentPresetVariant].split(" ");
-        luc = parseTuple(ps[0], ":");
-        rdc = parseTuple(ps[1], ":");
+    if(preset_current_variant > 0) {
+        ps = ps_variants[preset_current_variant].split(" ");
+
+        if(ps.length == 3) {
+            // handle complete variant definitions
+            grid_format = parseTuple(ps[0], "x");
+            luc = parseTuple(ps[1], ":");
+            rdc = parseTuple(ps[2], ":");
+        } else if (ps.length == 2) {
+            // handle short variant definitions - grid format is taken from
+            // a previous variant
+            grid_format = preset_last_grid_format;
+            luc = parseTuple(ps[0], ":");
+            rdc = parseTuple(ps[1], ":");
+        } else {
+            log("Bad preset " + preset + " settings " + preset_string);
+            return;
+        }
     }
 
     log("Parsed " + grid_format.X + "x" + grid_format.Y + " "
@@ -1029,7 +1045,9 @@ function presetResize(preset) {
     // resize window to the given preset dimensions
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     window.move_resize_frame(true, wx, wy, ww, wh);
-    lastPreset = preset;
+
+    preset_last_index = preset;
+    preset_last_grid_format = grid_format;
 }
 
 /*****************************************************************
