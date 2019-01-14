@@ -88,7 +88,7 @@ function accel_tab(notebook) {
     let settings = Settings.get();
     let ks_grid = new Gtk.Grid({ orientation: Gtk.Orientation.VERTICAL,
                                     row_spacing: 6,
-                                    column_spacing: 6 });    
+                                    column_spacing: 6 });
 
     let model = new Gtk.ListStore();
 
@@ -185,7 +185,7 @@ function basics_tab(notebook) {
     add_check("Animation",  SETTINGS_ANIMATION,  bs_grid, settings);
     add_check("Show icon",  SETTINGS_SHOW_ICON,  bs_grid, settings);
 
-    add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES      , bs_grid, settings, 30);    
+    add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES, bs_grid, settings, 30);
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
@@ -196,7 +196,7 @@ function basics_tab(notebook) {
     let bs_window = new Gtk.ScrolledWindow({'vexpand': true});
     bs_window.add(bs_grid);
     let bs_label = new Gtk.Label({ label: "Basic", use_markup: false, halign: Gtk.Align.START })
-    notebook.append_page(bs_window, bs_label);    
+    notebook.append_page(bs_window, bs_label);
 }
 
 function presets_tab(notebook) {
@@ -214,9 +214,9 @@ function presets_tab(notebook) {
         add_text ("Preset resize " + ind, SETTINGS_PRESET_RESIZE + ind, pr_grid, settings, 20);
     }
     let pr_window = new Gtk.ScrolledWindow({'vexpand': true});
-    pr_window.add(pr_grid);    
+    pr_window.add(pr_grid);
     let pr_label = new Gtk.Label({ label: "Resize presets", use_markup: false, halign: Gtk.Align.START })
-    notebook.append_page(pr_window, pr_label);        
+    notebook.append_page(pr_window, pr_label);
 }
 
 function margins_tab(notebook) {
@@ -239,9 +239,9 @@ function margins_tab(notebook) {
     add_int  ("Insets secondary bottom"  , SETTINGS_INSETS_SECONDARY_BOTTOM , mg_grid, settings, 0, 240, 1, 10);
 
     let mg_window = new Gtk.ScrolledWindow({'vexpand': true});
-    mg_window.add(mg_grid);    
+    mg_window.add(mg_grid);
     let mg_label = new Gtk.Label({ label: "Margins", use_markup: false, halign: Gtk.Align.START })
-    notebook.append_page(mg_window, mg_label);    
+    notebook.append_page(mg_window, mg_label);
 }
 
 function help_tab(notebook) {
@@ -270,14 +270,14 @@ function buildPrefsWidget() {
     basics_tab(notebook);
     accel_tab(notebook);
     presets_tab(notebook);
-    margins_tab(notebook);    
+    margins_tab(notebook);
     help_tab(notebook);
 
     let main_vbox = new Gtk.Box({   orientation: Gtk.Orientation.VERTICAL,
                                     spacing: 10,
                                     border_width: 10});
 
-    main_vbox.pack_start(notebook, true, true, 0);    
+    main_vbox.pack_start(notebook, true, true, 0);
 
     main_vbox.show_all();
 
