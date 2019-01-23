@@ -72,11 +72,11 @@ let keyControlBound = false;
 let debug = false;
 
 let presetState = new Array();
-presetState["last_index"] = '';
 presetState["current_variant"] = 0;
-presetState["last_grid_format"] = '';
-presetState["last_window_title"] = '';
 presetState["last_call"] = '';
+presetState["last_grid_format"] = '';
+presetState["last_preset"] = '';
+presetState["last_window_title"] = '';
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -994,14 +994,15 @@ function presetResize(preset) {
     // handle preset variants (if there are any)
     ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
-        if( presetState["last_index"] == preset  &&
-            presetState["last_window_title"] == window.get_title()) {
-            // same preset & window:
+        if( presetState["last_call"] + 2000 > new Date().getTime() &&
+            presetState["last_preset"] == preset  &&
+            presetState["last_window_title"] == window.get_title() ) {
+            // within timeout, same preset & same window:
             // increase variant counter, but consider upper boundary
             presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
         } else {
-            // new preset or window:
-            // update presetState["last_index"] and reset variant counter
+            // timeout, new preset or new window:
+            // update presetState["last_preset"] and reset variant counter
             presetState["current_variant"] = 0;
         }
     } else {
@@ -1057,9 +1058,12 @@ function presetResize(preset) {
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     window.move_resize_frame(true, wx, wy, ww, wh);
 
-    presetState["last_index"] = preset;
+    presetState["last_preset"] = preset;
     presetState["last_grid_format"] = grid_format;
     presetState["last_window_title"] = window.get_title();
+    presetState["last_call"] = new Date().getTime();
+
+    log("Resize preset last call: " + presetState["last_call"])
 }
 
 /*****************************************************************
