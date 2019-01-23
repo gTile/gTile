@@ -71,9 +71,12 @@ let toggleSettingListener;
 let keyControlBound = false;
 let debug = false;
 
-let preset_last_index;
-let preset_current_variant = 0;
-let preset_last_grid_format;
+let presetState = new Array();
+presetState["last_index"] = '';
+presetState["current_variant"] = 0;
+presetState["last_grid_format"] = '';
+presetState["last_window_title"] = '';
+presetState["last_call"] = '';
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -957,6 +960,11 @@ function presetResize(preset) {
         return;
     }
 
+    // Lets assume window titles are always unique.
+    // Note: window roles 'window.get_role()' would offer a unique identifier.
+    // Unfortunately role is often set to NULL.
+    log("presetResize window title: " + window.get_title());
+
     // Ensure that the window is not maximized
     reset_window(window);
 
@@ -986,21 +994,24 @@ function presetResize(preset) {
     // handle preset variants (if there are any)
     ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
-        if(preset == preset_last_index) {
-            // same preset: increase variant counter, but consider upper boundary
-            preset_current_variant = (preset_current_variant + 1) % ps_variant_count;
+        if( presetState["last_index"] == preset  &&
+            presetState["last_window_title"] == window.get_title()) {
+            // same preset & window:
+            // increase variant counter, but consider upper boundary
+            presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
         } else {
-            // new preset: update preset_last_index and reset variant counter
-            preset_current_variant = 0;
+            // new preset or window:
+            // update presetState["last_index"] and reset variant counter
+            presetState["current_variant"] = 0;
         }
     } else {
-        preset_current_variant = 0;
+        presetState["current_variant"] = 0;
     }
-    //log("Current Preset Variant: " + preset_current_variant);
+    //log("Current Preset Variant: " + presetState["current_variant"]);
 
     // retrieve current preset variant
-    if(preset_current_variant > 0) {
-        ps = ps_variants[preset_current_variant].trim().split(" ");
+    if(presetState["current_variant"] > 0) {
+        ps = ps_variants[presetState["current_variant"]].trim().split(" ");
 
         if(ps.length == 3) {
             // handle complete variant definitions
@@ -1010,7 +1021,7 @@ function presetResize(preset) {
         } else if (ps.length == 2) {
             // handle short variant definitions - grid format is taken from
             // a previous variant
-            grid_format = preset_last_grid_format;
+            grid_format = presetState["last_grid_format"];
             luc = parseTuple(ps[0], ":");
             rdc = parseTuple(ps[1], ":");
         } else {
@@ -1046,8 +1057,9 @@ function presetResize(preset) {
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     window.move_resize_frame(true, wx, wy, ww, wh);
 
-    preset_last_index = preset;
-    preset_last_grid_format = grid_format;
+    presetState["last_index"] = preset;
+    presetState["last_grid_format"] = grid_format;
+    presetState["last_window_title"] = window.get_title();
 }
 
 /*****************************************************************
