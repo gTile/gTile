@@ -1169,22 +1169,33 @@ function AutoTileMain() {
 
 	let monitor = monitors[mind];
 	let workArea = getWorkAreaByMonitor(monitor);
-	let windows = getNotFocusedWindowsOfMonitor(monitor);
+	let notFocusedwindows = getNotFocusedWindowsOfMonitor(monitor);
 
-	move_resize_window_with_margins(
-		focusMetaWindow,
-		workArea.x,
-		workArea.y,
-		workArea.width/2,
-		workArea.height);
+    if(Object.keys(notFocusedwindows).length===0){
+        move_resize_window_with_margins(
+            focusMetaWindow,
+            workArea.x,
+            workArea.y,
+            workArea.width,
+            workArea.height);
+            return;
+    }
+    
+    move_resize_window_with_margins(
+            focusMetaWindow,
+            workArea.x,
+            workArea.y,
+            workArea.width/2,
+            workArea.height);
+    
 
-	let winHeight = workArea.height/windows.length;
+	let winHeight = workArea.height/notFocusedwindows.length;
 	let countWin = 0;
 
-	log("AutoTileMain MonitorHeight: "+monitor.height+":"+windows.length );
+	log("AutoTileMain MonitorHeight: "+monitor.height+":"+notFocusedwindows.length );
 
-	for (let windowIdx in windows) {
-		let metaWindow = windows[windowIdx].meta_window;
+	for (let windowIdx in notFocusedwindows) {
+		let metaWindow = notFocusedwindows[windowIdx].meta_window;
 
 		let newOffset = workArea.y + (countWin * winHeight);
 		reset_window(metaWindow);
