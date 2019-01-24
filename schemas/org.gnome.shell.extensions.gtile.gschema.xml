@@ -357,6 +357,10 @@
 			<default>0</default>
 			<summary>Gaps between windows in the middle of screen</summary>
 		</key>
+		<key type = "i" name="max-timeout">
+			<default>2000</default>
+			<summary>Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling.</summary>
+		</key>
 		<key type = "i" name="insets-primary-left">
 			<default>0</default>
 			<summary>Left gap around border of screen for primary monitor</summary>

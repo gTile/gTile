@@ -42,6 +42,8 @@ const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_MAX_TIMEOUT = 'max-timeout';
+
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
 const SETTINGS_INSETS_PRIMARY_RIGHT = 'insets-primary-right';
@@ -268,6 +270,8 @@ function initSettings() {
         bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM),
         left:   getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT),
         right:  getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT) };
+
+    gridSettings[SETTINGS_MAX_TIMEOUT] = getIntSetting(SETTINGS_MAX_TIMEOUT);
 
     // initialize these from settings, the first set of sizes
     if(nbCols == 0 || nbRows == 0) {
@@ -994,10 +998,10 @@ function presetResize(preset) {
     // handle preset variants (if there are any)
     ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
-        if( presetState["last_call"] + 2000 > new Date().getTime() &&
+        if( presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
             presetState["last_preset"] == preset  &&
             presetState["last_window_title"] == window.get_title() ) {
-            // within timeout, same preset & same window:
+            // within timeout (default: 2s), same preset & same window:
             // increase variant counter, but consider upper boundary
             presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
         } else {
