@@ -92,16 +92,6 @@ const key_bindings_tiling = {
     'cancel-tiling'   : function() { keyCancelTiling();},
     'set-tiling'      : function() { keySetTiling();},
     'change-grid-size': function() { keyChangeTiling();},
-    'autotile-main'	  : function() { AutoTileMain();},
-    'autotile-2'	  : function() { AutoTileNCols(2);},
-    'autotile-3'	  : function() { AutoTileNCols(3);},
-    'autotile-4'	  : function() { AutoTileNCols(4);},
-    'autotile-5'	  : function() { AutoTileNCols(5);},
-    'autotile-6'	  : function() { AutoTileNCols(6);},
-    'autotile-7'	  : function() { AutoTileNCols(7);},
-    'autotile-8'	  : function() { AutoTileNCols(8);},
-    'autotile-9'	  : function() { AutoTileNCols(9);},
-    'autotile-10'	  : function() { AutoTileNCols(10);}
 }
 
 const key_bindings_presets = {
@@ -134,7 +124,18 @@ const key_bindings_presets = {
     'preset-resize-27': function() { presetResize(27) ;},
     'preset-resize-28': function() { presetResize(28) ;},
     'preset-resize-29': function() { presetResize(29) ;},
-    'preset-resize-30': function() { presetResize(30) ;}
+    'preset-resize-30': function() { presetResize(30) ;},
+
+    'autotile-main'	  : function() { AutoTileMain();},
+    'autotile-2'	  : function() { AutoTileNCols(2);},
+    'autotile-3'	  : function() { AutoTileNCols(3);},
+    'autotile-4'	  : function() { AutoTileNCols(4);},
+    'autotile-5'	  : function() { AutoTileNCols(5);},
+    'autotile-6'	  : function() { AutoTileNCols(6);},
+    'autotile-7'	  : function() { AutoTileNCols(7);},
+    'autotile-8'	  : function() { AutoTileNCols(8);},
+    'autotile-9'	  : function() { AutoTileNCols(9);},
+    'autotile-10'	  : function() { AutoTileNCols(10);}
 }
 
 function log(log_string) {
@@ -1163,6 +1164,10 @@ function AutoTileMain() {
         return;
     }
 
+    if(!focusMetaWindow){
+        focusMetaWindow = getFocusApp();
+    }
+
     reset_window(window);
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
@@ -1173,7 +1178,7 @@ function AutoTileMain() {
 
     if(Object.keys(notFocusedwindows).length===0){
         move_resize_window_with_margins(
-            focusMetaWindow,
+            window,
             workArea.x,
             workArea.y,
             workArea.width,
@@ -1182,7 +1187,7 @@ function AutoTileMain() {
     }
     
     move_resize_window_with_margins(
-            focusMetaWindow,
+            window,
             workArea.x,
             workArea.y,
             workArea.width/2,
@@ -1243,6 +1248,10 @@ function AutoTileNCols(cols) {
     if (!window) {
         log("No focused window - ignoring keyboard shortcut AutoTileNCols");
         return;
+    }
+
+    if(!focusMetaWindow){
+        focusMetaWindow = getFocusApp();
     }
 
     reset_window(window);
