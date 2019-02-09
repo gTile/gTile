@@ -228,7 +228,7 @@
 			<summary>Preset resize4 settings.</summary>
 		</key>
 		<key type = "s" name="resize5">
-			<default>'4x4 0:0 3:3,8x4 3:0 4:3,2:0 5:3,1:0 5:3'</default>
+			<default>'8x8 2:2 5:5, 1:1 6:6,0:0 7:7,16x16 5:5 9:9'</default>
 			<summary>Preset resize5 settings.</summary>
 		</key>
 		<key type = "s" name="resize6">
