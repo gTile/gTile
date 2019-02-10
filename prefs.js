@@ -16,12 +16,15 @@ const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
 const SETTINGS_DEBUG = 'debug';
+
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
 const SETTINGS_INSETS_PRIMARY_RIGHT = 'insets-primary-right';
 const SETTINGS_INSETS_PRIMARY_TOP = 'insets-primary-top';
 const SETTINGS_INSETS_PRIMARY_BOTTOM = 'insets-primary-bottom';
+
 const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left';
 const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
@@ -207,6 +210,8 @@ function basics_tab(notebook) {
 
     add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES, bs_grid, settings, 30);
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
+
+    add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
     text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
@@ -415,4 +420,3 @@ function append_hotkey(model, settings, name, pretty_name) {
 
     model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
-
