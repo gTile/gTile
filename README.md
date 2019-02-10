@@ -108,6 +108,7 @@ Shortcut | Description
 1. Preconfigured keyboard shortcuts are optimized for horizontal screens.
 2. For **cyclable presets**, invoke the corresponding shortcut consecutively on a window to activate format variants.
 
+
 ## AutoTiling
 
 You can do auto tiling for all windows on screen
@@ -115,6 +116,7 @@ You can do auto tiling for all windows on screen
 1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
 2. Click on one of 2 autotile buttons, or
 2. Press one of `Super`+`[KP_0..KP_9]` (total 10 available)
+
 
 ## Overlap with stock Gnome-shell shortcuts
 
