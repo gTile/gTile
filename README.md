@@ -36,20 +36,21 @@ For configuration changes to take effect, disable/enable gTile (Gnome Tweak Tool
 In the *Help* tab you will find help and usage hints.
 
 * Keyboard shortcuts:
-	* Can be assigned from the preferences window (*Accelerators* tab)
-	* Both the key combinations and the respective function are configurable
-	* Can be Global (can be used directly without the main gTile window)
-	* Can be non-global (can only be used when the gTile window is shown)
-	* Up to 30 accelerators can be configured, which should be plenty
-	* Up to 10 accelerators for AutoTiling
+  * Can be assigned from the preferences window (*Accelerators* tab)
+  * Both the key combinations and the respective function are configurable
+  * Can be Global (can be used directly without the main gTile window)
+  * Can be non-global (can only be used when the gTile window is shown)
+  * Up to 30 accelerators can be configured, which should be plenty
+  * Up to 10 accelerators for AutoTiling
 * Grid schemes:
-	* Are defined in the preferences window (*Basic* tab)
-	* Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
+  * Are defined in the preferences window (*Basic* tab)
+  * Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces)
 * Resize presets:
-	* Are defined in the preferences window (*Reset presets* tab) 
-	* Format: grid size, top left corner tile, bottom right corner tile
-	* Format examples: "2x2 0:1 0:1" or "6x4 0:2 3:3"
-	* Grids setup here size can be of any size, not necessarily what you have set up in grid sizes settings
+  * Are defined in the preferences window (*Reset presets* tab) 
+  * Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
+  * Format examples: `2x2 0:1 0:1` or `6x4 0:2 3:3, 0:0 3:3, 3x2 0:0 1:1` for multiple presets
+  * Grid size format variants can either reuse the last grid format or define a new grid.
+  * Grids defined here can be of any size, not necessarily what you have set up in grid sizes settings
 
 
 ## Usage with interface
