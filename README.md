@@ -48,22 +48,22 @@ In the *Help* tab you will find help and usage hints.
 * Resize presets:
   * Are defined in the preferences window (*Reset presets* tab) 
   * Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
-  * Format examples: `2x2 0:1 0:1` or `6x4 0:2 3:3, 0:0 3:3, 3x2 0:0 1:1` for multiple presets
-  * Grid size format variants can either reuse the last grid format or define a new grid.
-  * Grids defined here can be of any size, not necessarily what you have set up in grid sizes settings
+  * Format examples: `2x2 0:1 0:1` or `6x4 0:2 3:3, 0:0 3:3, 3x2 0:0 1:1` for multiple cyclable presets
+  * Grid size format variants can either reuse the last grid format (e.g `6x4 0:2 3:3, 0:0 3:3`) or define a new grid (e.g `6x4 0:2 3:3, 8x6 0:0 3:3`)
+  * Grids defined here can differ from the grid sizes defined in the *Basic* tab
 
 
 ## Usage with interface
 
 1. Make sure the window you want to resize has focus
-2. Click on the gTile icon on the tool bar, or press `Super+Enter` (default)
+2. Click on the gTile icon on the tool bar, or press `Super`+`Enter` (default)
 3. The gTile dialog pop-up will show up in the center of your screen
 
 What these buttons do:
 
-- ![Toggle animation icon](https://github.com/paulodeleo/gTile/raw/master/images/animation-icon.png) <- this one toggles the animation of the changes to the preview drawing.
+- ![Toggle animation icon](https://raw.githubusercontent.com/gTile/gTile/master/images/animation-icon.png) <- this one toggles the animation of the changes to the preview drawing.
 
-- ![Toggle auto-close icon](https://github.com/paulodeleo/gTile/raw/master/images/auto-close-icon.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
+- ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/auto-close-icon.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
 
 ### Using the mouse
 
@@ -80,47 +80,56 @@ What these buttons do:
 
 ## Usage with no interface
 
-You can also resize windows using Keyboard shortcuts directly.
+You can also resize windows using keyboard shortcuts directly.
 
 There are 3 groups of pre-configured shortcuts, representing the following grid schemes:
 
-* Grid 2x2 -> `Super + Alt`
-* Grid 2x3 -> `Super + Control`
-* Grid 3x3 -> `Super + Shift`
+* Grid 2x2 -> `Super`+`Alt`
+* Grid 2x3 -> `Super`+`Control`
+* Grid 3x3 -> `Super`+`Shift`
 
-These "grid selectors" are then combined with a keypad number to define the window placement:
+These "grid selectors" are then combined with a keypad number to define the window placement. 
 
-Default shortcuts for Super+Alt+[1..9(keypad)]
+Default shortcuts for `Super`+`Alt`+`[KP_1..KP_9]`
 
-1 - Bottom left quarter of screen
-2 - Bottom half
-3 - Bottom right quarter
-4 - Center left
-5 - Center
-6 - Center right
-7 - Top left quarter
-8 - Top half
-9 - Top right quarter
+Shortcut | Description
+------------ | -------------
+`Super`+`Alt`+`KP_1` | Bottom left quarter of screen
+`Super`+`Alt`+`KP_2` | Bottom half
+`Super`+`Alt`+`KP_3` | Bottom right quarter
+`Super`+`Alt`+`KP_4` | Center left
+`Super`+`Alt`+`KP_5` | Center
+`Super`+`Alt`+`KP_6` | Center right
+`Super`+`Alt`+`KP_7` | Top left quarter
+`Super`+`Alt`+`KP_8` | Top half
+`Super`+`Alt`+`KP_9` | Top right quarter
 
-**Note:** Preconfigured keyboard shortcuts are optimized for horizontal screens.
+**Notes:**
+1. Preconfigured keyboard shortcuts are optimized for horizontal screens.
+2. For **cyclable presets**, invoke the corresponding shortcut consecutively on a window to activate format variants.
+
 
 ## AutoTiling
 
 You can do auto tiling for all windows on screen
 
-1. Activate gTile by pressing <Super>KP_Enter or clicking on gTile icon
+1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
 2. Click on one of 2 autotile buttons, or
-2. Press one of <Super>1 - 0 (total 10 available)
+2. Press one of `Super`+`[KP_0..KP_9]` (total 10 available)
+
 
 ## Overlap with stock Gnome-shell shortcuts
 
 gTile is intended to **supplement** existing Gnome-shell keyboard shortcuts.
 
 Here are some useful Gnome built-ins to keep in mind when configuring gTile:
-* Super + Up - Maximize
-* Super + Down - Un-Maximize (return to size and position previous to maximizing)
-* Super + Left/Right - left/right half of screen
-* Shift + Super + Up/Down/Left/Right] - move window to adjacent monitor/workspace 
+
+Shortcut | Description
+------------ | -------------
+`Super`+`Up` | Maximize
+`Super`+`Down` | Un-Maximize (return to size and position previous to maximizing)
+`Super`+`Left/Right` | left/right half of screen
+`Shift`+`Super`+`Up/Down/Left/Right` | move window to adjacent monitor/workspace 
 
 
 ## Source code
