@@ -381,6 +381,7 @@ function refreshGrids() {
 }
 
 function moveGrids() {
+	log("moveGrids");
     if (!status) {
         return;
     }
@@ -396,6 +397,20 @@ function moveGrids() {
             if (window.get_monitor() == grid.monitor_idx) {
                 pos_x = window.get_frame_rect().width / 2  + window.get_frame_rect().x;
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
+
+                let [mouse_x, mouse_y, mask] = global.get_pointer();
+                let act_x = pos_x - grid.actor.width / 2;
+                let act_y = pos_y - grid.actor.height / 2;
+                if (   mouse_x >= act_x
+                    && mouse_x <= act_x + grid.actor.width
+                    && mouse_y >= act_y
+                    && mouse_y <= act_y + grid.actor.height) {
+                    log("Mouse x " + mouse_x + " y " + mouse_y +
+                        " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
+                        ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
+                    pos_x = mouse_x + grid.actor.width / 2;
+                    pos_y = mouse_y + grid.actor.height / 2;
+                }
             }
             else {
                 pos_x = monitor.x + monitor.width/2;
@@ -482,28 +497,26 @@ function move_maximize_window(metaWindow, x, y) {
  * @param height
  */
 function move_resize_window_with_margins(metaWindow, x, y, width, height){
-    move_resize_window(
-        metaWindow,
-        x + gridSettings[SETTINGS_WINDOW_MARGIN],
-        y + gridSettings[SETTINGS_WINDOW_MARGIN],
-        width - gridSettings[SETTINGS_WINDOW_MARGIN] * 2,
-        height - gridSettings[SETTINGS_WINDOW_MARGIN] * 2
-    )
-}
 
-function move_resize_window(metaWindow, x, y, width, height) {
     let [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
     let [vBorderX,vBorderY] = _getVisibleBorderPadding(metaWindow);
 
-    log(metaWindow.get_title() + " " + borderX + "-" + borderY);
+    log("move_resize_window_with_margins " + metaWindow.get_title() + " " + x + ":" + y + " - " + width
+        + ":" + height + " margin " + gridSettings[SETTINGS_WINDOW_MARGIN] + " borders invisible " +
+        borderX + ":" + borderY + " visible " + vBorderX + ":" + vBorderY);
 
-    x = x  ;
-    y = y  ;
+    x = x + gridSettings[SETTINGS_WINDOW_MARGIN];
+    y = y + gridSettings[SETTINGS_WINDOW_MARGIN];
+    width = width - gridSettings[SETTINGS_WINDOW_MARGIN] * 2;
+    height = height - gridSettings[SETTINGS_WINDOW_MARGIN] * 2;
 
-    width = width - vBorderX;
-    height = height - vBorderY ;
+    x = x + vBorderX;
+    y = y + vBorderY;
+    width = width - 2 * vBorderX;
+    height = height - 2 * vBorderY ;
+    log("After marging and visible border window is " + x + ":" + y + " - " + width + ":" + height);
 
-    metaWindow.move_resize_frame(true,x,y,width,height);
+    metaWindow.move_resize_frame(true, x, y, width, height);
 }
 
 function _isMyWindow(win) {
@@ -612,6 +625,19 @@ function showTiling() {
             if (window.get_monitor() == monitorIdx) {
                 pos_x = window.get_frame_rect().width / 2  + window.get_frame_rect().x;
                 pos_y = window.get_frame_rect().height / 2  + window.get_frame_rect().y;
+                let [mouse_x, mouse_y, mask] = global.get_pointer();
+                let act_x = pos_x - grid.actor.width / 2;
+                let act_y = pos_y - grid.actor.height / 2;
+                if (   mouse_x >= act_x
+                    && mouse_x <= act_x + grid.actor.width
+                    && mouse_y >= act_y
+                    && mouse_y <= act_y + grid.actor.height) {
+                    log("Mouse x " + mouse_x + " y " + mouse_y +
+                        " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
+                        ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
+                    pos_x = mouse_x + grid.actor.width / 2;
+                    pos_y = mouse_y + grid.actor.height / 2;
+                }
             }
             else {
                 pos_x = monitor.x + monitor.width/2;
@@ -837,13 +863,13 @@ function setInitialSelection() {
     let grid_element_width = Math.floor(workArea.width / nbCols);
     let grid_element_height = Math.floor(workArea.height / nbRows);
     log("width " + grid_element_width + " height " + grid_element_height);
-    let lux = Math.min(Math.floor(wax / grid_element_width), nbCols - 1);
+    let lux = Math.min(Math.max(Math.round(wax / grid_element_width), 0), nbCols - 1);
     log("wx " + (wx - workArea.x) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + lux);
-    let luy = Math.min(Math.floor(way / grid_element_height), grid.rows - 1);
+    let luy = Math.min(Math.max(Math.round(way / grid_element_height), 0), grid.rows - 1);
     log("wy " + (wy - workArea.y) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + luy);
-    let rdx = Math.min(Math.floor((wax + wwidth - 1) / grid_element_width), grid.cols - 1);
+    let rdx = Math.min(Math.max(Math.round((wax + wwidth) / grid_element_width) - 1, lux), grid.cols - 1);
     log("wx + wwidth " + (wx + wwidth - workArea.x - 1) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + rdx);
-    let rdy = Math.min(Math.floor((way + wheight - 1) / grid_element_height), grid.rows - 1);
+    let rdy = Math.min(Math.max(Math.round((way + wheight) / grid_element_height) - 1, luy), grid.rows - 1);
     log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
     log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
 
@@ -1053,14 +1079,14 @@ function presetResize(preset) {
     let work_area = getWorkAreaByMonitorIdx(mind);
     let grid_element_width = Math.floor(work_area.width / grid_format.X);
     let grid_element_height = Math.floor(work_area.height / grid_format.Y);
-    let wx = work_area.x + luc.X * grid_element_width + gridSettings[SETTINGS_WINDOW_MARGIN];
-    let wy = work_area.y + luc.Y * grid_element_height + gridSettings[SETTINGS_WINDOW_MARGIN];
-    let ww = (rdc.X + 1 - luc.X) * grid_element_width - 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
-    let wh = (rdc.Y + 1 - luc.Y) * grid_element_height- 2 * gridSettings[SETTINGS_WINDOW_MARGIN];
 
-    // resize window to the given preset dimensions
+	let wx = work_area.x + luc.X * grid_element_width;
+    let wy = work_area.y + luc.Y * grid_element_height;
+    let ww = (rdc.X + 1 - luc.X) * grid_element_width;
+    let wh = (rdc.Y + 1 - luc.Y) * grid_element_height;
+
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
-    window.move_resize_frame(true, wx, wy, ww, wh);
+    move_resize_window_with_margins(window, wx, wy, ww, wh);
 
     presetState["last_preset"] = preset;
     presetState["last_grid_format"] = grid_format;
@@ -1249,14 +1275,14 @@ function AutoTileMain() {
             workArea.height);
             return;
     }
-    
+
     move_resize_window_with_margins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
         workArea.width/2,
         workArea.height);
-    
+
 
     let winHeight = workArea.height/notFocusedwindows.length;
     let countWin = 0;
