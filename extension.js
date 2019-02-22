@@ -514,7 +514,7 @@ function move_resize_window_with_margins(metaWindow, x, y, width, height){
     y = y + vBorderY;
     width = width - 2 * vBorderX;
     height = height - 2 * vBorderY ;
-    log("After marging and visible border window is " + x + ":" + y + " - " + width + ":" + height);
+    log("After margins and visible border window is " + x + ":" + y + " - " + width + ":" + height);
 
     metaWindow.move_resize_frame(true, x, y, width, height);
 }
@@ -1080,7 +1080,7 @@ function presetResize(preset) {
     let grid_element_width = Math.floor(work_area.width / grid_format.X);
     let grid_element_height = Math.floor(work_area.height / grid_format.Y);
 
-	let wx = work_area.x + luc.X * grid_element_width;
+    let wx = work_area.x + luc.X * grid_element_width;
     let wy = work_area.y + luc.Y * grid_element_height;
     let ww = (rdc.X + 1 - luc.X) * grid_element_width;
     let wh = (rdc.Y + 1 - luc.Y) * grid_element_height;
