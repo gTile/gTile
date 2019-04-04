@@ -142,7 +142,6 @@ function accel_tab(notebook) {
         }
 
         let name = model.get_value(iter, 0);
-        global.log("Clearing value for " + name);
         model.set(iter, [3], [0]);
         settings.set_strv(name, ['']);
     });
