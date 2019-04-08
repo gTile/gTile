@@ -134,6 +134,18 @@ function accel_tab(notebook) {
         'accel-mode': Gtk.CellRendererAccelMode.GTK
     });
 
+    cellrend.connect('accel-cleared', function(rend, str_iter) {
+        let [success, iter] = model.get_iter_from_string(str_iter);
+
+        if (!success) {
+            throw new Error("Something be broken, yo.");
+        }
+
+        let name = model.get_value(iter, 0);
+        model.set(iter, [3], [0]);
+        settings.set_strv(name, ['']);
+    });
+
     cellrend.connect('accel-edited', function(rend, str_iter, key, mods) {
         let value = Gtk.accelerator_name(key, mods);
 
