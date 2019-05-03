@@ -398,17 +398,16 @@
 			<summary>Put debug lines into global.log. To see, run journalctl /usr/bin/gnome-shell -f in terminal</summary>
 		</key>
 		<key type = "s" name="help-text">
-			<default>"gTile allow to quickly move/resize/place window on predefined grid,
+			<default>"gTile allows to move/resize/place window quickly on user-defined grids 
 with mouse or keyboard, on multiple monitors.
-How to use gTile
+How to use gTile:
 Set focus to window you want to resize (click, use TAB etc)
 Click on icon on toolbar or press Super+Enter (keypad) (configurable)
-You will see gTile dialog popup
+You will see the gTile dialog popup
 Use mouse and click on desired left corner location,
-Then other corner location, inside gTile window
+then click the other corner location.
 Window will resize on second click
-Or
-Use arrows to move window and Shift-arrows to resize window
+You can also use the arrow keys to movea  window and Shift+Arrow to resize window
   When done, hit Enter - window will resize
   Hit Escape - to cancel resize
   Hit Space - change grid in cycle
@@ -449,27 +448,28 @@ Default shortcuts for Super+Control+[1..9(Keypad)]
 
 If you need some other position for window, hit Super + Enter (Keypad),
 and use Up/Down/Left/Right to move, with Shift to resize window.
-Default grid is 8x6, but you can change it from preconfigured list with space.
-Escape will cancel, and Enter will finish window placement.
+Default grid is 8x6, but you can change it from the pre-configured list by pressing space.
+Again, Escape will cancel, and Enter will confirm.
 
-Change shortcut to fit your needs in preferences.
+To edit gTile configurations you will need the Gnome Tweak Tool installed or
+go to https://extensions.gnome.org/local/ after installation.
+
+Change shortcut to fit your needs in preferences:
 Tweaks->Extensions->gTile->preferences
 For changes to take effect, disable and enable gTile in 
 Tweaks->Extensions->gTile->Off/On
-You can change both keys and what it is doing.
+
 Keyboard shortcuts can be Global (works without gTile window)
 or non-global (first show gTile window Super-Enter (keypad)).
 Keyboard Accelerators are reassignable in preferences.
 You have 30 accelerators, should be plenty.
 You can define your own grid sizes, like something odd 17x19
-Prime numbers usually the oddest ones.
-Set it in basic settings - it is comma-separatel list of
+Prime numbers usually are the oddest ones.
+Set it in basic settings - it is a comma-separated list of
 grid sizes like 8x7,3x2,4x6,4x7
-Resize preset format: grid size, left upper corner, right down corner
-Left upper corner is 0:0.
-Do not forget that you can grid dimension is one more then corner coordinate.
-format is 6x4 0:2 3:3
-Grid size can be any, not necessary what you have in grid sizes setting.
+Resize preset format: grid size, left upper tile, right bottom tile (column first, then row)
+Grid dimensions one more then the highest corner coordinate, because tile idices start at 0, not 1.
+Left upper tile is 0:0 in any grid, in a 6x3 grid, the bottom right tile would be 5:2.
 
 AutoTiling
 You can call AutoTiling by pressing Super + 1 - 0, total 10 options available.
@@ -513,3 +513,4 @@ GPL v2
 		</key>
 	</schema>
 </schemalist>
+

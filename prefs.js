@@ -254,7 +254,7 @@ function presets_tab(notebook) {
         row_spacing: 10,
     });
 
-    let text = "Resize presets (grid size and 2 corner tiles, e.g. '2x2 0:1 0:1' is left bottom quarter)";
+    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, cloums first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)"; 
     pr_grid.add(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
