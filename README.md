@@ -124,7 +124,7 @@ You can do auto tiling for all windows on screen
 
 1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
 2. Click on one of 2 autotile buttons, or
-2. Press one of `Super`+`[KP_0..KP_9]` (total 10 available)
+2. Press one of `Super`+`[0..9]` (total 10 available)
 
 
 ## Overlap with stock Gnome-shell shortcuts
