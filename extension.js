@@ -86,7 +86,8 @@ let excludedApplications = new Array(
 );
 
 const key_bindings = {
-    'show-toggle-tiling': function() { toggleTiling(); }
+    'show-toggle-tiling': function() { toggleTiling(); },
+    'show-toggle-tiling-alt': function() { toggleTiling(); }
 };
 
 const key_bindings_tiling = {
@@ -98,10 +99,19 @@ const key_bindings_tiling = {
     'resize-right'    : function() { keyMoveResizeEvent('resize', 'right');},
     'resize-up'       : function() { keyMoveResizeEvent('resize', 'up'   );},
     'resize-down'     : function() { keyMoveResizeEvent('resize', 'down' );},
+    'move-left-vi'    : function() { keyMoveResizeEvent('move'  , 'left' );},
+    'move-right-vi'   : function() { keyMoveResizeEvent('move'  , 'right');},
+    'move-up-vi'      : function() { keyMoveResizeEvent('move'  , 'up'   );},
+    'move-down-vi'    : function() { keyMoveResizeEvent('move'  , 'down' );},
+    'resize-left-vi'  : function() { keyMoveResizeEvent('resize', 'left' );},
+    'resize-right-vi' : function() { keyMoveResizeEvent('resize', 'right');},
+    'resize-up-vi'    : function() { keyMoveResizeEvent('resize', 'up'   );},
+    'resize-down-vi'  : function() { keyMoveResizeEvent('resize', 'down' );},
     'cancel-tiling'   : function() { keyCancelTiling();},
     'set-tiling'      : function() { keySetTiling();},
     'change-grid-size': function() { keyChangeTiling();},
     'autotile-main'   : function() { AutoTileMain();},
+    'autotile-1'      : function() { AutoTileNCols(1);},
     'autotile-2'      : function() { AutoTileNCols(2);},
     'autotile-3'      : function() { AutoTileNCols(3);},
     'autotile-4'      : function() { AutoTileNCols(4);},
