@@ -46,7 +46,7 @@ In the *Help* tab you will find help and usage hints.
   * Are defined in the preferences window (*Basic* tab)
   * Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces, columns first, then rows)
 * Resize presets:
-  * Are defined in the preferences window (*Resize presets* tab) 
+  * Are defined in the preferences window (*Reset presets* tab) 
   * Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
   * Coordinate origin: The tile at `0:0` always corresponds to the **top left**, no matter the grid size. 
     In a `6x4` grid `5:3` is the bottom right tile
@@ -65,7 +65,7 @@ In the *Help* tab you will find help and usage hints.
 ## Usage with interface
 
 1. Make sure the window you want to resize has focus
-2. Click on the gTile icon on the tool bar, or press `Super`+`Return` (default) or `Super`+`KP_Enter`
+2. Click on the gTile icon on the tool bar, or press `Super`+`Enter` (default)
 3. The gTile dialog pop-up will show up in the center of your screen
 
 What these buttons do:
@@ -82,7 +82,6 @@ What these buttons do:
 ### Using the keyboard
 
 4. Use the arrow keys to select the coordinate of the first corner and Shift-arrow to select the second coordinate
-   vi-style movement keys hjkl also works.
 5. a) Hit `Space` to change the grid scheme [optional]
 5. b) Hit `Enter` and the window will resize
 5. c) Hit `Escape` to cancel resize
@@ -123,11 +122,10 @@ Shortcut | Description
 
 You can do auto tiling for all windows on screen
 
-1. Activate gTile by pressing `Super`+`Return` or `Super`+`KP_Enter` or clicking on gTile icon
+1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
 2. Click on one of 2 autotile buttons, or
-3. Press one of `[1..9,0]` (total 10 available)
-4. Press `M` for one window to the left - rest of windows in one column to the right autotiling
-Note that autotiling works only when gTile is activated.
+3. Press one of `Control`+`[1..9,0]` (total 10 available), or `M`
+
 
 ## Overlap with stock Gnome-shell shortcuts
 

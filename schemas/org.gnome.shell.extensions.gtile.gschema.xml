@@ -211,43 +211,43 @@
 			<summary>Autotile 1.</summary>
 		</key>
 		<key type="as" name="autotile-1">
-			<default><![CDATA[['1']]]></default>
+			<default><![CDATA[['<Control>1']]]></default>
 			<summary>Autotile 2.</summary>
 		</key>
 		<key type="as" name="autotile-2">
-			<default><![CDATA[['2']]]></default>
+			<default><![CDATA[['<Control>2']]]></default>
 			<summary>Autotile 2.</summary>
 		</key>
 		<key type="as" name="autotile-3">
-			<default><![CDATA[['3']]]></default>
+			<default><![CDATA[['<Control>3']]]></default>
 			<summary>Autotile 3.</summary>
 		</key>
 		<key type="as" name="autotile-4">
-			<default><![CDATA[['4']]]></default>
+			<default><![CDATA[['<Control>4']]]></default>
 			<summary>Autotile 4.</summary>
 		</key>
 		<key type="as" name="autotile-5">
-			<default><![CDATA[['5']]]></default>
+			<default><![CDATA[['<Control>5']]]></default>
 			<summary>Autotile 5.</summary>
 		</key>
 		<key type="as" name="autotile-6">
-			<default><![CDATA[['6']]]></default>
+			<default><![CDATA[['<Control>6']]]></default>
 			<summary>Autotile 6.</summary>
 		</key>
 		<key type="as" name="autotile-7">
-			<default><![CDATA[['7']]]></default>
+			<default><![CDATA[['<Control>7']]]></default>
 			<summary>Autotile 7.</summary>
 		</key>
 		<key type="as" name="autotile-8">
-			<default><![CDATA[['8']]]></default>
+			<default><![CDATA[['<Control>8']]]></default>
 			<summary>Autotile 8.</summary>
 		</key>
 		<key type="as" name="autotile-9">
-			<default><![CDATA[['9']]]></default>
+			<default><![CDATA[['<Control>9']]]></default>
 			<summary>Autotile 9.</summary>
 		</key>
 		<key type="as" name="autotile-10">
-			<default><![CDATA[['0']]]></default>
+			<default><![CDATA[['<Control>0']]]></default>
 			<summary>Autotile 10.</summary>
 		</key>
 		
