@@ -34,10 +34,12 @@ const SETTINGS_HELP_TEXT = 'help-text';
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
+    'show-toggle-tiling-alt': 'Display gTile alternative',
     'set-tiling'        : 'Set tiling',
     'cancel-tiling'     : 'Cancel tiling',
     'change-grid-size'  : 'Change grid size',
     'autotile-main'     : 'Autotile Main',
+    'autotile-1'        : 'Autotile 1 cols',
     'autotile-2'        : 'Autotile 2 cols',
     'autotile-3'        : 'Autotile 3 cols',
     'autotile-4'        : 'Autotile 4 cols',
@@ -47,10 +49,6 @@ const pretty_names = {
     'autotile-8'        : 'Autotile 8 cols',
     'autotile-9'        : 'Autotile 9 cols',
     'autotile-10'       : 'Autotile 10 cols',
-    'resize-left'       : 'Resize horizontal narrower',
-    'resize-right'      : 'Resize horizontal wider',
-    'resize-up'         : 'Resize vertical higher',
-    'resize-down'       : 'Resize vertical lower',
     'preset-resize-1'   : 'Preset resize 1',
     'preset-resize-2'   : 'Preset resize 2',
     'preset-resize-3'   : 'Preset resize 3',
@@ -80,7 +78,15 @@ const pretty_names = {
     'preset-resize-27'  : 'Preset resize 27',
     'preset-resize-28'  : 'Preset resize 28',
     'preset-resize-29'  : 'Preset resize 29',
-    'preset-resize-30'  : 'Preset resize 30'
+    'preset-resize-30'  : 'Preset resize 30',
+    'move-left-vi'      : 'vi-style Resize horizontal narrower',
+    'move-right-vi'     : 'vi-style Resize horizontal wider',
+    'move-up-vi'        : 'vi-style Resize vertical higher',
+    'move-down-vi'      : 'vi-style Resize vertical lower',
+    'resize-left-vi'    : 'vi-style Resize horizontal narrower',
+    'resize-right-vi'   : 'vi-style Resize horizontal wider',
+    'resize-up-vi'      : 'vi-style Resize vertical higher',
+    'resize-down-vi'    : 'vi-style Resize vertical lower'
 }
 
 function init() {

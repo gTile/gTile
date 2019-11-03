@@ -5,6 +5,10 @@
 			<default><![CDATA[['<Super>KP_Enter']]]></default>
 			<summary>The key you want to activate gTile.</summary>
 		</key>
+		<key type="as" name="show-toggle-tiling-alt">
+			<default><![CDATA[['<Super>Return']]]></default>
+			<summary>AlternativegTile activation key.</summary>
+		</key>
 		<key type="as" name="move-left">
 			<default><![CDATA[['Left']]]></default>
 			<summary>Move window left.</summary>
@@ -35,6 +39,38 @@
 		</key>
 		<key type="as" name="resize-down">
 			<default><![CDATA[['<Shift>Down']]]></default>
+			<summary>Resize window - decrease height.</summary>
+		</key>
+		<key type="as" name="move-left-vi">
+			<default><![CDATA[['h']]]></default>
+			<summary>Move window left.</summary>
+		</key>
+		<key type="as" name="move-right-vi">
+			<default><![CDATA[['l']]]></default>
+			<summary>Move window right.</summary>
+		</key>
+		<key type="as" name="move-up-vi">
+			<default><![CDATA[['k']]]></default>
+			<summary>Move window up.</summary>
+		</key>
+		<key type="as" name="move-down-vi">
+			<default><![CDATA[['j']]]></default>
+			<summary>Move window down.</summary>
+		</key>
+		<key type="as" name="resize-left-vi">
+			<default><![CDATA[['<Shift>h']]]></default>
+			<summary>Resize window - increase width.</summary>
+		</key>
+		<key type="as" name="resize-right-vi">
+			<default><![CDATA[['<Shift>l']]]></default>
+			<summary>Resize window - decrease width.</summary>
+		</key>
+		<key type="as" name="resize-up-vi">
+			<default><![CDATA[['<Shift>k']]]></default>
+			<summary>Resize window - increase height.</summary>
+		</key>
+		<key type="as" name="resize-down-vi">
+			<default><![CDATA[['<Shift>j']]]></default>
 			<summary>Resize window - decrease height.</summary>
 		</key>
 		<key type="as" name="set-tiling">
@@ -171,43 +207,47 @@
 			<summary>Preset resize 30.</summary>
 		</key>
 		<key type="as" name="autotile-main">
-			<default><![CDATA[['<Super>1']]]></default>
+			<default><![CDATA[['m']]]></default>
 			<summary>Autotile 1.</summary>
 		</key>
+		<key type="as" name="autotile-1">
+			<default><![CDATA[['<Control>1']]]></default>
+			<summary>Autotile 2.</summary>
+		</key>
 		<key type="as" name="autotile-2">
-			<default><![CDATA[['<Super>2']]]></default>
+			<default><![CDATA[['<Control>2']]]></default>
 			<summary>Autotile 2.</summary>
 		</key>
 		<key type="as" name="autotile-3">
-			<default><![CDATA[['<Super>3']]]></default>
+			<default><![CDATA[['<Control>3']]]></default>
 			<summary>Autotile 3.</summary>
 		</key>
 		<key type="as" name="autotile-4">
-			<default><![CDATA[['<Super>4']]]></default>
+			<default><![CDATA[['<Control>4']]]></default>
 			<summary>Autotile 4.</summary>
 		</key>
 		<key type="as" name="autotile-5">
-			<default><![CDATA[['<Super>5']]]></default>
+			<default><![CDATA[['<Control>5']]]></default>
 			<summary>Autotile 5.</summary>
 		</key>
 		<key type="as" name="autotile-6">
-			<default><![CDATA[['<Super>6']]]></default>
+			<default><![CDATA[['<Control>6']]]></default>
 			<summary>Autotile 6.</summary>
 		</key>
 		<key type="as" name="autotile-7">
-			<default><![CDATA[['<Super>7']]]></default>
+			<default><![CDATA[['<Control>7']]]></default>
 			<summary>Autotile 7.</summary>
 		</key>
 		<key type="as" name="autotile-8">
-			<default><![CDATA[['<Super>8']]]></default>
+			<default><![CDATA[['<Control>8']]]></default>
 			<summary>Autotile 8.</summary>
 		</key>
 		<key type="as" name="autotile-9">
-			<default><![CDATA[['<Super>9']]]></default>
+			<default><![CDATA[['<Control>9']]]></default>
 			<summary>Autotile 9.</summary>
 		</key>
 		<key type="as" name="autotile-10">
-			<default><![CDATA[['<Super>0']]]></default>
+			<default><![CDATA[['<Control>0']]]></default>
 			<summary>Autotile 10.</summary>
 		</key>
 		
@@ -402,7 +442,7 @@
 with mouse or keyboard, on multiple monitors.
 How to use gTile:
 Set focus to window you want to resize (click, use TAB etc)
-Click on icon on toolbar or press Super+Enter (keypad) (configurable)
+Click on icon on toolbar or press Super+Return of Super-KP_Enter (configurable)
 You will see the gTile dialog popup
 Use mouse and click on desired left corner location,
 then click the other corner location.
@@ -472,9 +512,8 @@ Grid dimensions one more then the highest corner coordinate, because tile idices
 Left upper tile is 0:0 in any grid, in a 6x3 grid, the bottom right tile would be 5:2.
 
 AutoTiling
-You can call AutoTiling by pressing Super + 1 - 0, total 10 options available.
+You can call AutoTiling by ativating gTile and pressing [1..9] or 0, total 10 options available.
 Or, you can press one of two autotile buttons.
-gTile window shold be active.
 
 gTile intended to supplement existing Gnome keyboard shortcuts.
 Here are some useful Gnome built-in:

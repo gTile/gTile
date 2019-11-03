@@ -86,7 +86,8 @@ let excludedApplications = new Array(
 );
 
 const key_bindings = {
-    'show-toggle-tiling': function() { toggleTiling(); }
+    'show-toggle-tiling': function() { toggleTiling(); },
+    'show-toggle-tiling-alt': function() { toggleTiling(); }
 };
 
 const key_bindings_tiling = {
@@ -98,10 +99,19 @@ const key_bindings_tiling = {
     'resize-right'    : function() { keyMoveResizeEvent('resize', 'right');},
     'resize-up'       : function() { keyMoveResizeEvent('resize', 'up'   );},
     'resize-down'     : function() { keyMoveResizeEvent('resize', 'down' );},
+    'move-left-vi'    : function() { keyMoveResizeEvent('move'  , 'left' );},
+    'move-right-vi'   : function() { keyMoveResizeEvent('move'  , 'right');},
+    'move-up-vi'      : function() { keyMoveResizeEvent('move'  , 'up'   );},
+    'move-down-vi'    : function() { keyMoveResizeEvent('move'  , 'down' );},
+    'resize-left-vi'  : function() { keyMoveResizeEvent('resize', 'left' );},
+    'resize-right-vi' : function() { keyMoveResizeEvent('resize', 'right');},
+    'resize-up-vi'    : function() { keyMoveResizeEvent('resize', 'up'   );},
+    'resize-down-vi'  : function() { keyMoveResizeEvent('resize', 'down' );},
     'cancel-tiling'   : function() { keyCancelTiling();},
     'set-tiling'      : function() { keySetTiling();},
     'change-grid-size': function() { keyChangeTiling();},
     'autotile-main'   : function() { AutoTileMain();},
+    'autotile-1'      : function() { AutoTileNCols(1);},
     'autotile-2'      : function() { AutoTileNCols(2);},
     'autotile-3'      : function() { AutoTileNCols(3);},
     'autotile-4'      : function() { AutoTileNCols(4);},
@@ -196,8 +206,8 @@ function parseTuple(format, delimiter) {
     // parsing grid size in format XdelimY, like 6x4 or 1:2
     let gssk = format.trim().split(delimiter);
     if(gssk.length != 2
-        || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 40
-        || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 40) {
+        || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 99
+        || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 99) {
         log("Bad format " + format + ", delimiter " + delimiter);
         return {X: Number(-1), Y: Number(-1)};
     }
@@ -860,8 +870,8 @@ function setInitialSelection() {
     log("Workarea position x " + workArea.x + " y " + workArea.y + " width " + workArea.width + " height " + workArea.height);
     let wax = Math.max(wx - workArea.x, 0);
     let way = Math.max(wy - workArea.y, 0);
-    let grid_element_width = Math.floor(workArea.width / nbCols);
-    let grid_element_height = Math.floor(workArea.height / nbRows);
+    let grid_element_width = workArea.width / nbCols;
+    let grid_element_height = workArea.height / nbRows;
     log("width " + grid_element_width + " height " + grid_element_height);
     let lux = Math.min(Math.max(Math.round(wax / grid_element_width), 0), nbCols - 1);
     log("wx " + (wx - workArea.x) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + lux);
@@ -1077,13 +1087,13 @@ function presetResize(preset) {
     // do the maths to resize the window
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
-    let grid_element_width = Math.floor(work_area.width / grid_format.X);
-    let grid_element_height = Math.floor(work_area.height / grid_format.Y);
+    let grid_element_width = work_area.width / grid_format.X;
+    let grid_element_height = work_area.height / grid_format.Y;
 
-    let wx = work_area.x + luc.X * grid_element_width;
-    let wy = work_area.y + luc.Y * grid_element_height;
-    let ww = (rdc.X + 1 - luc.X) * grid_element_width;
-    let wh = (rdc.Y + 1 - luc.Y) * grid_element_height;
+    let wx = Math.round(work_area.x + luc.X * grid_element_width);
+    let wy = Math.round(work_area.y + luc.Y * grid_element_height);
+    let ww = Math.round((rdc.X + 1 - luc.X) * grid_element_width);
+    let wh = Math.round((rdc.Y + 1 - luc.Y) * grid_element_height);
 
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     move_resize_window_with_margins(window, wx, wy, ww, wh);
