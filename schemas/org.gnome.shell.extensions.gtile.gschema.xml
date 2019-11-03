@@ -208,47 +208,47 @@
 		</key>
 		<key type="as" name="autotile-main">
 			<default><![CDATA[['m']]]></default>
-			<summary>Autotile 1.</summary>
+			<summary>Autotile with main window.</summary>
 		</key>
 		<key type="as" name="autotile-1">
-			<default><![CDATA[['<Control>1']]]></default>
-			<summary>Autotile 2.</summary>
+			<default><![CDATA[['1']]]></default>
+			<summary>Autotile 1 column.</summary>
 		</key>
 		<key type="as" name="autotile-2">
-			<default><![CDATA[['<Control>2']]]></default>
-			<summary>Autotile 2.</summary>
+			<default><![CDATA[['2']]]></default>
+			<summary>Autotile 2 columns.</summary>
 		</key>
 		<key type="as" name="autotile-3">
-			<default><![CDATA[['<Control>3']]]></default>
-			<summary>Autotile 3.</summary>
+			<default><![CDATA[['3']]]></default>
+			<summary>Autotile 3 columns.</summary>
 		</key>
 		<key type="as" name="autotile-4">
-			<default><![CDATA[['<Control>4']]]></default>
-			<summary>Autotile 4.</summary>
+			<default><![CDATA[['4']]]></default>
+			<summary>Autotile 4 columns.</summary>
 		</key>
 		<key type="as" name="autotile-5">
-			<default><![CDATA[['<Control>5']]]></default>
-			<summary>Autotile 5.</summary>
+			<default><![CDATA[['5']]]></default>
+			<summary>Autotile 5 columns.</summary>
 		</key>
 		<key type="as" name="autotile-6">
-			<default><![CDATA[['<Control>6']]]></default>
-			<summary>Autotile 6.</summary>
+			<default><![CDATA[['6']]]></default>
+			<summary>Autotile 6 columns.</summary>
 		</key>
 		<key type="as" name="autotile-7">
-			<default><![CDATA[['<Control>7']]]></default>
-			<summary>Autotile 7.</summary>
+			<default><![CDATA[['7']]]></default>
+			<summary>Autotile 7 columns.</summary>
 		</key>
 		<key type="as" name="autotile-8">
-			<default><![CDATA[['<Control>8']]]></default>
-			<summary>Autotile 8.</summary>
+			<default><![CDATA[['8']]]></default>
+			<summary>Autotile 8 columns.</summary>
 		</key>
 		<key type="as" name="autotile-9">
-			<default><![CDATA[['<Control>9']]]></default>
-			<summary>Autotile 9.</summary>
+			<default><![CDATA[['9']]]></default>
+			<summary>Autotile 9 columns.</summary>
 		</key>
 		<key type="as" name="autotile-10">
-			<default><![CDATA[['<Control>0']]]></default>
-			<summary>Autotile 10.</summary>
+			<default><![CDATA[['0']]]></default>
+			<summary>Autotile 10 columns.</summary>
 		</key>
 		
 		<key type = "s" name="resize1">
