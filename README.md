@@ -70,9 +70,9 @@ In the *Help* tab you will find help and usage hints.
 
 What these buttons do:
 
-- ![Toggle animation icon](https://raw.githubusercontent.com/gTile/gTile/master/images/animation-icon.png) <- this one toggles the animation of the changes to the preview drawing.
+- ![Toggle animation icon](https://raw.githubusercontent.com/gTile/gTile/master/images/animation-icon-black.png) <- this one toggles the animation of the changes to the preview drawing.
 
-- ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/auto-close-icon.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
+- ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/auto-close-icon-black.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
 
 ### Using the mouse
 
