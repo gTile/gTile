@@ -169,22 +169,22 @@ const GTileStatusButton = new Lang.Class({
     _init: function(classname) {
         this.parent(0.0, "gTile", false);
 
-        this.actor.add_style_class_name(classname);
+        this.add_style_class_name(classname);
         //Done by default in PanelMenuButton - Just need to override the method
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
     },
 
     reset: function() {
         this.activated = false;
-        launcher.actor.remove_style_pseudo_class('activate');
+        launcher.remove_style_pseudo_class('activate');
     },
 
     activate: function() {
-        launcher.actor.add_style_pseudo_class('activate');
+        launcher.add_style_pseudo_class('activate');
     },
 
     deactivate: function() {
-        launcher.actor.remove_style_pseudo_class('activate');
+        launcher.remove_style_pseudo_class('activate');
     },
 
     _onButtonPress: function(actor, event) {
@@ -1674,8 +1674,8 @@ Grid.prototype = {
     },
 
     _onHideComplete: function() {
-        if(!this.interceptHide && this.actor) {
-            Main.layoutManager.removeChrome(this.actor);
+        if(!this.interceptHide && this) {
+            Main.layoutManager.removeChrome(this);
         }
     },
 
