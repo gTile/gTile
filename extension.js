@@ -1621,6 +1621,7 @@ Grid.prototype = {
     },
 
     show: function() {
+		this.actor.scale_x = this.normalScaleX;
         this.interceptHide = true;
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
@@ -1669,6 +1670,7 @@ Grid.prototype = {
             this.actor.opacity = 0;
             this.actor.visible = false;
             //this.actor.y = 0;
+            this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
     },
@@ -1677,6 +1679,7 @@ Grid.prototype = {
         if(!this.interceptHide && this) {
             Main.layoutManager.removeChrome(this);
         }
+        this.actor.scale_x = 0;
     },
 
     _onShowComplete: function() {
