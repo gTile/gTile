@@ -250,6 +250,11 @@
 			<default><![CDATA[['0']]]></default>
 			<summary>Autotile 10 columns.</summary>
 		</key>
+
+		<key type="as" name="snap-to-neighbors">
+			<default><![CDATA[['<ALt><control>s']]]></default>
+			<summary>Snap window size to neighbors</summary>
+		</key>
 		
 		<key type = "s" name="resize1">
 			<default>'4x4 0:2 1:3, 0:1 2:3, 0:0 3:3, 0:3 0:3'</default>

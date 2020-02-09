@@ -34,6 +34,7 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 const Hotkeys = Extension.imports.hotkeys;
+const SnapToNeighbors = Extension.imports.snaptoneighbors;
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -120,7 +121,8 @@ const key_bindings_tiling = {
     'autotile-7'      : function() { AutoTileNCols(7);},
     'autotile-8'      : function() { AutoTileNCols(8);},
     'autotile-9'      : function() { AutoTileNCols(9);},
-    'autotile-10'     : function() { AutoTileNCols(10);}
+    'autotile-10'     : function() { AutoTileNCols(10);},
+    'snap-to-neighbors': function() { SnapToNeighborsBind();}
 }
 
 const key_bindings_presets = {
@@ -1392,6 +1394,17 @@ function AutoTileNCols(cols) {
     log("AutoTileNCols done");
 }
 
+function SnapToNeighborsBind() {
+    log("SnapToNeighbors keybind invoked");
+    let window = getFocusApp();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut SnapToNeighbors");
+        return;
+    }
+
+    SnapToNeighbors.snapToNeighbors(window);
+}
+
 function GridSettingsButton(text,cols,rows) {
     this._init(text,cols,rows);
 }
@@ -1445,6 +1458,8 @@ Grid.prototype = {
         this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 
+        this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
+		
         this.topbar = new TopBar(title);
 
         this.bottombarContainer = new St.Bin({ style_class: 'bottom-box-container',
@@ -1621,7 +1636,6 @@ Grid.prototype = {
     },
 
     show: function() {
-		this.actor.scale_x = this.normalScaleX;
         this.interceptHide = true;
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
@@ -1631,13 +1645,14 @@ Grid.prototype = {
         Main.layoutManager.addChrome(this.actor);
         //this.actor.y = 0 ;
         this.actor.scale_y= 0;
-        //this.actor.scale_x= 0;
+        this.actor.scale_x= 0;
         if (time > 0 ) {
             Tweener.addTween(this.actor, {
-                time: time,
+                time: this.animation_time,
                 opacity: 255,
                 visible: true,
                 transition: 'easeOutQuad',
+                scale_x: this.normalScaleX,
                 scale_y: this.normalScaleY,
                 onComplete: this._onShowComplete
             });
@@ -1654,13 +1669,13 @@ Grid.prototype = {
     hide: function(immediate) {
       log("hide " + immediate);
         this.elementsDelegate.reset();
-        let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.3 : 0;
         //log("hide " + time);
-        if (time > 0) {
+        if (!immediate && this.animation_time > 0) {
             Tweener.addTween(this.actor, {
-                time: time,
+                time: this.animation_time,
                 opacity: 0,
                 visible: false,
+                scale_x:0,
                 scale_y:0,
                 transition: 'easeOutQuad',
                 onComplete: this._onHideComplete
@@ -1679,7 +1694,6 @@ Grid.prototype = {
         if(!this.interceptHide && this) {
             Main.layoutManager.removeChrome(this);
         }
-        this.actor.scale_x = 0;
     },
 
     _onShowComplete: function() {

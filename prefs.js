@@ -49,6 +49,7 @@ const pretty_names = {
     'autotile-8'        : 'Autotile 8 cols',
     'autotile-9'        : 'Autotile 9 cols',
     'autotile-10'       : 'Autotile 10 cols',
+    'snap-to-neighbors' : 'Snap widnow size to neighbors',
     'preset-resize-1'   : 'Preset resize 1',
     'preset-resize-2'   : 'Preset resize 2',
     'preset-resize-3'   : 'Preset resize 3',
