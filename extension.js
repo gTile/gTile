@@ -153,7 +153,10 @@ const key_bindings_presets = {
     'preset-resize-27': function() { presetResize(27) ;},
     'preset-resize-28': function() { presetResize(28) ;},
     'preset-resize-29': function() { presetResize(29) ;},
-    'preset-resize-30': function() { presetResize(30) ;}
+    'preset-resize-30': function() { global_keyMoveResizeEvent('move'  , 'left' );},
+    'preset-resize-31': function() { global_keyMoveResizeEvent('move'  , 'right' );},
+    'preset-resize-32': function() { global_keyMoveResizeEvent('move'  , 'up' );},
+    'preset-resize-33': function() { global_keyMoveResizeEvent('move'  , 'down' );}
 }
 
 function log(log_string) {
@@ -714,7 +717,7 @@ function contains(a, obj) {
 
 /**
  * Get focused window by iterating though the windows on the active workspace.
- * @returns {Object} The focussed window object. False if no focussed window was found. 
+ * @returns {Object} The focussed window object. False if no focussed window was found.
  */
 function getFocusApp() {
     if (tracker.focus_app == null) {
@@ -895,12 +898,103 @@ function setInitialSelection() {
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
+function global_keyMoveResizeEvent(type, key) {
+    log("Got key event " + type + " " + key);
+    if (!focusMetaWindow){
+      focusMetaWindow = getFocusApp();
+    }
+    log("Going on..");
+    let mind = focusMetaWindow.get_monitor();
+    let monitor = monitors[mind];
+    let mkey = getMonitorKey(monitor);
+    let grid = grids[mkey];
+    let delegate = grid.elementsDelegate;
 
+    if(!delegate.currentElement) {
+        log("Key event while no mouse activation - set current and second element");
+        setInitialSelection();
+    } else {
+        if(!delegate.first){
+            log("currentElement is there but no first yet");
+            delegate.currentElement._onButtonPress();
+        }
+    }
+    if(!delegate.currentElement) {
+        log("gTime currentElement is not set!");
+    }
+    let cX = delegate.currentElement.coordx;
+    let cY = delegate.currentElement.coordy;
+    let fX = delegate.first.coordx;
+    let fY = delegate.first.coordy;
+
+    log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    log("Grid cols " + nbCols + " rows " + nbRows);
+    if(type == 'move') {
+        switch(key) {
+            case 'right':
+            if(fX < nbCols - 1 && cX < nbCols - 1) {
+                delegate.first = grid.elements [fY] [fX + 1];
+                grid.elements[cY] [cX + 1]._onHoverChanged();
+            }
+            break;
+            case 'left':
+            if(fX > 0 && cX > 0) {
+                delegate.first = grid.elements [fY] [fX - 1];
+                grid.elements[cY] [cX - 1]._onHoverChanged();
+            }
+            break;
+            case 'up':
+            if(fY > 0 && cY > 0) {
+                delegate.first = grid.elements [fY - 1] [fX];
+                grid.elements[cY - 1] [cX]._onHoverChanged();
+            }
+            break;
+            case 'down':
+            if(fY < nbRows - 1 && cY < nbRows - 1) {
+                delegate.first = grid.elements [fY + 1] [fX];
+                grid.elements[cY + 1] [cX]._onHoverChanged();
+            }
+            break;
+        }
+        } else {
+        switch(key) {
+            case 'right':
+            if(cX < nbCols - 1) {
+                grid.elements[cY] [cX + 1]._onHoverChanged();
+            }
+            break;
+            case 'left':
+            if(cX > 0) {
+                grid.elements[cY] [cX - 1]._onHoverChanged();
+            }
+            break;
+            case 'up':
+            if(cY > 0 ) {
+                grid.elements[cY - 1] [cX]._onHoverChanged();
+            }
+            break;
+            case 'down':
+            if(cY < nbRows - 1) {
+                grid.elements[cY + 1] [cX]._onHoverChanged();
+            }
+            break;
+        }
+    }
+
+    cX = delegate.currentElement.coordx;
+    cY = delegate.currentElement.coordy;
+    fX = delegate.first.coordx;
+    fY = delegate.first.coordy;
+
+    log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    keySetTiling();
+}
 function keyMoveResizeEvent(type, key) {
     log("Got key event " + type + " " + key);
     if (!focusMetaWindow) {
         return;
     }
+    log("Going on..");
     let mind = focusMetaWindow.get_monitor();
     let monitor = monitors[mind];
     let mkey = getMonitorKey(monitor);

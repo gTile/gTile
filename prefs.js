@@ -30,7 +30,6 @@ const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_HELP_TEXT = 'help-text';
-
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
@@ -79,6 +78,10 @@ const pretty_names = {
     'preset-resize-28'  : 'Preset resize 28',
     'preset-resize-29'  : 'Preset resize 29',
     'preset-resize-30'  : 'Preset resize 30',
+    'preset-resize-31'  : 'Global move left',
+    'preset-resize-32'  : 'Global move right',
+    'preset-resize-33'  : 'Global move up',
+    'preset-resize-34'  : 'Global move down',
     'move-left-vi'      : 'vi-style Resize horizontal narrower',
     'move-right-vi'     : 'vi-style Resize horizontal wider',
     'move-up-vi'        : 'vi-style Resize vertical higher',
@@ -260,7 +263,7 @@ function presets_tab(notebook) {
         row_spacing: 10,
     });
 
-    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)"; 
+    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)";
     pr_grid.add(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
