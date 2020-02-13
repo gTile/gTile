@@ -206,22 +206,6 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Preset resize 30.</summary>
 		</key>
-		<key type="as" name="preset-resize-31">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move left.</summary>
-		</key>
-		<key type="as" name="preset-resize-32">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move right.</summary>
-		</key>
-		<key type="as" name="preset-resize-33">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move up.</summary>
-		</key>
-		<key type="as" name="preset-resize-34">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move down.</summary>
-		</key>
 		<key type="as" name="autotile-main">
 			<default><![CDATA[['m']]]></default>
 			<summary>Autotile with main window.</summary>
