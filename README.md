@@ -1,8 +1,4 @@
 # gTile
-## Based on gTile/gTile
-## Differences:
-Also adds support for global accelerators (shortcuts) for expanding, contracting and moving active window.
-
 Gnome-shell extension that improves window tiling capabilities of stock gnome-shell.
 
 gTile is used to moves/resize windows on a configurable grid scheme.
