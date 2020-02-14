@@ -1,4 +1,5 @@
 # gTile
+
 Gnome-shell extension that improves window tiling capabilities of stock gnome-shell.
 
 gTile is used to moves/resize windows on a configurable grid scheme.
