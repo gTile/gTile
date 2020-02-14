@@ -999,7 +999,9 @@ function keyMoveResizeEvent(type, key, is_global=false) {
     fY = delegate.first.coordy;
 
     log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-    keySetTiling();
+    if (is_global){
+        keySetTiling();
+    }
 }
 
 /**
