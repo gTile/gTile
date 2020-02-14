@@ -407,7 +407,7 @@ function refreshGrids() {
 }
 
 function moveGrids() {
-	log("moveGrids");
+	 log("moveGrids");
     if (!status) {
         return;
     }
@@ -911,13 +911,13 @@ function setInitialSelection() {
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
-function keyMoveResizeEvent(type, key, is_global=false) {
-    if (is_global){
-      focusMetaWindow = getFocusApp();
+function keyMoveResizeEvent(type, key, is_global = false) {
+    if (is_global) {
+        focusMetaWindow = getFocusApp();
     }
     log("Got key event " + type + " " + key);
-    if (!focusMetaWindow){
-      return;
+    if (!focusMetaWindow) {
+        return;
     }
     log("Going on..");
     let mind = focusMetaWindow.get_monitor();
@@ -926,16 +926,16 @@ function keyMoveResizeEvent(type, key, is_global=false) {
     let grid = grids[mkey];
     let delegate = grid.elementsDelegate;
 
-    if(!delegate.currentElement) {
+    if (!delegate.currentElement) {
         log("Key event while no mouse activation - set current and second element");
         setInitialSelection();
     } else {
-        if(!delegate.first){
+        if (!delegate.first) {
             log("currentElement is there but no first yet");
             delegate.currentElement._onButtonPress();
         }
     }
-    if(!delegate.currentElement) {
+    if (!delegate.currentElement) {
         log("gTime currentElement is not set!");
     }
     let cX = delegate.currentElement.coordx;
@@ -945,116 +945,112 @@ function keyMoveResizeEvent(type, key, is_global=false) {
 
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
-    if(type == 'move') {
-        switch(key) {
+    log("--------");
+    log("nbCols:nbRows");
+    log("" + nbCols + ":" + nbRows);
+    log("fX:fY:");
+    log("" + fX + ":" + fY);
+    log("cX:cY:");
+    log("" + cX + ":" + cY);
+    log("--------");
+    if (type == 'move') {
+        switch (key) {
             case 'right':
-            if(fX < nbCols - 1 && cX < nbCols - 1) {
-                delegate.first = grid.elements [fY] [fX + 1];
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
+                if (fX < nbCols - 1 && cX < nbCols - 1) {
+                    delegate.first = grid.elements[fY][fX + 1];
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
             case 'left':
-            if(fX > 0 && cX > 0) {
-                delegate.first = grid.elements [fY] [fX - 1];
-                grid.elements[cY] [cX - 1]._onHoverChanged();
-            }
-            break;
+                if (fX > 0 && cX > 0) {
+                    delegate.first = grid.elements[fY][fX - 1];
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
             case 'up':
-            if(fY > 0 && cY > 0) {
-                delegate.first = grid.elements [fY - 1] [fX];
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (fY > 0 && cY > 0) {
+                    delegate.first = grid.elements[fY - 1][fX];
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
             case 'down':
-            if(fY < nbRows - 1 && cY < nbRows - 1) {
-                delegate.first = grid.elements [fY + 1] [fX];
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (fY < nbRows - 1 && cY < nbRows - 1) {
+                    delegate.first = grid.elements[fY + 1][fX];
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
         }
-      } else if(type=="resize") {
-        switch(key) {
+    } else if (type == "resize") {
+        switch (key) {
             case 'right':
-            if(cX < nbCols - 1) {
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
+                if (cX < nbCols - 1) {
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
             case 'left':
-            if(cX > 0) {
-                grid.elements[cY][cX - 1]._onHoverChanged();
-            }
-            break;
+                if (cX > 0) {
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
             case 'up':
-            if(cY > 0 ) {
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (cY > 0) {
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
             case 'down':
-            if(cY < nbRows - 1) {
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (cY < nbRows - 1) {
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
         }
-    } else if(type=="contract") {
-      log("--------");
-      log(""+cX+":"+nbCols);
-      log("--------");
-      switch(key) {
-          case 'left':
-          // if(cX < nbCols - 1) {
-              delegate.first = grid.elements [fY] [fX+1];
-          // }
-          break;
-          case 'right':
-          if(cX > 0) {
-              grid.elements[cY] [cX - 1]._onHoverChanged();
-          }
-          break;
-          case 'top':
-          if(cY > 0) {
-              delegate.first = grid.elements [fY+1] [fX];
-          }
-          break;
-          case 'bottom':
-          if(cY < nbRows) {
-              // grid.elements[cY + 1] [cX]._onHoverChanged();
-              grid.elements[cY - 1] [cX]._onHoverChanged();
-          }
-          break;
-      }
+    } else if (type == "contract") {
+        switch (key) {
+            case 'left':
+                if (cX > fX) {
+                    delegate.first = grid.elements[fY][fX + 1];
+                }
+                break;
+            case 'right':
+                if (cX > fX) {
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
+            case 'top':
+                if (cY > fY) {
+                    delegate.first = grid.elements[fY + 1][fX];
+                }
+                break;
+            case 'bottom':
+                if (cY > fY) {
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
+        }
 
-    } else if(type=="expand") {
-      log("--------");
-      log("nbCols:nbRows");
-      log(""+nbCols+":"+nbRows);
-      log("fX:fY:");
-      log(""+fX+":"+fY);
-      log("cX:cY:");
-      log(""+cX+":"+cY);
-      log("--------");
-      switch(key) {
-          case 'right':
-          if(cX < nbCols - 1) {
-              grid.elements[cY] [cX + 1]._onHoverChanged();
-          }
-          break;
-          case 'left':
-          if(fX > 0) {
-              delegate.first = grid.elements [fY] [fX - 1];
-              // grid.elements[cY] [cX - 1]._onHoverChanged();
-          }
-          break;
-          case 'top':
-          if(fY > 0) {
-              delegate.first = grid.elements [fY-1] [fX];
-          }
-          break;
-          case 'bottom':
-          if(cY < nbRows - 1) {
-              grid.elements[cY + 1] [cX]._onHoverChanged();
-          }
-          break;
-      }
+    } else if (type == "expand") {
+
+        switch (key) {
+            case 'right':
+                if (cX < nbCols) {
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
+            case 'left':
+                if (fX > 0) {
+                    delegate.first = grid.elements[fY][fX - 1];
+                }
+                break;
+            case 'top':
+                if (fY > 0) {
+                    delegate.first = grid.elements[fY - 1][fX];
+                }
+                break;
+            case 'bottom':
+                if (cY < nbRows - 1) {
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
+        }
     }
 
     cX = delegate.currentElement.coordx;
@@ -1063,11 +1059,10 @@ function keyMoveResizeEvent(type, key, is_global=false) {
     fY = delegate.first.coordy;
 
     log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-    if (is_global){
+    if (is_global) {
         keySetTiling();
     }
 }
-
 /**
  * Resize window to the given preset.
  * @param  {number}  Identifier of the resize preset (1 - 30)
