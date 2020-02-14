@@ -157,14 +157,14 @@ const key_bindings_presets = {
 }
 const key_binding_global_resizes = {
   'action-resize-1': function() { keyChangeTiling(); },
-  'action-resize-2': function() { global_keyMoveResizeEvent('resize'  , 'left' );},
-  'action-resize-3': function() { global_keyMoveResizeEvent('resize'  , 'right' );},
-  'action-resize-4': function() { global_keyMoveResizeEvent('resize'  , 'up' );},
-  'action-resize-5': function() { global_keyMoveResizeEvent('resize'  , 'down' );},
-  'action-resize-6': function() { global_keyMoveResizeEvent('move'  , 'left' );},
-  'action-resize-7': function() { global_keyMoveResizeEvent('move'  , 'right' );},
-  'action-resize-8': function() { global_keyMoveResizeEvent('move'  , 'up' );},
-  'action-resize-9': function() { global_keyMoveResizeEvent('move'  , 'down' );}
+  'action-resize-2': function() { keyMoveResizeEvent('resize'  , 'left', true );},
+  'action-resize-3': function() { keyMoveResizeEvent('resize'  , 'right', true );},
+  'action-resize-4': function() { keyMoveResizeEvent('resize'  , 'up', true );},
+  'action-resize-5': function() { keyMoveResizeEvent('resize'  , 'down', true );},
+  'action-resize-6': function() { keyMoveResizeEvent('move'  , 'left', true );},
+  'action-resize-7': function() { keyMoveResizeEvent('move'  , 'right', true );},
+  'action-resize-8': function() { keyMoveResizeEvent('move'  , 'up', true );},
+  'action-resize-9': function() { keyMoveResizeEvent('move'  , 'down', true );}
 }
 
 function log(log_string) {
@@ -907,10 +907,13 @@ function setInitialSelection() {
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
-function global_keyMoveResizeEvent(type, key) {
+function keyMoveResizeEvent(type, key, is_global=false) {
+    if (is_global){
+      focusMetaWindow = getFocusApp();
+    }
     log("Got key event " + type + " " + key);
     if (!focusMetaWindow){
-      focusMetaWindow = getFocusApp();
+      return;
     }
     log("Going on..");
     let mind = focusMetaWindow.get_monitor();
@@ -974,7 +977,7 @@ function global_keyMoveResizeEvent(type, key) {
             break;
             case 'left':
             if(cX > 0) {
-                grid.elements[cY] [cX - 1]._onHoverChanged();
+                grid.elements[cY][cX - 1]._onHoverChanged();
             }
             break;
             case 'up':
@@ -997,97 +1000,6 @@ function global_keyMoveResizeEvent(type, key) {
 
     log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     keySetTiling();
-}
-function keyMoveResizeEvent(type, key) {
-    log("Got key event " + type + " " + key);
-    if (!focusMetaWindow) {
-        return;
-    }
-    log("Going on..");
-    let mind = focusMetaWindow.get_monitor();
-    let monitor = monitors[mind];
-    let mkey = getMonitorKey(monitor);
-    let grid = grids[mkey];
-    let delegate = grid.elementsDelegate;
-
-    if(!delegate.currentElement) {
-        log("Key event while no mouse activation - set current and second element");
-        setInitialSelection();
-    } else {
-        if(!delegate.first){
-            log("currentElement is there but no first yet");
-            delegate.currentElement._onButtonPress();
-        }
-    }
-    if(!delegate.currentElement) {
-        log("gTime currentElement is not set!");
-    }
-    let cX = delegate.currentElement.coordx;
-    let cY = delegate.currentElement.coordy;
-    let fX = delegate.first.coordx;
-    let fY = delegate.first.coordy;
-
-    log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-    log("Grid cols " + nbCols + " rows " + nbRows);
-    if(type == 'move') {
-        switch(key) {
-            case 'right':
-            if(fX < nbCols - 1 && cX < nbCols - 1) {
-                delegate.first = grid.elements [fY] [fX + 1];
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
-            case 'left':
-            if(fX > 0 && cX > 0) {
-                delegate.first = grid.elements [fY] [fX - 1];
-                grid.elements[cY] [cX - 1]._onHoverChanged();
-            }
-            break;
-            case 'up':
-            if(fY > 0 && cY > 0) {
-                delegate.first = grid.elements [fY - 1] [fX];
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
-            case 'down':
-            if(fY < nbRows - 1 && cY < nbRows - 1) {
-                delegate.first = grid.elements [fY + 1] [fX];
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
-        }
-        } else {
-        switch(key) {
-            case 'right':
-            if(cX < nbCols - 1) {
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
-            case 'left':
-            if(cX > 0) {
-                grid.elements[cY] [cX - 1]._onHoverChanged();
-            }
-            break;
-            case 'up':
-            if(cY > 0 ) {
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
-            case 'down':
-            if(cY < nbRows - 1) {
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
-        }
-    }
-
-    cX = delegate.currentElement.coordx;
-    cY = delegate.currentElement.coordy;
-    fX = delegate.first.coordx;
-    fY = delegate.first.coordy;
-
-    log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-
 }
 
 /**
