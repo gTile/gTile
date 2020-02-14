@@ -206,6 +206,42 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Preset resize 30.</summary>
 		</key>
+		<key type="as" name="preset-resize-31">
+			<default><![CDATA[['']]]></default>
+			<summary>Global change grid size.</summary>
+		</key>
+		<key type="as" name="preset-resize-32">
+			<default><![CDATA[['']]]></default>
+			<summary>Global resize left.</summary>
+		</key>
+		<key type="as" name="preset-resize-33">
+			<default><![CDATA[['']]]></default>
+			<summary>Global resize right.</summary>
+		</key>
+		<key type="as" name="preset-resize-34">
+			<default><![CDATA[['']]]></default>
+			<summary>Global resize up.</summary>
+		</key>
+		<key type="as" name="preset-resize-35">
+			<default><![CDATA[['']]]></default>
+			<summary>Global resize down.</summary>
+		</key>
+		<key type="as" name="preset-resize-36">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move left.</summary>
+		</key>
+		<key type="as" name="preset-resize-37">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move right.</summary>
+		</key>
+		<key type="as" name="preset-resize-38">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move up.</summary>
+		</key>
+		<key type="as" name="preset-resize-39">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move down.</summary>
+		</key>
 		<key type="as" name="autotile-main">
 			<default><![CDATA[['m']]]></default>
 			<summary>Autotile with main window.</summary>

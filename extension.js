@@ -145,15 +145,26 @@ const key_bindings_presets = {
     'preset-resize-19': function() { presetResize(19) ;},
     'preset-resize-20': function() { presetResize(20) ;},
     'preset-resize-21': function() { presetResize(21) ;},
-    'preset-resize-22': function() { keyChangeTiling() ;},
-    'preset-resize-23': function() { global_keyMoveResizeEvent('resize'  , 'left' ); ;},
-    'preset-resize-24': function() { global_keyMoveResizeEvent('resize'  , 'right' ); ;},
-    'preset-resize-25': function() { global_keyMoveResizeEvent('resize'  , 'up' ); ;},
-    'preset-resize-26': function() { global_keyMoveResizeEvent('resize'  , 'down' ); ;},
-    'preset-resize-27': function() { global_keyMoveResizeEvent('move'  , 'left' );},
-    'preset-resize-28': function() { global_keyMoveResizeEvent('move'  , 'right' );},
-    'preset-resize-29': function() { global_keyMoveResizeEvent('move'  , 'up' );},
-    'preset-resize-30': function() { global_keyMoveResizeEvent('move'  , 'down' );}
+    'preset-resize-22': function() { presetResize(22) ;},
+    'preset-resize-23': function() { presetResize(23) ;},
+    'preset-resize-24': function() { presetResize(24) ;},
+    'preset-resize-25': function() { presetResize(25) ;},
+    'preset-resize-26': function() { presetResize(26) ;},
+    'preset-resize-27': function() { presetResize(27) ;},
+    'preset-resize-28': function() { presetResize(28) ;},
+    'preset-resize-29': function() { presetResize(29) ;},
+    'preset-resize-30': function() { presetResize(30) ;}
+}
+const key_binding_global_resizes = {
+  'preset-resize-31': function() { keyChangeTiling(); },
+  'preset-resize-32': function() { global_keyMoveResizeEvent('resize'  , 'left' );},
+  'preset-resize-33': function() { global_keyMoveResizeEvent('resize'  , 'right' );},
+  'preset-resize-34': function() { global_keyMoveResizeEvent('resize'  , 'up' );},
+  'preset-resize-35': function() { global_keyMoveResizeEvent('resize'  , 'down' );},
+  'preset-resize-36': function() { global_keyMoveResizeEvent('move'  , 'left' );},
+  'preset-resize-37': function() { global_keyMoveResizeEvent('move'  , 'right' );},
+  'preset-resize-38': function() { global_keyMoveResizeEvent('move'  , 'up' );},
+  'preset-resize-39': function() { global_keyMoveResizeEvent('move'  , 'down' );}
 }
 
 function log(log_string) {
@@ -326,6 +337,7 @@ function enable() {
     Hotkeys.bind(key_bindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
         Hotkeys.bind(key_bindings_presets);
+        Hotkeys.bind(key_binding_global_resizes);
     }
     log("Extention Enabled!");
 }
