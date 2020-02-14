@@ -156,19 +156,19 @@ const key_bindings_presets = {
     'preset-resize-30': function() { presetResize(30) ;}
 }
 const key_binding_global_resizes = {
-  'action-change-tiling': function() { keyChangeTiling(); },
-  'action-contract-bottom': function() { keyMoveResizeEvent('contract'  , 'bottom', true );},
-  'action-contract-left': function() { keyMoveResizeEvent('contract'  , 'left', true );},
-  'action-contract-right': function() { keyMoveResizeEvent('contract'  , 'right', true );},
-  'action-contract-top': function() { keyMoveResizeEvent('contract'  , 'top', true );},
-  'action-expand-bottom': function() { keyMoveResizeEvent('expand'  , 'bottom', true );},
-  'action-expand-left': function() { keyMoveResizeEvent('expand'  , 'left', true );},
-  'action-expand-right': function() { keyMoveResizeEvent('expand'  , 'right', true );},
-  'action-expand-top': function() { keyMoveResizeEvent('expand'  , 'top', true );},
-  'action-move-down': function() { keyMoveResizeEvent('move'  , 'down', true );},
-  'action-move-left': function() { keyMoveResizeEvent('move'  , 'left', true );},
-  'action-move-right': function() { keyMoveResizeEvent('move'  , 'right', true );},
-  'action-move-up': function() { keyMoveResizeEvent('move'  , 'up', true );}
+  'action-change-tiling':   function()  { keyChangeTiling(); },
+  'action-contract-bottom': function() { keyMoveResizeEvent('contract' , 'bottom', true );},
+  'action-contract-left':   function() { keyMoveResizeEvent('contract' , 'left'  , true );},
+  'action-contract-right':  function() { keyMoveResizeEvent('contract' , 'right' , true );},
+  'action-contract-top':    function() { keyMoveResizeEvent('contract' , 'top'   , true );},
+  'action-expand-bottom':   function() { keyMoveResizeEvent('expand'   , 'bottom', true );},
+  'action-expand-left':     function() { keyMoveResizeEvent('expand'   , 'left'  , true );},
+  'action-expand-right':    function() { keyMoveResizeEvent('expand'   , 'right' , true );},
+  'action-expand-top':      function() { keyMoveResizeEvent('expand'   , 'top'   , true );},
+  'action-move-down':       function() { keyMoveResizeEvent('move'     , 'down'  , true );},
+  'action-move-left':       function() { keyMoveResizeEvent('move'     , 'left'  , true );},
+  'action-move-right':      function() { keyMoveResizeEvent('move'     , 'right' , true );},
+  'action-move-up':         function() { keyMoveResizeEvent('move'     , 'up'    , true );}
 }
 
 function log(log_string) {
@@ -945,14 +945,6 @@ function keyMoveResizeEvent(type, key, is_global = false) {
 
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
-    log("--------");
-    log("nbCols:nbRows");
-    log("" + nbCols + ":" + nbRows);
-    log("fX:fY:");
-    log("" + fX + ":" + fY);
-    log("cX:cY:");
-    log("" + cX + ":" + cY);
-    log("--------");
     if (type == 'move') {
         switch (key) {
             case 'right':
@@ -1006,21 +998,25 @@ function keyMoveResizeEvent(type, key, is_global = false) {
     } else if (type == "contract") {
         switch (key) {
             case 'left':
+                // Contract left edge of current window right one column
                 if (cX > fX) {
                     delegate.first = grid.elements[fY][fX + 1];
                 }
                 break;
             case 'right':
+                // Contract right edge of current window left one column
                 if (cX > fX) {
                     grid.elements[cY][cX - 1]._onHoverChanged();
                 }
                 break;
             case 'top':
+                // Contract top edge of current window down one row
                 if (cY > fY) {
                     delegate.first = grid.elements[fY + 1][fX];
                 }
                 break;
             case 'bottom':
+                // Contract bottom edge of current window up one row
                 if (cY > fY) {
                     grid.elements[cY - 1][cX]._onHoverChanged();
                 }
