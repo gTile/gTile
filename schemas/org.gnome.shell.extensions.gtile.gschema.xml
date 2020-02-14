@@ -206,41 +206,60 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Preset resize 30.</summary>
 		</key>
-		<key type="as" name="action-resize-1">
+		<key type="as" name="action-change-tiling">
 			<default><![CDATA[['']]]></default>
 			<summary>Global change grid size.</summary>
 		</key>
-		<key type="as" name="action-resize-2">
+		<key type="as" name="action-contract-bottom">
 			<default><![CDATA[['']]]></default>
-			<summary>Global resize left.</summary>
+			<summary>Global contract bottom edge.</summary>
 		</key>
-		<key type="as" name="action-resize-3">
+		<key type="as" name="action-contract-left">
 			<default><![CDATA[['']]]></default>
-			<summary>Global resize right.</summary>
+			<summary>Global contract left edge.</summary>
 		</key>
-		<key type="as" name="action-resize-4">
+		<key type="as" name="action-contract-right">
 			<default><![CDATA[['']]]></default>
-			<summary>Global resize up.</summary>
+			<summary>Global contract right edge.</summary>
 		</key>
-		<key type="as" name="action-resize-5">
+		<key type="as" name="action-contract-top">
 			<default><![CDATA[['']]]></default>
-			<summary>Global resize down.</summary>
+			<summary>Global contract top edge.</summary>
 		</key>
-		<key type="as" name="action-resize-6">
+
+		<key type="as" name="action-expand-bottom">
 			<default><![CDATA[['']]]></default>
-			<summary>Global move left.</summary>
+			<summary>Global expand bottom edge.</summary>
 		</key>
-		<key type="as" name="action-resize-7">
+		<key type="as" name="action-expand-left">
 			<default><![CDATA[['']]]></default>
-			<summary>Global move right.</summary>
+			<summary>Global expand left edge.</summary>
 		</key>
-		<key type="as" name="action-resize-8">
+		<key type="as" name="action-expand-right">
 			<default><![CDATA[['']]]></default>
-			<summary>Global move up.</summary>
+			<summary>Global expand right edge.</summary>
 		</key>
-		<key type="as" name="action-resize-9">
+		<key type="as" name="action-expand-top">
 			<default><![CDATA[['']]]></default>
-			<summary>Global move down.</summary>
+			<summary>Global expand top edge.</summary>
+		</key>
+
+
+		<key type="as" name="action-move-left">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move window left.</summary>
+		</key>
+		<key type="as" name="action-move-right">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move window right.</summary>
+		</key>
+		<key type="as" name="action-move-up">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move window up.</summary>
+		</key>
+		<key type="as" name="action-move-down">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move window down.</summary>
 		</key>
 		<key type="as" name="autotile-main">
 			<default><![CDATA[['m']]]></default>

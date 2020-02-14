@@ -156,15 +156,19 @@ const key_bindings_presets = {
     'preset-resize-30': function() { presetResize(30) ;}
 }
 const key_binding_global_resizes = {
-  'action-resize-1': function() { keyChangeTiling(); },
-  'action-resize-2': function() { keyMoveResizeEvent('resize'  , 'left', true );},
-  'action-resize-3': function() { keyMoveResizeEvent('resize'  , 'right', true );},
-  'action-resize-4': function() { keyMoveResizeEvent('resize'  , 'up', true );},
-  'action-resize-5': function() { keyMoveResizeEvent('resize'  , 'down', true );},
-  'action-resize-6': function() { keyMoveResizeEvent('move'  , 'left', true );},
-  'action-resize-7': function() { keyMoveResizeEvent('move'  , 'right', true );},
-  'action-resize-8': function() { keyMoveResizeEvent('move'  , 'up', true );},
-  'action-resize-9': function() { keyMoveResizeEvent('move'  , 'down', true );}
+  'action-change-tiling': function() { keyChangeTiling(); },
+  'action-contract-bottom': function() { keyMoveResizeEvent('contract'  , 'bottom', true );},
+  'action-contract-left': function() { keyMoveResizeEvent('contract'  , 'left', true );},
+  'action-contract-right': function() { keyMoveResizeEvent('contract'  , 'right', true );},
+  'action-contract-top': function() { keyMoveResizeEvent('contract'  , 'top', true );},
+  'action-expand-bottom': function() { keyMoveResizeEvent('expand'  , 'bottom', true );},
+  'action-expand-left': function() { keyMoveResizeEvent('expand'  , 'left', true );},
+  'action-expand-right': function() { keyMoveResizeEvent('expand'  , 'right', true );},
+  'action-expand-top': function() { keyMoveResizeEvent('expand'  , 'top', true );},
+  'action-move-down': function() { keyMoveResizeEvent('move'  , 'down', true );},
+  'action-move-left': function() { keyMoveResizeEvent('move'  , 'left', true );},
+  'action-move-right': function() { keyMoveResizeEvent('move'  , 'right', true );},
+  'action-move-up': function() { keyMoveResizeEvent('move'  , 'up', true );}
 }
 
 function log(log_string) {
@@ -991,6 +995,67 @@ function keyMoveResizeEvent(type, key, is_global=false) {
             }
             break;
         }
+    } else if(type=="contract") {
+      log("--------");
+      log(""+cX+":"+nbCols);
+      log("--------");
+      switch(key) {
+          case 'left':
+          // if(cX < nbCols - 1) {
+              delegate.first = grid.elements [fY] [fX+1];
+          // }
+          break;
+          case 'right':
+          if(cX > 0) {
+              grid.elements[cY] [cX - 1]._onHoverChanged();
+          }
+          break;
+          case 'top':
+          if(cY > 0) {
+              delegate.first = grid.elements [fY+1] [fX];
+          }
+          break;
+          case 'bottom':
+          if(cY < nbRows) {
+              log("----------");
+              log(cY-nbRows);
+              log(cY);
+              log(nbRows);
+              log("----------");
+              // grid.elements[cY + 1] [cX]._onHoverChanged();
+              grid.elements[cY - 1] [cX]._onHoverChanged();
+          }
+          break;
+      }
+
+    } else if(type=="expand") {
+      switch(key) {
+          case 'right':
+          if(cX < nbCols - 1) {
+              grid.elements[cY] [cX + 1]._onHoverChanged();
+          }
+          break;
+          case 'left':
+          if(cX > 0) {
+              delegate.first = grid.elements [fY] [fX - 1];
+              // grid.elements[cY] [cX - 1]._onHoverChanged();
+          }
+          break;
+          case 'top':
+          if(cY > 0 ) {
+              delegate.first = grid.elements [fY-1] [fX];
+          }
+          break;
+          case 'bottom':
+          if(cY < nbRows - 1) {
+              grid.elements[cY + 1] [cX]._onHoverChanged();
+          }
+          break;
+      }
+    } else if(type=="vertical-shorten") {
+
+    } else if(type=="vertical-expand") {
+
     }
 
     cX = delegate.currentElement.coordx;
@@ -1909,7 +1974,7 @@ GridElementDelegate.prototype = {
     },
 
     _displayArea: function(fromGridElement, toGridElement) {
-        //log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+        // log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
 
@@ -1939,7 +2004,7 @@ GridElementDelegate.prototype = {
     },
 
     _onHoverChanged: function(gridElement) {
-        //log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
+        log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if(this.activated) {
             this.refreshGrid(this.first,gridElement);
             this.currentElement = gridElement;
