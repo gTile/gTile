@@ -206,39 +206,39 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Preset resize 30.</summary>
 		</key>
-		<key type="as" name="preset-resize-31">
+		<key type="as" name="action-resize-1">
 			<default><![CDATA[['']]]></default>
 			<summary>Global change grid size.</summary>
 		</key>
-		<key type="as" name="preset-resize-32">
+		<key type="as" name="action-resize-2">
 			<default><![CDATA[['']]]></default>
 			<summary>Global resize left.</summary>
 		</key>
-		<key type="as" name="preset-resize-33">
+		<key type="as" name="action-resize-3">
 			<default><![CDATA[['']]]></default>
 			<summary>Global resize right.</summary>
 		</key>
-		<key type="as" name="preset-resize-34">
+		<key type="as" name="action-resize-4">
 			<default><![CDATA[['']]]></default>
 			<summary>Global resize up.</summary>
 		</key>
-		<key type="as" name="preset-resize-35">
+		<key type="as" name="action-resize-5">
 			<default><![CDATA[['']]]></default>
 			<summary>Global resize down.</summary>
 		</key>
-		<key type="as" name="preset-resize-36">
+		<key type="as" name="action-resize-6">
 			<default><![CDATA[['']]]></default>
 			<summary>Global move left.</summary>
 		</key>
-		<key type="as" name="preset-resize-37">
+		<key type="as" name="action-resize-7">
 			<default><![CDATA[['']]]></default>
 			<summary>Global move right.</summary>
 		</key>
-		<key type="as" name="preset-resize-38">
+		<key type="as" name="action-resize-8">
 			<default><![CDATA[['']]]></default>
 			<summary>Global move up.</summary>
 		</key>
-		<key type="as" name="preset-resize-39">
+		<key type="as" name="action-resize-9">
 			<default><![CDATA[['']]]></default>
 			<summary>Global move down.</summary>
 		</key>

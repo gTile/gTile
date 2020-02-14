@@ -156,15 +156,15 @@ const key_bindings_presets = {
     'preset-resize-30': function() { presetResize(30) ;}
 }
 const key_binding_global_resizes = {
-  'preset-resize-31': function() { keyChangeTiling(); },
-  'preset-resize-32': function() { global_keyMoveResizeEvent('resize'  , 'left' );},
-  'preset-resize-33': function() { global_keyMoveResizeEvent('resize'  , 'right' );},
-  'preset-resize-34': function() { global_keyMoveResizeEvent('resize'  , 'up' );},
-  'preset-resize-35': function() { global_keyMoveResizeEvent('resize'  , 'down' );},
-  'preset-resize-36': function() { global_keyMoveResizeEvent('move'  , 'left' );},
-  'preset-resize-37': function() { global_keyMoveResizeEvent('move'  , 'right' );},
-  'preset-resize-38': function() { global_keyMoveResizeEvent('move'  , 'up' );},
-  'preset-resize-39': function() { global_keyMoveResizeEvent('move'  , 'down' );}
+  'action-resize-1': function() { keyChangeTiling(); },
+  'action-resize-2': function() { global_keyMoveResizeEvent('resize'  , 'left' );},
+  'action-resize-3': function() { global_keyMoveResizeEvent('resize'  , 'right' );},
+  'action-resize-4': function() { global_keyMoveResizeEvent('resize'  , 'up' );},
+  'action-resize-5': function() { global_keyMoveResizeEvent('resize'  , 'down' );},
+  'action-resize-6': function() { global_keyMoveResizeEvent('move'  , 'left' );},
+  'action-resize-7': function() { global_keyMoveResizeEvent('move'  , 'right' );},
+  'action-resize-8': function() { global_keyMoveResizeEvent('move'  , 'up' );},
+  'action-resize-9': function() { global_keyMoveResizeEvent('move'  , 'down' );}
 }
 
 function log(log_string) {
