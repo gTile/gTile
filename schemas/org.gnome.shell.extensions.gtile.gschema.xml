@@ -448,6 +448,10 @@
 			<default>true</default>
 			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
 		</key>
+		<key type = "b" name="moveresize-enabled">
+			<default>true</default>
+			<summary>Enables shortcuts for moving and resizing the current window.</summary>
+		</key>
 		<key type = "i" name="window-margin">
 			<default>0</default>
 			<summary>Gaps between windows in the middle of screen</summary>

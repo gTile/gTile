@@ -41,6 +41,7 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 
@@ -282,9 +283,9 @@ function initSettings() {
     getBoolSetting(SETTINGS_ANIMATION);
     getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
+    getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
-
     gridSettings[SETTINGS_INSETS_PRIMARY] =
         { top:    getIntSetting(SETTINGS_INSETS_PRIMARY_TOP),
         bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM),
@@ -341,6 +342,8 @@ function enable() {
     Hotkeys.bind(key_bindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
         Hotkeys.bind(key_bindings_presets);
+    }
+    if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
         Hotkeys.bind(key_binding_global_resizes);
     }
     log("Extention Enabled!");
@@ -350,6 +353,7 @@ function disable() {
     log("Extension start disabling");
     Hotkeys.unbind(key_bindings);
     Hotkeys.unbind(key_bindings_presets);
+    Hotkeys.unbind(key_binding_global_resizes);
     if(keyControlBound) {
         Hotkeys.unbind(key_bindings_tiling);
         keyControlBound = false;
@@ -818,6 +822,9 @@ function unbindKeyControls() {
         }
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             Hotkeys.unbind(key_bindings_presets);
+        }
+        if(!gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
+            Hotkeys.unbind(key_binding_global_resizes);
         }
         keyControlBound = false;
     }
