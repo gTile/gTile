@@ -173,7 +173,7 @@ const GTileStatusButton = new Lang.Class({
 
         this.add_style_class_name(classname);
         //Done by default in PanelMenuButton - Just need to override the method
-        this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
     },
 
     reset: function() {
