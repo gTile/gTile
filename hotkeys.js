@@ -6,24 +6,16 @@ const Shell = imports.gi.Shell;
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
-
-// Copy from extention.js
-const SETTINGS_DEBUG = 'debug';
+const Log = Extension.imports.logging;
 
 // Globals
 const mySettings = Settings.get();
 
-let debug=false;
-
 function log(log_string) {
-    if(debug) {
-        global.log("gTile " + log_string);
-    }
+    Log.log(log_string);
 }
 
 function bind(key_bindings) {
-    debug = mySettings.get_boolean(SETTINGS_DEBUG);
-
     log("Binding keys");
     for (var key in key_bindings) {
         //log("Binding key: " + key);
@@ -57,7 +49,6 @@ function bind(key_bindings) {
 }
 
 function unbind(key_bindings) {
-    debug = mySettings.get_boolean(SETTINGS_DEBUG);
     log("Unbinding keys");
     for (var key in key_bindings) {
         //log("Unbinding key: " + key);

@@ -126,6 +126,17 @@ You can do auto tiling for all windows on screen
 2. Click on one of 2 autotile buttons, or
 3. Press one of `[1..9,0]` (total 10 available) for vertical columns autotiling, or `M` for "main" autotailing
 
+## Snap-To-Neighbors
+
+You can expand window - it will fill all available space up to borders with neighbors.
+Default keyboard shortcut is `<Alt><Ctrl>s`
+Snap-to-neighbors works only when gTile window is activated
+
+1. Focus on window you want to expand to fill space up to neighobrs borders
+2. Activate gTile window `<Super>Enter`
+3. Press `<Als><Ctrl>s`. Your windows will snap to neighbors.
+4. Close gTile window `Escape`
+
 
 ## Overlap with stock Gnome-shell shortcuts
 
