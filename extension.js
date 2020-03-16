@@ -41,6 +41,7 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 
@@ -155,6 +156,21 @@ const key_bindings_presets = {
     'preset-resize-29': function() { presetResize(29) ;},
     'preset-resize-30': function() { presetResize(30) ;}
 }
+const key_binding_global_resizes = {
+  'action-change-tiling':   function()  { keyChangeTiling(); },
+  'action-contract-bottom': function() { keyMoveResizeEvent('contract' , 'bottom', true );},
+  'action-contract-left':   function() { keyMoveResizeEvent('contract' , 'left'  , true );},
+  'action-contract-right':  function() { keyMoveResizeEvent('contract' , 'right' , true );},
+  'action-contract-top':    function() { keyMoveResizeEvent('contract' , 'top'   , true );},
+  'action-expand-bottom':   function() { keyMoveResizeEvent('expand'   , 'bottom', true );},
+  'action-expand-left':     function() { keyMoveResizeEvent('expand'   , 'left'  , true );},
+  'action-expand-right':    function() { keyMoveResizeEvent('expand'   , 'right' , true );},
+  'action-expand-top':      function() { keyMoveResizeEvent('expand'   , 'top'   , true );},
+  'action-move-down':       function() { keyMoveResizeEvent('move'     , 'down'  , true );},
+  'action-move-left':       function() { keyMoveResizeEvent('move'     , 'left'  , true );},
+  'action-move-right':      function() { keyMoveResizeEvent('move'     , 'right' , true );},
+  'action-move-up':         function() { keyMoveResizeEvent('move'     , 'up'    , true );}
+}
 
 function log(log_string) {
     if(debug) {
@@ -267,9 +283,9 @@ function initSettings() {
     getBoolSetting(SETTINGS_ANIMATION);
     getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
+    getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
-
     gridSettings[SETTINGS_INSETS_PRIMARY] =
         { top:    getIntSetting(SETTINGS_INSETS_PRIMARY_TOP),
         bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM),
@@ -327,6 +343,9 @@ function enable() {
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
         Hotkeys.bind(key_bindings_presets);
     }
+    if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
+        Hotkeys.bind(key_binding_global_resizes);
+    }
     log("Extention Enabled!");
 }
 
@@ -334,6 +353,7 @@ function disable() {
     log("Extension start disabling");
     Hotkeys.unbind(key_bindings);
     Hotkeys.unbind(key_bindings_presets);
+    Hotkeys.unbind(key_binding_global_resizes);
     if(keyControlBound) {
         Hotkeys.unbind(key_bindings_tiling);
         keyControlBound = false;
@@ -391,7 +411,7 @@ function refreshGrids() {
 }
 
 function moveGrids() {
-	log("moveGrids");
+	 log("moveGrids");
     if (!status) {
         return;
     }
@@ -714,7 +734,7 @@ function contains(a, obj) {
 
 /**
  * Get focused window by iterating though the windows on the active workspace.
- * @returns {Object} The focussed window object. False if no focussed window was found. 
+ * @returns {Object} The focussed window object. False if no focussed window was found.
  */
 function getFocusApp() {
     if (tracker.focus_app == null) {
@@ -802,6 +822,9 @@ function unbindKeyControls() {
         }
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             Hotkeys.unbind(key_bindings_presets);
+        }
+        if(!gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
+            Hotkeys.unbind(key_binding_global_resizes);
         }
         keyControlBound = false;
     }
@@ -895,28 +918,31 @@ function setInitialSelection() {
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
-
-function keyMoveResizeEvent(type, key) {
+function keyMoveResizeEvent(type, key, is_global = false) {
+    if (is_global) {
+        focusMetaWindow = getFocusApp();
+    }
     log("Got key event " + type + " " + key);
     if (!focusMetaWindow) {
         return;
     }
+    log("Going on..");
     let mind = focusMetaWindow.get_monitor();
     let monitor = monitors[mind];
     let mkey = getMonitorKey(monitor);
     let grid = grids[mkey];
     let delegate = grid.elementsDelegate;
 
-    if(!delegate.currentElement) {
+    if (!delegate.currentElement) {
         log("Key event while no mouse activation - set current and second element");
         setInitialSelection();
     } else {
-        if(!delegate.first){
+        if (!delegate.first) {
             log("currentElement is there but no first yet");
             delegate.currentElement._onButtonPress();
         }
     }
-    if(!delegate.currentElement) {
+    if (!delegate.currentElement) {
         log("gTime currentElement is not set!");
     }
     let cX = delegate.currentElement.coordx;
@@ -926,55 +952,107 @@ function keyMoveResizeEvent(type, key) {
 
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
-    if(type == 'move') {
-        switch(key) {
+    if (type == 'move') {
+        switch (key) {
             case 'right':
-            if(fX < nbCols - 1 && cX < nbCols - 1) {
-                delegate.first = grid.elements [fY] [fX + 1];
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
+                if (fX < nbCols - 1 && cX < nbCols - 1) {
+                    delegate.first = grid.elements[fY][fX + 1];
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
             case 'left':
-            if(fX > 0 && cX > 0) {
-                delegate.first = grid.elements [fY] [fX - 1];
-                grid.elements[cY] [cX - 1]._onHoverChanged();
-            }
-            break;
+                if (fX > 0 && cX > 0) {
+                    delegate.first = grid.elements[fY][fX - 1];
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
             case 'up':
-            if(fY > 0 && cY > 0) {
-                delegate.first = grid.elements [fY - 1] [fX];
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (fY > 0 && cY > 0) {
+                    delegate.first = grid.elements[fY - 1][fX];
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
             case 'down':
-            if(fY < nbRows - 1 && cY < nbRows - 1) {
-                delegate.first = grid.elements [fY + 1] [fX];
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (fY < nbRows - 1 && cY < nbRows - 1) {
+                    delegate.first = grid.elements[fY + 1][fX];
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
         }
-        } else {
-        switch(key) {
+    } else if (type == "resize") {
+        switch (key) {
             case 'right':
-            if(cX < nbCols - 1) {
-                grid.elements[cY] [cX + 1]._onHoverChanged();
-            }
-            break;
+                if (cX < nbCols - 1) {
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
             case 'left':
-            if(cX > 0) {
-                grid.elements[cY] [cX - 1]._onHoverChanged();
-            }
-            break;
+                if (cX > 0) {
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
             case 'up':
-            if(cY > 0 ) {
-                grid.elements[cY - 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (cY > 0) {
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
             case 'down':
-            if(cY < nbRows - 1) {
-                grid.elements[cY + 1] [cX]._onHoverChanged();
-            }
-            break;
+                if (cY < nbRows - 1) {
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
+        }
+    } else if (type == "contract") {
+        switch (key) {
+            case 'left':
+                // Contract left edge of current window right one column
+                if (cX > fX) {
+                    delegate.first = grid.elements[fY][fX + 1];
+                }
+                break;
+            case 'right':
+                // Contract right edge of current window left one column
+                if (cX > fX) {
+                    grid.elements[cY][cX - 1]._onHoverChanged();
+                }
+                break;
+            case 'top':
+                // Contract top edge of current window down one row
+                if (cY > fY) {
+                    delegate.first = grid.elements[fY + 1][fX];
+                }
+                break;
+            case 'bottom':
+                // Contract bottom edge of current window up one row
+                if (cY > fY) {
+                    grid.elements[cY - 1][cX]._onHoverChanged();
+                }
+                break;
+        }
+
+    } else if (type == "expand") {
+
+        switch (key) {
+            case 'right':
+                if (cX < nbCols) {
+                    grid.elements[cY][cX + 1]._onHoverChanged();
+                }
+                break;
+            case 'left':
+                if (fX > 0) {
+                    delegate.first = grid.elements[fY][fX - 1];
+                }
+                break;
+            case 'top':
+                if (fY > 0) {
+                    delegate.first = grid.elements[fY - 1][fX];
+                }
+                break;
+            case 'bottom':
+                if (cY < nbRows - 1) {
+                    grid.elements[cY + 1][cX]._onHoverChanged();
+                }
+                break;
         }
     }
 
@@ -984,9 +1062,10 @@ function keyMoveResizeEvent(type, key) {
     fY = delegate.first.coordy;
 
     log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-
+    if (is_global) {
+        keySetTiling();
+    }
 }
-
 /**
  * Resize window to the given preset.
  * @param  {number}  Identifier of the resize preset (1 - 30)
@@ -1892,7 +1971,7 @@ GridElementDelegate.prototype = {
     },
 
     _displayArea: function(fromGridElement, toGridElement) {
-        //log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
+        // log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
 
@@ -1922,7 +2001,7 @@ GridElementDelegate.prototype = {
     },
 
     _onHoverChanged: function(gridElement) {
-        //log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
+        log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if(this.activated) {
             this.refreshGrid(this.first,gridElement);
             this.currentElement = gridElement;

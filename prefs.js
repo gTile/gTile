@@ -15,6 +15,7 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
@@ -30,63 +31,75 @@ const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_HELP_TEXT = 'help-text';
-
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
     'show-toggle-tiling-alt': 'Display gTile alternative',
-    'set-tiling'        : 'Set tiling',
-    'cancel-tiling'     : 'Cancel tiling',
-    'change-grid-size'  : 'Change grid size',
-    'autotile-main'     : 'Autotile Main',
-    'autotile-1'        : 'Autotile 1 cols',
-    'autotile-2'        : 'Autotile 2 cols',
-    'autotile-3'        : 'Autotile 3 cols',
-    'autotile-4'        : 'Autotile 4 cols',
-    'autotile-5'        : 'Autotile 5 cols',
-    'autotile-6'        : 'Autotile 6 cols',
-    'autotile-7'        : 'Autotile 7 cols',
-    'autotile-8'        : 'Autotile 8 cols',
-    'autotile-9'        : 'Autotile 9 cols',
-    'autotile-10'       : 'Autotile 10 cols',
-    'preset-resize-1'   : 'Preset resize 1',
-    'preset-resize-2'   : 'Preset resize 2',
-    'preset-resize-3'   : 'Preset resize 3',
-    'preset-resize-4'   : 'Preset resize 4',
-    'preset-resize-5'   : 'Preset resize 5',
-    'preset-resize-6'   : 'Preset resize 6',
-    'preset-resize-7'   : 'Preset resize 7',
-    'preset-resize-8'   : 'Preset resize 8',
-    'preset-resize-9'   : 'Preset resize 9',
-    'preset-resize-10'  : 'Preset resize 10',
-    'preset-resize-11'  : 'Preset resize 11',
-    'preset-resize-12'  : 'Preset resize 12',
-    'preset-resize-13'  : 'Preset resize 13',
-    'preset-resize-14'  : 'Preset resize 14',
-    'preset-resize-15'  : 'Preset resize 15',
-    'preset-resize-16'  : 'Preset resize 16',
-    'preset-resize-17'  : 'Preset resize 17',
-    'preset-resize-18'  : 'Preset resize 18',
-    'preset-resize-19'  : 'Preset resize 19',
-    'preset-resize-20'  : 'Preset resize 20',
-    'preset-resize-21'  : 'Preset resize 21',
-    'preset-resize-22'  : 'Preset resize 22',
-    'preset-resize-23'  : 'Preset resize 23',
-    'preset-resize-24'  : 'Preset resize 24',
-    'preset-resize-25'  : 'Preset resize 25',
-    'preset-resize-26'  : 'Preset resize 26',
-    'preset-resize-27'  : 'Preset resize 27',
-    'preset-resize-28'  : 'Preset resize 28',
-    'preset-resize-29'  : 'Preset resize 29',
-    'preset-resize-30'  : 'Preset resize 30',
-    'move-left-vi'      : 'vi-style Resize horizontal narrower',
-    'move-right-vi'     : 'vi-style Resize horizontal wider',
-    'move-up-vi'        : 'vi-style Resize vertical higher',
-    'move-down-vi'      : 'vi-style Resize vertical lower',
-    'resize-left-vi'    : 'vi-style Resize horizontal narrower',
-    'resize-right-vi'   : 'vi-style Resize horizontal wider',
-    'resize-up-vi'      : 'vi-style Resize vertical higher',
-    'resize-down-vi'    : 'vi-style Resize vertical lower'
+    'set-tiling'              : 'Set tiling',
+    'cancel-tiling'           : 'Cancel tiling',
+    'change-grid-size'        : 'Change grid size',
+    'autotile-main'           : 'Autotile Main',
+    'autotile-1'              : 'Autotile 1 cols',
+    'autotile-2'              : 'Autotile 2 cols',
+    'autotile-3'              : 'Autotile 3 cols',
+    'autotile-4'              : 'Autotile 4 cols',
+    'autotile-5'              : 'Autotile 5 cols',
+    'autotile-6'              : 'Autotile 6 cols',
+    'autotile-7'              : 'Autotile 7 cols',
+    'autotile-8'              : 'Autotile 8 cols',
+    'autotile-9'              : 'Autotile 9 cols',
+    'autotile-10'             : 'Autotile 10 cols',
+    'preset-resize-1'         : 'Preset resize 1',
+    'preset-resize-2'         : 'Preset resize 2',
+    'preset-resize-3'         : 'Preset resize 3',
+    'preset-resize-4'         : 'Preset resize 4',
+    'preset-resize-5'         : 'Preset resize 5',
+    'preset-resize-6'         : 'Preset resize 6',
+    'preset-resize-7'         : 'Preset resize 7',
+    'preset-resize-8'         : 'Preset resize 8',
+    'preset-resize-9'         : 'Preset resize 9',
+    'preset-resize-10'        : 'Preset resize 10',
+    'preset-resize-11'        : 'Preset resize 11',
+    'preset-resize-12'        : 'Preset resize 12',
+    'preset-resize-13'        : 'Preset resize 13',
+    'preset-resize-14'        : 'Preset resize 14',
+    'preset-resize-15'        : 'Preset resize 15',
+    'preset-resize-16'        : 'Preset resize 16',
+    'preset-resize-17'        : 'Preset resize 17',
+    'preset-resize-18'        : 'Preset resize 18',
+    'preset-resize-19'        : 'Preset resize 19',
+    'preset-resize-20'        : 'Preset resize 20',
+    'preset-resize-21'        : 'Preset resize 21',
+    'preset-resize-22'        : 'Preset resize 22',
+    'preset-resize-23'        : 'Preset resize 23',
+    'preset-resize-24'        : 'Preset resize 24',
+    'preset-resize-25'        : 'Preset resize 25',
+    'preset-resize-26'        : 'Preset resize 26',
+    'preset-resize-27'        : 'Preset resize 27',
+    'preset-resize-28'        : 'Preset resize 28',
+    'preset-resize-29'        : 'Preset resize 29',
+    'preset-resize-30'        : 'Preset resize 30',
+    'action-change-tiling'    : 'Global change grid size',
+    'action-contract-bottom'  : 'Global contract bottom edge',
+    'action-contract-left'    : 'Global contract left edge',
+    'action-contract-right'   : 'Global contract right edge',
+    'action-contract-top'     : 'Global contract top edge',
+    'action-expand-bottom'    : 'Global expand bottom edge',
+    'action-expand-left'      : 'Global expand left edge',
+    'action-expand-right'     : 'Global expand right edge',
+    'action-expand-top'       : 'Global expand top edge',
+    'action-move-down'        : 'Global move window down',
+    'action-move-left'        : 'Global move window left',
+    'action-move-right'       : 'Global move window right',
+    'action-move-up'          : 'Global move window up',
+    'move-left-vi'            : 'vi-style Resize horizontal narrower',
+    'move-right-vi'           : 'vi-style Resize horizontal wider',
+    'move-up-vi'              : 'vi-style Resize vertical higher',
+    'move-down-vi'            : 'vi-style Resize vertical lower',
+    'resize-left-vi'          : 'vi-style Resize horizontal narrower',
+    'resize-right-vi'         : 'vi-style Resize horizontal wider',
+    'resize-up-vi'            : 'vi-style Resize vertical higher',
+    'resize-down-vi'          : 'vi-style Resize vertical lower'
 }
 
 function init() {
@@ -229,6 +242,8 @@ function basics_tab(notebook) {
     add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES, bs_grid, settings, 30);
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
 
+    add_check("Enable accelerators for moving and resizing windows", SETTINGS_MOVERESIZE_ENABLED  , bs_grid, settings);
+
     add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
@@ -260,7 +275,7 @@ function presets_tab(notebook) {
         row_spacing: 10,
     });
 
-    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)"; 
+    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)";
     pr_grid.add(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
