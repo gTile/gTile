@@ -182,15 +182,27 @@ const GTileStatusButton = new Lang.Class({
 
     reset: function() {
         this.activated = false;
-        launcher.remove_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.remove_style_pseudo_class('activate');
+        } else {
+            this.actor.remove_style_pseudo_class('activate');
+        }
     },
 
     activate: function() {
-        launcher.add_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.add_style_pseudo_class('activate');
+        } else {
+            this.actor.add_style_pseudo_class('activate');
+        }
     },
 
     deactivate: function() {
-        launcher.remove_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.remove_style_pseudo_class('activate');
+        } else {
+            this.actor.remove_style_pseudo_class('activate');
+        }
     },
 
     _onButtonPress: function(actor, event) {
