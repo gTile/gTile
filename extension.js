@@ -32,8 +32,11 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Log = Extension.imports.logging;
 const Settings = Extension.imports.settings;
 const Hotkeys = Extension.imports.hotkeys;
+const SnapToNeighbors = Extension.imports.snaptoneighbors;
+const ShellVersion_module = Extension.imports.shellversion;
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -72,7 +75,7 @@ let gridSettings = new Object();
 let settings = Settings.get();
 let toggleSettingListener;
 let keyControlBound = false;
-let debug = false;
+let shellVersion = new ShellVersion_module.ShellVersion();
 
 let presetState = new Array();
 presetState["current_variant"] = 0;
@@ -121,7 +124,8 @@ const key_bindings_tiling = {
     'autotile-7'      : function() { AutoTileNCols(7);},
     'autotile-8'      : function() { AutoTileNCols(8);},
     'autotile-9'      : function() { AutoTileNCols(9);},
-    'autotile-10'     : function() { AutoTileNCols(10);}
+    'autotile-10'     : function() { AutoTileNCols(10);},
+    'snap-to-neighbors': function() { SnapToNeighborsBind();}
 }
 
 const key_bindings_presets = {
@@ -173,9 +177,7 @@ const key_binding_global_resizes = {
 }
 
 function log(log_string) {
-    if(debug) {
-        global.log("gTile " + log_string);
-    }
+    Log.log(log_string);
 }
 
 const GTileStatusButton = new Lang.Class({
@@ -185,22 +187,38 @@ const GTileStatusButton = new Lang.Class({
     _init: function(classname) {
         this.parent(0.0, "gTile", false);
 
-        this.actor.add_style_class_name(classname);
+        this.add_style_class_name(classname);
         //Done by default in PanelMenuButton - Just need to override the method
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        if(shellVersion.version_at_least_34()) {
+            this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        } else {
+            this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        }
     },
 
     reset: function() {
         this.activated = false;
-        launcher.actor.remove_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.remove_style_pseudo_class('activate');
+        } else {
+            this.actor.remove_style_pseudo_class('activate');
+        }
     },
 
     activate: function() {
-        launcher.actor.add_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.add_style_pseudo_class('activate');
+        } else {
+            this.actor.add_style_pseudo_class('activate');
+        }
     },
 
     deactivate: function() {
-        launcher.actor.remove_style_pseudo_class('activate');
+        if(shellVersion.version_at_least_34()) {
+            this.remove_style_pseudo_class('activate');
+        } else {
+            this.actor.remove_style_pseudo_class('activate');
+        }
     },
 
     _onButtonPress: function(actor, event) {
@@ -312,13 +330,13 @@ function initSettings() {
   FUNCTIONS
  *****************************************************************/
 function init() {
-
 }
 
 function enable() {
-    log("Extension start enabling");
     getBoolSetting(SETTINGS_DEBUG);
-    debug = gridSettings[SETTINGS_DEBUG];
+    Log.debug = gridSettings[SETTINGS_DEBUG];
+    log("Enabling begin");
+    shellVersion.print_version();
 
     status = false;
     monitors = Main.layoutManager.monitors;
@@ -1471,6 +1489,17 @@ function AutoTileNCols(cols) {
     log("AutoTileNCols done");
 }
 
+function SnapToNeighborsBind() {
+    log("SnapToNeighbors keybind invoked");
+    let window = getFocusApp();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut SnapToNeighbors");
+        return;
+    }
+
+    SnapToNeighbors.snapToNeighbors(window);
+}
+
 function GridSettingsButton(text,cols,rows) {
     this._init(text,cols,rows);
 }
@@ -1524,6 +1553,8 @@ Grid.prototype = {
         this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 
+        this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
+		
         this.topbar = new TopBar(title);
 
         this.bottombarContainer = new St.Bin({ style_class: 'bottom-box-container',
@@ -1709,13 +1740,14 @@ Grid.prototype = {
         Main.layoutManager.addChrome(this.actor);
         //this.actor.y = 0 ;
         this.actor.scale_y= 0;
-        //this.actor.scale_x= 0;
+        this.actor.scale_x= 0;
         if (time > 0 ) {
             Tweener.addTween(this.actor, {
-                time: time,
+                time: this.animation_time,
                 opacity: 255,
                 visible: true,
                 transition: 'easeOutQuad',
+                scale_x: this.normalScaleX,
                 scale_y: this.normalScaleY,
                 onComplete: this._onShowComplete
             });
@@ -1732,13 +1764,13 @@ Grid.prototype = {
     hide: function(immediate) {
       log("hide " + immediate);
         this.elementsDelegate.reset();
-        let time = (gridSettings[SETTINGS_ANIMATION] && !immediate) ? 0.3 : 0;
         //log("hide " + time);
-        if (time > 0) {
+        if (!immediate && this.animation_time > 0) {
             Tweener.addTween(this.actor, {
-                time: time,
+                time: this.animation_time,
                 opacity: 0,
                 visible: false,
+                scale_x:0,
                 scale_y:0,
                 transition: 'easeOutQuad',
                 onComplete: this._onHideComplete
@@ -1748,13 +1780,14 @@ Grid.prototype = {
             this.actor.opacity = 0;
             this.actor.visible = false;
             //this.actor.y = 0;
+            this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
     },
 
     _onHideComplete: function() {
-        if(!this.interceptHide && this.actor) {
-            Main.layoutManager.removeChrome(this.actor);
+        if(!this.interceptHide && this) {
+            Main.layoutManager.removeChrome(this);
         }
     },
 
