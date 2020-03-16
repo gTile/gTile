@@ -15,17 +15,14 @@ const Main = imports.ui.main;
 const WorkspaceManager = global.screen || global.workspace_manager;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const Extension = ExtensionUtils.getCurrentExtension();
+const Log = Extension.imports.logging;
 
 const OVERLAP_TOLERANCE = 5;
 const SCAN_BOX_SIZE = 50;
 
-const debug = false;
-
 function log(log_string) {
-    if(debug) {
-        global.log("gTile SnapToNeighbors " + log_string);
-    }
+    Log.log(log_string);
 }
 
 /**

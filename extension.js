@@ -32,9 +32,11 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Log = Extension.imports.logging;
 const Settings = Extension.imports.settings;
 const Hotkeys = Extension.imports.hotkeys;
 const SnapToNeighbors = Extension.imports.snaptoneighbors;
+const ShellVersion_module = Extension.imports.shellversion;
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -72,7 +74,7 @@ let gridSettings = new Object();
 let settings = Settings.get();
 let toggleSettingListener;
 let keyControlBound = false;
-let debug = false;
+let shellVersion = new ShellVersion_module.ShellVersion();
 
 let presetState = new Array();
 presetState["current_variant"] = 0;
@@ -159,9 +161,7 @@ const key_bindings_presets = {
 }
 
 function log(log_string) {
-    if(debug) {
-        global.log("gTile " + log_string);
-    }
+    Log.log(log_string);
 }
 
 const GTileStatusButton = new Lang.Class({
@@ -173,7 +173,11 @@ const GTileStatusButton = new Lang.Class({
 
         this.add_style_class_name(classname);
         //Done by default in PanelMenuButton - Just need to override the method
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        if(shellVersion.version_at_least_34()) {
+            this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        } else {
+            this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        }
     },
 
     reset: function() {
@@ -298,13 +302,13 @@ function initSettings() {
   FUNCTIONS
  *****************************************************************/
 function init() {
-
 }
 
 function enable() {
-    log("Extension start enabling");
     getBoolSetting(SETTINGS_DEBUG);
-    debug = gridSettings[SETTINGS_DEBUG];
+    Log.debug = gridSettings[SETTINGS_DEBUG];
+    log("Enabling begin");
+    shellVersion.print_version();
 
     status = false;
     monitors = Main.layoutManager.monitors;
