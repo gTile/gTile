@@ -1570,7 +1570,7 @@ Grid.prototype = {
             reactive: true,
             width:this.tableWidth-20,
             height:36,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.bottombar_table_layout = this.bottombar.layout_manager;
 
@@ -1589,7 +1589,7 @@ Grid.prototype = {
             reactive: true,
             width:this.tableWidth-20,
             height:36,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
 
@@ -1608,7 +1608,7 @@ Grid.prototype = {
 
             let button = gridSettingsButton[index];
             button = new GridSettingsButton(button.text,button.cols,button.rows);
-            this.bottombar_table_layout.pack(button.actor, colNum, rowNum);
+            this.bottombar_table_layout.attach(button.actor, colNum, rowNum, 1, 1);
             button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
             colNum++;
         }
@@ -1626,7 +1626,7 @@ Grid.prototype = {
             reactive: true,
             height:this.tableHeight,
             width:this.tableWidth-2,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.table_table_layout = this.table.layout_manager;
         this.tableContainer.add_actor(this.table);
@@ -1651,19 +1651,19 @@ Grid.prototype = {
         }
 
         let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-        this.veryBottomBar_table_layout.pack(toggle.actor, 0, 0);
+        this.veryBottomBar_table_layout.attach(toggle.actor, 0, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-        this.veryBottomBar_table_layout.pack(toggle.actor, 1, 0);
+        this.veryBottomBar_table_layout.attach(toggle.actor, 1, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         let action = new AutoTileMainAndList(this);
-        this.veryBottomBar_table_layout.pack(action.actor, 2, 0);
+        this.veryBottomBar_table_layout.attach(action.actor, 2, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this,this._onResize));
 
         action = new AutoTileTwoList(this);
-        this.veryBottomBar_table_layout.pack(action.actor, 3, 0);
+        this.veryBottomBar_table_layout.attach(action.actor, 3, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this,this._onResize));
 
         this.x = 0;
@@ -1694,7 +1694,7 @@ Grid.prototype = {
 
                 this.elements[r][c] = element;
                 element.actor._delegate = this.elementsDelegate;
-                this.table_table_layout.pack(element.actor, c, r);
+                this.table_table_layout.attach(element.actor, c, r, 1, 1);
                 element.show();
             }
         }
@@ -1735,7 +1735,7 @@ Grid.prototype = {
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
 
-        this.actor.raise_top();
+        Main.uiGroup.set_child_above_sibling(this.actor,null);
         Main.layoutManager.removeChrome(this.actor);
         Main.layoutManager.addChrome(this.actor);
         //this.actor.y = 0 ;
