@@ -1573,6 +1573,7 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.bottombar_table_layout = this.bottombar.layout_manager;
+        this.bottombar_table_layout.set_column_homogeneous(true);
 
         this.bottombarContainer.add_actor(this.bottombar);
 
@@ -1592,6 +1593,7 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
+        this.veryBottomBar_table_layout.set_column_homogeneous(true);
 
         this.veryBottomBarContainer.add_actor(this.veryBottomBar);
 
@@ -1601,7 +1603,7 @@ Grid.prototype = {
 
         let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZES];
         for (var index=0; index<gridSettingsButton.length;index++) {
-            if (colNum>= 4) {
+            if (colNum>= maxPerRow) {
                 colNum = 0;
                 rowNum += 2;
             }
@@ -1629,6 +1631,8 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.table_table_layout = this.table.layout_manager;
+        this.table_table_layout.set_row_homogeneous(true);
+        this.table_table_layout.set_column_homogeneous(true);
         this.tableContainer.add_actor(this.table);
 
         this.actor.add_actor(this.topbar.actor);
@@ -1735,7 +1739,7 @@ Grid.prototype = {
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
 
-        Main.uiGroup.set_child_above_sibling(this.actor,null);
+        this.actor.raise_top();
         Main.layoutManager.removeChrome(this.actor);
         Main.layoutManager.addChrome(this.actor);
         //this.actor.y = 0 ;
