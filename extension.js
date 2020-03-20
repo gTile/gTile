@@ -1573,6 +1573,7 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.bottombar_table_layout = this.bottombar.layout_manager;
+        this.bottombar_table_layout.set_row_homogeneous(true);
         this.bottombar_table_layout.set_column_homogeneous(true);
 
         this.bottombarContainer.add_actor(this.bottombar);
@@ -1593,6 +1594,7 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
+        this.bottombar_table_layout.set_row_homogeneous(true);	    
         this.veryBottomBar_table_layout.set_column_homogeneous(true);
 
         this.veryBottomBarContainer.add_actor(this.veryBottomBar);
