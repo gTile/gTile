@@ -1130,7 +1130,7 @@ function presetResize(preset) {
     let rdc = parseTuple(ps[2], ":");
 
     // handle preset variants (if there are any)
-    ps_variant_count = ps_variants.length;
+    let ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
         if( presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
             presetState["last_preset"] == preset  &&
