@@ -186,14 +186,15 @@ const GTileStatusButton = new Lang.Class({
 
     _init: function(classname) {
         this.parent(0.0, "gTile", false);
-
-        this.add_style_class_name(classname);
         //Done by default in PanelMenuButton - Just need to override the method
         if(shellVersion.version_at_least_34()) {
+            this.add_style_class_name(classname);
             this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
         } else {
+            this.actor.add_style_class_name(classname);
             this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
         }
+        log("GTileStatusButton _init done");
     },
 
     reset: function() {

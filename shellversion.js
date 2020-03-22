@@ -22,8 +22,8 @@ ShellVersion.prototype = {
     },
     
     _version_at_least : function (version) {
-        return version[0] >= this.v_major &&
-            version[1] >= this.v_minor;
+        return version[0] <= this.v_major &&
+            version[1] <= this.v_minor;
     },
 
     version_at_least_34 : function () {
