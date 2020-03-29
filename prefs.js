@@ -31,7 +31,6 @@ const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left';
 const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
-const SETTINGS_HELP_TEXT = 'help-text';
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
@@ -337,28 +336,19 @@ function margins_tab(notebook) {
 }
 
 function help_tab(notebook) {
-    let settings = Settings.get();
-    let buffer = new Gtk.TextBuffer();
-    let help_str = settings.get_string(SETTINGS_HELP_TEXT);
-    if(help_str === "Unknown") {
-        help_str = "No help text, write your own in gSettings";
-    }
-    buffer.set_text(help_str, help_str.length);
-
-    this.text_view = new Gtk.TextView ({
-        buffer: buffer,
-        editable: false,
-        margin: 24,
-        wrap_mode: Gtk.WrapMode.WORD
+    let weblink = 'https://github.com/gTile/gTile/blob/master/README.md';
+    let hl_link =  new Gtk.LinkButton({
+        label: weblink,
+        uri: weblink,
+        halign: Gtk.Align.CENTER,
+        valign: Gtk.Align.CENTER,
     });
-    let hl_window = new Gtk.ScrolledWindow({'vexpand': true});
-        hl_window.add(text_view);
     let hl_label = new Gtk.Label({
         label: "Help",
         halign: Gtk.Align.START,
         use_markup: false,
     });
-    notebook.append_page(hl_window, hl_label);
+    notebook.append_page(hl_link, hl_label);
 }
 
 function buildPrefsWidget() {
