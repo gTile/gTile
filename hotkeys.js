@@ -1,12 +1,13 @@
+'use strict'
 // Library imports
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
 
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Extension.imports.settings;
-const Log = Extension.imports.logging;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Me.imports.settings;
+const Log = Me.imports.logging;
 
 // Globals
 const mySettings = Settings.get();

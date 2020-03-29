@@ -1,9 +1,10 @@
+'use strict'
 /* Determine if gnome-shell version newer than required
  * Written by Sergey
 */ 
 
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Extension.imports.logging;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Log = Me.imports.logging;
 
 const Config = imports.misc.config;
 

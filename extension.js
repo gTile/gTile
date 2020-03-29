@@ -1,3 +1,4 @@
+'use strict'
 /*****************************************************************
 
   This extension has been developed by vibou
@@ -31,12 +32,12 @@ const Workspace = imports.ui.workspace;
 const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Extension.imports.logging;
-const Settings = Extension.imports.settings;
-const Hotkeys = Extension.imports.hotkeys;
-const SnapToNeighbors = Extension.imports.snaptoneighbors;
-const ShellVersion_module = Extension.imports.shellversion;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Log = Me.imports.logging;
+const Settings = Me.imports.settings;
+const Hotkeys = Me.imports.hotkeys;
+const SnapToNeighbors = Me.imports.snaptoneighbors;
+const ShellVersion_module = Me.imports.shellversion;
 
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';

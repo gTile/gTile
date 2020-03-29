@@ -1,3 +1,4 @@
+'use strict'
 // Library imports
 const GObject = imports.gi.GObject;
 const Gdk = imports.gi.Gdk;
@@ -6,8 +7,8 @@ const Gio = imports.gi.Gio;
 const Lang = imports.lang;
 
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Settings = Extension.imports.settings;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Settings = Me.imports.settings;
 
 // Redefining globals from extension.js - do not know how to do it better :-(
 const SETTINGS_GRID_SIZES = 'grid-sizes';

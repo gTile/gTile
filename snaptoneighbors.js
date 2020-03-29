@@ -1,4 +1,4 @@
-
+'use strict'
 /* Edited by Sergey after 
 https://github.com/tpyl/gssnaptoneighbors
  by Timo Pylvanainen <tpyl@iki.fi>
@@ -14,9 +14,8 @@ const Main = imports.ui.main;
 
 const WorkspaceManager = global.screen || global.workspace_manager;
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Extension = ExtensionUtils.getCurrentExtension();
-const Log = Extension.imports.logging;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Log = Me.imports.logging;
 
 const OVERLAP_TOLERANCE = 5;
 const SCAN_BOX_SIZE = 50;

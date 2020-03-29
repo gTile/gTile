@@ -1,11 +1,12 @@
+'use strict'
 // Library imports
 const Gio = imports.gi.Gio;
 
 // Extension imports
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 function get() {
-    let dir = Extension.dir.get_child('schemas').get_path();
+    let dir = Me.dir.get_child('schemas').get_path();
     let source = Gio.SettingsSchemaSource.new_from_directory(
         dir,
         Gio.SettingsSchemaSource.get_default(),
