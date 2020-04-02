@@ -49,7 +49,7 @@ const pretty_names = {
     'autotile-8'              : 'Autotile 8 cols',
     'autotile-9'              : 'Autotile 9 cols',
     'autotile-10'             : 'Autotile 10 cols',
-    'snap-to-neighbors' : 'Snap widnow size to neighbors',
+    'snap-to-neighbors'       : 'Snap window size to neighbors',
     'preset-resize-1'         : 'Preset resize 1',
     'preset-resize-2'         : 'Preset resize 2',
     'preset-resize-3'         : 'Preset resize 3',
@@ -93,14 +93,14 @@ const pretty_names = {
     'action-move-left'        : 'Global move window left',
     'action-move-right'       : 'Global move window right',
     'action-move-up'          : 'Global move window up',
-    'move-left-vi'            : 'vi-style Resize horizontal narrower',
-    'move-right-vi'           : 'vi-style Resize horizontal wider',
-    'move-up-vi'              : 'vi-style Resize vertical higher',
-    'move-down-vi'            : 'vi-style Resize vertical lower',
-    'resize-left-vi'          : 'vi-style Resize horizontal narrower',
-    'resize-right-vi'         : 'vi-style Resize horizontal wider',
-    'resize-up-vi'            : 'vi-style Resize vertical higher',
-    'resize-down-vi'          : 'vi-style Resize vertical lower'
+    'move-left-vi'            : 'Vi-style move left',
+    'move-right-vi'           : 'Vi-style move right',
+    'move-up-vi'              : 'Vi-style move up',
+    'move-down-vi'            : 'Vi-style move down',
+    'resize-left-vi'          : 'Vi-style resize narrower',
+    'resize-right-vi'         : 'Vi-style resize wider',
+    'resize-up-vi'            : 'Vi-style resize taller',
+    'resize-down-vi'          : 'Vi-style resize shorter'
 }
 
 function init() {
