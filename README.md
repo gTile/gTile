@@ -134,7 +134,7 @@ Snap-to-neighbors works only when gTile window is activated
 
 1. Focus on window you want to expand to fill space up to neighobrs borders
 2. Activate gTile window `<Super>Enter`
-3. Press `<Als><Ctrl>s`. Your windows will snap to neighbors.
+3. Press `<Alt><Ctrl>s`. Your windows will snap to neighbors.
 4. Close gTile window `Escape`
 
 
