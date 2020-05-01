@@ -1754,13 +1754,16 @@ Grid.prototype = {
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
 
-	Main.uiGroup.set_child_above_sibling(this.actor, null);
+        log("Before set_child_above_sibling");
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
+        log("After set_child_above_sibling");
+
         Main.layoutManager.removeChrome(this.actor);
         Main.layoutManager.addChrome(this.actor);
         //this.actor.y = 0 ;
-        this.actor.scale_y= 0;
-        this.actor.scale_x= 0;
         if (time > 0 ) {
+            this.actor.scale_y= 0;
+            this.actor.scale_x= 0;
             Tweener.addTween(this.actor, {
                 time: this.animation_time,
                 opacity: 255,
@@ -1772,19 +1775,22 @@ Grid.prototype = {
             });
         }
         else {
+            this.actor.scale_x = this.normalScaleX;
+            this.actor.scale_y = this.normalScaleY;
             this.actor.opacity = 255;
             this.actor.visible = true;
-            this.actor.scale_y = this.normalScaleY;
         }
 
         this.interceptHide = false;
+        log("show end");
     },
 
     hide: function(immediate) {
       log("hide " + immediate);
         this.elementsDelegate.reset();
+        let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
         //log("hide " + time);
-        if (!immediate && this.animation_time > 0) {
+        if (!immediate && time > 0) {
             Tweener.addTween(this.actor, {
                 time: this.animation_time,
                 opacity: 0,
@@ -1802,16 +1808,19 @@ Grid.prototype = {
             this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
+        log("hide end");
     },
 
     _onHideComplete: function() {
+        log("_onHideComplete");
         if(!this.interceptHide && this) {
             Main.layoutManager.removeChrome(this);
         }
+        log("_onHideComplete end");
     },
 
     _onShowComplete: function() {
-
+        log("_onShowComplete");
     },
 
     _onResize: function(actor, event) {
