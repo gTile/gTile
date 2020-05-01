@@ -2,7 +2,7 @@
   "uuid": "gTile@vibou", 
   "name": "gTile", 
   "description": "Tile windows on a grid.", 
-  "version": 34,
+  "version": 35,
   "shell-version": [
     "3.14", 
     "3.16", 
