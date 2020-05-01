@@ -74,9 +74,11 @@ let focusWindowActor = false;
 let focusConnect = false;
 let gridSettings = new Object();
 let settings = Settings.get();
+settings.connect('changed', Lang.bind(this, this.changed_settings));
 let toggleSettingListener;
 let keyControlBound = false;
 let shellVersion = new ShellVersion_module.ShellVersion();
+let enabled = false;
 
 let presetState = new Array();
 presetState["current_variant"] = 0;
@@ -179,6 +181,15 @@ const key_binding_global_resizes = {
 
 function log(log_string) {
     Log.log(log_string);
+}
+
+function changed_settings() {
+    log("changed_settings");
+    if(enabled) {
+        disable();
+        enable();
+    }
+    log("changed_settings complete");
 }
 
 const GTileStatusButton = new Lang.Class({
@@ -366,11 +377,13 @@ function enable() {
     if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
         Hotkeys.bind(key_binding_global_resizes);
     }
+    enabled = true;
     log("Extention Enabled!");
 }
 
 function disable() {
     log("Extension start disabling");
+    enabled = false;
     Hotkeys.unbind(key_bindings);
     Hotkeys.unbind(key_bindings_presets);
     Hotkeys.unbind(key_binding_global_resizes);

@@ -21,19 +21,11 @@ You can alternatively manually install the latest version from GitHub master bra
    git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
    ```
 
-2. Restart *Gnome* (only on X11, on Wayland you will have to log out and log back in)
-
-   ```
-   Alt-F2
-   Enter a Command: r
-   ```
-
+2. Log out and log back in.
 
 ## Configuration
 
 For configuration, please use the built-in preferences dialog (Gnome Tweak Tool -> Extensions -> gTile -> Preferences).
-For configuration changes to take effect, disable/enable gTile (Gnome Tweak Tool -> Extensions -> gTile -> Off/On )
-In the *Help* tab you will find help and usage hints.
 
 * Keyboard shortcuts:
   * Can be assigned from the preferences window (*Accelerators* tab)

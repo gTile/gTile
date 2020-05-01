@@ -227,16 +227,6 @@ function basics_tab(notebook) {
         row_spacing: 10,
     });
 
-    let text = "<b>For changes in this and other tabs to take effect - disable and enable gTile in Gnome Tweak Tool(Tweaks) -> Extensions -> gTile -> Off/On</b>";
-
-    bs_grid.add(new Gtk.Label({
-        label: text,
-        halign: Gtk.Align.START,
-        justify: Gtk.Justification.LEFT,
-        use_markup: true,
-        wrap: true,
-    }));
-
     add_check("Auto close", SETTINGS_AUTO_CLOSE, bs_grid, settings);
     add_check("Animation",  SETTINGS_ANIMATION,  bs_grid, settings);
     add_check("Show icon",  SETTINGS_SHOW_ICON,  bs_grid, settings);
@@ -249,7 +239,7 @@ function basics_tab(notebook) {
     add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
-    text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
+    let text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
     bs_grid.add(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
