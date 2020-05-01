@@ -1754,9 +1754,7 @@ Grid.prototype = {
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
 
-        log("Before set_child_above_sibling");
         Main.uiGroup.set_child_above_sibling(this.actor, null);
-        log("After set_child_above_sibling");
 
         Main.layoutManager.removeChrome(this.actor);
         Main.layoutManager.addChrome(this.actor);
@@ -1782,7 +1780,6 @@ Grid.prototype = {
         }
 
         this.interceptHide = false;
-        log("show end");
     },
 
     hide: function(immediate) {
@@ -1808,19 +1805,12 @@ Grid.prototype = {
             this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
-        log("hide end");
     },
 
     _onHideComplete: function() {
-        log("_onHideComplete");
-        if(!this.interceptHide && this) {
-            Main.layoutManager.removeChrome(this);
-        }
-        log("_onHideComplete end");
     },
 
     _onShowComplete: function() {
-        log("_onShowComplete");
     },
 
     _onResize: function(actor, event) {
