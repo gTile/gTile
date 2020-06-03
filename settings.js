@@ -1,13 +1,33 @@
 'use strict'
+// Library imports
+const Gio = imports.gi.Gio;
 
 // Extension imports
-const Utils = imports.misc.extensionUtils;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 var settings;
 
 function get() {
-    if(!settings) {
-        settings = Utils.getSettings('org.gnome.shell.extensions.gtile');
+  if (!settings) {
+    let dir = Me.dir.get_child('schemas').get_path();
+    let source = Gio.SettingsSchemaSource.new_from_directory(
+        dir,
+        Gio.SettingsSchemaSource.get_default(),
+        false);
+
+    if (!source) {
+        throw new Error('Error Initializing the thingy.');
     }
-    return settings;
+
+    let schema = source.lookup('org.gnome.shell.extensions.gtile', false);
+
+    if (!schema) {
+        throw new Error('Schema missing.');
+    }
+
+    settings = new Gio.Settings({
+        settings_schema: schema
+    });
+  }
+  return settings;
 }
