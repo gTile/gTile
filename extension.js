@@ -539,18 +539,6 @@ function _getVisibleBorderPadding(metaWindow) {
     return [borderX, borderY];
 }
 
-function move_maximize_window(metaWindow, x, y) {
-    let borderX,borderY,vBorderX,vBorderY;
-    [borderX,borderY] = _getInvisibleBorderPadding(metaWindow);
-
-    x = x - borderX;
-    y = y - borderY;
-
-
-    metaWindow.move_frame(true,x,y);
-    metaWindow.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-}
-
 /**
  * Resizes window considering margin settings
  * @param metaWindow
@@ -1892,10 +1880,6 @@ GridElementDelegate.prototype = {
         this.activatedActors=false;
     },
 
-    _allSelected: function() {
-        return (this.activatedActors.length == (nbCols * nbRows));
-    },
-
     _onButtonPress: function(gridElement) {
         log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
         //this._logActiveActors("GridElementDelegate _onButtonPress active actors");
@@ -1922,12 +1906,8 @@ GridElementDelegate.prototype = {
             let areaWidth,areaHeight,areaX,areaY;
             [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(this.first,gridElement);
 
-            if (this._allSelected()) {
-                move_maximize_window(focusMetaWindow,areaX,areaY);
-            }
-            else {
-                move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
-            }
+            move_resize_window_with_margins(focusMetaWindow,areaX,areaY,areaWidth,areaHeight);
+
             //this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
 
             this._resizeDone();
