@@ -27,3 +27,23 @@ yarn_install(
     package_json = "//:package.json",
     yarn_lock = "//:yarn.lock",
 )
+
+# For testing, use Karma per
+# Per https://bazelbuild.github.io/rules_nodejs/Karma.html
+
+# Fetch transitive Bazel dependencies of @bazel/karma
+load("@npm//@bazel/karma:package.bzl", "npm_bazel_karma_dependencies")
+npm_bazel_karma_dependencies()
+
+# Set up web testing, choose browsers we can test on
+load("@io_bazel_rules_webtesting//web:repositories.bzl", "web_test_repositories")
+
+web_test_repositories()
+
+load("@io_bazel_rules_webtesting//web/versioned:browsers-0.3.2.bzl", "browser_repositories")
+
+browser_repositories(
+    # There is no GJS option. GJS is based on Mozilla's SpiderMonkey, though.
+    chromium = True,
+    firefox = True,
+)

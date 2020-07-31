@@ -2,6 +2,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 #load("@build_bazel_rules_typescript//:defs.bzl", "ts_library", "ts_web_test")
 load("@npm//@bazel/typescript:index.bzl", "ts_library")
 load("@npm//@bazel/rollup:index.bzl", "rollup_bundle")
+load("@npm//@bazel/karma:index.bzl", "karma_web_test", "karma_web_test_suite")
 load(":execute.bzl", "concat")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -98,15 +99,20 @@ ts_library(
     deps = [
         ":resize_lib",
         ":tilespec_lib",
+        "@npm//@types/chai",
+        "@npm//@types/mocha",
+        "@npm//@types/jasmine",
+        "@npm//chai",
+        "@npm//jasmine",
     ],
 )
 
-# ts_web_test(
-#     name = "testing",
-#     deps = [
-#         ":tests",
-#     ],
-# )
+karma_web_test(
+    name = "testing",
+    deps = [
+        ":tests",
+    ],
+)
 
 rollup_bundle(
     name = "bundle",

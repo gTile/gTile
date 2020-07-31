@@ -26,14 +26,15 @@ You can alternatively manually install the latest version from GitHub:
 1. Clone the repository to the *Gnome* extensions folder.
 
 ```shell
-git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
+git clone https://github.com/gTile/gTile.git
+git checkout bazelify
 ```
 
-2. Set up workspace dependencies. If you forget to run this command, bazel will
-   give errors.
+2. (May not be necessary) Set up workspace dependencies. If you forget to run
+   this command, bazel will give errors.
 
 ```shell
-bazel run @yarn//:yarn
+bazel run @nodejs//:yarn
 ```
 
 3. Build and install
@@ -150,8 +151,10 @@ you do need to install bazel.
 
 ### One-time setup
 
+This may no longer be necessary as of 2020, but it doesn't hurt:
+
 ```shell
-bazel run @yarn//:yarn
+bazel run @nodejs//:yarn
 ```
 
 ### Build/Test
@@ -165,4 +168,13 @@ bazel test ...
 
 ```shell
 bazel run :install-extension
+```
+
+
+### Add a new dependency
+
+"dev" dependency:
+
+```shell
+bazel run @nodejs//:yarn -- add --dev "@bazel/karma"
 ```
