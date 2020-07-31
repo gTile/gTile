@@ -1,42 +1,29 @@
-workspace(name = "gtiles")
+workspace(
+    # How this workspace would be referenced with absolute labels from another workspace
+    name = "gtile",
+    # Map the @npm bazel workspace to the node_modules directory.
+    # This lets Bazel use the same node_modules as other local tooling.
+    managed_directories = {"@npm": ["node_modules"]},
+)
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-git_repository(
+http_archive(
     name = "build_bazel_rules_nodejs",
-    remote = "https://github.com/bazelbuild/rules_nodejs.git",
-    commit = "920232176dac3fdabf742d14ad1b1e74676b63d5",
+    sha256 = "0f2de53628e848c1691e5729b515022f5a77369c76a09fbe55611e12731c90e3",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/2.0.1/rules_nodejs-2.0.1.tar.gz"],
 )
 
-load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
+#load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install")
+load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
 
-# git_repository(
-#     name = "build_bazel_rules_nodejs",
-#     remote = "https://github.com/bazelbuild/rules_nodejs.git",
-#     tag = "0.0.2", # check for the latest tag when you install
-# )
+# NOTE: this rule installs nodejs, npm, and yarn, but does NOT install
+# your npm dependencies into your node_modules folder.
+# You must still run the package manager to do this.
+#node_repositories(package_json = ["//:package.json"])
 
-# load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
-
-node_repositories(package_json = ["//:package.json"])
-
-
-# Include @bazel/typescript in package.json#devDependencies
-# local_repository(
-#     name = "build_bazel_rules_typescript",
-#     path = "node_modules/@bazel/typescript",
-# )
-
-git_repository(
-    name = "build_bazel_rules_typescript",
-    remote = "https://github.com/bazelbuild/rules_typescript.git",
-    commit = "eb3244363e1cb265c84e723b347926f28c29aa35",
+yarn_install(
+    name = "npm",
+    package_json = "//:package.json",
+    yarn_lock = "//:yarn.lock",
 )
-
-load("@build_bazel_rules_typescript//:defs.bzl", "ts_setup_workspace")
-
-# This points all `ts_library` rules at your normal tsconfig.json file, which
-# should also be the one your editor uses so that settings match.
-# Update this value to match where your tsconfig.json file lives.
-#ts_setup_workspace(default_tsconfig = "@gtiles//:tsconfig.json")
-ts_setup_workspace()

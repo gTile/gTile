@@ -19,8 +19,8 @@ export class TileSpec {
 
     toString() {
         return [[this.gridWidth, this.gridHeight].join('x'),
-                [this.luc.x, this.luc.y].join(':'),
-                [this.rdc.x, this.rdc.y].join(':')].join(' ');
+        [this.luc.x, this.luc.y].join(':'),
+        [this.rdc.x, this.rdc.y].join(':')].join(' ');
     }
 
     toFrameRect(workArea: Rect) {
@@ -29,10 +29,10 @@ export class TileSpec {
             Math.floor(workArea.size.height / this.gridHeight));
         return new Rect(
             new XY(
-                workArea.origin.x  + this.luc.x * elemSize.width,
-                workArea.origin.y  + this.luc.y * elemSize.height),
+                workArea.origin.x + this.luc.x * elemSize.width,
+                workArea.origin.y + this.luc.y * elemSize.height),
             new Size((this.rdc.x + 1 - this.luc.x) * elemSize.width,
-                     (this.rdc.y + 1 - this.luc.y) * elemSize.height));
+                (this.rdc.y + 1 - this.luc.y) * elemSize.height));
     }
 
 }
@@ -53,12 +53,12 @@ export class XY {
     }
 
     dot(b: XY) {
-        return this.x*b.x + this.y*b.y;
+        return this.x * b.x + this.y * b.y;
     }
 
     unit() {
         const norm = this.l2norm()
-        return new XY(this.x/norm, this.y/norm);
+        return new XY(this.x / norm, this.y / norm);
     }
 
     l2norm() {
@@ -70,12 +70,12 @@ export class XY {
     }
 
     scale(s: number) {
-        return new XY(this.x*s, this.y*s)
+        return new XY(this.x * s, this.y * s)
     }
 
     project(b: XY): XY {
         return b.scale(
-            this.dot(b)/b.l2normSquared());
+            this.dot(b) / b.l2normSquared());
     }
 
     scalarProjection(b: XY): number {
@@ -94,13 +94,10 @@ export class XY {
 const ADJOIN_DOT_PRODUCT_TOL = .02;
 
 export class LineSegment {
-    a: XY;
-    b: XY;
-    static fromTwoPoints(a: XY, b: XY) {
-        const l = new LineSegment();
-        l.a = a
-        l.b = b
-        return l
+    private constructor(readonly a: XY, readonly b: XY) { }
+
+    static fromTwoPoints(a: XY, b: XY): LineSegment {
+        return new LineSegment(a, b);
     }
 
     direction() {
@@ -154,7 +151,7 @@ export class Size {
     }
 
     area() {
-        return this.width*this.height;
+        return this.width * this.height;
     }
 }
 
@@ -180,16 +177,16 @@ export class Rect {
     equal(r: Rect, tol: number) {
         const close = (a: number, b: number) => Math.abs(a - b) <= tol;
         return (close(this.origin.x, r.origin.x) &&
-                close(this.origin.y,  r.origin.y) &&
-                close(this.size.width,  r.size.width) &&
-                close(this.size.height,  r.size.height));
+            close(this.origin.y, r.origin.y) &&
+            close(this.size.width, r.size.width) &&
+            close(this.size.height, r.size.height));
     }
 
     inset(s: Size) {
         return new Rect(
             new XY(this.origin.x + s.width, this.origin.y + s.height),
-            new Size(this.size.width - 2*s.width,
-                     this.size.height - 2*s.height));
+            new Size(this.size.width - 2 * s.width,
+                this.size.height - 2 * s.height));
     }
 
     edges() {
@@ -203,11 +200,12 @@ export class Rect {
         const c = a.plus(down)
         const d = c.plus(right)
 
-        const rv = new Edges();
-        rv.top = seg(a, b);
-        rv.right = seg(b, d);
-        rv.bottom = seg(c, d);
-        rv.left = seg(a, c);
+        const rv = new Edges({
+            top: seg(a, b),
+            left: seg(b, d),
+            bottom: seg(c, d),
+            right: seg(a, c)
+        });
         return rv;
     }
 
@@ -221,16 +219,16 @@ export class Rect {
     translateEdge(side: Side, d: number): Rect {
         const [w, h] = [this.size.width, this.size.height];
         switch (side) {
-        case Side.Top:
-            return new Rect(this.origin.plus(new XY(0, d)), new Size(w, h-d));
-        case Side.Bottom:
-            return new Rect(this.origin,                    new Size(w, h+d));
-        case Side.Right:
-            return new Rect(this.origin,                    new Size(w+d, h));
-        case Side.Left:
-            return new Rect(this.origin.plus(new XY(d, 0)), new Size(w-d, h));
-        default:
-            throw TypeError('bad side type ' + side);
+            case Side.Top:
+                return new Rect(this.origin.plus(new XY(0, d)), new Size(w, h - d));
+            case Side.Bottom:
+                return new Rect(this.origin, new Size(w, h + d));
+            case Side.Right:
+                return new Rect(this.origin, new Size(w + d, h));
+            case Side.Left:
+                return new Rect(this.origin.plus(new XY(d, 0)), new Size(w - d, h));
+            default:
+                throw TypeError('bad side type ' + side);
         }
     }
 
@@ -253,9 +251,9 @@ export class Rect {
     intersection(other: Rect): Rect {
         // Not optimized, but that's not necessary.
         const origin = new XY(Math.max(this.topLeft().x, other.topLeft().x),
-                              Math.max(this.topLeft().y, other.topLeft().y));
+            Math.max(this.topLeft().y, other.topLeft().y));
         const br = new XY(Math.min(this.bottomRight().x, other.bottomRight().x),
-                          Math.min(this.bottomRight().y, other.bottomRight().y));
+            Math.min(this.bottomRight().y, other.bottomRight().y));
         const sizeXY = br.minus(origin);
         const size = new Size(sizeXY.x, sizeXY.y);
         if (size.width < 0 || size.height < 0) {
@@ -277,17 +275,29 @@ export enum Side {
 }
 
 export class Edges {
-    top: LineSegment;
-    right: LineSegment;
-    bottom: LineSegment;
-    left: LineSegment;
+    readonly top: LineSegment;
+    readonly right: LineSegment;
+    readonly bottom: LineSegment;
+    readonly left: LineSegment;
+
+    constructor(obj: {
+        top: LineSegment,
+        left: LineSegment,
+        bottom: LineSegment,
+        right: LineSegment
+    }) {
+        this.top = obj.top;
+        this.left = obj.left;
+        this.bottom = obj.bottom;
+        this.right = obj.right;
+    }
 
     getSide(s: Side): LineSegment {
         switch (s) {
-        case Side.Top:    return this.top;
-        case Side.Right:  return this.right;
-        case Side.Bottom: return this.bottom;
-        case Side.Left:   return this.left;
+            case Side.Top: return this.top;
+            case Side.Right: return this.right;
+            case Side.Bottom: return this.bottom;
+            case Side.Left: return this.left;
         }
     }
 }
@@ -320,14 +330,14 @@ export function parsePreset(preset: string): Array<TileSpec> {
 
 function parseSinglePreset(preset: string) {
     const ps = preset.trim().split(" ");
-    if(ps.length != 3) {
+    if (ps.length != 3) {
         throw new Error("Bad preset: " + preset);
     }
     const gridFormat = parseTuple(ps[0], "x");
     const luc = parseTuple(ps[1], ":");
     const rdc = parseTuple(ps[2], ":");
 
-    if  (  gridFormat.x < 1 || luc.x < 0 || rdc.x < 0
+    if (gridFormat.x < 1 || luc.x < 0 || rdc.x < 0
         || gridFormat.y < 1 || luc.y < 0 || rdc.y < 0
         || gridFormat.x <= luc.x || gridFormat.x <= rdc.x
         || gridFormat.y <= luc.y || gridFormat.y <= rdc.y
@@ -341,7 +351,7 @@ function parseTuple(unparsed: string, delim: string) {
     // parsing grid size in unparsed XdelimY, like 6x4 or 1:2
     const gssk = unparsed.split(delim);
 
-    if(gssk.length != 2) {
+    if (gssk.length != 2) {
         throw new Error("Failed to split " + unparsed + " by delimiter " + delim + " into two numbers");
     }
     const numbers = gssk.map(Number);
