@@ -202,9 +202,9 @@ export class Rect {
 
         const rv = new Edges({
             top: seg(a, b),
-            left: seg(b, d),
+            right: seg(b, d),
             bottom: seg(c, d),
-            right: seg(a, c)
+            left: seg(a, c)
         });
         return rv;
     }

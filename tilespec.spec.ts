@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import {describe, it} from 'mocha';
+// import {describe, it} from 'mocha';
 
 import {LineSegment, XY, parsePreset, adjoiningSides, Edges, Side, Rect, Size} from './tilespec';
 

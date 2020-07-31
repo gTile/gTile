@@ -3,6 +3,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@npm//@bazel/typescript:index.bzl", "ts_library")
 load("@npm//@bazel/rollup:index.bzl", "rollup_bundle")
 load("@npm//@bazel/karma:index.bzl", "karma_web_test", "karma_web_test_suite")
+load("@npm//@bazel/jasmine:index.bzl", "jasmine_node_test")
 load(":execute.bzl", "concat")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -104,10 +105,11 @@ ts_library(
         "@npm//@types/jasmine",
         "@npm//chai",
         "@npm//jasmine",
+        "@npm//mocha",
     ],
 )
 
-karma_web_test(
+jasmine_node_test(
     name = "testing",
     deps = [
         ":tests",

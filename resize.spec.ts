@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import {describe, it} from 'mocha';
+// import {describe, it} from 'mocha';
 
 import {LineSegment, XY, parsePreset, Edges, Side, Rect, Size} from './tilespec';
 import {coincidentEdgeMoves, MoveSpec, CoincidentMoveOptions} from './resize';
@@ -20,7 +20,7 @@ describe("coincidentEdgeMoves", function() {
         const other = new Rect(new XY(100, 10), new Size(200, 190));
 
         expect(coincidentEdgeMoves(move, [other], workArea, opts))
-            .equal({
+            .eql({
                 0: new MoveSpec(
                     other,
                     new Rect(new XY(95, 10), new Size(205, 190)))
@@ -41,7 +41,7 @@ describe("coincidentEdgeMoves", function() {
             new Rect(new XY(1180, 1365), new Size(1380, 786))];
         const workArea = new Rect(new XY(0, 579), new Size(2560, 1573));
         expect(coincidentEdgeMoves(move, otherWindows, workArea, opts))
-            .equal({
+            .eql({
                 0: new MoveSpec(otherWindows[0], shifted[0]),
                 1: new MoveSpec(otherWindows[1], shifted[1]),
                 2: new MoveSpec(otherWindows[2], shifted[2]),
@@ -60,7 +60,7 @@ describe("coincidentEdgeMoves - tolerance handling", function() {
     it("move rect shares right edge with left edge of other window - within tolerance", function() {
         const opts = new CoincidentMoveOptions(new Size(.1, .1), 20.01);
         expect(coincidentEdgeMoves(move, [other], workArea, opts))
-            .equal({
+            .to.eql({
                 0: new MoveSpec(
                     other,
                     new Rect(new XY(95, 10), new Size(220, 190)))
@@ -70,7 +70,7 @@ describe("coincidentEdgeMoves - tolerance handling", function() {
     it("move rect shares right edge with left edge of other window - out of tolerance", function() {
         const opts = new CoincidentMoveOptions(new Size(.1, .1), 10);
         expect(coincidentEdgeMoves(move, [other], workArea, opts))
-            .equal({});
+            .eql({});
     });
 });
 
@@ -85,7 +85,7 @@ describe("coincidentEdgeMoves - tolerance 2", function() {
     it("move rect shares right edge with left edge of other window - within tolerance", function() {
         const opts = new CoincidentMoveOptions(new Size(.1, .1), 3.01);
         expect(coincidentEdgeMoves(move, [other], workArea, opts))
-            .equal({
+            .eql({
                 0: new MoveSpec(
                     other,
                     new Rect(new XY(110, 10), new Size(188, 190)))
@@ -104,12 +104,12 @@ describe("Movespec.edgeTranslationDistance - simple translation", function() {
         const move = new MoveSpec(
             new Rect(new XY(10, 10), new Size(90, 190)),
             new Rect(new XY(5, 3), new Size(90, 190)));
-        expect(translations(move)).equal([-7, -5, -7, -5])
+        expect(translations(move)).eql([-7, -5, -7, -5])
     });
     it("edge translations non-uniform", function() {
         const move = new MoveSpec(
             new Rect(new XY(10, 10), new Size(90, 190)),
             new Rect(new XY(5, 3), new Size(80, 170)));
-        expect(translations(move)).equal([-7, -15, -27, -5])
+        expect(translations(move)).eql([-7, -15, -27, -5])
     });
 });

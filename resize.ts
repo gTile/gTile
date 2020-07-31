@@ -41,7 +41,7 @@ export const DEFAULT_COINCIDENT_MOVE_OPTIONS = new CoincidentMoveOptions(
  * Given the move of one window, find coincident edges of other windows and
  * suggest moves if appropriate.
  */
-export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Array<Rect>, workArea: Rect, opts: CoincidentMoveOptions) {
+export function coincidentEdgeMoves(move: MoveSpec, otherWindows: Rect[], workArea: Rect, opts: CoincidentMoveOptions) {
     //const result: Array<MoveSpec> = otherWindows.map(x => null);
     const result: { [s: number]: MoveSpec  } = {};
 
