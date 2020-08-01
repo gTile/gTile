@@ -430,7 +430,7 @@ function initGrids() {
         grid.actor.set_opacity(0);
         grid.hide(true);
         log("Connect hide-tiling for monitor " + monitorIdx);
-        grid.connectHideTiling = grid.connect('hide-tiling', Lang.bind(this, hideTiling));
+        grid.connectHideTiling = grid.connect('hide-tiling', hideTiling);
     }
     log("Init grid done");
 }
@@ -847,7 +847,7 @@ function bindKeyControls() {
         if(focusConnect) {
             global.display.disconnect(focusConnect);
         }
-        focusConnect = global.display.connect('notify::focus-window', Lang.bind(this, _onFocus));
+        focusConnect = global.display.connect('notify::focus-window', _onFocus);
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             Hotkeys.bind(key_bindings_presets);
         }
