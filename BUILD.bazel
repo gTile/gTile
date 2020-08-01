@@ -14,7 +14,7 @@ package(default_visibility = ["//:__subpackages__"])
 sh_binary(
     name = "install-extension",
     srcs = ["install-extension.sh"],
-    data = [":dist"],
+    data = [":dist.tar.gz"],
 )
 
 sh_binary(
@@ -36,11 +36,14 @@ filegroup(
     srcs = [
         "extension.js",
         "hotkeys.js",
+        "logging.js",
         "metadata.json",
         "prefs.js",
         "schemas/gschemas.compiled",
         "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
         "settings.js",
+        "shellversion.js",
+        "snaptoneighbors.js",
     ],
 )
 
@@ -84,6 +87,7 @@ concat(
     name = "extension",
     srcs = [
         # Order matters here. Setup.js must come first.
+        "setup.js",
         "polyfill.js",
         "bundle.js",
     ],

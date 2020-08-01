@@ -84,7 +84,7 @@ let focusWindowActor: any = false;
 let focusConnect: any = false;
 let gridSettings = new Object();
 let settings = Settings.get();
-settings.connect('changed', Lang.bind(this, this.changed_settings));
+settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
 let shellVersion = new ShellVersion_module.ShellVersion();
