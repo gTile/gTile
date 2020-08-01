@@ -11,17 +11,36 @@ This extension is particularly useful for window management on (multiple) large 
 
 ## Installation
 
-Preferred installation is from [Gnome Extensions](https://extensions.gnome.org)
+Preferred installation is from [Gnome Extensions](https://extensions.gnome.org).
 
+
+### Installation from source
 You can alternatively manually install the latest version from GitHub master branch:
 
-1. Clone the repository to the *Gnome* extensions folder.
+1. Clone the repository to a folder of your choice.
 
+   ```shell
+   git clone https://github.com/gTile/gTile.git
    ```
-   git clone https://github.com/gTile/gTile.git ~/.local/share/gnome-shell/extensions/gTile@vibou
+   Note: It is not recommended to clone the repository directly into
+   `$HOME/.local/share/gnome-shell/extensions/gTile@vibou`. The code gTile
+   installs into the extensions folder is a compiled version of the code in the
+   git repository, and the files may conflict.)
+
+2. Build and install
+
+   You will need to [install
+   Bazel](https://docs.bazel.build/versions/master/install-ubuntu.html) on your
+   system to run the build tool. Then, you can run the installation script to
+   install to `$HOME/.local/share/gnome-shell/extensions/gTile@vibou`.
+
+   ```shell
+   bazel run :install-extension
    ```
 
-2. Log out and log back in.
+3. Log out and log back in. (If you don't want to log out, you can restart gnome
+   shell, which keeps all your windows open. Type `Alt`+`F2`, then type `r` and
+   hit enter.)
 
 ## Configuration
 

@@ -5,7 +5,7 @@
 Even an everyday user may wish to install the latest version from GitHub. It's
 easy:
 
-1. Clone the repository to the *Gnome* extensions folder.
+1. Clone the repository to a folder of your choice.
 
 ```shell
 git clone https://github.com/gTile/gTile.git
