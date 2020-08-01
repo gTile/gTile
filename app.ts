@@ -19,6 +19,8 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
+// Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
+const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
@@ -535,7 +537,7 @@ function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
         const criteria = [
             !excludedApplications[appName],
               metaWin.get_window_type() == Meta.WindowType.NORMAL,
-              metaWin.get_workspace() == global.screen.get_active_workspace(),
+              metaWin.get_workspace() == WorkspaceManager.get_active_workspace(),
               metaWin.showing_on_its_workspace(),
               metaWin.get_monitor() == monitorIndex,
               focus != metaWin
@@ -543,7 +545,7 @@ function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
 
         return !excludedApplications[appName]
             && metaWin.get_window_type() == Meta.WindowType.NORMAL
-            && metaWin.get_workspace() == global.screen.get_active_workspace()
+            && metaWin.get_workspace() == WorkspaceManager.get_active_workspace()
             && metaWin.showing_on_its_workspace()
             && metaWin.get_monitor() == monitorIndex
             && focus != metaWin;
@@ -553,7 +555,7 @@ function getNotFocusedWindowActorsOfMonitorIndex(monitorIndex) {
 function getWindowsOfMonitor(monitor) {
     let windows = global.get_window_actors().filter(function(w) {
         return w.meta_window.get_window_type() != Meta.WindowType.DESKTOP
-            && w.meta_window.get_workspace() == global.screen.get_active_workspace()
+            && w.meta_window.get_workspace() == WorkspaceManager.get_active_workspace()
             && w.meta_window.showing_on_its_workspace()
             && monitors[w.meta_window.get_monitor()] == monitor;
     });
@@ -691,7 +693,7 @@ function getFocusWindow() {
         return null;
     }
 
-    return global.screen.get_active_workspace().list_windows()
+    return WorkspaceManager.get_active_workspace().list_windows()
         .find(w => w.has_focus());
 }
 
@@ -734,7 +736,7 @@ function windowFrameRect(window) {
 }
 
 function getWorkArea(monitor, monitor_idx): WorkArea {
-    const wkspace = global.screen.get_active_workspace();
+    const wkspace = WorkspaceManager.get_active_workspace();
     const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
     log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     const insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
