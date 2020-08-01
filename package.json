@@ -1,0 +1,42 @@
+{
+    "name": "example",
+    "version": "0.0.1",
+    "description": "Demo of bazel rules for angular",
+    "license": "Apache 2.0",
+    "dependencies": {},
+    "devDependencies": {
+        "@bazel/bazelisk": "latest",
+        "@bazel/buildifier": "latest",
+        "@bazel/ibazel": "latest",
+        "@bazel/jasmine": "^2.0.1",
+        "@bazel/karma": "^2.0.1",
+        "@bazel/protractor": "^2.0.1",
+        "@bazel/rollup": "^2.0.1",
+        "@bazel/typescript": "^2.0.1",
+        "@types/chai": "^4.2.12",
+        "@types/jasmine": "^3.5.11",
+        "@types/mocha": "^8.0.0",
+        "chai": "^4.2.0",
+        "jasmine": "^3.6.1",
+        "jasmine-core": "^3.6.0",
+        "karma": "^5.0.2",
+        "karma-chrome-launcher": "^3.1.0",
+        "karma-firefox-launcher": "^1.3.0",
+        "karma-jasmine": "^3.1.0",
+        "karma-requirejs": "^1.1.0",
+        "karma-sourcemap-loader": "^0.3.7",
+        "mocha": "^8.1.0",
+        "requirejs": "^2.3.6",
+        "rollup": "^2.23.0",
+        "typescript": "^3.9.7"
+    },
+    "scripts": {
+        "serve": "ibazel run //src:devserver",
+        "pree2e": "bazel build test/...",
+        "e2e": "concurrently \"bazel run //src:prodserver\" \"while ! nc -z 127.0.0.1 8080; do sleep 1; done && protractor\" --kill-others --success first",
+        "prebuildifier": "bazel build @com_github_bazelbuild_buildtools//buildifier",
+        "buildifier": "find . -type f \\( -name BUILD -or -name BUILD.bazel \\) ! -path \"./node_modules/*\" | xargs $(bazel info bazel-bin)/external/com_github_bazelbuild_buildtools/buildifier/*/buildifier",
+        "format": "git-clang-format",
+        "precommit": "check-clang-format \"yarn format\""
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es3",
+    "module": "system",
+    "lib": ["es6"],
+
+    "strict": false,
+    "downlevelIteration": true,
+  }
+}

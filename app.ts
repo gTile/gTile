@@ -1,4 +1,7 @@
-'use strict'
+// GJS import system
+declare var imports:any;
+declare var global:any;
+
 /*****************************************************************
 
   This extension has been developed by vibou
@@ -39,6 +42,13 @@ const Hotkeys = Me.imports.hotkeys;
 const SnapToNeighbors = Me.imports.snaptoneighbors;
 const ShellVersion_module = Me.imports.shellversion;
 
+interface WorkArea {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
@@ -69,14 +79,14 @@ let tracker;
 let nbCols = 0;
 let nbRows = 0;
 let area;
-let focusMetaWindow = false;
-let focusWindowActor = false;
-let focusConnect = false;
+let focusMetaWindow: any = false;
+let focusWindowActor: any = false;
+let focusConnect: any = false;
 let gridSettings = new Object();
 let settings = Settings.get();
 settings.connect('changed', Lang.bind(this, this.changed_settings));
 let toggleSettingListener;
-let keyControlBound = false;
+let keyControlBound: any = false;
 let shellVersion = new ShellVersion_module.ShellVersion();
 let enabled = false;
 
@@ -345,7 +355,7 @@ function initSettings() {
 function init() {
 }
 
-function enable() {
+export function enable() {
     getBoolSetting(SETTINGS_DEBUG);
     Log.debug = gridSettings[SETTINGS_DEBUG];
     log("Enabling begin");
@@ -381,7 +391,7 @@ function enable() {
     log("Extention Enabled!");
 }
 
-function disable() {
+export function disable() {
     log("Extension start disabling");
     enabled = false;
     Hotkeys.unbind(key_bindings);
@@ -769,7 +779,7 @@ function contains(a, obj) {
  * Get focused window by iterating though the windows on the active workspace.
  * @returns {Object} The focussed window object. False if no focussed window was found.
  */
-function getFocusApp() {
+function getFocusApp(): any {
     if (tracker.focus_app == null) {
         return false;
     }
@@ -802,14 +812,14 @@ function isPrimaryMonitor(monitor) {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
-function getWorkAreaByMonitor(monitor) {
+function getWorkAreaByMonitor(monitor):WorkArea|null {
     for (let monitor_idx in monitors) {
         let mon  = monitors[monitor_idx];
         if(mon.x == monitor.x && mon.y == monitor.y) {
             return getWorkArea(monitor, monitor_idx);
         }
     }
-    return false;
+    return null;
 }
 
 function getWorkAreaByMonitorIdx(monitor_idx) {
@@ -885,7 +895,7 @@ function keySetTiling() {
 function keyChangeTiling() {
     log("keyChangeTiling");
     let grid_settings_sizes = gridSettings[SETTINGS_GRID_SIZES];
-    let next_key = 0;
+    let next_key: number|string = 0;
     let found = false;
     for (let key in grid_settings_sizes) {
         if(found) {
@@ -1879,7 +1889,7 @@ Grid.prototype = {
 
 Signals.addSignalMethods(Grid.prototype);
 
-function GridElementDelegate(rows, cols, width, height) {
+function GridElementDelegate() {
     this._init();
 }
 
