@@ -18,6 +18,7 @@ if [ -d "$EXTDIR" ]; then
 fi
 
 mkdir -p "$EXTDIR"
+echo tar -xzf "$BASEDIR/dist.tar.gz" --directory "$HOME/.local/share/gnome-shell/extensions/gTile@vibou"
 tar -xzf "$BASEDIR/dist.tar.gz" --directory "$HOME/.local/share/gnome-shell/extensions/gTile@vibou"
 
 echo "Installation complete."

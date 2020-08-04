@@ -5,6 +5,21 @@ import * as resizelib from "./resize"
 declare var imports:any;
 declare var global:any;
 
+/*****************************************************************
+
+  This extension has been developed by vibou
+
+  With the help of the gnome-shell community
+
+  Edited by Kvis for gnome 3.8
+  Edited by Lundal for gnome 3.18
+  Edited by Sergey to add keyboard shortcuts and prefs dialog
+
+ ******************************************************************/
+
+/*****************************************************************
+  CONST & VARS
+ *****************************************************************/
 // Library imports
 const St = imports.gi.St;
 const Main = imports.ui.main;
@@ -24,6 +39,7 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Extension.imports.settings;
 const hotkeys = Extension.imports.hotkeys;
 
@@ -34,20 +50,23 @@ interface WorkArea {
     height: number;
 }
 
-
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_ANIMATION = 'animation';
+const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_MAX_TIMEOUT = 'max-timeout';
+
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
 const SETTINGS_INSETS_PRIMARY_RIGHT = 'insets-primary-right';
 const SETTINGS_INSETS_PRIMARY_TOP = 'insets-primary-top';
 const SETTINGS_INSETS_PRIMARY_BOTTOM = 'insets-primary-bottom';
 const SETTINGS_INSETS_SECONDARY = 'insets-secondary';
-const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left'
+const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left';
 const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
@@ -973,7 +992,7 @@ function presetResize(preset) {
     reset_window(window);
 
     let presetString = settings.get_string("resize" + preset);
-    log("Preset resize " + preset + "  is " + presetString);
+    log("(gonzojive) Preset resize " + preset + "  is " + presetString);
     let specs;
     try {
       specs = tspec.parsePreset(presetString);
@@ -1017,6 +1036,7 @@ function presetResize(preset) {
 
 // Move the window to the next monitor.
 function moveWindowToNextMonitor() {
+    log("moveWindowToNextMonitor");
     let window = getFocusWindow();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut");
@@ -1368,6 +1388,8 @@ Grid.prototype = {
         this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 
+        this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
+		
         this.topbar = new TopBar(title);
 
         this.bottombarContainer = new St.Bin({ style_class: 'bottom-box-container',
@@ -1383,9 +1405,11 @@ Grid.prototype = {
             reactive: true,
             width:this.tableWidth-20,
             height:36,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.bottombar_table_layout = this.bottombar.layout_manager;
+        this.bottombar_table_layout.set_row_homogeneous(true);
+        this.bottombar_table_layout.set_column_homogeneous(true);
 
         this.bottombarContainer.add_actor(this.bottombar);
 
@@ -1402,9 +1426,11 @@ Grid.prototype = {
             reactive: true,
             width:this.tableWidth-20,
             height:36,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
+        this.bottombar_table_layout.set_row_homogeneous(true);	    
+        this.veryBottomBar_table_layout.set_column_homogeneous(true);
 
         this.veryBottomBarContainer.add_actor(this.veryBottomBar);
 
@@ -1414,14 +1440,14 @@ Grid.prototype = {
 
         let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZES];
         for (var index=0; index<gridSettingsButton.length;index++) {
-            if (colNum>= 4) {
+            if (colNum>= maxPerRow) {
                 colNum = 0;
                 rowNum += 2;
             }
 
             let button = gridSettingsButton[index];
             button = new GridSettingsButton(button.text,button.cols,button.rows);
-            this.bottombar_table_layout.pack(button.actor, colNum, rowNum);
+            this.bottombar_table_layout.attach(button.actor, colNum, rowNum, 1, 1);
             button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
             colNum++;
         }
@@ -1439,9 +1465,11 @@ Grid.prototype = {
             reactive: true,
             height:this.tableHeight,
             width:this.tableWidth-2,
-            layout_manager: new Clutter.TableLayout()
+            layout_manager: new Clutter.GridLayout()
         });
         this.table_table_layout = this.table.layout_manager;
+        this.table_table_layout.set_row_homogeneous(true);
+        this.table_table_layout.set_column_homogeneous(true);
         this.tableContainer.add_actor(this.table);
 
         this.actor.add_actor(this.topbar.actor);
@@ -1464,19 +1492,19 @@ Grid.prototype = {
         }
 
         let toggle = new ToggleSettingsButton("animation",SETTINGS_ANIMATION);
-        this.veryBottomBar_table_layout.pack(toggle.actor, 0, 0);
+        this.veryBottomBar_table_layout.attach(toggle.actor, 0, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         toggle = new ToggleSettingsButton("auto-close",SETTINGS_AUTO_CLOSE);
-        this.veryBottomBar_table_layout.pack(toggle.actor, 1, 0);
+        this.veryBottomBar_table_layout.attach(toggle.actor, 1, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         let action = new AutoTileMainAndList(this);
-        this.veryBottomBar_table_layout.pack(action.actor, 2, 0);
+        this.veryBottomBar_table_layout.attach(action.actor, 2, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this,this._onResize));
 
         action = new AutoTileTwoList(this);
-        this.veryBottomBar_table_layout.pack(action.actor, 3, 0);
+        this.veryBottomBar_table_layout.attach(action.actor, 3, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this,this._onResize));
 
         this.x = 0;
@@ -1507,7 +1535,7 @@ Grid.prototype = {
 
                 this.elements[r][c] = element;
                 element.actor._delegate = this.elementsDelegate;
-                this.table_table_layout.pack(element.actor, c, r);
+                this.table_table_layout.attach(element.actor, c, r, 1, 1);
                 element.show();
             }
         }

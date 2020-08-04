@@ -15,7 +15,7 @@ package(default_visibility = ["//:__subpackages__"])
 sh_binary(
     name = "install-extension",
     srcs = ["install-extension.sh"],
-    data = [":dist"],
+    data = [":dist.tar.gz"],
 )
 
 sh_binary(
@@ -125,7 +125,7 @@ rollup_bundle(
 concat(
     name = "extension",
     srcs = [
-        # Order matters here. Setup.js must come first.
+        # Order matters here.
         "polyfill.js",
         "setup.js",
         "bundle.js",
