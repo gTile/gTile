@@ -268,7 +268,6 @@ function parseTuple(format, delimiter) {
         log("Bad format " + format + ", delimiter " + delimiter);
         return {X: Number(-1), Y: Number(-1)};
     }
-    //log("Parsed format " + gssk[0] + delimiter + gssk[1]);
     return {X: Number(gssk[0]), Y: Number(gssk[1]) };
 }
 
@@ -299,7 +298,6 @@ function getBoolSetting (settings_string) {
     log("Undefined settings " + settings_string);
         gridSettings[settings_string] = false;
     } else {
-        //log(settings_string + " set to " + gridSettings[settings_string]);
     }
 }
 
@@ -309,7 +307,6 @@ function getIntSetting (settings_string) {
         log("Undefined settings " + settings_string);
         return 0;
     } else {
-        //log(settings_string + " set to " + iss);
         return iss;
     }
 }
@@ -593,7 +590,6 @@ function move_resize_window_with_margins(metaWindow, x, y, width, height){
 }
 
 function _isMyWindow(win) {
-    //log("meta-window: "+this.focusMetaWindow+" : "+win.meta_window);
     return (this.focusMetaWindow == win.meta_window);
 }
 
@@ -601,7 +597,6 @@ function getWindowActor() {
     let windows = global.get_window_actors().filter(this._isMyWindow, this);
     focusWindowActor = windows[0];
 
-    //log("window actor: "+focusWindowActor+":"+focusMetaWindow.get_compositor_private() );
 }
 
 function getNotFocusedWindowsOfMonitor(monitor) {
@@ -614,7 +609,6 @@ function getNotFocusedWindowsOfMonitor(monitor) {
 
         let appName = app.get_name();
 
-        //log("NotFocused - AppName: " + appName);
 
         return !contains(excludedApplications, appName)
             && w.meta_window.get_window_type() == Meta.WindowType.NORMAL
@@ -690,7 +684,6 @@ function showTiling() {
             let monitor = monitors[monitorIdx];
             let key = getMonitorKey(monitor);
             let grid = grids[key];
-            //log("ancestor: "+grid.actor.get_parent());
 
             let window = getFocusApp();
             let pos_x;
@@ -830,7 +823,6 @@ function getWorkAreaByMonitorIdx(monitor_idx) {
 function getWorkArea(monitor, monitor_idx) {
     let wkspace = WorkspaceManager.get_active_workspace();
     let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
-    //log("getWorkArea for monitor " + monitor_idx + " - work_area " + work_area.x + ":" + work_area.y + ":" + work_area.width + ":" + work_area.height );
     let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     return {
         x: work_area.x + insets.left,
@@ -843,7 +835,6 @@ function getWorkArea(monitor, monitor_idx) {
 function bindKeyControls() {
     if(!keyControlBound) {
         Hotkeys.bind(key_bindings_tiling);
-        //log("Connect notify:focus-window");
         if(focusConnect) {
             global.display.disconnect(focusConnect);
         }
@@ -1170,7 +1161,6 @@ function presetResize(preset) {
     } else {
         presetState["current_variant"] = 0;
     }
-    //log("Current Preset Variant: " + presetState["current_variant"]);
 
     // retrieve current preset variant
     if(presetState["current_variant"] > 0) {
@@ -1740,27 +1730,21 @@ Grid.prototype = {
                 element.show();
             }
         }
-        //log("Grid _displayElements end");
     },
 
     forceGridElementDelegate: function(x,y,w,h) {
-        //log("Grid forceGridElementDelegate " + x + ":" + y + " - " + w + ":" + h);
         this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
     },
 
     refresh: function() {
-        //log("Grid refresh")
         //this.elementsDelegate._logActiveActors("Grid refresh active actors");
         this.elementsDelegate._resetGrid();
-        //log("Grid refresh disconnect grid elements");
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 this.elements[r][c]._disconnect();
             }
         }
-        //log("Grid refresh destroy_all_children");
         this.table.destroy_all_children();
-        //log("Grid refresh destroy_all_children done");
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
@@ -1809,7 +1793,6 @@ Grid.prototype = {
       log("hide " + immediate);
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
-        //log("hide " + time);
         if (!immediate && time > 0) {
             Tweener.addTween(this.actor, {
                 time: this.animation_time,
@@ -1846,7 +1829,6 @@ Grid.prototype = {
     },
 
     _onMouseEnter: function() {
-        //log("onMouseEnter");
         if (!this.isEntered) {
             this.elementsDelegate.reset();
             this.isEntered = true;
@@ -1854,7 +1836,6 @@ Grid.prototype = {
     },
 
     _onMouseLeave: function() {
-        //log("onMouseLeave");
         let [x, y, mask] = global.get_pointer();
         if ( this.elementsDelegate && (x <= this.actor.x || x>= (this.actor.x+this.actor.width)) || (y <=this.actor.y || y >= (this.actor.y+this.actor.height)) ) {
             this.isEntered = false;
@@ -1950,7 +1931,6 @@ GridElementDelegate.prototype = {
     },
 
     reset: function() {
-        //log("GridElementsDelegate reset");
         this._resetGrid();
 
         this.activated = false;
@@ -1958,26 +1938,9 @@ GridElementDelegate.prototype = {
         this.currentElement = false;
     },
 
-    /*
-    _logActiveActors: function(prefixString) {
-        let activeActorsString ="count:(" + this.activatedActors.length+")";
-        for (var act in this.activatedActors) {
-            activeActorsString = activeActorsString + "," + this.activatedActors[act].id + "-";
-            if(this.activatedActors[act].active) {
-                activeActorsString = activeActorsString +"A";
-            } else {
-                activeActorsString = activeActorsString +"U";
-            }
-        }
-        log(prefixString + " " + activeActorsString);
-    },
-    */
     _resetGrid: function() {
-        //log("GridElementDelegate _resetGrid");
-        //this._logActiveActors("GridElementDelegate _resetGrid Active actors before");
         this._hideArea();
         if (this.currentElement) {
-            //log("GridElementDelegate _resetGrid deactivating currentElement " + this.currentElement.id);
             this.currentElement._deactivate();
         }
 
@@ -1985,7 +1948,6 @@ GridElementDelegate.prototype = {
             this.activatedActors[act]._deactivate();
         }
         this.activatedActors = new Array();
-        //this._logActiveActors("GridElementDelegate _resetGrid Active actors after");
     },
 
     _getVarFromGridElement: function(fromGridElement, toGridElement) {
@@ -1999,7 +1961,6 @@ GridElementDelegate.prototype = {
     },
 
     refreshGrid: function(fromGridElement, toGridElement) {
-        //log("GridElementDelegate refreshGrid " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         this._resetGrid();
         let [minX,maxX,minY,maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
@@ -2012,8 +1973,6 @@ GridElementDelegate.prototype = {
                 this.activatedActors.push(element);
             }
         }
-
-        //this._logActiveActors("GridElementDelegate _refreshGrid Active actors after");
 
         this._displayArea(fromGridElement, toGridElement);
     },
@@ -2034,10 +1993,8 @@ GridElementDelegate.prototype = {
     },
 
     forceArea: function(fromGridElement, toGridElement) {
-        //log("GridElementDelegate _forceArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
-        //log("GridElementDelegate forceArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
         area.width = areaWidth;
         area.height = areaHeight;
         area.x = areaX;
@@ -2045,13 +2002,11 @@ GridElementDelegate.prototype = {
     },
 
     _displayArea: function(fromGridElement, toGridElement) {
-        // log("GridElementDelegate _displayArea " + fromGridElement.coordx + ":" + fromGridElement.coordy + " - " + toGridElement.coordx + ":" + toGridElement.coordy);
         let areaWidth,areaHeight,areaX,areaY;
         [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(fromGridElement,toGridElement);
 
         area.add_style_pseudo_class('activate');
 
-        //log("GridElementDelegate _displayArea " + area.x+":"+area.y+"-"+area.width+":"+area.height+" -> "+areaX+":"+areaY+"-"+areaWidth+":"+areaHeight);
         if (gridSettings[SETTINGS_ANIMATION]) {
             Tweener.addTween(area, {
                 time: 0.2,
@@ -2082,12 +2037,10 @@ GridElementDelegate.prototype = {
         }
         else if (!this.currentElement || gridElement.id != this.currentElement.id) {
             if (this.currentElement) {
-                //log("GridElementDelegate _onHoverChange currentElement deactivating" + this.currentElement.id);
                 this.currentElement._deactivate();
             }
 
             this.currentElement = gridElement;
-            //log("GridElementDelegate _onHoverChange currentElement new activating" + this.currentElement.id);
             this.currentElement._activate();
             this._displayArea(gridElement,gridElement);
         }
@@ -2139,32 +2092,24 @@ GridElement.prototype = {
     },
 
     _onButtonPress: function() {
-        //log("GridElement _onButtonPress "+this.id);
         this.actor._delegate._onButtonPress(this);
     },
 
     _onHoverChanged: function() {
-        //log("GridElement _onHoverChanged "+this.id);
         this.actor._delegate._onHoverChanged(this);
     },
 
     _activate: function() {
-        //log("GridElement activate "+this.id);
         if(!this.active) {
             this.actor.add_style_pseudo_class('activate');
             this.active = true;
-        //} else {
-        //  log("GridElement activate - already active "+this.id);
         }
     },
 
     _deactivate: function() {
-        //log("GridElement deactivate "+this.id);
         if(this.active) {
             this.actor.remove_style_pseudo_class('activate');
             this.active = false;
-        //} else {
-        //  log("GridElement deactivate - already inactive "+this.id);
         }
     },
 
