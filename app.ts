@@ -74,7 +74,6 @@ const SETTINGS_DEBUG = 'debug';
 let status;
 let launcher;
 let grids;
-let monitors;
 let tracker;
 let nbCols = 0;
 let nbRows = 0;
@@ -359,7 +358,6 @@ export function enable() {
     shellVersion.print_version();
 
     status = false;
-    monitors = Main.layoutManager.monitors;
     tracker = Shell.WindowTracker.get_default();
 
     initSettings();
@@ -413,7 +411,8 @@ function resetFocusMetaWindow() {
 function initGrids() {
     log("initGrids");
     grids = new Array();
-    for (let monitorIdx in monitors) {
+    const monitors = activeMonitors();
+    for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
         log("New Grid for monitor " + monitorIdx);
 
         let monitor = monitors[monitorIdx];
@@ -433,7 +432,8 @@ function initGrids() {
 }
 
 function destroyGrids() {
-    for (let monitorIdx in monitors) {
+    const monitors = activeMonitors();
+    for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
         let monitor = monitors[monitorIdx];
         let key = getMonitorKey(monitor);
         let grid = grids[key];
@@ -599,7 +599,8 @@ function getWindowActor() {
 
 }
 
-function getNotFocusedWindowsOfMonitor(monitor) {
+function getNotFocusedWindowsOfMonitor(monitor: Monitor) {
+    const monitors = activeMonitors();
     let windows = global.get_window_actors().filter(function(w) {
         let app = tracker.get_window_app(w.meta_window);
 
@@ -621,7 +622,8 @@ function getNotFocusedWindowsOfMonitor(monitor) {
     return windows;
 }
 
-function getWindowsOfMonitor(monitor) {
+function getWindowsOfMonitor(monitor: Monitor) {
+    const monitors = activeMonitors();
     let windows = global.get_window_actors().filter(function(w) {
         return w.meta_window.get_window_type() != Meta.WindowType.DESKTOP
             && w.meta_window.get_workspace() == WorkspaceManager.get_active_workspace()
@@ -644,7 +646,8 @@ function _onFocus() {
         let app = tracker.get_window_app(focusMetaWindow);
         let title = focusMetaWindow.get_title();
 
-        for (let monitorIdx in monitors) {
+        const monitors = activeMonitors();
+        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
             let monitor = monitors[monitorIdx];
             let key = getMonitorKey(monitor);
             let grid = grids[key];
@@ -680,7 +683,8 @@ function showTiling() {
 
     area.visible = true;
     if (focusMetaWindow && wm_type != 1 && layer > 0) {
-        for (let monitorIdx in monitors) {
+        const monitors = activeMonitors();
+        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
             let monitor = monitors[monitorIdx];
             let key = getMonitorKey(monitor);
             let grid = grids[key];
@@ -796,17 +800,32 @@ function getFocusApp(): any {
     return focusedWindow;
 }
 
+
+// TODO: This type is incomplete. Its definition is based purely on usage in
+// this file and may be missing methods from the Gnome object.
+interface Monitor {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+};
+
+function activeMonitors():Monitor[] {
+    return Main.layoutManager.monitors;
+}
+
 /**
  * Determine if the given monitor is the primary monitor.
  * @param {Object} monitor The given monitor to evaluate.
  * @returns {boolean} True if the given monitor is the primary monitor.
  * */
-function isPrimaryMonitor(monitor) {
+function isPrimaryMonitor(monitor: Monitor): boolean {
     return Main.layoutManager.primaryMonitor.x == monitor.x && Main.layoutManager.primaryMonitor.y == monitor.y;
 }
 
-function getWorkAreaByMonitor(monitor):WorkArea|null {
-    for (let monitor_idx in monitors) {
+function getWorkAreaByMonitor(monitor: Monitor):WorkArea|null {
+    const monitors = activeMonitors();
+    for (let monitor_idx = 0; monitor_idx < monitors.length; monitor_idx++) {
         let mon  = monitors[monitor_idx];
         if(mon.x == monitor.x && mon.y == monitor.y) {
             return getWorkArea(monitor, monitor_idx);
@@ -815,15 +834,16 @@ function getWorkAreaByMonitor(monitor):WorkArea|null {
     return null;
 }
 
-function getWorkAreaByMonitorIdx(monitor_idx) {
+function getWorkAreaByMonitorIdx(monitor_idx: number) {
+    const monitors = activeMonitors();
     let monitor = monitors[monitor_idx];
     return getWorkArea(monitor, monitor_idx);
 }
 
-function getWorkArea(monitor, monitor_idx) {
-    let wkspace = WorkspaceManager.get_active_workspace();
-    let work_area = wkspace.get_work_area_for_monitor(monitor_idx);
-    let insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
+function getWorkArea(monitor: Monitor, monitor_idx: number): WorkArea {
+    const wkspace = WorkspaceManager.get_active_workspace();
+    const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
+    const insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
     return {
         x: work_area.x + insets.left,
         y: work_area.y + insets.top,
@@ -872,7 +892,8 @@ function keyCancelTiling() {
 function keySetTiling() {
     log("keySetTiling");
     if (focusMetaWindow) {
-        let mind = focusMetaWindow.get_monitor();
+        const monitors = activeMonitors();
+        let mind = focusMetaWindow.get_monitor() as number;
         let monitor = monitors[mind];
         let mkey = getMonitorKey(monitor);
         let grid = grids[mkey];
@@ -910,6 +931,7 @@ function setInitialSelection() {
         return;
     }
     let mind = focusMetaWindow.get_monitor();
+    const monitors = activeMonitors();
     let monitor = monitors[mind];
     let workArea = getWorkArea(monitor, mind);
 
@@ -962,6 +984,7 @@ function keyMoveResizeEvent(type, key, is_global = false) {
     }
     log("Going on..");
     let mind = focusMetaWindow.get_monitor();
+    const monitors = activeMonitors();
     let monitor = monitors[mind];
     let mkey = getMonitorKey(monitor);
     let grid = grids[mkey];
@@ -1395,6 +1418,7 @@ function AutoTileMain() {
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
 
+    const monitors = activeMonitors();
     let monitor = monitors[mind];
     let workArea = getWorkAreaByMonitor(monitor);
     let notFocusedwindows = getNotFocusedWindowsOfMonitor(monitor);
@@ -1477,6 +1501,7 @@ function AutoTileNCols(cols) {
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
 
+    const monitors = activeMonitors();
     let monitor = monitors[mind];
     let workArea = getWorkAreaByMonitor(monitor);
     let windows = getNotFocusedWindowsOfMonitor(monitor);
