@@ -4,7 +4,6 @@
 *.zip
 compiled_typescript.js
 bazel-*
-*.lock
 
 # Bazel
 
