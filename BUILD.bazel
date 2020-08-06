@@ -44,7 +44,10 @@ filegroup(
         "settings.js",
         "shellversion.js",
         "snaptoneighbors.js",
-    ],
+        "stylesheet.css"
+    ] + glob([
+        "images/*",
+    ]),
 )
 
 exports_files([
