@@ -2,6 +2,8 @@
 declare var imports:any;
 declare var global:any;
 
+import {log, setLoggingEnabled} from './logging';
+
 /*****************************************************************
 
   This extension has been developed by vibou
@@ -36,7 +38,6 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Me.imports.logging;
 const Settings = Me.imports.settings;
 const Hotkeys = Me.imports.hotkeys;
 const SnapToNeighbors = Me.imports.snaptoneighbors;
@@ -71,6 +72,13 @@ const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
 
+interface SettingsObject {
+    get_boolean(name: string): boolean | undefined;
+    get_string(name: string): string | undefined;
+    get_int(name: string): number | undefined;
+    connect(eventName: string, callback: () => void): void;
+};
+
 let status;
 let launcher;
 let grids;
@@ -82,7 +90,7 @@ let focusMetaWindow: any = false;
 let focusWindowActor: any = false;
 let focusConnect: any = false;
 let gridSettings = new Object();
-let settings = Settings.get();
+let settings: SettingsObject = Settings.get();
 settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
@@ -188,10 +196,6 @@ const key_binding_global_resizes = {
   'action-move-up':         function() { keyMoveResizeEvent('move'     , 'up'    , true );}
 }
 
-function log(log_string) {
-    Log.log(log_string);
-}
-
 function changed_settings() {
     log("changed_settings");
     if(enabled) {
@@ -291,13 +295,16 @@ function initGridSizes(grid_sizes) {
     }
 }
 
-function getBoolSetting (settings_string) {
-    gridSettings[settings_string] = settings.get_boolean(settings_string);
-    if(gridSettings[settings_string] === undefined) {
-    log("Undefined settings " + settings_string);
-        gridSettings[settings_string] = false;
+function getBoolSetting(settingName: string): boolean {
+    const value = settings.get_boolean(settingName);
+    if(value === undefined) {
+        log("Undefined settings " + settingName);
+        gridSettings[settingName] = false;
+        return false;
     } else {
+        gridSettings[settingName] = value;
     }
+    return value;
 }
 
 function getIntSetting (settings_string) {
@@ -352,8 +359,7 @@ function init() {
 }
 
 export function enable() {
-    getBoolSetting(SETTINGS_DEBUG);
-    Log.debug = gridSettings[SETTINGS_DEBUG];
+    setLoggingEnabled(getBoolSetting(SETTINGS_DEBUG));
     log("Enabling begin");
     shellVersion.print_version();
 
