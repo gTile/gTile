@@ -41,7 +41,6 @@ filegroup(
         "schemas/gschemas.compiled",
         "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
         "settings.js",
-        "shellversion.js",
         "snaptoneighbors.js",
         "stylesheet.css",
         "LICENSE"
@@ -71,6 +70,7 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",
+        ":shellversion_lib",
     ],
 )
 
@@ -82,11 +82,43 @@ ts_library(
     ],
 )
 
+
+ts_library(
+    name = "shellversion_lib",
+    srcs = ["shellversion.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
+        ":logging_lib",
+    ],
+)
+
 ts_library(
     name = "entry_lib",
     srcs = ["entry.ts"],
     tsconfig = "//:tsconfig-app.json",
     deps = [":app_lib"],
+)
+
+ts_library(
+    name = "tests",
+    testonly = 1,
+    srcs = [
+        "shellversion.spec.ts",
+    ],
+    deps = [
+        ":shellversion_lib",
+        "@npm//@types/chai",
+        "@npm//@types/jasmine",
+        "@npm//chai",
+        "@npm//jasmine",
+    ],
+)
+
+jasmine_node_test(
+    name = "testing",
+    deps = [
+        ":tests",
+    ],
 )
 
 rollup_bundle(

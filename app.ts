@@ -3,6 +3,7 @@ declare var imports:any;
 declare var global:any;
 
 import {log, setLoggingEnabled} from './logging';
+import {ShellVersion} from './shellversion';
 
 /*****************************************************************
 
@@ -41,7 +42,6 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 const Hotkeys = Me.imports.hotkeys;
 const SnapToNeighbors = Me.imports.snaptoneighbors;
-const ShellVersion_module = Me.imports.shellversion;
 
 interface WorkArea {
     x: number;
@@ -94,8 +94,9 @@ let settings: SettingsObject = Settings.get();
 settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
-let shellVersion = new ShellVersion_module.ShellVersion();
 let enabled = false;
+
+const SHELL_VERSION = ShellVersion.defaultVersion();
 
 let presetState = new Array();
 presetState["current_variant"] = 0;
@@ -209,10 +210,10 @@ const GTileStatusButton = new Lang.Class({
     Name: 'GTileStatusButton',
     Extends: PanelMenu.Button,
 
-    _init: function(classname) {
+    _init: function(classname: string) {
         this.parent(0.0, "gTile", false);
         //Done by default in PanelMenuButton - Just need to override the method
-        if(shellVersion.version_at_least_34()) {
+        if(SHELL_VERSION.version_at_least_34()) {
             this.add_style_class_name(classname);
             this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
         } else {
@@ -224,7 +225,7 @@ const GTileStatusButton = new Lang.Class({
 
     reset: function() {
         this.activated = false;
-        if(shellVersion.version_at_least_34()) {
+        if(SHELL_VERSION.version_at_least_34()) {
             this.remove_style_pseudo_class('activate');
         } else {
             this.actor.remove_style_pseudo_class('activate');
@@ -232,7 +233,7 @@ const GTileStatusButton = new Lang.Class({
     },
 
     activate: function() {
-        if(shellVersion.version_at_least_34()) {
+        if(SHELL_VERSION.version_at_least_34()) {
             this.add_style_pseudo_class('activate');
         } else {
             this.actor.add_style_pseudo_class('activate');
@@ -240,7 +241,7 @@ const GTileStatusButton = new Lang.Class({
     },
 
     deactivate: function() {
-        if(shellVersion.version_at_least_34()) {
+        if(SHELL_VERSION.version_at_least_34()) {
             this.remove_style_pseudo_class('activate');
         } else {
             this.actor.remove_style_pseudo_class('activate');
@@ -361,7 +362,7 @@ function init() {
 export function enable() {
     setLoggingEnabled(getBoolSetting(SETTINGS_DEBUG));
     log("Enabling begin");
-    shellVersion.print_version();
+    SHELL_VERSION.print_version();
 
     status = false;
     tracker = Shell.WindowTracker.get_default();
