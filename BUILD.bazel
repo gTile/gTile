@@ -36,7 +36,6 @@ filegroup(
     srcs = [
         "extension.js",
         "hotkeys.js",
-        "logging.js",
         "metadata.json",
         "prefs.js",
         "schemas/gschemas.compiled",
@@ -69,6 +68,15 @@ filegroup(
 ts_library(
     name = "app_lib",
     srcs = ["app.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
+        ":logging_lib",
+    ],
+)
+
+ts_library(
+    name = "logging_lib",
+    srcs = ["logging.ts"],
     tsconfig = "//:tsconfig-app.json",
     deps = [
     ],
