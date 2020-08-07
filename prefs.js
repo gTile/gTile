@@ -9,7 +9,6 @@ const Lang = imports.lang;
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
-const Log = Me.imports.logging;
 
 // Redefining globals from extension.js - do not know how to do it better :-(
 const SETTINGS_GRID_SIZES = 'grid-sizes';
@@ -181,8 +180,6 @@ function accel_tab(notebook) {
         let name = model.get_value(iter, 0);
 
         model.set(iter, [ 2, 3 ], [ mods, key ]);
-
-        Log.log("Changing value for " + name + ": " + value);
 
         settings.set_strv(name, [value]);
     });
