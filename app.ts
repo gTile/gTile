@@ -4,6 +4,8 @@ declare var global:any;
 
 import {log, setLoggingEnabled} from './logging';
 import {ShellVersion} from './shellversion';
+import {bind as bindHotkeys, unbind as unbindHotkeys, Bindings} from './hotkeys';
+import { snapToNeighbors } from './snaptoneighbors';
 
 /*****************************************************************
 
@@ -40,8 +42,6 @@ const WorkspaceManager = global.screen || global.workspace_manager;
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
-const Hotkeys = Me.imports.hotkeys;
-const SnapToNeighbors = Me.imports.snaptoneighbors;
 
 interface WorkArea {
     x: number;
@@ -110,12 +110,12 @@ let excludedApplications = new Array(
     "Unknown"
 );
 
-const key_bindings = {
+const keyBindings: Bindings = {
     'show-toggle-tiling': function() { toggleTiling(); },
     'show-toggle-tiling-alt': function() { toggleTiling(); }
 };
 
-const key_bindings_tiling = {
+const key_bindings_tiling: Bindings = {
     'move-left'       : function() { keyMoveResizeEvent('move'  , 'left' );},
     'move-right'      : function() { keyMoveResizeEvent('move'  , 'right');},
     'move-up'         : function() { keyMoveResizeEvent('move'  , 'up'   );},
@@ -149,7 +149,7 @@ const key_bindings_tiling = {
     'snap-to-neighbors': function() { SnapToNeighborsBind();}
 }
 
-const key_bindings_presets = {
+const key_bindings_presets: Bindings = {
     'preset-resize-1' : function() { presetResize(1)  ;},
     'preset-resize-2' : function() { presetResize(2)  ;},
     'preset-resize-3' : function() { presetResize(3)  ;},
@@ -181,7 +181,7 @@ const key_bindings_presets = {
     'preset-resize-29': function() { presetResize(29) ;},
     'preset-resize-30': function() { presetResize(30) ;}
 }
-const key_binding_global_resizes = {
+const key_binding_global_resizes: Bindings = {
   'action-change-tiling':   function()  { keyChangeTiling(); },
   'action-contract-bottom': function() { keyMoveResizeEvent('contract' , 'bottom', true );},
   'action-contract-left':   function() { keyMoveResizeEvent('contract' , 'left'  , true );},
@@ -382,12 +382,12 @@ export function enable() {
         Main.panel.addToStatusArea("GTileStatusButton", launcher);
     }
 
-    Hotkeys.bind(key_bindings);
+    bindHotkeys(keyBindings);
     if(gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-        Hotkeys.bind(key_bindings_presets);
+        bindHotkeys(key_bindings_presets);
     }
     if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
-        Hotkeys.bind(key_binding_global_resizes);
+        bindHotkeys(key_binding_global_resizes);
     }
     enabled = true;
     log("Extention Enabled!");
@@ -396,11 +396,11 @@ export function enable() {
 export function disable() {
     log("Extension start disabling");
     enabled = false;
-    Hotkeys.unbind(key_bindings);
-    Hotkeys.unbind(key_bindings_presets);
-    Hotkeys.unbind(key_binding_global_resizes);
+    unbindHotkeys(keyBindings);
+    unbindHotkeys(key_bindings_presets);
+    unbindHotkeys(key_binding_global_resizes);
     if(keyControlBound) {
-        Hotkeys.unbind(key_bindings_tiling);
+        unbindHotkeys(key_bindings_tiling);
         keyControlBound = false;
     }
     destroyGrids();
@@ -861,13 +861,13 @@ function getWorkArea(monitor: Monitor, monitor_idx: number): WorkArea {
 
 function bindKeyControls() {
     if(!keyControlBound) {
-        Hotkeys.bind(key_bindings_tiling);
+        bindHotkeys(key_bindings_tiling);
         if(focusConnect) {
             global.display.disconnect(focusConnect);
         }
         focusConnect = global.display.connect('notify::focus-window', _onFocus);
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-            Hotkeys.bind(key_bindings_presets);
+            bindHotkeys(key_bindings_presets);
         }
         keyControlBound = true;
     }
@@ -875,17 +875,17 @@ function bindKeyControls() {
 
 function unbindKeyControls() {
     if(keyControlBound) {
-        Hotkeys.unbind(key_bindings_tiling);
+        unbindHotkeys(key_bindings_tiling);
         if(focusConnect) {
             log("Disconnect notify:focus-window");
             global.display.disconnect(focusConnect);
             focusConnect = false;
         }
         if(!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-            Hotkeys.unbind(key_bindings_presets);
+            unbindHotkeys(key_bindings_presets);
         }
         if(!gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
-            Hotkeys.unbind(key_binding_global_resizes);
+            unbindHotkeys(key_binding_global_resizes);
         }
         keyControlBound = false;
     }
@@ -1555,7 +1555,7 @@ function SnapToNeighborsBind() {
         return;
     }
 
-    SnapToNeighbors.snapToNeighbors(window);
+    snapToNeighbors(window);
 }
 
 function GridSettingsButton(text,cols,rows) {

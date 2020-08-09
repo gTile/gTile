@@ -1,4 +1,8 @@
-'use strict'
+import {log} from './logging';
+
+declare const imports: any;
+declare const global: any;
+
 // Library imports
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
@@ -7,26 +11,26 @@ const Shell = imports.gi.Shell;
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
-const Log = Me.imports.logging;
 
 // Globals
 const mySettings = Settings.get();
 
-function log(log_string) {
-    Log.log(log_string);
-}
+/**
+ * Bindings is a dictionary that maps a hotkey name to a function that handles
+ * the press of the key that is bound to that action.
+ */
+export type Bindings = {[name: string]: () => void};
 
-function bind(key_bindings) {
+export function bind(keyBindings: Bindings) {
     log("Binding keys");
-    for (var key in key_bindings) {
-        //log("Binding key: " + key);
+    for (var key in keyBindings) {
         if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
             Main.wm.addKeybinding(
                 key,
                 mySettings,
                 Meta.KeyBindingFlags.NONE,
                 Shell.ActionMode.NORMAL,
-                key_bindings[key]
+                keyBindings[key]
             );
         }
         else if (Main.wm.addKeybinding && Shell.KeyBindingMode) { // introduced in 3.7.5
@@ -35,7 +39,7 @@ function bind(key_bindings) {
                 mySettings,
                 Meta.KeyBindingFlags.NONE,
                 Shell.KeyBindingMode.NORMAL | Shell.KeyBindingMode.MESSAGE_TRAY,
-                key_bindings[key]
+                keyBindings[key]
             );
         }
         else {
@@ -43,16 +47,15 @@ function bind(key_bindings) {
                 key,
                 mySettings,
                 Meta.KeyBindingFlags.NONE,
-                key_bindings[key]
+                keyBindings[key]
             );
         }
     }
 }
 
-function unbind(key_bindings) {
+export function unbind(keyBindings: Bindings) {
     log("Unbinding keys");
-    for (var key in key_bindings) {
-        //log("Unbinding key: " + key);
+    for (var key in keyBindings) {
         if (Main.wm.removeKeybinding) { // introduced in 3.7.2
             Main.wm.removeKeybinding(key);
         }

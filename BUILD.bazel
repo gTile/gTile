@@ -35,13 +35,11 @@ filegroup(
     name = "dist_files",
     srcs = [
         "extension.js",
-        "hotkeys.js",
         "metadata.json",
         "prefs.js",
         "schemas/gschemas.compiled",
         "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
         "settings.js",
-        "snaptoneighbors.js",
         "stylesheet.css",
         "LICENSE"
     ] + glob([
@@ -70,7 +68,18 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",
+        ":hotkeys_lib",
         ":shellversion_lib",
+        ":snaptoneighbors_lib",
+    ],
+)
+
+ts_library(
+    name = "hotkeys_lib",
+    srcs = ["hotkeys.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
+        ":logging_lib",
     ],
 )
 
@@ -86,6 +95,15 @@ ts_library(
 ts_library(
     name = "shellversion_lib",
     srcs = ["shellversion.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
+        ":logging_lib",
+    ],
+)
+
+ts_library(
+    name = "snaptoneighbors_lib",
+    srcs = ["snaptoneighbors.ts"],
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",

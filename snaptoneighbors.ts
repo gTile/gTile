@@ -1,28 +1,19 @@
-'use strict'
 /* Edited by Sergey after 
 https://github.com/tpyl/gssnaptoneighbors
  by Timo Pylvanainen <tpyl@iki.fi>
  */
 
-const Gio = imports.gi.Gio;
-const Meta = imports.gi.Meta;
-const Shell = imports.gi.Shell;
-const St = imports.gi.St;
-const Tweener = imports.ui.tweener;
+import {log} from './logging';
 
-const Main = imports.ui.main;
+declare const imports: any;
+declare const global: any;
+
+const Meta = imports.gi.Meta;
 
 const WorkspaceManager = global.screen || global.workspace_manager;
 
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Me.imports.logging;
-
 const OVERLAP_TOLERANCE = 5;
 const SCAN_BOX_SIZE = 50;
-
-function log(log_string) {
-    Log.log(log_string);
-}
 
 /**
  * Return all windows on the currently active workspace
@@ -113,6 +104,35 @@ function expandVertically(y, left, right, miny, maxy, windows) {
 }
 
 /**
+ * Type definition based on
+ * https://gjs-docs.gnome.org/meta6~6_api/meta.window#method-get_layer and 
+ * https://developer.gnome.org/meta/stable/MetaWindow.html#meta-window-get-work-area-current-monitor.
+ */
+interface MetaWindow {
+    readonly maximized_horizontally: boolean;
+    readonly maximized_vertically: boolean;
+    get_title(): string;
+    unmaximize(flags: any): void;
+    get_work_area_current_monitor(): MetaRectangle;
+    get_frame_rect(): MetaRectangle;
+
+    /**
+     * https://gjs-docs.gnome.org/meta6~6_api/meta.window#method-move_resize_frame
+     */
+    move_resize_frame(userOp: boolean, rootXNW: number, rootYNW: number, width: number, height: number): void;
+}
+
+/**
+ * Type definition based on https://gjs-docs.gnome.org/meta6~6_api/meta.rectangle.
+ */
+interface MetaRectangle {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+}
+
+/**
  * Resize & move the *window* so it touches adjacent windows or
  * screen edge top, bottom, left and right. The top-left corner 
  * of the window defines the expansion point. 
@@ -121,10 +141,10 @@ function expandVertically(y, left, right, miny, maxy, windows) {
  * both vertically and horizontally. The expnasion that results
  * in closer to 1 aspect ratio is selected. 
  */
-function snapToNeighbors(window) {
+export function snapToNeighbors(window: MetaWindow) {
 	log("snapToNeighbors " + window.get_title());
     // Unmaximize first
-    if (window.maximized_horizontally || window.maximizedVertically)
+    if (window.maximized_horizontally || window.maximized_vertically)
         window.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 
     let workArea = window.get_work_area_current_monitor();
