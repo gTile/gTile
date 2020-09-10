@@ -34,7 +34,6 @@ const DND = imports.ui.dnd;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
-const Tweener = imports.ui.tweener;
 const Workspace = imports.ui.workspace;
 // Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
 const WorkspaceManager = global.screen || global.workspace_manager;
@@ -506,14 +505,13 @@ function moveGrids() {
 
             let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
 
-            Tweener.addTween(
-                grid.actor, {
-                    time: time,
-                    x:pos_x,
-                    y:pos_y,
-                    transition: 'easeOutQuad',
-                    /*onComplete:updateRegions*/
-                });
+            grid.actor.ease({
+                time: time,
+                x:pos_x,
+                y:pos_y,
+                transition: Clutter.AnimationMode.EASE_OUT_QUAD,
+                /*onComplete:updateRegions*/
+            });
         }
     }
 }
@@ -1612,7 +1610,7 @@ Grid.prototype = {
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 
         this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
-		
+
         this.topbar = new TopBar(title);
 
         this.bottombarContainer = new St.Bin({ style_class: 'bottom-box-container',
@@ -1652,7 +1650,7 @@ Grid.prototype = {
             layout_manager: new Clutter.GridLayout()
         });
         this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
-        this.bottombar_table_layout.set_row_homogeneous(true);	    
+        this.bottombar_table_layout.set_row_homogeneous(true);
         this.veryBottomBar_table_layout.set_column_homogeneous(true);
 
         this.veryBottomBarContainer.add_actor(this.veryBottomBar);
@@ -1801,11 +1799,11 @@ Grid.prototype = {
         if (time > 0 ) {
             this.actor.scale_y= 0;
             this.actor.scale_x= 0;
-            Tweener.addTween(this.actor, {
+            this.actor.ease({
                 time: this.animation_time,
                 opacity: 255,
                 visible: true,
-                transition: 'easeOutQuad',
+                transition: Clutter.AnimationMode.EASE_OUT_QUAD,
                 scale_x: this.normalScaleX,
                 scale_y: this.normalScaleY,
                 onComplete: this._onShowComplete
@@ -1826,13 +1824,13 @@ Grid.prototype = {
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0 ;
         if (!immediate && time > 0) {
-            Tweener.addTween(this.actor, {
+            this.actor.ease({
                 time: this.animation_time,
                 opacity: 0,
                 visible: false,
                 scale_x:0,
                 scale_y:0,
-                transition: 'easeOutQuad',
+                transition: Clutter.AnimationMode.EASE_OUT_QUAD,
                 onComplete: this._onHideComplete
             });
         }
@@ -2040,13 +2038,13 @@ GridElementDelegate.prototype = {
         area.add_style_pseudo_class('activate');
 
         if (gridSettings[SETTINGS_ANIMATION]) {
-            Tweener.addTween(area, {
+            area.ease({
                 time: 0.2,
                 x:areaX,
                 y:areaY,
                 width:areaWidth,
                 height: areaHeight,
-                transition: 'easeOutQuad'
+                transition: Clutter.AnimationMode.EASE_OUT_QUAD
             });
         }
         else {
