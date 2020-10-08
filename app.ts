@@ -1438,11 +1438,15 @@ function AutoTileMain() {
             return;
     }
 
+    // let mainWidth = workArea.width/1.25;
+    let mainWidth = workArea.width/1.33;
+    let minorWidth = workArea.width - mainWidth;
     move_resize_window_with_margins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
-        workArea.width/2,
+        // workArea.width/2,
+        mainWidth,
         workArea.height);
 
 
@@ -1459,9 +1463,11 @@ function AutoTileMain() {
 
         move_resize_window_with_margins(
             metaWindow,
-            workArea.x + workArea.width/2,
+            // workArea.x + workArea.width,
+            workArea.x + mainWidth,
             newOffset,
-            workArea.width/2,
+            // workArea.width/2,
+            minorWidth,
             winHeight
         );
         countWin++;
