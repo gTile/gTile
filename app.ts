@@ -1412,6 +1412,7 @@ AutoTileMainAndList.prototype = {
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
 function AutoTileMain() {
+    let preset = "AutoTileMain";
     log("AutoTileMain");
     let window = getFocusApp();
     if (!window) {
@@ -1438,8 +1439,29 @@ function AutoTileMain() {
             return;
     }
 
+    let ps_variants = [1.25, 1.33, 1.5, 2]
+    // handle preset variants (if there are any)
+    let ps_variant_count = ps_variants.length;
+    if(ps_variant_count > 1) {
+        if( presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
+            presetState["last_preset"] == preset  &&
+            presetState["last_window_title"] == window.get_title() ) {
+            // within timeout (default: 2s), same preset & same window:
+            // increase variant counter, but consider upper boundary
+            presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
+        } else {
+            // timeout, new preset or new window:
+            // update presetState["last_preset"] and reset variant counter
+            presetState["current_variant"] = 0;
+        }
+    } else {
+        presetState["current_variant"] = 0;
+    }
+
     // let mainWidth = workArea.width/1.25;
-    let mainWidth = workArea.width/1.33;
+    // let mainWidth = workArea.width/1.33;
+    let mainRatio = ps_variants[presetState["current_variant"]];
+    let mainWidth = workArea.width/mainRatio;
     let minorWidth = workArea.width - mainWidth;
     move_resize_window_with_margins(
         focusMetaWindow,
@@ -1473,6 +1495,13 @@ function AutoTileMain() {
         countWin++;
     }
     log("AutoTileMain done");
+
+    presetState["last_preset"] = preset;
+    presetState["last_grid_format"] = preset;
+    presetState["last_window_title"] = window.get_title();
+    presetState["last_call"] = new Date().getTime();
+
+    log("Resize preset last call: " + presetState["last_call"])
 }
 
 function AutoTileTwoList(grid) {
