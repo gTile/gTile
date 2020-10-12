@@ -495,6 +495,10 @@
 			<default>0</default>
 			<summary>Bottom gap around border of screen for secondary monitor</summary>
 		</key>
+		<key type = "s" name="main-window-sizes">
+			<default>'7/8, 3/4, .625, .5'</default>
+			<summary>"Autotile Main window sizes. (Ratio of the screen to take up. Can be a decimal or a ratio).</summary>
+		</key>
 		<key type = "b" name="debug">
 			<default>false</default>
 			<summary>Put debug lines into global.log. To see, run journalctl /usr/bin/gnome-shell -f in terminal</summary>

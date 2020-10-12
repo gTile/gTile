@@ -28,7 +28,14 @@ Generally,
 
 1. Code
 2. Run the `install-extension` command above
+    * If you have changed schemas, you'd need to recompile those settings before reinstalling.
+        ```
+        rm schemas/gschemas.compiled
+        glib-compile-schemas schemas/
+        ```
 3. If 2 succeeded, hit `Alt`+`F2`, type `r`, and hit enter.
+
+A Makefile has been included for common tasks. Use `make help` for more info.
 
 #### Dependency management
 

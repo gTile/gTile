@@ -58,6 +58,7 @@ const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
+const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
 
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
@@ -94,6 +95,8 @@ settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
 let enabled = false;
+// let mainWindowSizes = [];
+let mainWindowSizes = new Array();;
 
 const SHELL_VERSION = ShellVersion.defaultVersion();
 
@@ -348,7 +351,22 @@ function initSettings() {
         nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
         nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
     }
+    let mainWindowSizesString = settings.get_string(SETTINGS_MAIN_WINDOW_SIZES);
+    log(SETTINGS_MAIN_WINDOW_SIZES + " settings found " + mainWindowSizesString);
+    mainWindowSizes = []
+    let mainWindowSizesArray = mainWindowSizesString.split(",");
 
+    for (var i in mainWindowSizesArray) {
+        let size = mainWindowSizesArray[i];
+        if (size.includes("/")) {
+            let fraction = size.split("/");
+            let ratio = parseFloat(fraction[0]) / parseFloat(fraction[1]);
+            mainWindowSizes.push(ratio);
+        } else {
+            mainWindowSizes.push(parseFloat(size));
+        }
+    };
+    log(SETTINGS_MAIN_WINDOW_SIZES + " set to " + mainWindowSizes);
 }
 
 
@@ -1439,7 +1457,9 @@ function AutoTileMain() {
             return;
     }
 
-    let ps_variants = [1.25, 1.33, 1.5, 2]
+    log("SETTINGS_MAIN_WINDOW_SIZES:" + mainWindowSizes);
+    let ps_variants = mainWindowSizes;
+    log("Main window sizes: " + ps_variants)
     // handle preset variants (if there are any)
     let ps_variant_count = ps_variants.length;
     if(ps_variant_count > 1) {
@@ -1458,16 +1478,13 @@ function AutoTileMain() {
         presetState["current_variant"] = 0;
     }
 
-    // let mainWidth = workArea.width/1.25;
-    // let mainWidth = workArea.width/1.33;
     let mainRatio = ps_variants[presetState["current_variant"]];
-    let mainWidth = workArea.width/mainRatio;
+    let mainWidth = workArea.width*mainRatio;
     let minorWidth = workArea.width - mainWidth;
     move_resize_window_with_margins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
-        // workArea.width/2,
         mainWidth,
         workArea.height);
 
@@ -1485,10 +1502,8 @@ function AutoTileMain() {
 
         move_resize_window_with_margins(
             metaWindow,
-            // workArea.x + workArea.width,
             workArea.x + mainWidth,
             newOffset,
-            // workArea.width/2,
             minorWidth,
             winHeight
         );

@@ -20,6 +20,7 @@ const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
+const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
 const SETTINGS_DEBUG = 'debug';
 
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
@@ -234,6 +235,8 @@ function basics_tab(notebook) {
     add_check("Enable accelerators for moving and resizing windows", SETTINGS_MOVERESIZE_ENABLED  , bs_grid, settings);
 
     add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
+
+    add_text ("Autotile Main window sizes\n(Ratio of the screen to take up. Can be a decimal or a ratio)", SETTINGS_MAIN_WINDOW_SIZES, bs_grid, settings, 30);
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
     let text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
