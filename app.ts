@@ -95,7 +95,6 @@ settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
 let enabled = false;
-// let mainWindowSizes = [];
 let mainWindowSizes = new Array();;
 
 const SHELL_VERSION = ShellVersion.defaultVersion();
