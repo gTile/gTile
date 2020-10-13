@@ -443,8 +443,8 @@ function destroyGrids() {
         let monitor = monitors[monitorIdx];
         let key = getMonitorKey(monitor);
         let grid = grids[key];
-	if (!grid)
-		continue;
+        if (!grid)
+               continue;
         grid.hide(true);
         Main.layoutManager.removeChrome(grid.actor);
     }
