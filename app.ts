@@ -402,9 +402,9 @@ export function disable() {
         unbindHotkeys(key_bindings_tiling);
         keyControlBound = false;
     }
-    destroyGrids();
     launcher.destroy();
     launcher = null;
+    destroyGrids();
     resetFocusMetaWindow();
     log("Extention Disabled!");
 }
