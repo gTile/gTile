@@ -390,6 +390,13 @@ export function enable() {
     if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
         bindHotkeys(key_binding_global_resizes);
     }
+
+    Main.layoutManager.connect('monitors-changed', () => {
+        log("Reinitializing grids on monitors-changed");
+        destroyGrids();
+        initGrids();
+    });
+
     enabled = true;
     log("Extention Enabled!");
 }
@@ -397,6 +404,9 @@ export function enable() {
 export function disable() {
     log("Extension start disabling");
     enabled = false;
+    
+    Main.layoutManager.disconnect('monitors-changed');
+    
     unbindHotkeys(keyBindings);
     unbindHotkeys(key_bindings_presets);
     unbindHotkeys(key_binding_global_resizes);
@@ -440,28 +450,24 @@ function initGrids() {
 }
 
 function destroyGrids() {
-    const monitors = activeMonitors();
-    for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
-        let monitor = monitors[monitorIdx];
-        let key = getMonitorKey(monitor);
-        let grid = grids[key];
-        if (!grid)
-               continue;
+    log("destroyGrids");
+    for(let grid of grids) {
         grid.hide(true);
         Main.layoutManager.removeChrome(grid.actor);
     }
+    log("destroyGrids done");
 }
 
 function refreshGrids() {
     log("refreshGrids");
-    for (var gridIdx in grids) {
-        let grid = grids[gridIdx];
+    for (let grid of grids) {
         grid.refresh();
     }
+    log("refreshGrids done");
 }
 
 function moveGrids() {
-	 log("moveGrids");
+    log("moveGrids");
     if (!status) {
         return;
     }
