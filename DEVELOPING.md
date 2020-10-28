@@ -27,8 +27,9 @@ bazel run :install-extension
 Generally, 
 
 1. Code
-2. Run the `install-extension` command above
-3. If 2 succeeded, hit `Alt`+`F2`, type `r`, and hit enter.
+2. Run `glib-compile-schemas schemas` (if you modified [the schema](/schemas/org.gnome.shell.extensions.gtile.gschema.xml))
+3. Run the `install-extension` command above
+4. If 2 succeeded, hit `Alt`+`F2`, type `r`, and hit enter.
 
 #### Dependency management
 
