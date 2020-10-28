@@ -57,6 +57,7 @@ const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
@@ -330,6 +331,7 @@ function initSettings() {
     getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
+    gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] = getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
     gridSettings[SETTINGS_INSETS_PRIMARY] =
         { top:    getIntSetting(SETTINGS_INSETS_PRIMARY_TOP),
         bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM),
@@ -1945,7 +1947,7 @@ GridElementDelegate.prototype = {
             let areaWidth,areaHeight,areaX,areaY;
             [areaX,areaY,areaWidth,areaHeight] = this._computeAreaPositionSize(this.first,gridElement);
 
-            if (this._allSelected()) {
+            if (this._allSelected() && gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] === false) {
                 move_maximize_window(focusMetaWindow,areaX,areaY);
             }
             else {

@@ -18,6 +18,7 @@ const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
 const SETTINGS_DEBUG = 'debug';
@@ -303,6 +304,7 @@ function margins_tab(notebook) {
         use_markup: false,
         wrap: true,
     }));
+    add_check("Apply margin to fullscreen windows", SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED, mg_grid, settings);
     add_int ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Insets primary right"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 240, 1, 10);
