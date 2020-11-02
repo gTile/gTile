@@ -95,6 +95,7 @@ settings.connect('changed', changed_settings);
 let toggleSettingListener;
 let keyControlBound: any = false;
 let enabled = false;
+let monitorsChangedConnect: any = false;
 
 const SHELL_VERSION = ShellVersion.defaultVersion();
 
@@ -391,7 +392,12 @@ export function enable() {
         bindHotkeys(key_binding_global_resizes);
     }
 
-    Main.layoutManager.connect('monitors-changed', () => {
+    if(monitorsChangedConnect) {
+        Main.layoutManager.disconnect(monitorsChangedConnect);
+    }
+
+    log("Connecting monitors-changed");
+    monitorsChangedConnect = Main.layoutManager.connect('monitors-changed', () => {
         log("Reinitializing grids on monitors-changed");
         destroyGrids();
         initGrids();
@@ -404,8 +410,12 @@ export function enable() {
 export function disable() {
     log("Extension start disabling");
     enabled = false;
-    
-    Main.layoutManager.disconnect('monitors-changed');
+
+    if(monitorsChangedConnect) {    
+        log("Disconnecting monitors-changed");
+        Main.layoutManager.disconnect(monitorsChangedConnect);
+        monitorsChangedConnect = false;
+    }
     
     unbindHotkeys(keyBindings);
     unbindHotkeys(key_bindings_presets);
