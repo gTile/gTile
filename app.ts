@@ -277,23 +277,23 @@ function parseTuple(format, delimiter) {
 }
 
 function initGridSizes(grid_sizes) {
-    gridSettings[SETTINGS_GRID_SIZES] = [
-        new GridSettingsButton('8x6',8,6),
-        new GridSettingsButton('6x4',6,4),
-        new GridSettingsButton('4x4',4,4),
-    ];
-    let grid_sizes_orig = true;
+    gridSettings[SETTINGS_GRID_SIZES] = []
     let gss = grid_sizes.split(",");
+    let no_grids = true;
     for (var key in gss) {
         let grid_format = parseTuple(gss[key], "x");
         if(grid_format.X == -1) {
             continue;
         }
-        if(grid_sizes_orig) {
-            gridSettings[SETTINGS_GRID_SIZES] = [];
-            grid_sizes_orig = false;
-        }
+        no_grids = false;
         gridSettings[SETTINGS_GRID_SIZES].push(new GridSettingsButton(grid_format.X + "x" + grid_format.Y, grid_format.X, grid_format.Y));
+    }
+    if (no_grids) {
+        gridSettings[SETTINGS_GRID_SIZES] = [
+            new GridSettingsButton('8x6',8,6),
+            new GridSettingsButton('6x4',6,4),
+            new GridSettingsButton('4x4',4,4),
+        ];
     }
 }
 
@@ -351,6 +351,7 @@ function initSettings() {
         nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
         nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
     }
+    log("Init complete, nbCols " + nbCols + " nbRows " + nbRows);
 
 }
 
@@ -363,7 +364,7 @@ function init() {
 
 export function enable() {
     setLoggingEnabled(getBoolSetting(SETTINGS_DEBUG));
-    log("Enabling begin");
+    log("Extension enable begin");
     SHELL_VERSION.print_version();
 
     status = false;
@@ -371,13 +372,11 @@ export function enable() {
 
     initSettings();
 
-    log("Starting...");
-
     area = new St.BoxLayout({style_class: 'grid-preview'});
     Main.uiGroup.add_actor(area);
     initGrids();
 
-    log("Create Button");
+    log("Create Button on Panel");
     launcher = new GTileStatusButton('tiling-icon');
 
     if(gridSettings[SETTINGS_SHOW_ICON]) {
@@ -404,11 +403,11 @@ export function enable() {
     });
 
     enabled = true;
-    log("Extention Enabled!");
+    log("Extention enable completed");
 }
 
 export function disable() {
-    log("Extension start disabling");
+    log("Extension disable begin");
     enabled = false;
 
     if(monitorsChangedConnect) {    
@@ -428,7 +427,7 @@ export function disable() {
     launcher = null;
     destroyGrids();
     resetFocusMetaWindow();
-    log("Extention Disabled!");
+    log("Extention disable completed");
 }
 
 function resetFocusMetaWindow() {
@@ -438,6 +437,7 @@ function resetFocusMetaWindow() {
 
 function initGrids() {
     log("initGrids");
+    log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
     grids = new Array();
     const monitors = activeMonitors();
     for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
@@ -449,6 +449,7 @@ function initGrids() {
 
         let key = getMonitorKey(monitor);
         grids[key] = grid;
+        log("initGrids adding grid key " + key);
 
         Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
         grid.actor.set_opacity(0);
@@ -461,16 +462,21 @@ function initGrids() {
 
 function destroyGrids() {
     log("destroyGrids");
-    for(let grid of grids) {
+    for(let grid_idx in grids) {
+        let grid = grids[grid_idx];
         grid.hide(true);
         Main.layoutManager.removeChrome(grid.actor);
+        log("Disconnect hide-tiling for monitor " + grid.monitor_idx);
+        grid.disconnect(grid.connectHideTiling);
     }
     log("destroyGrids done");
 }
 
 function refreshGrids() {
     log("refreshGrids");
-    for (let grid of grids) {
+    for (let grid_idx in grids) {
+        let grid = grids[grid_idx];
+        log("refreshGrids calling refresh on " + grid_idx);
         grid.refresh();
     }
     log("refreshGrids done");
@@ -930,7 +936,7 @@ function keySetTiling() {
 }
 
 function keyChangeTiling() {
-    log("keyChangeTiling");
+    log("keyChangeTiling. Current nbCols " + nbCols + " nbRos " + nbRows);
     let grid_settings_sizes = gridSettings[SETTINGS_GRID_SIZES];
     let next_key: number|string = 0;
     let found = false;
@@ -939,7 +945,7 @@ function keyChangeTiling() {
             next_key = key;
             break;
         }
-        log("Checking grid settings size " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
+        log("Checking grid settings ind " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
         if(grid_settings_sizes[key].cols == nbCols && grid_settings_sizes[key].rows == nbRows) {
             found = true;
         }
@@ -1595,15 +1601,18 @@ GridSettingsButton.prototype = {
 
         this.actor.add_actor(this.label);
 
+        log("Connecting button-press-event to GridSettingsButton " + text);
         this.actor.connect('button-press-event', Lang.bind(this,this._onButtonPress));
     },
 
     _onButtonPress: function() {
+        log("GridSettingsButton " + this.text + " _OnButtonPress");
         nbCols = this.cols;
         nbRows = this.rows;
 
         refreshGrids();
     }
+
 };
 
 function Grid(monitor_idx,screen,title,cols,rows) {
@@ -1626,6 +1635,7 @@ Grid.prototype = {
             track_hover:true
         });
 
+        log("Grid connect enter-event leave-envent ");
         this.actor.connect('enter-event',Lang.bind(this,this._onMouseEnter));
         this.actor.connect('leave-event',Lang.bind(this,this._onMouseLeave));
 
@@ -1679,16 +1689,17 @@ Grid.prototype = {
         let colNum = 0;
         let maxPerRow = 4;
 
-        let gridSettingsButton = gridSettings[SETTINGS_GRID_SIZES];
-        for (var index=0; index<gridSettingsButton.length;index++) {
+        var gridSettingsButtons = gridSettings[SETTINGS_GRID_SIZES];
+        for (var index=0; index<gridSettingsButtons.length;index++) {
             if (colNum>= maxPerRow) {
                 colNum = 0;
                 rowNum += 2;
             }
 
-            let button = gridSettingsButton[index];
-            button = new GridSettingsButton(button.text,button.cols,button.rows);
+            var button = gridSettingsButtons[index];
+            //button = new GridSettingsButton(button.text,button.cols,button.rows);
             this.bottombar_table_layout.attach(button.actor, colNum, rowNum, 1, 1);
+            log("Connecting grid settings button " + index + " : " + button.text); 
             button.actor.connect('notify::hover',Lang.bind(this,this._onSettingsButton));
             colNum++;
         }
@@ -1759,6 +1770,7 @@ Grid.prototype = {
     },
 
     _displayElements: function() {
+        log("Grid _displayElements " + this.cols + ":" + this.rows);
         this.elements = new Array();
 
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
@@ -1787,6 +1799,7 @@ Grid.prototype = {
     },
 
     refresh: function() {
+        log("Grid.refresh from " + this.cols + ":" + this.rows + " to " + nbCols + ":" + nbRows);
         //this.elementsDelegate._logActiveActors("Grid refresh active actors");
         this.elementsDelegate._resetGrid();
         for (let r = 0; r < this.rows; r++) {
