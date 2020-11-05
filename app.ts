@@ -2046,11 +2046,11 @@ GridElementDelegate.prototype = {
         let monitor = fromGridElement.monitor;
         let workArea = getWorkAreaByMonitor(monitor);
 
-        let areaWidth = (workArea.width/nbCols)*((maxX-minX)+1);
-        let areaHeight = (workArea.height/nbRows)*((maxY-minY)+1);
+        let areaWidth = Math.round((workArea.width/nbCols)*((maxX-minX)+1));
+        let areaHeight = Math.round((workArea.height/nbRows)*((maxY-minY)+1));
 
-        let areaX = workArea.x + (minX*(workArea.width/nbCols));
-        let areaY = workArea.y + (minY*(workArea.height/nbRows));
+        let areaX = workArea.x + Math.round((minX*(workArea.width/nbCols)));
+        let areaY = workArea.y + Math.round((minY*(workArea.height/nbRows)));
 
         return [areaX,areaY,areaWidth,areaHeight];
     },
