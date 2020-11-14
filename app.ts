@@ -6,6 +6,7 @@ import {log, setLoggingEnabled} from './logging';
 import {ShellVersion} from './shellversion';
 import {bind as bindHotkeys, unbind as unbindHotkeys, Bindings} from './hotkeys';
 import { snapToNeighbors } from './snaptoneighbors';
+import * as tilespec from "./tilespec"
 
 /*****************************************************************
 
@@ -182,20 +183,21 @@ const key_bindings_presets: Bindings = {
     'preset-resize-29': function() { presetResize(29) ;},
     'preset-resize-30': function() { presetResize(30) ;}
 }
-const key_binding_global_resizes: Bindings = {
-  'action-change-tiling':   function()  { keyChangeTiling(); },
-  'action-contract-bottom': function() { keyMoveResizeEvent('contract' , 'bottom', true );},
-  'action-contract-left':   function() { keyMoveResizeEvent('contract' , 'left'  , true );},
-  'action-contract-right':  function() { keyMoveResizeEvent('contract' , 'right' , true );},
-  'action-contract-top':    function() { keyMoveResizeEvent('contract' , 'top'   , true );},
-  'action-expand-bottom':   function() { keyMoveResizeEvent('expand'   , 'bottom', true );},
-  'action-expand-left':     function() { keyMoveResizeEvent('expand'   , 'left'  , true );},
-  'action-expand-right':    function() { keyMoveResizeEvent('expand'   , 'right' , true );},
-  'action-expand-top':      function() { keyMoveResizeEvent('expand'   , 'top'   , true );},
-  'action-move-down':       function() { keyMoveResizeEvent('move'     , 'down'  , true );},
-  'action-move-left':       function() { keyMoveResizeEvent('move'     , 'left'  , true );},
-  'action-move-right':      function() { keyMoveResizeEvent('move'     , 'right' , true );},
-  'action-move-up':         function() { keyMoveResizeEvent('move'     , 'up'    , true );}
+const keyBindingGlobalResizes: Bindings = {
+  'action-change-tiling':     () => { keyChangeTiling(); },
+  'action-contract-bottom':   () => { keyMoveResizeEvent('contract' , 'bottom', true );},
+  'action-contract-left':     () => { keyMoveResizeEvent('contract' , 'left'  , true );},
+  'action-contract-right':    () => { keyMoveResizeEvent('contract' , 'right' , true );},
+  'action-contract-top':      () => { keyMoveResizeEvent('contract' , 'top'   , true );},
+  'action-expand-bottom':     () => { keyMoveResizeEvent('expand'   , 'bottom', true );},
+  'action-expand-left':       () => { keyMoveResizeEvent('expand'   , 'left'  , true );},
+  'action-expand-right':      () => { keyMoveResizeEvent('expand'   , 'right' , true );},
+  'action-expand-top':        () => { keyMoveResizeEvent('expand'   , 'top'   , true );},
+  'action-move-down':         () => { keyMoveResizeEvent('move'     , 'down'  , true );},
+  'action-move-left':         () => { keyMoveResizeEvent('move'     , 'left'  , true );},
+  'action-move-right':        () => { keyMoveResizeEvent('move'     , 'right' , true );},
+  'action-move-up':           () => { keyMoveResizeEvent('move'     , 'up'    , true );},
+  'action-move-next-monitor': () => { moveWindowToNextMonitor();},
 }
 
 function changed_settings() {
@@ -388,7 +390,7 @@ export function enable() {
         bindHotkeys(key_bindings_presets);
     }
     if(gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
-        bindHotkeys(key_binding_global_resizes);
+        bindHotkeys(keyBindingGlobalResizes);
     }
 
     if(monitorsChangedConnect) {
@@ -418,7 +420,7 @@ export function disable() {
     
     unbindHotkeys(keyBindings);
     unbindHotkeys(key_bindings_presets);
-    unbindHotkeys(key_binding_global_resizes);
+    unbindHotkeys(keyBindingGlobalResizes);
     if(keyControlBound) {
         unbindHotkeys(key_bindings_tiling);
         keyControlBound = false;
@@ -832,6 +834,24 @@ function getFocusApp(): any {
     return focusedWindow;
 }
 
+function getFocusWindow(): any {
+    const focus_app = tracker.focus_app;
+    if (!focus_app || excludedApplications[focus_app.get_name()]) {
+        return null;
+    }
+
+    return WorkspaceManager.get_active_workspace().list_windows()
+        .find(w => w.has_focus());
+}
+
+function workAreaRectByMonitorIndex(monitorIndex: number) {
+    const monitor = activeMonitors()[monitorIndex];
+    const waLegacy = getWorkArea(monitor, monitorIndex);
+    return new tilespec.Rect(
+      new tilespec.XY(waLegacy.x, waLegacy.y),
+      new tilespec.Size(waLegacy.width, waLegacy.height));
+}
+
 
 // TODO: This type is incomplete. Its definition is based purely on usage in
 // this file and may be missing methods from the Gnome object.
@@ -910,7 +930,7 @@ function unbindKeyControls() {
             unbindHotkeys(key_bindings_presets);
         }
         if(!gridSettings[SETTINGS_MOVERESIZE_ENABLED]){
-            unbindHotkeys(key_binding_global_resizes);
+            unbindHotkeys(keyBindingGlobalResizes);
         }
         keyControlBound = false;
     }
@@ -1006,7 +1026,7 @@ function setInitialSelection() {
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
-function keyMoveResizeEvent(type, key, is_global = false) {
+function keyMoveResizeEvent(type: string, key: string, is_global = false) {
     if (is_global) {
         focusMetaWindow = getFocusApp();
     }
@@ -1271,6 +1291,48 @@ function presetResize(preset) {
     presetState["last_call"] = new Date().getTime();
 
     log("Resize preset last call: " + presetState["last_call"])
+}
+
+// Move the window to the next monitor.
+function moveWindowToNextMonitor() {
+    log("moveWindowToNextMonitor");
+    let window = getFocusWindow();
+    if (!window) {
+        log("No focused window - ignoring keyboard shortcut to move window");
+        return;
+    }
+
+    reset_window(window);
+
+    const numMonitors = activeMonitors().length;
+    if (numMonitors == 0) {
+        return;
+    }
+
+    const ts = tilespec.parsePreset("5x5 1:1 3:3")[0];
+
+    const srcMonitorIndex = window.get_monitor();
+    const dstMonitorIndex = (srcMonitorIndex + 1) % numMonitors;
+
+    const margin = new tilespec.Size(
+        gridSettings[SETTINGS_WINDOW_MARGIN],
+        gridSettings[SETTINGS_WINDOW_MARGIN]);
+    const workArea = workAreaRectByMonitorIndex(dstMonitorIndex).inset(margin);
+    const rect = ts.toFrameRect(workArea);
+    moveWindowToRect(window, rect);
+}
+
+/**
+ * Moves a window to the specified region. This may resize the window as well as
+ * move its origin.
+ */
+function moveWindowToRect(window: any, rect: tilespec.Rect) {
+    window.move_resize_frame(
+        true,
+        rect.origin.x,
+        rect.origin.y,
+        rect.size.width,
+        rect.size.height);
 }
 
 /*****************************************************************

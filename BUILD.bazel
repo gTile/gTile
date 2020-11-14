@@ -71,6 +71,7 @@ ts_library(
         ":hotkeys_lib",
         ":shellversion_lib",
         ":snaptoneighbors_lib",
+        ":tilespec_lib",
     ],
 )
 
@@ -110,6 +111,13 @@ ts_library(
     ],
 )
 
+
+ts_library(
+    name = "tilespec_lib",
+    srcs = ["tilespec.ts"],
+    tsconfig = "//:tsconfig.json",
+)
+
 ts_library(
     name = "entry_lib",
     srcs = ["entry.ts"],
@@ -122,9 +130,11 @@ ts_library(
     testonly = 1,
     srcs = [
         "shellversion.spec.ts",
+        "tilespec.spec.ts",
     ],
     deps = [
         ":shellversion_lib",
+        ":tilespec_lib",
         "@npm//@types/chai",
         "@npm//@types/jasmine",
         "@npm//chai",
