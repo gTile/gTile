@@ -38,9 +38,17 @@ export interface GDesktopAppInfo {
  * Based on https://gjs-docs.gnome.org/clutter4~4_api/clutter.actor.
  */
 export interface ClutterActor {
+    // Functions not documented anywhere:
+    connect(eventName: string, handler: Function): number;
+    disconnect(id: number): void;
+    emit(name: string, ...args: any): void;
+
+    // Methods from the API documentation page.
+
+
     // add_action(action): someType;
     // add_action_with_name(name, action): someType;
-    // add_child(child): someType;
+    add_child(child: ClutterActor): void;
     // add_constraint(constraint): someType;
     // add_constraint_with_name(name, constraint): someType;
     // add_effect(effect): someType;
@@ -61,8 +69,8 @@ export interface ClutterActor {
     // continue_pick(pick_context): someType;
     // create_pango_context(): someType;
     // create_pango_layout(text): someType;
-    // destroy(): someType;
-    // destroy_all_children(): someType;
+    destroy(): void;
+    destroy_all_children(): void;
     // event(event, capture): someType;
     // get_abs_allocation_vertices(): someType;
     // get_accessible(): someType;
@@ -219,11 +227,11 @@ export interface ClutterActor {
     // set_margin_top(margin): someType;
     // set_name(name): someType;
     // set_offscreen_redirect(redirect): someType;
-    // set_opacity(opacity): someType;
+    set_opacity(opacity: number): void;
     // set_opacity_override(opacity): someType;
     // set_pivot_point(pivot_x, pivot_y): someType;
     // set_pivot_point_z(pivot_z): someType;
-    // set_position(x, y): someType;
+    set_position(x: number, y: number): void;
     // set_reactive(reactive): someType;
     // set_request_mode(mode): someType;
     // set_rotation_angle(axis, angle): someType;
@@ -272,7 +280,7 @@ export interface ClutterActor {
     readonly has_pointer: boolean;
     height: number;
     // readonly last_child: Clutter.Actor;
-    // layout_manager:	Clutter.LayoutManager;
+    layout_manager:	LayoutManager;
     // magnification_filter:	Clutter.ScalingFilter;
     readonly mapped:	boolean;
     margin_bottom:	number;
@@ -319,6 +327,27 @@ export interface ClutterActor {
     //y_align:	Clutter.ActorAlign;
     y_expand:	boolean;
     z_position:	number;
+}
+
+interface ClutterContainer {
+    /**
+     * 
+     * @see https://gjs-docs.gnome.org/clutter7~7_api/clutter.container#method-add_actor
+     * @deprecated
+     */
+    add_actor(actor: ClutterActor): void;
+    // child_get_property(child, property, value): someType;
+    // child_notify(child, pspec): someType;
+    // child_set_property(child, property, value): someType;
+    // create_child_meta(actor): someType;
+    // destroy_child_meta(actor): someType;
+    // find_child_by_name(child_name): someType;
+    // get_child_meta(actor): someType;
+    // get_children(): someType;
+    // lower_child(actor, sibling): someType;
+    // raise_child(actor, sibling): someType;
+    // remove_actor(actor): someType;
+    // sort_depth_order(): someType;
 }
 
 interface ShellAppState { }
@@ -574,9 +603,22 @@ export interface BoxLayout extends StWidget, ClutterActor {
 }
 
 /**
+ * @see https://gjs-docs.gnome.org/st10~1.0_api/st.bin
+ */
+export interface StBin extends ClutterContainer, ClutterActor, StWidget {
+}
+
+
+/**
+ * @see https://gjs-docs.gnome.org/st10~1.0_api/st.button
+ */
+export interface StButton extends ClutterContainer, ClutterActor, StWidget, StBin {
+}
+
+/**
  * 
  */
-export interface StWidget {
+export interface StWidget extends ClutterActor {
     // add_accessible_state(state): someTYpe;
     // add_style_class_name(style_class): someTYpe;
     add_style_pseudo_class(pseudo_class: string): void;
@@ -623,4 +665,14 @@ export interface StWidget {
     style: string;
     style_class: string;
     track_hover: boolean;
+}
+
+export interface LayoutManager {
+
+}
+
+export interface SignalMethods {
+    connect(name: string, callback: Function): number;
+    disconnect(id: number): void;
+    emit(name: string, ...args: any): void;
 }

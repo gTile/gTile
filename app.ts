@@ -7,7 +7,7 @@ import { ShellVersion } from './shellversion';
 import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkeys';
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
-import { BoxLayout, MetaWindow, ShellApp, ShellWindowTracker, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
+import { BoxLayout, ClutterActor, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
 
 /*****************************************************************
 
@@ -807,7 +807,7 @@ function toggleTiling() {
 }
 
 
-function getMonitorKey(monitor) {
+function getMonitorKey(monitor: Monitor): string {
     return monitor.x + ":" + monitor.width + ":" + monitor.y + ":" + monitor.height;
 }
 
@@ -1696,26 +1696,52 @@ GridSettingsButton.prototype = {
 
 };
 
-function Grid(monitor_idx, screen, title, cols, rows) {
-    this._init(monitor_idx, screen, title, cols, rows)
-}
+class Grid {
+    connectHideTiling: any;
 
-Grid.prototype = {
-    _init: function (monitor_idx, monitor, title, cols, rows) {
-        this.connectHideTiling = false;
+    readonly tableWidth = 320;
+    readonly tableHeight: number;
+    readonly borderwidth = 2;
+    readonly actor: BoxLayout;
+    readonly bottombar_table_layout: any;
+    readonly animation_time: number;
+    readonly topbar: any; //TopBar;
+    readonly bottombarContainer: StBin;
+    readonly bottombar: StWidget;
+    readonly veryBottomBar: StWidget;
+    readonly veryBottomBarContainer: any;
+    readonly veryBottomBar_table_layout: any;
+
+    readonly tableContainer: any;
+    readonly table: StWidget;
+    readonly table_table_layout: any;
+    monitor: Monitor|null;
+    readonly monitor_idx: number;
+    x: number;
+    y: number;
+    rows: number;
+    cols: number;
+    title: string;
+    readonly normalScaleX: number;
+    readonly normalScaleY: number;
+    interceptHide: boolean;
+    isEntered: boolean;
+    elementsDelegate: GridElementDelegate|null;
+    elements: GridElement[][];
+
+
+    constructor(monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
         let workArea = getWorkArea(monitor, monitor_idx);
 
-        this.tableWidth = 320;
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
-        this.borderwidth = 2;
-
+        
         this.actor = new St.BoxLayout({
             vertical: true,
             style_class: 'grid-panel',
             reactive: true,
             can_focus: true,
             track_hover: true
-        }) as BoxLayout;
+        });
 
         log("Grid connect enter-event leave-envent ");
         this.actor.connect('enter-event', Lang.bind(this, this._onMouseEnter));
@@ -1809,10 +1835,10 @@ Grid.prototype = {
         this.table_table_layout.set_column_homogeneous(true);
         this.tableContainer.add_actor(this.table);
 
-        this.actor.add_actor(this.topbar.actor);
-        this.actor.add_actor(this.tableContainer);
-        this.actor.add_actor(this.bottombarContainer);
-        this.actor.add_actor(this.veryBottomBarContainer);
+        this.actor.add_child(this.topbar.actor);
+        this.actor.add_child(this.tableContainer);
+        this.actor.add_child(this.bottombarContainer);
+        this.actor.add_child(this.veryBottomBarContainer);
 
         this.monitor = monitor;
         this.monitor_idx = monitor_idx;
@@ -1852,9 +1878,9 @@ Grid.prototype = {
 
         this.normalScaleY = this.actor.scale_y;
         this.normalScaleX = this.actor.scale_x;
-    },
+    }
 
-    _displayElements: function () {
+    _displayElements() {
         log("Grid _displayElements " + this.cols + ":" + this.rows);
         this.elements = new Array();
 
@@ -1872,18 +1898,19 @@ Grid.prototype = {
                 let element = new GridElement(this.monitor, width, height, c, r);
 
                 this.elements[r][c] = element;
-                element.actor._delegate = this.elementsDelegate;
+                log("hack: undocument property element.actor._delegate property accesseed in _displayElements");
+                (element.actor as any)._delegate = this.elementsDelegate;
                 this.table_table_layout.attach(element.actor, c, r, 1, 1);
                 element.show();
             }
         }
-    },
+    }
 
-    forceGridElementDelegate: function (x, y, w, h) {
+    forceGridElementDelegate(x, y, w, h) {
         this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
-    },
+    }
 
-    refresh: function () {
+    refresh() {
         log("Grid.refresh from " + this.cols + ":" + this.rows + " to " + nbCols + ":" + nbRows);
         //this.elementsDelegate._logActiveActors("Grid refresh active actors");
         this.elementsDelegate._resetGrid();
@@ -1896,15 +1923,15 @@ Grid.prototype = {
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
-    },
+    }
 
-    set_position: function (x, y) {
+    set_position(x: number, y: number): void {
         this.x = x;
         this.y = y;
         this.actor.set_position(x, y);
-    },
+    }
 
-    show: function () {
+    show() {
         this.interceptHide = true;
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0;
@@ -1935,9 +1962,9 @@ Grid.prototype = {
         }
 
         this.interceptHide = false;
-    },
+    }
 
-    hide: function (immediate) {
+    hide(immediate) {
         log("hide " + immediate);
         this.elementsDelegate.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0;
@@ -1959,44 +1986,44 @@ Grid.prototype = {
             this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
-    },
+    }
 
-    _onHideComplete: function () {
-    },
+    _onHideComplete() {
+    }
 
-    _onShowComplete: function () {
-    },
+    _onShowComplete() {
+    }
 
-    _onResize: function (actor, event) {
+    _onResize(actor, event) {
         log("resize-done: " + actor);
         updateRegions();
         if (gridSettings[SETTINGS_AUTO_CLOSE]) {
             log("Emitting hide-tiling");
             this.emit('hide-tiling');
         }
-    },
+    }
 
-    _onMouseEnter: function () {
+    _onMouseEnter() {
         if (!this.isEntered) {
             this.elementsDelegate.reset();
             this.isEntered = true;
         }
-    },
+    }
 
-    _onMouseLeave: function () {
+    _onMouseLeave() {
         let [x, y, mask] = global.get_pointer();
         if (this.elementsDelegate && (x <= this.actor.x || x >= (this.actor.x + this.actor.width)) || (y <= this.actor.y || y >= (this.actor.y + this.actor.height))) {
             this.isEntered = false;
             this.elementsDelegate.reset();
             refreshGrids();
         }
-    },
+    }
 
-    _onSettingsButton: function () {
+    _onSettingsButton() {
         this.elementsDelegate.reset();
-    },
+    }
 
-    _destroy: function () {
+    _destroy() {
         log("Grid _destroy");
         for (let r in this.elements) {
             for (let c in this.elements[r]) {
@@ -2008,34 +2035,33 @@ Grid.prototype = {
         this.topbar._destroy();
 
         this.monitor = null;
-        this.rows = null;
-        this.title = null;
-        this.cols = null;
+        this.rows = 0;
+        this.title = "";
+        this.cols = 0;
         log("Disconnect hide-tiling");
         this.disconnect(this.connectHideTiling);
     }
+
+    // Methods replaced by Signals.addSignalMethods.
+    connect(name: string, callback: Function): number{ return -1 }
+    disconnect(id: number): void{}
+    emit(name: string, ...args: any): void{}
 };
 
 Signals.addSignalMethods(Grid.prototype);
+class GridElementDelegate {
+    activated: boolean = false;
+    first: GridElement|null = null;
+    currentElement: GridElement|null = null;
+    activatedActors: GridElement[] = [];
 
-function GridElementDelegate() {
-    this._init();
-}
+    constructor() {}
 
-GridElementDelegate.prototype = {
+    _allSelected() {
+        return (this.activatedActors.length === (nbCols * nbRows));
+    }
 
-    _init: function () {
-        this.activated = false;
-        this.first = false;
-        this.currentElement = false;
-        this.activatedActors = false;
-    },
-
-    _allSelected: function () {
-        return (this.activatedActors.length == (nbCols * nbRows));
-    },
-
-    _onButtonPress: function (gridElement) {
+    _onButtonPress(gridElement: GridElement) {
         log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
         //this._logActiveActors("GridElementDelegate _onButtonPress active actors");
         if (!this.currentElement) {
@@ -2071,22 +2097,22 @@ GridElementDelegate.prototype = {
 
             this._resizeDone();
         }
-    },
+    }
 
-    _resizeDone: function () {
+    _resizeDone() {
         log("resizeDone, emitting signal resize-done");
         this.emit('resize-done');
-    },
+    }
 
-    reset: function () {
+    reset() {
         this._resetGrid();
 
         this.activated = false;
-        this.first = false;
-        this.currentElement = false;
-    },
+        this.first = null;
+        this.currentElement = null;
+    }
 
-    _resetGrid: function () {
+    _resetGrid() {
         this._hideArea();
         if (this.currentElement) {
             this.currentElement._deactivate();
@@ -2096,9 +2122,9 @@ GridElementDelegate.prototype = {
             this.activatedActors[act]._deactivate();
         }
         this.activatedActors = new Array();
-    },
+    }
 
-    _getVarFromGridElement: function (fromGridElement, toGridElement) {
+    _getVarFromGridElement(fromGridElement, toGridElement) {
         let minX = Math.min(fromGridElement.coordx, toGridElement.coordx);
         let maxX = Math.max(fromGridElement.coordx, toGridElement.coordx);
 
@@ -2106,9 +2132,9 @@ GridElementDelegate.prototype = {
         let maxY = Math.max(fromGridElement.coordy, toGridElement.coordy);
 
         return [minX, maxX, minY, maxY];
-    },
+    }
 
-    refreshGrid: function (fromGridElement, toGridElement) {
+    refreshGrid(fromGridElement, toGridElement) {
         this._resetGrid();
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
@@ -2123,9 +2149,9 @@ GridElementDelegate.prototype = {
         }
 
         this._displayArea(fromGridElement, toGridElement);
-    },
+    }
 
-    _computeAreaPositionSize: function (fromGridElement, toGridElement) {
+    _computeAreaPositionSize(fromGridElement, toGridElement) {
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
         let monitor = fromGridElement.monitor;
@@ -2138,18 +2164,18 @@ GridElementDelegate.prototype = {
         let areaY = workArea.y + Math.round((minY * (workArea.height / nbRows)));
 
         return [areaX, areaY, areaWidth, areaHeight];
-    },
+    }
 
-    forceArea: function (fromGridElement, toGridElement) {
+    forceArea(fromGridElement, toGridElement) {
         let areaWidth, areaHeight, areaX, areaY;
         [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
         gridWidget.width = areaWidth;
         gridWidget.height = areaHeight;
         gridWidget.x = areaX;
         gridWidget.y = areaY;
-    },
+    }
 
-    _displayArea: function (fromGridElement, toGridElement) {
+    _displayArea(fromGridElement, toGridElement) {
         if (!gridWidget) {
             return;
         }
@@ -2173,13 +2199,13 @@ GridElementDelegate.prototype = {
             gridWidget.x = areaX;
             gridWidget.y = areaY;
         }
-    },
+    }
 
-    _hideArea: function () {
+    _hideArea() {
         gridWidget.remove_style_pseudo_class('activate');
-    },
+    }
 
-    _onHoverChanged: function (gridElement) {
+    _onHoverChanged(gridElement) {
         log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if (this.activated) {
             this.refreshGrid(this.first, gridElement);
@@ -2194,34 +2220,34 @@ GridElementDelegate.prototype = {
             this.currentElement._activate();
             this._displayArea(gridElement, gridElement);
         }
-    },
+    }
 
-    _destroy: function () {
+    _destroy() {
         this.activated = null;
         this.first = null;
         this.currentElement = null;
         this.activatedActors = null;
     }
+
+    // Methods replaced by Signals.addSignalMethods.
+    connect(name: string, callback: Function): number{ return -1 }
+    disconnect(id: number): void{}
+    emit(name: string, ...args: any): void{}
 };
 
 Signals.addSignalMethods(GridElementDelegate.prototype);
 
-function GridElement(monitor, width, height, coordx, coordy) {
-    this._init(monitor, width, height, coordx, coordy);
-}
+class GridElement{
+    readonly actor: StButton;
+    readonly id: string;
+    readonly hoverConnect: number;
+    active: boolean;
 
-GridElement.prototype = {
-
-    _init: function (monitor, width, height, coordx, coordy) {
-        this.actor = new St.Button({ style_class: 'table-element', reactive: true, can_focus: true, track_hover: true })
+    constructor(readonly monitor: Monitor, readonly width: number, readonly height: number, readonly coordx: number, readonly coordy: number) {
+        this.actor = new St.Button({ style_class: 'table-element', reactive: true, can_focus: true, track_hover: true });
 
         this.actor.visible = false;
         this.actor.opacity = 0;
-        this.monitor = monitor;
-        this.coordx = coordx;
-        this.coordy = coordy;
-        this.width = width;
-        this.height = height;
 
         this.id = getMonitorKey(monitor) + "-" + coordx + ":" + coordy;
 
@@ -2229,55 +2255,51 @@ GridElement.prototype = {
         this.hoverConnect = this.actor.connect('notify::hover', Lang.bind(this, this._onHoverChanged));
 
         this.active = false;
-    },
+    }
 
-    show: function () {
+    show() {
         this.actor.opacity = 255;
         this.actor.visible = true;
-    },
+    }
 
-    hide: function () {
+    hide() {
         this.actor.opacity = 0;
         this.actor.visible = false;
-    },
+    }
 
-    _onButtonPress: function () {
-        this.actor._delegate._onButtonPress(this);
-    },
+    _onButtonPress() {
+        log("hack - accessing undocumented _delegate property in _onButtonPress");
+        (this.actor as any)._delegate._onButtonPress(this);
+    }
 
-    _onHoverChanged: function () {
-        this.actor._delegate._onHoverChanged(this);
-    },
+    _onHoverChanged() {
+        log("hack - accessing undocumented _delegate property in _onHoverChanged");
+        (this.actor as any)._delegate._onHoverChanged(this);
+    }
 
-    _activate: function () {
+    _activate() {
         if (!this.active) {
             this.actor.add_style_pseudo_class('activate');
             this.active = true;
         }
-    },
+    }
 
-    _deactivate: function () {
+    _deactivate() {
         if (this.active) {
             this.actor.remove_style_pseudo_class('activate');
             this.active = false;
         }
-    },
+    }
 
-    _clean: function () {
+    _clean() {
         Main.uiGroup.remove_actor(gridWidget);
-    },
+    }
 
-    _disconnect: function () {
+    _disconnect() {
         this.actor.disconnect(this.hoverConnect);
-    },
+    }
 
-    _destroy: function () {
-        this.monitor = null;
-        this.coordx = null;
-        this.coordy = null;
-        this.width = null;
-        this.height = null;
-
-        this.active = null;
+    _destroy() {
+        this.active = false;
     }
 };
