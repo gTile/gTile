@@ -35,8 +35,6 @@ Generally,
         ```
 3. If 2 succeeded, hit `Alt`+`F2`, type `r`, and hit enter.
 
-A Makefile has been included for common tasks. Use `make help` for more info.
-
 #### Dependency management
 
 For the most part, look at `WORKSPACE` and `BUILD.bazel` to inspect the
