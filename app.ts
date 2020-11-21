@@ -86,7 +86,7 @@ let gridShowing: boolean = false;
 let gridWidget: BoxLayout|null;
 
 let launcher;
-let grids;
+const grids: Record<string, Grid> = {};
 let tracker: ShellWindowTracker;
 let nbCols = 0;
 let nbRows = 0;
@@ -447,7 +447,6 @@ function resetFocusMetaWindow() {
 function initGrids() {
     log("initGrids");
     log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
-    grids = new Array();
     const monitors = activeMonitors();
     for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
         log("New Grid for monitor " + monitorIdx);
@@ -456,7 +455,7 @@ function initGrids() {
 
         let grid = new Grid(monitorIdx, monitor, "gTile", nbCols, nbRows);
 
-        let key = getMonitorKey(monitor);
+        const key = getMonitorKey(monitor);
         grids[key] = grid;
         log("initGrids adding grid key " + key);
 
@@ -471,8 +470,8 @@ function initGrids() {
 
 function destroyGrids() {
     log("destroyGrids");
-    for (let grid_idx in grids) {
-        let grid = grids[grid_idx];
+    for (let gridKey in grids) {
+        const grid = grids[gridKey];
         grid.hide(true);
         Main.layoutManager.removeChrome(grid.actor);
         log("Disconnect hide-tiling for monitor " + grid.monitor_idx);
@@ -483,9 +482,9 @@ function destroyGrids() {
 
 function refreshGrids() {
     log("refreshGrids");
-    for (let grid_idx in grids) {
-        let grid = grids[grid_idx];
-        log("refreshGrids calling refresh on " + grid_idx);
+    for (let gridIdx in grids) {
+        const grid = grids[gridIdx];
+        log("refreshGrids calling refresh on " + gridIdx);
         grid.refresh();
     }
     log("refreshGrids done");
@@ -499,12 +498,15 @@ function moveGrids() {
 
     let window = focusMetaWindow;
     if (window) {
-        for (var gridIdx in grids) {
-            let grid = grids[gridIdx];
+        for (let gridKey in grids) {
+            let grid = grids[gridKey];
             let pos_x;
             let pos_y;
 
-            let monitor = grid.monitor;
+            const monitor = grid.monitor;
+            if (!monitor) {
+                return;
+            }
             if (window.get_monitor() == grid.monitor_idx) {
                 pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
                 pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
@@ -733,7 +735,7 @@ function showTiling() {
         for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
             let monitor = monitors[monitorIdx];
             let key = getMonitorKey(monitor);
-            let grid = grids[key];
+            const grid = grids[key];
 
             let window = getFocusApp();
             let pos_x;
@@ -1726,8 +1728,8 @@ class Grid {
     readonly normalScaleY: number;
     interceptHide: boolean;
     isEntered: boolean;
-    elementsDelegate: GridElementDelegate|null;
-    elements: GridElement[][];
+    elementsDelegate: GridElementDelegate|null = null;
+    elements: GridElement[][] = [];
 
 
     constructor(monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
@@ -1881,6 +1883,9 @@ class Grid {
     }
 
     _displayElements() {
+        if (this.monitor === null)  {
+            return;
+        }
         log("Grid _displayElements " + this.cols + ":" + this.rows);
         this.elements = new Array();
 
@@ -2004,6 +2009,7 @@ class Grid {
     }
 
     _onMouseEnter() {
+        log("onMouseEnter");
         if (!this.isEntered) {
             this.elementsDelegate.reset();
             this.isEntered = true;
@@ -2011,6 +2017,7 @@ class Grid {
     }
 
     _onMouseLeave() {
+        log("onMouseLeave");
         let [x, y, mask] = global.get_pointer();
         if (this.elementsDelegate && (x <= this.actor.x || x >= (this.actor.x + this.actor.width)) || (y <= this.actor.y || y >= (this.actor.y + this.actor.height))) {
             this.isEntered = false;
@@ -2124,7 +2131,7 @@ class GridElementDelegate {
         this.activatedActors = new Array();
     }
 
-    _getVarFromGridElement(fromGridElement, toGridElement) {
+    _getVarFromGridElement(fromGridElement: GridElement, toGridElement: GridElement) {
         let minX = Math.min(fromGridElement.coordx, toGridElement.coordx);
         let maxX = Math.max(fromGridElement.coordx, toGridElement.coordx);
 
@@ -2134,7 +2141,7 @@ class GridElementDelegate {
         return [minX, maxX, minY, maxY];
     }
 
-    refreshGrid(fromGridElement, toGridElement) {
+    refreshGrid(fromGridElement: GridElement, toGridElement: GridElement) {
         this._resetGrid();
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
@@ -2151,11 +2158,14 @@ class GridElementDelegate {
         this._displayArea(fromGridElement, toGridElement);
     }
 
-    _computeAreaPositionSize(fromGridElement, toGridElement) {
+    _computeAreaPositionSize(fromGridElement: GridElement, toGridElement: GridElement) {
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
         let monitor = fromGridElement.monitor;
-        let workArea = getWorkAreaByMonitor(monitor);
+        const workArea = getWorkAreaByMonitor(monitor);
+        if (!workArea) {
+            return;
+        }
 
         let areaWidth = Math.round((workArea.width / nbCols) * ((maxX - minX) + 1));
         let areaHeight = Math.round((workArea.height / nbRows) * ((maxY - minY) + 1));
@@ -2166,7 +2176,10 @@ class GridElementDelegate {
         return [areaX, areaY, areaWidth, areaHeight];
     }
 
-    forceArea(fromGridElement, toGridElement) {
+    forceArea(fromGridElement: GridElement, toGridElement: GridElement) {
+        if (!gridWidget) {
+            return;
+        }
         let areaWidth, areaHeight, areaX, areaY;
         [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
         gridWidget.width = areaWidth;
@@ -2175,7 +2188,7 @@ class GridElementDelegate {
         gridWidget.y = areaY;
     }
 
-    _displayArea(fromGridElement, toGridElement) {
+    _displayArea(fromGridElement: GridElement, toGridElement: GridElement) {
         if (!gridWidget) {
             return;
         }
@@ -2205,13 +2218,15 @@ class GridElementDelegate {
         gridWidget.remove_style_pseudo_class('activate');
     }
 
-    _onHoverChanged(gridElement) {
+    _onHoverChanged(gridElement: GridElement) {
         log("GridElementDelegate _onHoverChange " + gridElement.coordx + ":" + gridElement.coordy);
         if (this.activated) {
+            log("GridElementDelegate _onHoverChange/not active: " + gridElement.coordx + ":" + gridElement.coordy);
             this.refreshGrid(this.first, gridElement);
             this.currentElement = gridElement;
         }
         else if (!this.currentElement || gridElement.id != this.currentElement.id) {
+            log("GridElementDelegate _onHoverChange/active: " + gridElement.coordx + ":" + gridElement.coordy);
             if (this.currentElement) {
                 this.currentElement._deactivate();
             }
@@ -2219,6 +2234,9 @@ class GridElementDelegate {
             this.currentElement = gridElement;
             this.currentElement._activate();
             this._displayArea(gridElement, gridElement);
+        } else {
+            log("GridElementDelegate _onHoverChange/else: " + gridElement.coordx + ":" + gridElement.coordy);
+            
         }
     }
 

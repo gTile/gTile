@@ -61,7 +61,7 @@ export class ShellVersion {
     }
 
     print_version  () {
-        log("Init gnome-shell version " + this.rawVersion + " major " + this.major + " minor " + this.minor);                      
+        log("Init gnome-shell version " + this.rawVersion + " major " + this.major + " minor " + this.minor);
     }
 };
 

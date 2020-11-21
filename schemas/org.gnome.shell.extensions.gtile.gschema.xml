@@ -33,6 +33,10 @@
 			<default><![CDATA[['<Shift>Left']]]></default>
 			<summary>Resize window - increase width.</summary>
 		</key>
+		<key type="as" name="resize-right">
+			<default><![CDATA[['<Shift>Right']]]></default>
+			<summary>Resize window - decrease width.</summary>
+		</key>
 		<key type="as" name="resize-up">
 			<default><![CDATA[['<Shift>Up']]]></default>
 			<summary>Resize window - increase height.</summary>
