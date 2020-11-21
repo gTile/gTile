@@ -28,11 +28,8 @@ import { BoxLayout, ClutterActor, MetaWindow, ShellApp, ShellWindowTracker, StBi
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
-const WindowManager = imports.ui.windowManager;
-const MessageTray = imports.ui.messageTray;
 const Lang = imports.lang;
 const PanelMenu = imports.ui.panelMenu;
-const DND = imports.ui.dnd;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
@@ -86,13 +83,11 @@ let launcher;
 let tracker: ShellWindowTracker;
 let nbCols = 0;
 let nbRows = 0;
-let focusMetaWindow: any = false;
-let focusWindowActor: any = false;
+let focusMetaWindow: Window | null = null;
 let focusConnect: any = false;
 let gridSettings = new Object();
 let settings: SettingsObject = Settings.get();
 settings.connect('changed', changed_settings);
-let toggleSettingListener;
 let keyControlBound: any = false;
 let enabled = false;
 let monitorsChangedConnect: any = false;
@@ -281,6 +276,7 @@ class App {
             Main.layoutManager.removeChrome(grid.actor);
             log("Disconnect hide-tiling for monitor " + grid.monitor_idx);
             grid.disconnect(grid.connectHideTiling);
+            delete this.gridsByMonitorKey[gridKey];
         }
         log("destroyGrids done");
     }
@@ -371,10 +367,11 @@ class App {
         // TODO(#168): See https://github.com/gTile/gTile/issues/168. Without
         // these two lines, the grid UI does not properly respond to mouseover
         // and other events except for the first time it is shown.
+        log("showTiling with fix");
         this.destroyGrids();
         this.initGrids(this.gridWidget!);
 
-        log("issue#168/showTiling");
+        log("issue#168/showTiling with fix");
         focusMetaWindow = getFocusApp();
         if (!focusMetaWindow) {
             log("No focus window");
@@ -719,7 +716,7 @@ export function disable() {
 
 function resetFocusMetaWindow() {
     log("resetFocusMetaWindow");
-    focusMetaWindow = false;
+    focusMetaWindow = null;
 }
 
 function reset_window(metaWindow: Window) {
@@ -789,16 +786,6 @@ function move_resize_window_with_margins(metaWindow, x, y, width, height) {
 
     metaWindow.move_frame(true, x, y);
     metaWindow.move_resize_frame(true, x, y, width, height);
-}
-
-function _isMyWindow(win) {
-    return (this.focusMetaWindow == win.meta_window);
-}
-
-function getWindowActor() {
-    let windows = global.get_window_actors().filter(this._isMyWindow, this);
-    focusWindowActor = windows[0];
-
 }
 
 function getNotFocusedWindowsOfMonitor(monitor: Monitor) {
@@ -1433,25 +1420,23 @@ TopBar.prototype = {
     },
 };
 
-function ToggleSettingsButtonListener() {
-    this._init();
-};
+interface ToggleSettingsButtonListenerActor extends ClutterActor {
+    _update(): void;
+}
 
-ToggleSettingsButtonListener.prototype = {
-    _init: function () {
-        this.actors = new Array();
-    },
+class ToggleSettingsButtonListener {
+    private readonly actors: ToggleSettingsButtonListenerActor[] = [];
+    constructor() {}
 
-    addActor: function (actor) {
+    addActor(actor: ToggleSettingsButtonListenerActor) {
         log("ToggleSettingsButtonListener Connect update-toggle");
         actor.connect('update-toggle', Lang.bind(this, this._updateToggle));
         this.actors.push(actor);
-    },
+    }
 
-    _updateToggle: function () {
+    _updateToggle() {
         log("ToggleSettingsButtonListener _updateToggle");
-        for (let actorIdx in this.actors) {
-            let actor = this.actors[actorIdx];
+        for (let actor of this.actors) {
             actor._update();
         }
     }
@@ -1778,10 +1763,14 @@ class Grid {
             track_hover: true
         });
 
-        log("Grid connect enter-event leave-envent ");
-        this.actor.connect('enter-event', Lang.bind(this, this._onMouseEnter));
-        this.actor.connect('leave-event', Lang.bind(this, this._onMouseLeave));
+        log(`created actor for monitor ${monitor_idx}: ${this.actor}`)
 
+        log("Grid connect enter-event leave-envent BEGIN");
+        // TODO: disconnect these events on teardown.
+        this.actor.connect('enter-event', () => this._onMouseEnter());
+        this.actor.connect('leave-event', () => this._onMouseLeave());
+        log("Grid connect enter-event leave-envent FINISH");
+        
         this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
 
         this.topbar = new TopBar(title);
@@ -1845,7 +1834,7 @@ class Grid {
             //button = new GridSettingsButton(button.text,button.cols,button.rows);
             this.bottombar_table_layout.attach(button.actor, colNum, rowNum, 1, 1);
             log("Connecting grid settings button " + index + " : " + button.text);
-            button.actor.connect('notify::hover', Lang.bind(this, this._onSettingsButton));
+            button.actor.connect('notify::hover', () => this._onSettingsButton());
             colNum++;
         }
 
@@ -1885,9 +1874,7 @@ class Grid {
 
         let nbTotalSettings = 4;
 
-        if (!toggleSettingListener) {
-            toggleSettingListener = new ToggleSettingsButtonListener();
-        }
+        const toggleSettingListener = new ToggleSettingsButtonListener();
 
         let toggle = new ToggleSettingsButton("animation", SETTINGS_ANIMATION);
         this.veryBottomBar_table_layout.attach(toggle.actor, 0, 0, 1, 1);
@@ -2121,6 +2108,10 @@ class GridElementDelegate {
             //before doing anything with the window it must be unmaximized
             //if so move the window then maximize instead of change size
             //if not move the window and change size
+
+            if (!focusMetaWindow) {
+                return;
+            }
 
             reset_window(focusMetaWindow);
 

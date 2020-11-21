@@ -446,7 +446,7 @@ export interface Window {
     get_gtk_window_object_path(): string;
     // get_icon_geometry(): [boolean, Rectangle];
     get_id(): number;
-    // get_layer(): StackLayer;
+    get_layer(): StackLayer;
     get_maximized(): boolean;
 
     /**
@@ -554,6 +554,8 @@ export interface Window {
     readonly window_type: WindowType;
     readonly wm_class: string;
 }
+
+export interface StackLayer {}
 
 /**
  * From https://gjs-docs.gnome.org/meta4~4_api/meta.frametype.
