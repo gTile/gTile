@@ -82,11 +82,7 @@ interface SettingsObject {
     connect(eventName: string, callback: () => void): void;
 };
 
-let gridShowing: boolean = false;
-let gridWidget: BoxLayout|null;
-
 let launcher;
-const grids: Record<string, Grid> = {};
 let tracker: ShellWindowTracker;
 let nbCols = 0;
 let nbRows = 0;
@@ -116,8 +112,8 @@ let excludedApplications = new Array(
 );
 
 const keyBindings: Bindings = {
-    'show-toggle-tiling': function () { toggleTiling(); },
-    'show-toggle-tiling-alt': function () { toggleTiling(); }
+    'show-toggle-tiling': function () { globalApp.toggleTiling(); },
+    'show-toggle-tiling-alt': function () { globalApp.toggleTiling(); }
 };
 
 const key_bindings_tiling: Bindings = {
@@ -203,6 +199,344 @@ const keyBindingGlobalResizes: Bindings = {
     'action-move-next-monitor': () => { moveWindowToNextMonitor(); },
 }
 
+class App {
+    private readonly gridsByMonitorKey: Record<string, Grid> = {};
+    private gridShowing: boolean = false;
+    private gridWidget: BoxLayout|null = null;
+
+    enable() {
+        this.gridShowing = false;
+        tracker = Shell.WindowTracker.get_default();
+
+        initSettings();
+
+        const gridWidget: BoxLayout = (new St.BoxLayout({ style_class: 'grid-preview' }));
+        this.gridWidget = gridWidget;
+        Main.uiGroup.add_actor(gridWidget);
+        this.initGrids(gridWidget);
+
+        log("Create Button on Panel");
+        launcher = new GTileStatusButton('tiling-icon');
+
+        if (gridSettings[SETTINGS_SHOW_ICON]) {
+            Main.panel.addToStatusArea("GTileStatusButton", launcher);
+        }
+
+        bindHotkeys(keyBindings);
+        if (gridSettings[SETTINGS_GLOBAL_PRESETS]) {
+            bindHotkeys(key_bindings_presets);
+        }
+        if (gridSettings[SETTINGS_MOVERESIZE_ENABLED]) {
+            bindHotkeys(keyBindingGlobalResizes);
+        }
+
+        if (monitorsChangedConnect) {
+            Main.layoutManager.disconnect(monitorsChangedConnect);
+        }
+
+        log("Connecting monitors-changed");
+        monitorsChangedConnect = Main.layoutManager.connect('monitors-changed', () => {
+            log("Reinitializing grids on monitors-changed");
+            this.destroyGrids();
+            this.initGrids(gridWidget);
+        });
+
+        enabled = true;
+        log("Extention enable completed");
+    }
+
+    getGrid(monitor: Monitor): Grid|null {
+        return this.gridsByMonitorKey[getMonitorKey(monitor)];
+    }
+
+    initGrids(gridWidget: BoxLayout) {
+        log("initGrids");
+        log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
+        const monitors = activeMonitors();
+        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
+            log("New Grid for monitor " + monitorIdx);
+    
+            let monitor = monitors[monitorIdx];
+    
+            let grid = new Grid(gridWidget, monitorIdx, monitor, "gTile", nbCols, nbRows);
+    
+            const key = getMonitorKey(monitor);
+            this.gridsByMonitorKey[key] = grid;
+            log("initGrids adding grid key " + key);
+    
+            Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
+            grid.actor.set_opacity(0);
+            grid.hide(true);
+            log("Connect hide-tiling for monitor " + monitorIdx);
+            grid.connectHideTiling = grid.connect('hide-tiling', () => this.hideTiling());
+        }
+        log("Init grid done");
+    }
+    
+    destroyGrids() {
+        log("destroyGrids");
+        for (let gridKey in this.gridsByMonitorKey) {
+            const grid = this.gridsByMonitorKey[gridKey];
+            grid.hide(true);
+            Main.layoutManager.removeChrome(grid.actor);
+            log("Disconnect hide-tiling for monitor " + grid.monitor_idx);
+            grid.disconnect(grid.connectHideTiling);
+        }
+        log("destroyGrids done");
+    }
+    
+    refreshGrids() {
+        log("refreshGrids");
+        for (let gridIdx in this.gridsByMonitorKey) {
+            const grid = this.gridsByMonitorKey[gridIdx];
+            log("refreshGrids calling refresh on " + gridIdx);
+            grid.refresh();
+        }
+        log("refreshGrids done");
+    }
+    
+    moveGrids() {
+        log("moveGrids");
+        if (!this.gridShowing) {
+            return;
+        }
+    
+        let window = focusMetaWindow;
+        if (window) {
+            for (let gridKey in this.gridsByMonitorKey) {
+                let grid = this.gridsByMonitorKey[gridKey];
+                let pos_x;
+                let pos_y;
+    
+                const monitor = grid.monitor;
+                if (!monitor) {
+                    return;
+                }
+                if (window.get_monitor() == grid.monitor_idx) {
+                    pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
+                    pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
+    
+                    let [mouse_x, mouse_y, mask] = global.get_pointer();
+                    let act_x = pos_x - grid.actor.width / 2;
+                    let act_y = pos_y - grid.actor.height / 2;
+                    if (mouse_x >= act_x
+                        && mouse_x <= act_x + grid.actor.width
+                        && mouse_y >= act_y
+                        && mouse_y <= act_y + grid.actor.height) {
+                        log("Mouse x " + mouse_x + " y " + mouse_y +
+                            " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
+                            ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
+                        pos_x = mouse_x + grid.actor.width / 2;
+                        pos_y = mouse_y + grid.actor.height / 2;
+                    }
+                }
+                else {
+                    pos_x = monitor.x + monitor.width / 2;
+                    pos_y = monitor.y + monitor.height / 2;
+                }
+    
+                pos_x = Math.floor(pos_x - grid.actor.width / 2);
+                pos_y = Math.floor(pos_y - grid.actor.height / 2);
+    
+                if (window.get_monitor() == grid.monitor_idx) {
+                    pos_x = (pos_x < monitor.x) ? monitor.x : pos_x;
+                    pos_x = ((pos_x + grid.actor.width) > (monitor.width + monitor.x)) ? monitor.x + monitor.width - grid.actor.width : pos_x;
+                    pos_y = (pos_y < monitor.y) ? monitor.y : pos_y;
+                    pos_y = ((pos_y + grid.actor.height) > (monitor.height + monitor.y)) ? monitor.y + monitor.height - grid.actor.height : pos_y;
+                }
+    
+                let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
+    
+                (grid.actor as any).ease({
+                    time: time,
+                    x: pos_x,
+                    y: pos_y,
+                    transition: Clutter.AnimationMode.EASE_OUT_QUAD,
+                    /*onComplete:updateRegions*/
+                });
+            }
+        }
+    }
+    
+    updateRegions() {
+        /*Main.layoutManager._chrome.updateRegions();*/
+        log("updateRegions");
+        this.refreshGrids();
+        for (let idx in this.gridsByMonitorKey) {
+            this.gridsByMonitorKey[idx].elementsDelegate?.reset();
+        }
+    }
+
+    showTiling() {
+        // TODO(#168): See https://github.com/gTile/gTile/issues/168. Without
+        // these two lines, the grid UI does not properly respond to mouseover
+        // and other events except for the first time it is shown.
+        this.destroyGrids();
+        this.initGrids(this.gridWidget!);
+
+        log("issue#168/showTiling");
+        focusMetaWindow = getFocusApp();
+        if (!focusMetaWindow) {
+            log("No focus window");
+            return;
+        }
+        const wmType = focusMetaWindow.get_window_type();
+        const layer = focusMetaWindow.get_layer();
+
+        if (!this.gridWidget) {
+            return;
+        }
+
+        this.gridWidget.visible = true;
+        if (focusMetaWindow && wmType != WindowType.DESKTOP && layer > 0) {
+            log("issue#168/focusMetaWindow");
+            const monitors = activeMonitors();
+            for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
+                let monitor = monitors[monitorIdx];
+                const grid = this.getGrid(monitor);
+
+                if (grid === null) {
+                    log(`issue#168/showTiling ERROR: did not find grid for monitor ${getMonitorKey(monitor)}`);
+                    continue;
+                }
+
+                let window = getFocusApp();
+                let pos_x;
+                let pos_y;
+                if (window && window.get_monitor() == monitorIdx) {
+                    log("issue#168/matched monitor");
+                    pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
+                    pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
+                    let [mouse_x, mouse_y, mask] = global.get_pointer();
+                    let act_x = pos_x - grid.actor.width / 2;
+                    let act_y = pos_y - grid.actor.height / 2;
+                    if (mouse_x >= act_x
+                        && mouse_x <= act_x + grid.actor.width
+                        && mouse_y >= act_y
+                        && mouse_y <= act_y + grid.actor.height) {
+                        log("Mouse x " + mouse_x + " y " + mouse_y +
+                            " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
+                            ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
+                        pos_x = mouse_x + grid.actor.width / 2;
+                        pos_y = mouse_y + grid.actor.height / 2;
+                    }
+                }
+                else {
+                    pos_x = monitor.x + monitor.width / 2;
+                    pos_y = monitor.y + monitor.height / 2;
+                }
+
+                grid.set_position(
+                    Math.floor(pos_x - grid.actor.width / 2),
+                    Math.floor(pos_y - grid.actor.height / 2)
+                );
+
+                grid.show();
+            }
+
+            this.gridShowing = true;
+            this.onFocus();
+            launcher.activate();
+            bindKeyControls();
+        } else {
+            log("issue#168/no focus window");
+        }
+
+        this.moveGrids();
+    }
+
+    disable() {
+        log("Extension disable begin");
+        enabled = false;
+
+        if (monitorsChangedConnect) {
+            log("Disconnecting monitors-changed");
+            Main.layoutManager.disconnect(monitorsChangedConnect);
+            monitorsChangedConnect = false;
+        }
+
+        unbindHotkeys(keyBindings);
+        unbindHotkeys(key_bindings_presets);
+        unbindHotkeys(keyBindingGlobalResizes);
+        if (keyControlBound) {
+            unbindHotkeys(key_bindings_tiling);
+            keyControlBound = false;
+        }
+        launcher.destroy();
+        launcher = null;
+        Main.uiGroup.remove_actor(this.gridWidget);
+        this.destroyGrids();
+        resetFocusMetaWindow();
+        log("Extention disable completed");
+    }
+
+    hideTiling() {
+        log("hideTiling");
+        for (let key in this.gridsByMonitorKey) {
+            const grid = this.gridsByMonitorKey[key];
+            grid.elementsDelegate?.reset();
+            grid.hide(false);
+        }
+        this.gridWidget.visible = false;
+
+        resetFocusMetaWindow();
+
+        launcher.deactivate();
+        this.gridShowing = false;
+        unbindKeyControls();
+    }
+
+    toggleTiling(): boolean {
+        if (this.gridShowing) {
+            this.hideTiling();
+        }
+        else {
+            this.showTiling();
+        }
+        return this.gridShowing;
+    }
+
+    /**
+     * onFocus is called when the global focus changes.
+     */
+    onFocus() {
+        log("_onFocus ");
+        resetFocusMetaWindow();
+        const window = getFocusApp();
+    
+        if (window && this.gridShowing) {
+            log("_onFocus " + window.get_title());
+            focusMetaWindow = window;
+    
+            let app = tracker.get_window_app(focusMetaWindow);
+            let title = focusMetaWindow.get_title();
+    
+            const monitors = activeMonitors();
+            for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
+                let monitor = monitors[monitorIdx];
+                let grid = this.getGrid(monitor);
+                if (app) {
+                    grid?.topbar._set_app(app, title);
+                }
+                else {
+                    grid?.topbar._set_title(title);
+                }
+            }
+    
+            this.moveGrids();
+        } else {
+            if (this.gridShowing) {
+                log("No focus window, hide tiling");
+                this.hideTiling();
+            } else {
+                log("tiling window not active");
+            }
+        }
+    }
+}
+
+const globalApp = new App();
+
 function changed_settings() {
     log("changed_settings");
     if (enabled) {
@@ -256,7 +590,7 @@ const GTileStatusButton = new Lang.Class({
 
     _onButtonPress: function (actor, event) {
         log("_onButtonPress Click Toggle Status on system panel");
-        toggleTiling();
+        this.toggleTiling();
     },
 
     _destroy: function () {
@@ -376,191 +710,16 @@ export function enable() {
     log("Extension enable begin");
     SHELL_VERSION.print_version();
 
-    gridShowing = false;
-    tracker = Shell.WindowTracker.get_default();
-
-    initSettings();
-
-    gridWidget = (new St.BoxLayout({ style_class: 'grid-preview' }));
-    Main.uiGroup.add_actor(gridWidget);
-    initGrids();
-
-    log("Create Button on Panel");
-    launcher = new GTileStatusButton('tiling-icon');
-
-    if (gridSettings[SETTINGS_SHOW_ICON]) {
-        Main.panel.addToStatusArea("GTileStatusButton", launcher);
-    }
-
-    bindHotkeys(keyBindings);
-    if (gridSettings[SETTINGS_GLOBAL_PRESETS]) {
-        bindHotkeys(key_bindings_presets);
-    }
-    if (gridSettings[SETTINGS_MOVERESIZE_ENABLED]) {
-        bindHotkeys(keyBindingGlobalResizes);
-    }
-
-    if (monitorsChangedConnect) {
-        Main.layoutManager.disconnect(monitorsChangedConnect);
-    }
-
-    log("Connecting monitors-changed");
-    monitorsChangedConnect = Main.layoutManager.connect('monitors-changed', () => {
-        log("Reinitializing grids on monitors-changed");
-        destroyGrids();
-        initGrids();
-    });
-
-    enabled = true;
-    log("Extention enable completed");
+    globalApp.enable();
 }
 
 export function disable() {
-    log("Extension disable begin");
-    enabled = false;
-
-    if (monitorsChangedConnect) {
-        log("Disconnecting monitors-changed");
-        Main.layoutManager.disconnect(monitorsChangedConnect);
-        monitorsChangedConnect = false;
-    }
-
-    unbindHotkeys(keyBindings);
-    unbindHotkeys(key_bindings_presets);
-    unbindHotkeys(keyBindingGlobalResizes);
-    if (keyControlBound) {
-        unbindHotkeys(key_bindings_tiling);
-        keyControlBound = false;
-    }
-    launcher.destroy();
-    launcher = null;
-    destroyGrids();
-    resetFocusMetaWindow();
-    log("Extention disable completed");
+    globalApp.disable();
 }
 
 function resetFocusMetaWindow() {
     log("resetFocusMetaWindow");
     focusMetaWindow = false;
-}
-
-function initGrids() {
-    log("initGrids");
-    log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
-    const monitors = activeMonitors();
-    for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
-        log("New Grid for monitor " + monitorIdx);
-
-        let monitor = monitors[monitorIdx];
-
-        let grid = new Grid(monitorIdx, monitor, "gTile", nbCols, nbRows);
-
-        const key = getMonitorKey(monitor);
-        grids[key] = grid;
-        log("initGrids adding grid key " + key);
-
-        Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
-        grid.actor.set_opacity(0);
-        grid.hide(true);
-        log("Connect hide-tiling for monitor " + monitorIdx);
-        grid.connectHideTiling = grid.connect('hide-tiling', hideTiling);
-    }
-    log("Init grid done");
-}
-
-function destroyGrids() {
-    log("destroyGrids");
-    for (let gridKey in grids) {
-        const grid = grids[gridKey];
-        grid.hide(true);
-        Main.layoutManager.removeChrome(grid.actor);
-        log("Disconnect hide-tiling for monitor " + grid.monitor_idx);
-        grid.disconnect(grid.connectHideTiling);
-    }
-    log("destroyGrids done");
-}
-
-function refreshGrids() {
-    log("refreshGrids");
-    for (let gridIdx in grids) {
-        const grid = grids[gridIdx];
-        log("refreshGrids calling refresh on " + gridIdx);
-        grid.refresh();
-    }
-    log("refreshGrids done");
-}
-
-function moveGrids() {
-    log("moveGrids");
-    if (!gridShowing) {
-        return;
-    }
-
-    let window = focusMetaWindow;
-    if (window) {
-        for (let gridKey in grids) {
-            let grid = grids[gridKey];
-            let pos_x;
-            let pos_y;
-
-            const monitor = grid.monitor;
-            if (!monitor) {
-                return;
-            }
-            if (window.get_monitor() == grid.monitor_idx) {
-                pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
-                pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
-
-                let [mouse_x, mouse_y, mask] = global.get_pointer();
-                let act_x = pos_x - grid.actor.width / 2;
-                let act_y = pos_y - grid.actor.height / 2;
-                if (mouse_x >= act_x
-                    && mouse_x <= act_x + grid.actor.width
-                    && mouse_y >= act_y
-                    && mouse_y <= act_y + grid.actor.height) {
-                    log("Mouse x " + mouse_x + " y " + mouse_y +
-                        " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
-                        ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
-                    pos_x = mouse_x + grid.actor.width / 2;
-                    pos_y = mouse_y + grid.actor.height / 2;
-                }
-            }
-            else {
-                pos_x = monitor.x + monitor.width / 2;
-                pos_y = monitor.y + monitor.height / 2;
-            }
-
-            pos_x = Math.floor(pos_x - grid.actor.width / 2);
-            pos_y = Math.floor(pos_y - grid.actor.height / 2);
-
-            if (window.get_monitor() == grid.monitor_idx) {
-                pos_x = (pos_x < monitor.x) ? monitor.x : pos_x;
-                pos_x = ((pos_x + grid.actor.width) > (monitor.width + monitor.x)) ? monitor.x + monitor.width - grid.actor.width : pos_x;
-                pos_y = (pos_y < monitor.y) ? monitor.y : pos_y;
-                pos_y = ((pos_y + grid.actor.height) > (monitor.height + monitor.y)) ? monitor.y + monitor.height - grid.actor.height : pos_y;
-            }
-
-            let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
-
-            (grid.actor as any).ease({
-                time: time,
-                x: pos_x,
-                y: pos_y,
-                transition: Clutter.AnimationMode.EASE_OUT_QUAD,
-                /*onComplete:updateRegions*/
-            });
-        }
-    }
-}
-
-function updateRegions() {
-    /*Main.layoutManager._chrome.updateRegions();*/
-    log("updateRegions");
-    refreshGrids();
-    for (let idx in grids) {
-        let grid = grids[idx];
-        grid.elementsDelegate.reset();
-    }
 }
 
 function reset_window(metaWindow: Window) {
@@ -677,143 +836,11 @@ function getWindowsOfMonitor(monitor: Monitor) {
     return windows;
 }
 
-function _onFocus() {
-    log("_onFocus ");
-    resetFocusMetaWindow();
-    const window = getFocusApp();
-
-    if (window && gridShowing) {
-        log("_onFocus " + window.get_title());
-        focusMetaWindow = window;
-
-        let app = tracker.get_window_app(focusMetaWindow);
-        let title = focusMetaWindow.get_title();
-
-        const monitors = activeMonitors();
-        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
-            let monitor = monitors[monitorIdx];
-            let key = getMonitorKey(monitor);
-            let grid = grids[key];
-            if (app) {
-                grid.topbar._set_app(app, title);
-            }
-            else {
-                grid.topbar._set_title(title);
-            }
-        }
-
-        moveGrids();
-    } else {
-        if (gridShowing) {
-            log("No focus window, hide tiling");
-            hideTiling();
-        } else {
-            log("tiling window not active");
-        }
-    }
-}
-
-
-function showTiling() {
-    log("issue#168/showTiling");
-    focusMetaWindow = getFocusApp();
-    if (!focusMetaWindow) {
-        log("No focus window");
-        return;
-    }
-    const wmType = focusMetaWindow.get_window_type();
-    const layer = focusMetaWindow.get_layer();
-
-    if (!gridWidget) {
-        return;
-    }
-
-    gridWidget.visible = true;
-    if (focusMetaWindow && wmType != WindowType.DESKTOP && layer > 0) {
-        log("issue#168/focusMetaWindow");
-        const monitors = activeMonitors();
-        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
-            let monitor = monitors[monitorIdx];
-            let key = getMonitorKey(monitor);
-            const grid = grids[key];
-
-            let window = getFocusApp();
-            let pos_x;
-            let pos_y;
-            if (window.get_monitor() == monitorIdx) {
-                log("issue#168/matched monitor");
-                pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
-                pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
-                let [mouse_x, mouse_y, mask] = global.get_pointer();
-                let act_x = pos_x - grid.actor.width / 2;
-                let act_y = pos_y - grid.actor.height / 2;
-                if (mouse_x >= act_x
-                    && mouse_x <= act_x + grid.actor.width
-                    && mouse_y >= act_y
-                    && mouse_y <= act_y + grid.actor.height) {
-                    log("Mouse x " + mouse_x + " y " + mouse_y +
-                        " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
-                        ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
-                    pos_x = mouse_x + grid.actor.width / 2;
-                    pos_y = mouse_y + grid.actor.height / 2;
-                }
-            }
-            else {
-                pos_x = monitor.x + monitor.width / 2;
-                pos_y = monitor.y + monitor.height / 2;
-            }
-
-            grid.set_position(
-                Math.floor(pos_x - grid.actor.width / 2),
-                Math.floor(pos_y - grid.actor.height / 2)
-            );
-
-            grid.show();
-        }
-
-        gridShowing = true;
-        _onFocus();
-        launcher.activate();
-        bindKeyControls();
-    } else {
-        log("issue#168/no focus window");
-    }
-
-    moveGrids();
-}
-
-function hideTiling() {
-    log("hideTiling");
-    for (let gridIdx in grids) {
-        let grid = grids[gridIdx];
-        grid.elementsDelegate.reset();
-        grid.hide(false);
-    }
-    gridWidget.visible = false;
-
-    resetFocusMetaWindow();
-
-    launcher.deactivate();
-    gridShowing = false;
-    unbindKeyControls();
-}
-
-function toggleTiling() {
-    if (gridShowing) {
-        hideTiling();
-    }
-    else {
-        showTiling();
-    }
-    return gridShowing;
-}
-
-
 function getMonitorKey(monitor: Monitor): string {
     return monitor.x + ":" + monitor.width + ":" + monitor.y + ":" + monitor.height;
 }
 
-function contains(a, obj) {
+function contains<T>(a: Array<T>, obj: T) {
     var i = a.length;
     while (i--) {
         if (a[i] === obj) {
@@ -926,7 +953,7 @@ function bindKeyControls() {
         if (focusConnect) {
             global.display.disconnect(focusConnect);
         }
-        focusConnect = global.display.connect('notify::focus-window', _onFocus);
+        focusConnect = global.display.connect('notify::focus-window', () => globalApp.onFocus());
         if (!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             bindHotkeys(key_bindings_presets);
         }
@@ -954,7 +981,7 @@ function unbindKeyControls() {
 
 function keyCancelTiling() {
     log("Cancel key event");
-    hideTiling();
+    globalApp.hideTiling();
 }
 
 function keySetTiling() {
@@ -964,11 +991,9 @@ function keySetTiling() {
         let mind = focusMetaWindow.get_monitor() as number;
         let monitor = monitors[mind];
         let mkey = getMonitorKey(monitor);
-        let grid = grids[mkey];
+        const grid = globalApp.getGrid(monitor);
         log("In grid " + grid);
-        if (grid.elementsDelegate.currentElement) {
-            grid.elementsDelegate.currentElement._onButtonPress();
-        }
+        grid?.elementsDelegate?.currentElement?._onButtonPress();
     }
 }
 
@@ -1007,9 +1032,12 @@ function setInitialSelection() {
     let wy = focusMetaWindow.get_frame_rect().y;
     let wwidth = focusMetaWindow.get_frame_rect().width;
     let wheight = focusMetaWindow.get_frame_rect().height;
-    let mkey = getMonitorKey(monitor);
-    let grid = grids[mkey];
-    let delegate = grid.elementsDelegate;
+    const grid = globalApp.getGrid(monitor);
+    if (!grid) {
+        log("no grid ");
+        return;
+    }
+    const delegate = grid.elementsDelegate;
 
     log("Set initial selection");
     log("Focus window position x " + wx + " y " + wy + " width " + wwidth + " height " + wheight);
@@ -1035,10 +1063,10 @@ function setInitialSelection() {
     grid.elements[luy][lux]._onButtonPress();
     grid.elements[rdy][rdx]._onHoverChanged();
 
-    let cX = delegate.currentElement.coordx;
-    let cY = delegate.currentElement.coordy;
-    let fX = delegate.first.coordx;
-    let fY = delegate.first.coordy;
+    const cX = delegate?.currentElement?.coordx;
+    const cY = delegate?.currentElement?.coordy;
+    const fX = delegate?.first?.coordx;
+    const fY = delegate?.first?.coordy;
 
     log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
 }
@@ -1055,11 +1083,13 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
     let mind = focusMetaWindow.get_monitor();
     const monitors = activeMonitors();
     let monitor = monitors[mind];
-    let mkey = getMonitorKey(monitor);
-    let grid = grids[mkey];
-    let delegate = grid.elementsDelegate;
+    const grid = globalApp.getGrid(monitor);
+    if (!grid) {
+        return;
+    }
+    const delegate = grid.elementsDelegate;
 
-    if (!delegate.currentElement) {
+    if (!delegate?.currentElement) {
         log("Key event while no mouse activation - set current and second element");
         setInitialSelection();
     } else {
@@ -1068,13 +1098,16 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
             delegate.currentElement._onButtonPress();
         }
     }
-    if (!delegate.currentElement) {
+    if (!delegate?.currentElement) {
         log("gTime currentElement is not set!");
     }
-    let cX = delegate.currentElement.coordx;
-    let cY = delegate.currentElement.coordy;
-    let fX = delegate.first.coordx;
-    let fY = delegate.first.coordy;
+    if (!delegate) {
+        return;
+    }
+    let cX = delegate.currentElement?.coordx;
+    let cY = delegate.currentElement?.coordy;
+    let fX = delegate.first?.coordx;
+    let fY = delegate.first?.coordy;
 
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
@@ -1391,7 +1424,7 @@ TopBar.prototype = {
 
     _onButtonPress() {
         log("Close button");
-        toggleTiling();
+        globalApp.toggleTiling();
     },
 
     destroy() {
@@ -1499,21 +1532,19 @@ class ActionButton {
 
 Signals.addSignalMethods(ActionButton.prototype);
 
-function AutoTileMainAndList(grid) {
-    this._init(grid, "action-main-list");
-}
+const AUTO_TILE_MAIN_AND_LIST_CLASS_NAME = "action-main-list";
 
-AutoTileMainAndList.prototype = {
-    __proto__: ActionButton.prototype,
+class AutoTileMainAndList extends ActionButton {
+    readonly classname: string;
 
-    _init: function (grid, classname) {
-        ActionButton.prototype._init.call(this, grid, classname);
-        this.classname = classname;
+    constructor(grid: Grid) {
+        super(grid, AUTO_TILE_MAIN_AND_LIST_CLASS_NAME);
+        this.classname = AUTO_TILE_MAIN_AND_LIST_CLASS_NAME;
         log("AutoTileMainAndList connect button-press-event");
-        this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-    },
+        this.connect('button-press-event', () => this._onButtonPress());
+    }
 
-    _onButtonPress: function () {
+    _onButtonPress() {
         AutoTileMain();
         log("AutoTileMainAndList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
@@ -1580,21 +1611,19 @@ function AutoTileMain() {
     log("AutoTileMain done");
 }
 
-function AutoTileTwoList(grid) {
-    this._init(grid, "action-two-list");
-}
+class AutoTileTwoList extends ActionButton {
+    // __proto__: ActionButton.prototype,
 
-AutoTileTwoList.prototype = {
-    __proto__: ActionButton.prototype,
+    readonly classname: string;
 
-    _init: function (grid, classname) {
-        ActionButton.prototype._init.call(this, grid, classname);
-        this.classname = classname;
+    constructor(grid: Grid) {
+        super(grid, "action-two-list");
+        this.classname = "action-two-list";
         log("AutoTileTwoList connect button-press-event");
-        this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-    },
+        this.connect('button-press-event', () => this._onButtonPress());
+    }
 
-    _onButtonPress: function () {
+    _onButtonPress() {
         log("AutotileTwoList");
         AutoTileNCols(2);
         log("AutoTileTwoList _onButtonPress Emitting signal resize-done");
@@ -1697,7 +1726,7 @@ GridSettingsButton.prototype = {
         nbCols = this.cols;
         nbRows = this.rows;
 
-        refreshGrids();
+        globalApp.refreshGrids();
     }
 
 };
@@ -1736,7 +1765,7 @@ class Grid {
     elements: GridElement[][] = [];
 
 
-    constructor(monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
+    constructor(private readonly gridWidget: BoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
         let workArea = getWorkArea(monitor, monitor_idx);
 
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
@@ -1896,7 +1925,7 @@ class Grid {
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
         let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
 
-        this.elementsDelegate = new GridElementDelegate();
+        this.elementsDelegate = new GridElementDelegate(this.gridWidget);
         this.elementsDelegate.connect('resize-done', Lang.bind(this, this._onResize));
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
@@ -2005,7 +2034,7 @@ class Grid {
 
     _onResize(actor, event) {
         log("resize-done: " + actor);
-        updateRegions();
+        globalApp.updateRegions();
         if (gridSettings[SETTINGS_AUTO_CLOSE]) {
             log("Emitting hide-tiling");
             this.emit('hide-tiling');
@@ -2015,7 +2044,7 @@ class Grid {
     _onMouseEnter() {
         log("onMouseEnter");
         if (!this.isEntered) {
-            this.elementsDelegate.reset();
+            this.elementsDelegate?.reset();
             this.isEntered = true;
         }
     }
@@ -2025,13 +2054,13 @@ class Grid {
         let [x, y, mask] = global.get_pointer();
         if (this.elementsDelegate && (x <= this.actor.x || x >= (this.actor.x + this.actor.width)) || (y <= this.actor.y || y >= (this.actor.y + this.actor.height))) {
             this.isEntered = false;
-            this.elementsDelegate.reset();
-            refreshGrids();
+            this.elementsDelegate?.reset();
+            globalApp.refreshGrids();
         }
     }
 
     _onSettingsButton() {
-        this.elementsDelegate.reset();
+        this.elementsDelegate?.reset();
     }
 
     _destroy() {
@@ -2066,7 +2095,7 @@ class GridElementDelegate {
     currentElement: GridElement|null = null;
     activatedActors: GridElement[] = [];
 
-    constructor() {}
+    constructor(private readonly gridWidget: BoxLayout) {}
 
     _allSelected() {
         return (this.activatedActors.length === (nbCols * nbRows));
@@ -2149,8 +2178,13 @@ class GridElementDelegate {
         this._resetGrid();
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
-        let key = getMonitorKey(fromGridElement.monitor);
-        let grid = grids[key];
+        if (!fromGridElement.monitor) {
+            return;
+        }
+        const grid = globalApp.getGrid(fromGridElement.monitor);
+        if (!grid) {
+            return;
+        }
         for (let r = minY; r <= maxY; r++) {
             for (let c = minX; c <= maxX; c++) {
                 let element = grid.elements[r][c];
@@ -2181,27 +2215,21 @@ class GridElementDelegate {
     }
 
     forceArea(fromGridElement: GridElement, toGridElement: GridElement) {
-        if (!gridWidget) {
-            return;
-        }
         let areaWidth, areaHeight, areaX, areaY;
         [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
-        gridWidget.width = areaWidth;
-        gridWidget.height = areaHeight;
-        gridWidget.x = areaX;
-        gridWidget.y = areaY;
+        this.gridWidget.width = areaWidth;
+        this.gridWidget.height = areaHeight;
+        this.gridWidget.x = areaX;
+        this.gridWidget.y = areaY;
     }
 
     _displayArea(fromGridElement: GridElement, toGridElement: GridElement) {
-        if (!gridWidget) {
-            return;
-        }
         const [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
 
-        gridWidget.add_style_pseudo_class('activate');
+        this.gridWidget.add_style_pseudo_class('activate');
 
         if (gridSettings[SETTINGS_ANIMATION]) {
-            (gridWidget as any).ease({
+            (this.gridWidget as any).ease({
                 time: 0.2,
                 x: areaX,
                 y: areaY,
@@ -2211,15 +2239,15 @@ class GridElementDelegate {
             });
         }
         else {
-            gridWidget.width = areaWidth;
-            gridWidget.height = areaHeight;
-            gridWidget.x = areaX;
-            gridWidget.y = areaY;
+            this.gridWidget.width = areaWidth;
+            this.gridWidget.height = areaHeight;
+            this.gridWidget.x = areaX;
+            this.gridWidget.y = areaY;
         }
     }
 
     _hideArea() {
-        gridWidget.remove_style_pseudo_class('activate');
+        this.gridWidget.remove_style_pseudo_class('activate');
     }
 
     _onHoverChanged(gridElement: GridElement) {
@@ -2313,9 +2341,10 @@ class GridElement{
         }
     }
 
-    _clean() {
-        Main.uiGroup.remove_actor(gridWidget);
-    }
+    // This logic should probably go into disable().
+    // _clean() {
+    //     Main.uiGroup.remove_actor(this.gridWidget);
+    // }
 
     _disconnect() {
         this.actor.disconnect(this.hoverConnect);
