@@ -1466,12 +1466,11 @@ ToggleSettingsButton.prototype = {
 
 Signals.addSignalMethods(ToggleSettingsButton.prototype);
 
-function ActionButton(grid, classname) {
-    this._init(grid, classname);
-}
+class ActionButton {
+    readonly actor: StButton;
+    readonly icon: BoxLayout;
 
-ActionButton.prototype = {
-    _init: function (grid, classname) {
+    constructor(readonly grid: Grid, classname: string) {
         this.grid = grid;
         this.actor = new St.Button({
             style_class: 'settings-button',
@@ -1485,12 +1484,17 @@ ActionButton.prototype = {
 
         log("ActionButton Connect button-press-event");
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-    },
+    }
 
-    _onButtonPress: function () {
+    _onButtonPress() {
         log("ActionButton _onButtonPress Emitting signal button-press-event");
         this.emit('button-press-event');
     }
+
+    /** Functions replaced by Signals.addSignalMethods. */
+    connect(eventName: string, handler: Function): number {return 0; }
+    disconnect(id: number): void {}
+    emit(name: string, ...args: any): void {}
 };
 
 Signals.addSignalMethods(ActionButton.prototype);
