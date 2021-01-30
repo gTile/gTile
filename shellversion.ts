@@ -33,8 +33,12 @@ export class ShellVersion {
             throw new Error(`invalid version supplied: ${version}`);
         }
         this.major = parts[0];
-        this.minor = parts[1];
-        if (isNaN(this.major) || isNaN(this.minor)) {
+        if (isNaN(this.minor)) {
+            this.minor = 0;
+        } else {    
+            this.minor = parts[1];
+        }
+        if (isNaN(this.major)) {
             throw new Error(`invalid version supplied: ${version}; got major = ${this.major}, minor = ${this.minor}`);
         }
         this.rawVersion = version;
