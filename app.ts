@@ -782,7 +782,7 @@ function move_maximize_window(metaWindow, x, y) {
  * @param width
  * @param height
  */
-function move_resize_window_with_margins(metaWindow, x, y, width, height) {
+function moveResizeWindowWithMargins(metaWindow, x: number, y: number, width: number, height: number): void {
 
     let [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
     let [vBorderX, vBorderY] = _getVisibleBorderPadding(metaWindow);
@@ -1338,7 +1338,7 @@ function presetResize(preset) {
     let wh = Math.round((rdc.Y + 1 - luc.Y) * grid_element_height);
 
     log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
-    move_resize_window_with_margins(window, wx, wy, ww, wh);
+    moveResizeWindowWithMargins(window, wx, wy, ww, wh);
 
     presetState["last_preset"] = preset;
     presetState["last_grid_format"] = grid_format;
@@ -1573,7 +1573,7 @@ function AutoTileMain() {
     let notFocusedwindows = getNotFocusedWindowsOfMonitor(monitor);
 
     if (Object.keys(notFocusedwindows).length === 0) {
-        move_resize_window_with_margins(
+        moveResizeWindowWithMargins(
             focusMetaWindow,
             workArea.x,
             workArea.y,
@@ -1582,7 +1582,7 @@ function AutoTileMain() {
         return;
     }
 
-    move_resize_window_with_margins(
+    moveResizeWindowWithMargins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
@@ -1601,7 +1601,7 @@ function AutoTileMain() {
         let newOffset = workArea.y + (countWin * winHeight);
         reset_window(metaWindow);
 
-        move_resize_window_with_margins(
+        moveResizeWindowWithMargins(
             metaWindow,
             workArea.x + workArea.width / 2,
             newOffset,
@@ -1658,7 +1658,7 @@ function AutoTileNCols(cols) {
 
     let countWin = 0;
 
-    move_resize_window_with_margins(
+    moveResizeWindowWithMargins(
         focusMetaWindow,
         workArea.x + countWin % cols * workArea.width / cols,
         workArea.y + (Math.floor(countWin / cols) * winHeight),
@@ -1674,7 +1674,7 @@ function AutoTileNCols(cols) {
 
         reset_window(metaWindow);
 
-        move_resize_window_with_margins(
+        moveResizeWindowWithMargins(
             metaWindow,
             workArea.x + countWin % cols * workArea.width / cols,
             workArea.y + (Math.floor(countWin / cols) * winHeight),
@@ -2144,7 +2144,7 @@ class GridElementDelegate {
                 move_maximize_window(focusMetaWindow, areaX, areaY);
             }
             else {
-                move_resize_window_with_margins(focusMetaWindow, areaX, areaY, areaWidth, areaHeight);
+                moveResizeWindowWithMargins(focusMetaWindow, areaX, areaY, areaWidth, areaHeight);
             }
             //this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
 
