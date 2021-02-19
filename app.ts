@@ -8,6 +8,7 @@ import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkey
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
 import { BoxLayout, ClutterActor, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
+import {BoolSettingName, NumberSettingName, StringSettingName} from './settings_data';
 
 /*****************************************************************
 
@@ -73,9 +74,9 @@ const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
 
 interface SettingsObject {
-    get_boolean(name: string): boolean | undefined;
-    get_string(name: string): string | undefined;
-    get_int(name: string): number | undefined;
+    get_boolean(name: BoolSettingName): boolean | undefined;
+    get_string(name: StringSettingName): string | undefined;
+    get_int(name: NumberSettingName): number | undefined;
     connect(eventName: string, callback: () => void): void;
 };
 
@@ -146,37 +147,38 @@ const key_bindings_tiling: Bindings = {
 }
 
 const key_bindings_presets: Bindings = {
-    'preset-resize-1': function () { presetResize(1); },
-    'preset-resize-2': function () { presetResize(2); },
-    'preset-resize-3': function () { presetResize(3); },
-    'preset-resize-4': function () { presetResize(4); },
-    'preset-resize-5': function () { presetResize(5); },
-    'preset-resize-6': function () { presetResize(6); },
-    'preset-resize-7': function () { presetResize(7); },
-    'preset-resize-8': function () { presetResize(8); },
-    'preset-resize-9': function () { presetResize(9); },
-    'preset-resize-10': function () { presetResize(10); },
-    'preset-resize-11': function () { presetResize(11); },
-    'preset-resize-12': function () { presetResize(12); },
-    'preset-resize-13': function () { presetResize(13); },
-    'preset-resize-14': function () { presetResize(14); },
-    'preset-resize-15': function () { presetResize(15); },
-    'preset-resize-16': function () { presetResize(16); },
-    'preset-resize-17': function () { presetResize(17); },
-    'preset-resize-18': function () { presetResize(18); },
-    'preset-resize-19': function () { presetResize(19); },
-    'preset-resize-20': function () { presetResize(20); },
-    'preset-resize-21': function () { presetResize(21); },
-    'preset-resize-22': function () { presetResize(22); },
-    'preset-resize-23': function () { presetResize(23); },
-    'preset-resize-24': function () { presetResize(24); },
-    'preset-resize-25': function () { presetResize(25); },
-    'preset-resize-26': function () { presetResize(26); },
-    'preset-resize-27': function () { presetResize(27); },
-    'preset-resize-28': function () { presetResize(28); },
-    'preset-resize-29': function () { presetResize(29); },
-    'preset-resize-30': function () { presetResize(30); }
-}
+    'preset-resize-1': function () { presetResize(1, 'resize1'); },
+    'preset-resize-2': function () { presetResize(2, 'resize2'); },
+    'preset-resize-3': function () { presetResize(3, 'resize3'); },
+    'preset-resize-4': function () { presetResize(4, 'resize4'); },
+    'preset-resize-5': function () { presetResize(5, 'resize5'); },
+    'preset-resize-6': function () { presetResize(6, 'resize6'); },
+    'preset-resize-7': function () { presetResize(7, 'resize7'); },
+    'preset-resize-8': function () { presetResize(8, 'resize8'); },
+    'preset-resize-9': function () { presetResize(9, 'resize9'); },
+    'preset-resize-10': function () { presetResize(10, 'resize10'); },
+    'preset-resize-11': function () { presetResize(11, 'resize11'); },
+    'preset-resize-12': function () { presetResize(12, 'resize12'); },
+    'preset-resize-13': function () { presetResize(13, 'resize13'); },
+    'preset-resize-14': function () { presetResize(14, 'resize14'); },
+    'preset-resize-15': function () { presetResize(15, 'resize15'); },
+    'preset-resize-16': function () { presetResize(16, 'resize16'); },
+    'preset-resize-17': function () { presetResize(17, 'resize17'); },
+    'preset-resize-18': function () { presetResize(18, 'resize18'); },
+    'preset-resize-19': function () { presetResize(19, 'resize19'); },
+    'preset-resize-20': function () { presetResize(20, 'resize20'); },
+    'preset-resize-21': function () { presetResize(21, 'resize21'); },
+    'preset-resize-22': function () { presetResize(22, 'resize22'); },
+    'preset-resize-23': function () { presetResize(23, 'resize23'); },
+    'preset-resize-24': function () { presetResize(24, 'resize24'); },
+    'preset-resize-25': function () { presetResize(25, 'resize25'); },
+    'preset-resize-26': function () { presetResize(26, 'resize26'); },
+    'preset-resize-27': function () { presetResize(27, 'resize27'); },
+    'preset-resize-28': function () { presetResize(28, 'resize28'); },
+    'preset-resize-29': function () { presetResize(29, 'resize29'); },
+    'preset-resize-30': function () { presetResize(30, 'resize30'); },
+};
+
 const keyBindingGlobalResizes: Bindings = {
     'action-change-tiling': () => { keyChangeTiling(); },
     'action-contract-bottom': () => { keyMoveResizeEvent('contract', 'bottom', true); },
@@ -651,7 +653,7 @@ function initGridSizes(grid_sizes) {
     }
 }
 
-function getBoolSetting(settingName: string): boolean {
+function getBoolSetting(settingName: BoolSettingName): boolean {
     const value = settings.get_boolean(settingName);
     if (value === undefined) {
         log("Undefined settings " + settingName);
@@ -934,7 +936,7 @@ function getWorkAreaByMonitor(monitor: Monitor): WorkArea | null {
     return null;
 }
 
-function getWorkAreaByMonitorIdx(monitor_idx: number) {
+function getWorkAreaByMonitorIdx(monitor_idx: number): WorkArea {
     const monitors = activeMonitors();
     let monitor = monitors[monitor_idx];
     return getWorkArea(monitor, monitor_idx);
@@ -1230,11 +1232,12 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
         keySetTiling();
     }
 }
+
 /**
  * Resize window to the given preset.
  * @param  {number}  Identifier of the resize preset (1 - 30)
  */
-function presetResize(preset) {
+function presetResize(presetName: number, settingName: StringSettingName) {
 
     // Check if there's a focusable window
     let window = getFocusApp();
@@ -1258,14 +1261,14 @@ function presetResize(preset) {
     //  - x2:y2 is right down corner tile coordinates in grid tiles
     //  - a preset can define multiple variants (e.g. "3x2 0:0 0:1,0:0 1:1,0:0 2:1")
     //  - variants can be activated using the same shortcut consecutively
-    let preset_string = settings.get_string("resize" + preset);
-    log("Preset resize " + preset + "  is " + preset_string);
-    let ps_variants = preset_string.split(",");
+    let presetString = settings.get_string(settingName) || '';
+    log("Preset resize " + presetName + "  is " + presetString);
+    let ps_variants = presetString.split(",");
 
     // retrieve and validate preset string / first preset variant
     let ps = ps_variants[0].trim().split(" ");
     if (ps.length != 3) {
-        log("Bad preset " + preset + " settings " + preset_string);
+        log("Bad preset " + presetName + " settings " + presetString);
         return;
     }
 
@@ -1278,7 +1281,7 @@ function presetResize(preset) {
     let ps_variant_count = ps_variants.length;
     if (ps_variant_count > 1) {
         if (presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
-            presetState["last_preset"] == preset &&
+            presetState["last_preset"] == presetName &&
             presetState["last_window_title"] == window.get_title()) {
             // within timeout (default: 2s), same preset & same window:
             // increase variant counter, but consider upper boundary
@@ -1308,7 +1311,7 @@ function presetResize(preset) {
             luc = parseTuple(ps[0], ":");
             rdc = parseTuple(ps[1], ":");
         } else {
-            log("Bad preset " + preset + " settings " + preset_string);
+            log("Bad preset " + presetName + " settings " + presetString);
             return;
         }
     }
@@ -1320,10 +1323,10 @@ function presetResize(preset) {
         grid_format.X <= luc.X || grid_format.X <= rdc.X ||
         grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y ||
         luc.X > rdc.X || luc.Y > rdc.Y) {
-        log("Bad preset " + preset + " settings " + preset_string);
+        log("Bad preset " + presetName + " settings " + presetString);
         return;
     }
-    log("Parsed preset " + preset + " " + grid_format.X + "x" + grid_format.Y +
+    log("Parsed preset " + presetName + " " + grid_format.X + "x" + grid_format.Y +
         " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
 
     // do the maths to resize the window
@@ -1337,10 +1340,10 @@ function presetResize(preset) {
     let ww = Math.round((rdc.X + 1 - luc.X) * grid_element_width);
     let wh = Math.round((rdc.Y + 1 - luc.Y) * grid_element_height);
 
-    log("Resize preset " + preset + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
+    log("Resize preset " + presetName + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
     moveResizeWindowWithMargins(window, wx, wy, ww, wh);
 
-    presetState["last_preset"] = preset;
+    presetState["last_preset"] = presetName;
     presetState["last_grid_format"] = grid_format;
     presetState["last_window_title"] = window.get_title();
     presetState["last_call"] = new Date().getTime();
