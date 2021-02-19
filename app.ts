@@ -259,6 +259,8 @@ class App {
             this.gridsByMonitorKey[key] = grid;
             log("initGrids adding grid key " + key);
     
+            // TODO: addChrome is poorly documented. I can't find any reference
+            // to it in the gjs-docs site.
             Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
             grid.actor.set_opacity(0);
             grid.hide(true);
@@ -279,6 +281,9 @@ class App {
             delete this.gridsByMonitorKey[gridKey];
         }
         log("destroyGrids done");
+        for (let gridKey in this.gridsByMonitorKey) {
+            log("ERROR: gridKey still found in this.gridsByMonitorKey: " + gridKey);
+        }
     }
     
     refreshGrids() {
@@ -363,13 +368,26 @@ class App {
         }
     }
 
+    logState() {
+        let summary = ``;
+        let count = 0;
+        let states = '';
+        for (let gridKey in this.gridsByMonitorKey) {
+            states += `; ${this.gridsByMonitorKey[gridKey].state()}`;
+            count++;
+        }
+        log(`${count} grids; showing = ${this.gridShowing}: ${states}`)
+    }
+
     showTiling() {
         // TODO(#168): See https://github.com/gTile/gTile/issues/168. Without
         // these two lines, the grid UI does not properly respond to mouseover
         // and other events except for the first time it is shown.
         log("showTiling with fix");
+        this.hideTiling();
         this.destroyGrids();
         this.initGrids(this.gridWidget!);
+        this.logState();
 
         log("issue#168/showTiling with fix");
         focusMetaWindow = getFocusApp();
@@ -1394,7 +1412,6 @@ TopBar.prototype = {
 
         this.actor.add_actor(this._closebutton);
         this.actor.add_actor(this._stlabel);
-
     },
 
     _set_title: function (title) {
@@ -1411,7 +1428,7 @@ TopBar.prototype = {
 
     _onButtonPress() {
         log("Close button");
-        globalApp.toggleTiling();
+        globalApp.hideTiling();
     },
 
     destroy() {
@@ -1902,6 +1919,10 @@ class Grid {
         this.normalScaleX = this.actor.scale_x;
     }
 
+    state(): string {
+        return `grid with actor ${this.actor}`;
+    }
+
     _displayElements() {
         if (this.monitor === null)  {
             return;
@@ -1911,20 +1932,21 @@ class Grid {
 
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
         let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
-
-        this.elementsDelegate = new GridElementDelegate(this.gridWidget);
-        this.elementsDelegate.connect('resize-done', Lang.bind(this, this._onResize));
+    
+        const delegate = new GridElementDelegate(this.gridWidget);
+        this.elementsDelegate = delegate;
+        this.elementsDelegate.connect('resize-done', (actor, event) => this._onResize(actor, event));
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (c == 0) {
                     this.elements[r] = new Array();
                 }
 
-                let element = new GridElement(this.monitor, width, height, c, r);
+                let element = new GridElement(delegate, this.monitor, width, height, c, r);
 
                 this.elements[r][c] = element;
-                log("hack: undocument property element.actor._delegate property accesseed in _displayElements");
-                (element.actor as any)._delegate = this.elementsDelegate;
+                // TODO: Is setting _delegate needed?
+                (element.actor as any)._delegate = delegate;
                 this.table_table_layout.attach(element.actor, c, r, 1, 1);
                 element.show();
             }
@@ -2284,7 +2306,7 @@ class GridElement{
     readonly hoverConnect: number;
     active: boolean;
 
-    constructor(readonly monitor: Monitor, readonly width: number, readonly height: number, readonly coordx: number, readonly coordy: number) {
+    constructor(private readonly delegate: GridElementDelegate, readonly monitor: Monitor, readonly width: number, readonly height: number, readonly coordx: number, readonly coordy: number) {
         this.actor = new St.Button({ style_class: 'table-element', reactive: true, can_focus: true, track_hover: true });
 
         this.actor.visible = false;
@@ -2293,9 +2315,12 @@ class GridElement{
         this.id = getMonitorKey(monitor) + "-" + coordx + ":" + coordy;
 
         this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-        this.hoverConnect = this.actor.connect('notify::hover', Lang.bind(this, this._onHoverChanged));
-
+        this.hoverConnect = this.actor.connect('notify::hover', () => this._onHoverChanged());
         this.active = false;
+    }
+
+    state(): string {
+        return `id: ${this.id}; visible: ${this.actor.visible}`;
     }
 
     show() {
@@ -2309,13 +2334,11 @@ class GridElement{
     }
 
     _onButtonPress() {
-        log("hack - accessing undocumented _delegate property in _onButtonPress");
-        (this.actor as any)._delegate._onButtonPress(this);
+        this.delegate._onButtonPress(this);
     }
 
     _onHoverChanged() {
-        log("hack - accessing undocumented _delegate property in _onHoverChanged");
-        (this.actor as any)._delegate._onHoverChanged(this);
+        this.delegate._onHoverChanged(this);
     }
 
     _activate() {
