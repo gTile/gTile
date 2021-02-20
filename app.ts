@@ -7,8 +7,8 @@ import { ShellVersion } from './shellversion';
 import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkeys';
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
-import { BoxLayout, ClutterActor, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
-import {BoolSettingName, NumberSettingName, StringSettingName} from './settings_data';
+import { BoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
+import { BoolSettingName, NumberSettingName, StringSettingName } from './settings_data';
 
 /*****************************************************************
 
@@ -73,6 +73,55 @@ const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
 const SETTINGS_DEBUG = 'debug';
 
+
+interface ParsedSettings {
+    [SETTINGS_GRID_SIZES]: tilespec.GridSize[];
+    [SETTINGS_AUTO_CLOSE]: any;
+    [SETTINGS_ANIMATION]: any;
+    [SETTINGS_SHOW_ICON]: any;
+    [SETTINGS_GLOBAL_PRESETS]: any;
+    [SETTINGS_MOVERESIZE_ENABLED]: any;
+    [SETTINGS_WINDOW_MARGIN]: any;
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: any;
+    [SETTINGS_MAX_TIMEOUT]: any;
+
+    [SETTINGS_INSETS_PRIMARY]: any;
+    [SETTINGS_INSETS_PRIMARY_LEFT]: any;
+    [SETTINGS_INSETS_PRIMARY_RIGHT]: any;
+    [SETTINGS_INSETS_PRIMARY_TOP]: any;
+    [SETTINGS_INSETS_PRIMARY_BOTTOM]: any;
+    [SETTINGS_INSETS_SECONDARY]: any;
+    [SETTINGS_INSETS_SECONDARY_LEFT]: any;
+    [SETTINGS_INSETS_SECONDARY_RIGHT]: any;
+    [SETTINGS_INSETS_SECONDARY_TOP]: any;
+    [SETTINGS_INSETS_SECONDARY_BOTTOM]: any;
+    [SETTINGS_DEBUG]: any;
+}
+
+const gridSettings: ParsedSettings = {
+    [SETTINGS_GRID_SIZES]: [],
+    [SETTINGS_AUTO_CLOSE]: null,
+    [SETTINGS_ANIMATION]: null,
+    [SETTINGS_SHOW_ICON]: null,
+    [SETTINGS_GLOBAL_PRESETS]: null,
+    [SETTINGS_MOVERESIZE_ENABLED]: null,
+    [SETTINGS_WINDOW_MARGIN]: null,
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: null,
+    [SETTINGS_MAX_TIMEOUT]: null,
+
+    [SETTINGS_INSETS_PRIMARY]: null,
+    [SETTINGS_INSETS_PRIMARY_LEFT]: null,
+    [SETTINGS_INSETS_PRIMARY_RIGHT]: null,
+    [SETTINGS_INSETS_PRIMARY_TOP]: null,
+    [SETTINGS_INSETS_PRIMARY_BOTTOM]: null,
+    [SETTINGS_INSETS_SECONDARY]: null,
+    [SETTINGS_INSETS_SECONDARY_LEFT]: null,
+    [SETTINGS_INSETS_SECONDARY_RIGHT]: null,
+    [SETTINGS_INSETS_SECONDARY_TOP]: null,
+    [SETTINGS_INSETS_SECONDARY_BOTTOM]: null,
+    [SETTINGS_DEBUG]: null,
+};
+
 interface SettingsObject {
     get_boolean(name: BoolSettingName): boolean | undefined;
     get_string(name: StringSettingName): string | undefined;
@@ -86,7 +135,7 @@ let nbCols = 0;
 let nbRows = 0;
 let focusMetaWindow: Window | null = null;
 let focusConnect: any = false;
-let gridSettings = new Object();
+
 let settings: SettingsObject = Settings.get();
 settings.connect('changed', changed_settings);
 let keyControlBound: any = false;
@@ -155,36 +204,36 @@ const key_bindings_tiling: Bindings = new Map([
 ]);
 
 const key_bindings_presets: Bindings = new Map([
-    ['preset-resize-1', () => { presetResize(1, 'resize1'); } ],
-    ['preset-resize-2', () => { presetResize(2, 'resize2'); } ],
-    ['preset-resize-3', () => { presetResize(3, 'resize3'); } ],
-    ['preset-resize-4', () => { presetResize(4, 'resize4'); } ],
-    ['preset-resize-5', () => { presetResize(5, 'resize5'); } ],
-    ['preset-resize-6', () => { presetResize(6, 'resize6'); } ],
-    ['preset-resize-7', () => { presetResize(7, 'resize7'); } ],
-    ['preset-resize-8', () => { presetResize(8, 'resize8'); } ],
-    ['preset-resize-9', () => { presetResize(9, 'resize9'); } ],
-    ['preset-resize-10', () => { presetResize(10, 'resize10'); } ],
-    ['preset-resize-11', () => { presetResize(11, 'resize11'); } ],
-    ['preset-resize-12', () => { presetResize(12, 'resize12'); } ],
-    ['preset-resize-13', () => { presetResize(13, 'resize13'); } ],
-    ['preset-resize-14', () => { presetResize(14, 'resize14'); } ],
-    ['preset-resize-15', () => { presetResize(15, 'resize15'); } ],
-    ['preset-resize-16', () => { presetResize(16, 'resize16'); } ],
-    ['preset-resize-17', () => { presetResize(17, 'resize17'); } ],
-    ['preset-resize-18', () => { presetResize(18, 'resize18'); } ],
-    ['preset-resize-19', () => { presetResize(19, 'resize19'); } ],
-    ['preset-resize-20', () => { presetResize(20, 'resize20'); } ],
-    ['preset-resize-21', () => { presetResize(21, 'resize21'); } ],
-    ['preset-resize-22', () => { presetResize(22, 'resize22'); } ],
-    ['preset-resize-23', () => { presetResize(23, 'resize23'); } ],
-    ['preset-resize-24', () => { presetResize(24, 'resize24'); } ],
-    ['preset-resize-25', () => { presetResize(25, 'resize25'); } ],
-    ['preset-resize-26', () => { presetResize(26, 'resize26'); } ],
-    ['preset-resize-27', () => { presetResize(27, 'resize27'); } ],
-    ['preset-resize-28', () => { presetResize(28, 'resize28'); } ],
-    ['preset-resize-29', () => { presetResize(29, 'resize29'); } ],
-    ['preset-resize-30', () => { presetResize(30, 'resize30'); } ],
+    ['preset-resize-1', () => { presetResize(1, 'resize1'); }],
+    ['preset-resize-2', () => { presetResize(2, 'resize2'); }],
+    ['preset-resize-3', () => { presetResize(3, 'resize3'); }],
+    ['preset-resize-4', () => { presetResize(4, 'resize4'); }],
+    ['preset-resize-5', () => { presetResize(5, 'resize5'); }],
+    ['preset-resize-6', () => { presetResize(6, 'resize6'); }],
+    ['preset-resize-7', () => { presetResize(7, 'resize7'); }],
+    ['preset-resize-8', () => { presetResize(8, 'resize8'); }],
+    ['preset-resize-9', () => { presetResize(9, 'resize9'); }],
+    ['preset-resize-10', () => { presetResize(10, 'resize10'); }],
+    ['preset-resize-11', () => { presetResize(11, 'resize11'); }],
+    ['preset-resize-12', () => { presetResize(12, 'resize12'); }],
+    ['preset-resize-13', () => { presetResize(13, 'resize13'); }],
+    ['preset-resize-14', () => { presetResize(14, 'resize14'); }],
+    ['preset-resize-15', () => { presetResize(15, 'resize15'); }],
+    ['preset-resize-16', () => { presetResize(16, 'resize16'); }],
+    ['preset-resize-17', () => { presetResize(17, 'resize17'); }],
+    ['preset-resize-18', () => { presetResize(18, 'resize18'); }],
+    ['preset-resize-19', () => { presetResize(19, 'resize19'); }],
+    ['preset-resize-20', () => { presetResize(20, 'resize20'); }],
+    ['preset-resize-21', () => { presetResize(21, 'resize21'); }],
+    ['preset-resize-22', () => { presetResize(22, 'resize22'); }],
+    ['preset-resize-23', () => { presetResize(23, 'resize23'); }],
+    ['preset-resize-24', () => { presetResize(24, 'resize24'); }],
+    ['preset-resize-25', () => { presetResize(25, 'resize25'); }],
+    ['preset-resize-26', () => { presetResize(26, 'resize26'); }],
+    ['preset-resize-27', () => { presetResize(27, 'resize27'); }],
+    ['preset-resize-28', () => { presetResize(28, 'resize28'); }],
+    ['preset-resize-29', () => { presetResize(29, 'resize29'); }],
+    ['preset-resize-30', () => { presetResize(30, 'resize30'); }],
 ]);
 
 const keyBindingGlobalResizes: Bindings = new Map([
@@ -207,7 +256,7 @@ const keyBindingGlobalResizes: Bindings = new Map([
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
     private gridShowing: boolean = false;
-    private gridWidget: BoxLayout|null = null;
+    private gridWidget: BoxLayout | null = null;
 
     enable() {
         this.gridShowing = false;
@@ -250,7 +299,7 @@ class App {
         log("Extention enable completed");
     }
 
-    getGrid(monitor: Monitor): Grid|null {
+    getGrid(monitor: Monitor): Grid | null {
         return this.gridsByMonitorKey[getMonitorKey(monitor)];
     }
 
@@ -260,15 +309,15 @@ class App {
         const monitors = activeMonitors();
         for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
             log("New Grid for monitor " + monitorIdx);
-    
+
             let monitor = monitors[monitorIdx];
-    
+
             let grid = new Grid(gridWidget, monitorIdx, monitor, "gTile", nbCols, nbRows);
-    
+
             const key = getMonitorKey(monitor);
             this.gridsByMonitorKey[key] = grid;
             log("initGrids adding grid key " + key);
-    
+
             // TODO: addChrome is poorly documented. I can't find any reference
             // to it in the gjs-docs site.
             Main.layoutManager.addChrome(grid.actor, { trackFullscreen: true });
@@ -279,7 +328,7 @@ class App {
         }
         log("Init grid done");
     }
-    
+
     destroyGrids() {
         log("destroyGrids");
         for (let gridKey in this.gridsByMonitorKey) {
@@ -295,7 +344,7 @@ class App {
             log("ERROR: gridKey still found in this.gridsByMonitorKey: " + gridKey);
         }
     }
-    
+
     refreshGrids() {
         log("refreshGrids");
         for (let gridIdx in this.gridsByMonitorKey) {
@@ -305,20 +354,26 @@ class App {
         }
         log("refreshGrids done");
     }
-    
+
+    setGridSize(gridSize: tilespec.GridSize): void {
+        nbCols = gridSize.width;
+        nbRows = gridSize.height;
+        this.refreshGrids();
+    }
+
     moveGrids() {
         log("moveGrids");
         if (!this.gridShowing) {
             return;
         }
-    
+
         let window = focusMetaWindow;
         if (window) {
             for (let gridKey in this.gridsByMonitorKey) {
                 let grid = this.gridsByMonitorKey[gridKey];
                 let pos_x;
                 let pos_y;
-    
+
                 const monitor = grid.monitor;
                 if (!monitor) {
                     return;
@@ -326,7 +381,7 @@ class App {
                 if (window.get_monitor() == grid.monitor_idx) {
                     pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
                     pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
-    
+
                     let [mouse_x, mouse_y, mask] = global.get_pointer();
                     let act_x = pos_x - grid.actor.width / 2;
                     let act_y = pos_y - grid.actor.height / 2;
@@ -345,19 +400,19 @@ class App {
                     pos_x = monitor.x + monitor.width / 2;
                     pos_y = monitor.y + monitor.height / 2;
                 }
-    
+
                 pos_x = Math.floor(pos_x - grid.actor.width / 2);
                 pos_y = Math.floor(pos_y - grid.actor.height / 2);
-    
+
                 if (window.get_monitor() == grid.monitor_idx) {
                     pos_x = (pos_x < monitor.x) ? monitor.x : pos_x;
                     pos_x = ((pos_x + grid.actor.width) > (monitor.width + monitor.x)) ? monitor.x + monitor.width - grid.actor.width : pos_x;
                     pos_y = (pos_y < monitor.y) ? monitor.y : pos_y;
                     pos_y = ((pos_y + grid.actor.height) > (monitor.height + monitor.y)) ? monitor.y + monitor.height - grid.actor.height : pos_y;
                 }
-    
+
                 let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0.1;
-    
+
                 (grid.actor as any).ease({
                     time: time,
                     x: pos_x,
@@ -368,7 +423,7 @@ class App {
             }
         }
     }
-    
+
     updateRegions() {
         /*Main.layoutManager._chrome.updateRegions();*/
         log("updateRegions");
@@ -528,14 +583,14 @@ class App {
         log("_onFocus ");
         resetFocusMetaWindow();
         const window = getFocusApp();
-    
+
         if (window && this.gridShowing) {
             log("_onFocus " + window.get_title());
             focusMetaWindow = window;
-    
+
             let app = tracker.get_window_app(focusMetaWindow);
             let title = focusMetaWindow.get_title();
-    
+
             const monitors = activeMonitors();
             for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
                 let monitor = monitors[monitorIdx];
@@ -547,7 +602,7 @@ class App {
                     grid?.topbar._set_title(title);
                 }
             }
-    
+
             this.moveGrids();
         } else {
             if (this.gridShowing) {
@@ -614,8 +669,8 @@ const GTileStatusButton = new Lang.Class({
     },
 
     _onButtonPress: function (actor, event) {
-        log("_onButtonPress Click Toggle Status on system panel");
-        this.toggleTiling();
+        log(`_onButtonPress Click Toggle Status on system panel ${this}`);
+        globalApp.toggleTiling();
     },
 
     _destroy: function () {
@@ -628,7 +683,6 @@ const GTileStatusButton = new Lang.Class({
   SETTINGS
  *****************************************************************/
 function initGridSizes(configValue: string): void {
-    gridSettings[SETTINGS_GRID_SIZES] = []
     let gridSizes = tilespec.parseGridSizesIgnoringErrors(configValue);
     if (gridSizes.length === 0) {
         gridSizes = [
@@ -637,10 +691,7 @@ function initGridSizes(configValue: string): void {
             new tilespec.GridSize(4, 4),
         ];
     }
-    gridSettings[SETTINGS_GRID_SIZES] = gridSizes.map(
-        (size: tilespec.GridSize) => {
-            return new GridSettingsButton(size.toString(), size.width, size.height);
-        });
+    gridSettings[SETTINGS_GRID_SIZES] = gridSizes;
 }
 
 function getBoolSetting(settingName: BoolSettingName): boolean {
@@ -667,7 +718,7 @@ function getIntSetting(settings_string) {
 
 function initSettings() {
     log("Init settings");
-    const gridSizes = settings.get_string(SETTINGS_GRID_SIZES);
+    const gridSizes = settings.get_string(SETTINGS_GRID_SIZES) || '';
     log(SETTINGS_GRID_SIZES + " set to " + gridSizes);
     initGridSizes(gridSizes);
 
@@ -698,8 +749,8 @@ function initSettings() {
 
     // initialize these from settings, the first set of sizes
     if (nbCols == 0 || nbRows == 0) {
-        nbCols = gridSettings[SETTINGS_GRID_SIZES][0].cols;
-        nbRows = gridSettings[SETTINGS_GRID_SIZES][0].rows;
+        nbCols = gridSettings[SETTINGS_GRID_SIZES][0].width;
+        nbRows = gridSettings[SETTINGS_GRID_SIZES][0].height;
     }
     log("Init complete, nbCols " + nbCols + " nbRows " + nbRows);
 
@@ -851,7 +902,7 @@ function contains<T>(a: Array<T>, obj: T) {
  * Get focused window by iterating though the windows on the active workspace.
  * @returns {Object} The focussed window object. False if no focussed window was found.
  */
-function getFocusApp(): Window|null {
+function getFocusApp(): Window | null {
     if (tracker.focus_app == null) {
         return null;
     }
@@ -884,7 +935,7 @@ function getFocusWindow(): any {
         .find(w => w.has_focus());
 }
 
-function workAreaRectByMonitorIndex(monitorIndex: number): tilespec.Rect|null {
+function workAreaRectByMonitorIndex(monitorIndex: number): tilespec.Rect | null {
     const monitor = activeMonitors()[monitorIndex];
     if (!monitor) {
         return null;
@@ -1004,23 +1055,18 @@ function keySetTiling() {
 
 function keyChangeTiling() {
     log("keyChangeTiling. Current nbCols " + nbCols + " nbRos " + nbRows);
-    let grid_settings_sizes = gridSettings[SETTINGS_GRID_SIZES];
-    let next_key: number | string = 0;
-    let found = false;
-    for (let key in grid_settings_sizes) {
-        if (found) {
-            next_key = key;
-            break;
-        }
-        log("Checking grid settings ind " + key + " have cols " + grid_settings_sizes[key].cols + " and rows " + grid_settings_sizes[key].rows);
-        if (grid_settings_sizes[key].cols == nbCols && grid_settings_sizes[key].rows == nbRows) {
-            found = true;
-        }
+    const gridSizes = gridSettings[SETTINGS_GRID_SIZES];
+    if (gridSizes.length === 0) {
+        return;
     }
-    log("found matching grid nbCols " + nbCols + " nbRows " + nbRows + " next key is " + next_key);
-    log("New settings will be nbCols " + grid_settings_sizes[next_key].cols + " nbRows " + grid_settings_sizes[next_key].rows);
-    grid_settings_sizes[next_key]._onButtonPress();
-    log("New settings are nbCols " + nbCols + " nbRows " + nbRows);
+    let next_key: number = 0;
+    let found = false;
+    const currentIndex = gridSizes.findIndex((size: tilespec.GridSize): boolean => 
+        size.width === nbCols && size.height === nbRows)
+    
+    const newIndex = currentIndex === -1 ? 0 : (currentIndex +1) % gridSizes.length;
+    const newGridSize = gridSizes[newIndex];
+    globalApp.setGridSize(newGridSize);
     setInitialSelection();
 }
 
@@ -1409,7 +1455,7 @@ interface ToggleSettingsButtonListenerActor extends ClutterActor {
 
 class ToggleSettingsButtonListener {
     private readonly actors: ToggleSettingsButtonListenerActor[] = [];
-    constructor() {}
+    constructor() { }
 
     addActor(actor: ToggleSettingsButtonListenerActor) {
         log("ToggleSettingsButtonListener Connect update-toggle");
@@ -1493,9 +1539,9 @@ class ActionButton {
     }
 
     /** Functions replaced by Signals.addSignalMethods. */
-    connect(eventName: string, handler: Function): number {return 0; }
-    disconnect(id: number): void {}
-    emit(name: string, ...args: any): void {}
+    connect(eventName: string, handler: Function): number { return 0; }
+    disconnect(id: number): void { }
+    emit(name: string, ...args: any): void { }
 };
 
 Signals.addSignalMethods(ActionButton.prototype);
@@ -1664,40 +1710,38 @@ function SnapToNeighborsBind() {
     snapToNeighbors(window);
 }
 
-function GridSettingsButton(text, cols, rows) {
-    this._init(text, cols, rows);
-}
+/**
+ * GridSettingsButton is a GUI button that displays text like "8x8" and changes
+ * the main grid size used for GUI elements and some presets.
+ */
+class GridSettingsButton {
+    readonly actor: StButton;
+    readonly text: string;
+    readonly cols: number;
+    readonly rows: number;
 
-GridSettingsButton.prototype = {
-    _init: function (text, cols, rows) {
-        this.cols = cols;
-        this.rows = rows;
-        this.text = text;
+    constructor(gridSize: tilespec.GridSize) {
+        this.text = gridSize.toString();
+        this.cols = gridSize.width;
+        this.rows = gridSize.height;
 
         this.actor = new St.Button({
             style_class: 'settings-button',
             reactive: true,
             can_focus: true,
-            track_hover: true
+            track_hover: true,
+            label: this.text,
         });
 
-        this.label = new St.Label({ style_class: 'settings-label', reactive: true, can_focus: true, track_hover: true, text: this.text });
-
-        this.actor.add_actor(this.label);
-
-        log("Connecting button-press-event to GridSettingsButton " + text);
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
-    },
-
-    _onButtonPress: function () {
-        log("GridSettingsButton " + this.text + " _OnButtonPress");
-        nbCols = this.cols;
-        nbRows = this.rows;
-
-        globalApp.refreshGrids();
+        this.actor.connect('button-press-event', () => this._onButtonPress());
     }
 
-};
+    _onButtonPress() {
+        nbCols = this.cols;
+        nbRows = this.rows;
+        globalApp.refreshGrids();
+    }
+}
 
 class Grid {
     connectHideTiling: any;
@@ -1706,19 +1750,19 @@ class Grid {
     readonly tableHeight: number;
     readonly borderwidth = 2;
     readonly actor: BoxLayout;
-    readonly bottombar_table_layout: any;
+    readonly bottomBarTableLayout: GridLayout;
     readonly animation_time: number;
     readonly topbar: any; //TopBar;
     readonly bottombarContainer: StBin;
     readonly bottombar: StWidget;
     readonly veryBottomBar: StWidget;
     readonly veryBottomBarContainer: any;
-    readonly veryBottomBar_table_layout: any;
+    readonly veryBottomBarTableLayout: GridLayout;
 
     readonly tableContainer: any;
     readonly table: StWidget;
     readonly table_table_layout: any;
-    monitor: Monitor|null;
+    monitor: Monitor | null;
     readonly monitor_idx: number;
     x: number;
     y: number;
@@ -1729,7 +1773,7 @@ class Grid {
     readonly normalScaleY: number;
     interceptHide: boolean;
     isEntered: boolean;
-    elementsDelegate: GridElementDelegate|null = null;
+    elementsDelegate: GridElementDelegate | null = null;
     elements: GridElement[][] = [];
 
 
@@ -1737,7 +1781,7 @@ class Grid {
         let workArea = getWorkArea(monitor, monitor_idx);
 
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
-        
+
         this.actor = new St.BoxLayout({
             vertical: true,
             style_class: 'grid-panel',
@@ -1746,14 +1790,14 @@ class Grid {
             track_hover: true
         });
 
-        log(`created actor for monitor ${monitor_idx}: ${this.actor}`)
+        log(`created actor for monitor ${monitor_idx}: ${this.actor} with cols=${cols}, rows=${rows}`)
 
         log("Grid connect enter-event leave-envent BEGIN");
         // TODO: disconnect these events on teardown.
         this.actor.connect('enter-event', () => this._onMouseEnter());
         this.actor.connect('leave-event', () => this._onMouseLeave());
         log("Grid connect enter-event leave-envent FINISH");
-        
+
         this.animation_time = gridSettings[SETTINGS_ANIMATION] ? 0.3 : 0;
 
         this.topbar = new TopBar(title);
@@ -1765,6 +1809,8 @@ class Grid {
             track_hover: true
         });
 
+
+        this.bottomBarTableLayout = new Clutter.GridLayout();
         this.bottombar = new St.Widget({
             style_class: 'bottom-box',
             can_focus: true,
@@ -1772,11 +1818,10 @@ class Grid {
             reactive: true,
             width: this.tableWidth - 20,
             height: 36,
-            layout_manager: new Clutter.GridLayout()
+            layout_manager: this.bottomBarTableLayout
         });
-        this.bottombar_table_layout = this.bottombar.layout_manager;
-        this.bottombar_table_layout.set_row_homogeneous(true);
-        this.bottombar_table_layout.set_column_homogeneous(true);
+        this.bottomBarTableLayout.set_row_homogeneous(true);
+        this.bottomBarTableLayout.set_column_homogeneous(true);
 
         this.bottombarContainer.add_actor(this.bottombar);
 
@@ -1787,6 +1832,7 @@ class Grid {
             track_hover: true
         });
 
+        this.veryBottomBarTableLayout = new Clutter.GridLayout();
         this.veryBottomBar = new St.Widget({
             style_class: 'very-bottom-box',
             can_focus: true,
@@ -1794,11 +1840,10 @@ class Grid {
             reactive: true,
             width: this.tableWidth - 20,
             height: 36,
-            layout_manager: new Clutter.GridLayout()
+            layout_manager: this.veryBottomBarTableLayout,
         });
-        this.veryBottomBar_table_layout = this.veryBottomBar.layout_manager;
-        this.bottombar_table_layout.set_row_homogeneous(true);
-        this.veryBottomBar_table_layout.set_column_homogeneous(true);
+        this.bottomBarTableLayout.set_row_homogeneous(true);
+        this.veryBottomBarTableLayout.set_column_homogeneous(true);
 
         this.veryBottomBarContainer.add_actor(this.veryBottomBar);
 
@@ -1806,20 +1851,18 @@ class Grid {
         let colNum = 0;
         let maxPerRow = 4;
 
-        var gridSettingsButtons = gridSettings[SETTINGS_GRID_SIZES];
-        for (var index = 0; index < gridSettingsButtons.length; index++) {
+        for (let gridSize of gridSettings[SETTINGS_GRID_SIZES]) {
             if (colNum >= maxPerRow) {
                 colNum = 0;
-                rowNum += 2;
+                rowNum += 1;
             }
 
-            var button = gridSettingsButtons[index];
-            //button = new GridSettingsButton(button.text,button.cols,button.rows);
-            this.bottombar_table_layout.attach(button.actor, colNum, rowNum, 1, 1);
-            log("Connecting grid settings button " + index + " : " + button.text);
+            const button = new GridSettingsButton(gridSize);
+            this.bottomBarTableLayout.attach(button.actor, colNum, rowNum, 1, 1);
             button.actor.connect('notify::hover', () => this._onSettingsButton());
             colNum++;
         }
+        this.bottombar.height *= (rowNum+1);
 
         this.tableContainer = new St.Bin({
             style_class: 'table-container',
@@ -1860,19 +1903,19 @@ class Grid {
         const toggleSettingListener = new ToggleSettingsButtonListener();
 
         let toggle = new ToggleSettingsButton("animation", SETTINGS_ANIMATION);
-        this.veryBottomBar_table_layout.attach(toggle.actor, 0, 0, 1, 1);
+        this.veryBottomBarTableLayout.attach(toggle.actor, 0, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         toggle = new ToggleSettingsButton("auto-close", SETTINGS_AUTO_CLOSE);
-        this.veryBottomBar_table_layout.attach(toggle.actor, 1, 0, 1, 1);
+        this.veryBottomBarTableLayout.attach(toggle.actor, 1, 0, 1, 1);
         toggleSettingListener.addActor(toggle);
 
         let action = new AutoTileMainAndList(this);
-        this.veryBottomBar_table_layout.attach(action.actor, 2, 0, 1, 1);
+        this.veryBottomBarTableLayout.attach(action.actor, 2, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this, this._onResize));
 
         action = new AutoTileTwoList(this);
-        this.veryBottomBar_table_layout.attach(action.actor, 3, 0, 1, 1);
+        this.veryBottomBarTableLayout.attach(action.actor, 3, 0, 1, 1);
         action.connect('resize-done', Lang.bind(this, this._onResize));
 
         this.x = 0;
@@ -1890,7 +1933,7 @@ class Grid {
     }
 
     _displayElements() {
-        if (this.monitor === null)  {
+        if (this.monitor === null) {
             return;
         }
         log("Grid _displayElements " + this.cols + ":" + this.rows);
@@ -1898,7 +1941,7 @@ class Grid {
 
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
         let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
-    
+
         const delegate = new GridElementDelegate(this.gridWidget);
         this.elementsDelegate = delegate;
         this.elementsDelegate.connect('resize-done', (actor, event) => this._onResize(actor, event));
@@ -2035,6 +2078,7 @@ class Grid {
     }
 
     _onSettingsButton() {
+        log("_onSettingsButton");
         this.elementsDelegate?.reset();
     }
 
@@ -2058,19 +2102,19 @@ class Grid {
     }
 
     // Methods replaced by Signals.addSignalMethods.
-    connect(name: string, callback: Function): number{ return -1 }
-    disconnect(id: number): void{}
-    emit(name: string, ...args: any): void{}
+    connect(name: string, callback: Function): number { return -1 }
+    disconnect(id: number): void { }
+    emit(name: string, ...args: any): void { }
 };
 
 Signals.addSignalMethods(Grid.prototype);
 class GridElementDelegate {
     activated: boolean = false;
-    first: GridElement|null = null;
-    currentElement: GridElement|null = null;
+    first: GridElement | null = null;
+    currentElement: GridElement | null = null;
     activatedActors: GridElement[] = [];
 
-    constructor(private readonly gridWidget: BoxLayout) {}
+    constructor(private readonly gridWidget: BoxLayout) { }
 
     _allSelected() {
         return (this.activatedActors.length === (nbCols * nbRows));
@@ -2247,7 +2291,7 @@ class GridElementDelegate {
             this._displayArea(gridElement, gridElement);
         } else {
             log("GridElementDelegate _onHoverChange/else: " + gridElement.coordx + ":" + gridElement.coordy);
-            
+
         }
     }
 
@@ -2259,14 +2303,14 @@ class GridElementDelegate {
     }
 
     // Methods replaced by Signals.addSignalMethods.
-    connect(name: string, callback: Function): number{ return -1 }
-    disconnect(id: number): void{}
-    emit(name: string, ...args: any): void{}
+    connect(name: string, callback: Function): number { return -1 }
+    disconnect(id: number): void { }
+    emit(name: string, ...args: any): void { }
 };
 
 Signals.addSignalMethods(GridElementDelegate.prototype);
 
-class GridElement{
+class GridElement {
     readonly actor: StButton;
     readonly id: string;
     readonly hoverConnect: number;

@@ -1,6 +1,17 @@
 /**
- * 
+ * @fileoverview This file contains incomplete typings for gnome shell types.
  *
+ * Probably the best source of definitive API documentation is here:
+ * https://gjs-docs.gnome.org/
+ *
+ * However, there are also some ways the GJS works that make the API docs above
+ * slightly incomplete.
+ * https://wiki.gnome.org/Projects/GnomeShell/Extensions/StepByStepTutorial
+ * mentions that constructors can take a property map as an argument. This file
+ * does not correctly type the constructors for these types.
+ */
+
+/**
  * Based on https://developer.gnome.org/shell/stable/shell-shell-app.html#ShellApp.
  */
 export interface ShellApp {
@@ -667,10 +678,34 @@ export interface StWidget extends ClutterActor {
     style: string;
     style_class: string;
     track_hover: boolean;
+    layout_manager: LayoutManager;
 }
 
-export interface LayoutManager {
+export interface LayoutManager {}
 
+export interface GridLayout extends LayoutManager {
+    /**
+     * Adds a widget to the grid. The position of child is determined by left
+     * and top. The number of 'cells' that child will occupy is determined by
+     * width and height.
+     */
+    attach(child: ClutterActor, left: number, top: number, width: number, height: number): void;
+
+    // attach_next_to(child, sibling, side, width, height)
+    // get_child_at(left, top)
+    // get_column_homogeneous()
+    // get_column_spacing()
+    // get_orientation()
+    // get_row_homogeneous()
+    // get_row_spacing()
+    // insert_column(position)
+    // insert_next_to(sibling, side)
+    // insert_row(position)
+    set_column_homogeneous(homogeneous: boolean): void;
+    // set_column_spacing(spacing)
+    // set_orientation(orientation)
+    set_row_homogeneous(homogeneous: boolean): void;
+    // set_row_spacing(spacing)
 }
 
 export interface SignalMethods {
