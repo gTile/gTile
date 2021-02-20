@@ -92,6 +92,7 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",
+        ":settings_data_lib",
     ],
 )
 

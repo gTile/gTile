@@ -85,6 +85,7 @@ function generateTypeDefinition(keys: ConfigKey[]): string {
     const boolSettings = keys.filter(k => k.type === KeyType.Boolean);
     const numberSettings = keys.filter(k => k.type === KeyType.Int32);
     const stringSettings = keys.filter(k => k.type === KeyType.String);
+    const keyBindingSettings = keys.filter(k => k.type === KeyType.StringArray);
 
 
     const interfaceEntries = keys.map((key: ConfigKey): string => {
@@ -102,6 +103,9 @@ ${settingType('BoolSettingName', boolSettings)}
 
 // A setting name for a number-valued setting.
 ${settingType('NumberSettingName', numberSettings)}
+
+// A setting for a key binding i.e. a 'preset' in the app.ts code.
+${settingType('KeyBindingSettingName', keyBindingSettings)}
 
 // A setting name for a string-valued setting.
 ${settingType('StringSettingName', stringSettings)}

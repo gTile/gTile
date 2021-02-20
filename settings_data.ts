@@ -26,6 +26,87 @@ export type NumberSettingName = (
     "max-timeout" |
     "window-margin");
 
+// A setting for a key binding i.e. a 'preset' in the app.ts code.
+export type KeyBindingSettingName = (
+    "action-change-tiling" |
+    "action-contract-bottom" |
+    "action-contract-left" |
+    "action-contract-right" |
+    "action-contract-top" |
+    "action-expand-bottom" |
+    "action-expand-left" |
+    "action-expand-right" |
+    "action-expand-top" |
+    "action-move-down" |
+    "action-move-left" |
+    "action-move-next-monitor" |
+    "action-move-right" |
+    "action-move-up" |
+    "autotile-1" |
+    "autotile-10" |
+    "autotile-2" |
+    "autotile-3" |
+    "autotile-4" |
+    "autotile-5" |
+    "autotile-6" |
+    "autotile-7" |
+    "autotile-8" |
+    "autotile-9" |
+    "autotile-main" |
+    "cancel-tiling" |
+    "change-grid-size" |
+    "move-down" |
+    "move-down-vi" |
+    "move-left" |
+    "move-left-vi" |
+    "move-next-monitor" |
+    "move-right" |
+    "move-right-vi" |
+    "move-up" |
+    "move-up-vi" |
+    "preset-resize-1" |
+    "preset-resize-10" |
+    "preset-resize-11" |
+    "preset-resize-12" |
+    "preset-resize-13" |
+    "preset-resize-14" |
+    "preset-resize-15" |
+    "preset-resize-16" |
+    "preset-resize-17" |
+    "preset-resize-18" |
+    "preset-resize-19" |
+    "preset-resize-2" |
+    "preset-resize-20" |
+    "preset-resize-21" |
+    "preset-resize-22" |
+    "preset-resize-23" |
+    "preset-resize-24" |
+    "preset-resize-25" |
+    "preset-resize-26" |
+    "preset-resize-27" |
+    "preset-resize-28" |
+    "preset-resize-29" |
+    "preset-resize-3" |
+    "preset-resize-30" |
+    "preset-resize-4" |
+    "preset-resize-5" |
+    "preset-resize-6" |
+    "preset-resize-7" |
+    "preset-resize-8" |
+    "preset-resize-9" |
+    "resize-down" |
+    "resize-down-vi" |
+    "resize-left" |
+    "resize-left-vi" |
+    "resize-right" |
+    "resize-right-vi" |
+    "resize-up" |
+    "resize-up-vi" |
+    "set-tiling" |
+    "show-toggle-tiling" |
+    "show-toggle-tiling-alt" |
+    "snap-to-neighbors");
+
 // A setting name for a string-valued setting.
 export type StringSettingName = (
     "grid-sizes" |
