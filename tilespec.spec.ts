@@ -9,16 +9,53 @@ describe('1 = 1', () => {
     });
 });
 
-describe("TileSpec.parsePreset", function() {
-    it("parsePreset should work", function () {
-        const roundtrip = function(s: string) {
-            return parsePreset(s)
-                .map(x => x.toString())
-                .join(', ');
-        };
-        expect(roundtrip('3x3 0:0 1:1, 2x2 0:0 0:0'))
-            .equal('3x3 0:0 1:1, 2x2 0:0 0:0');
-    });
+describe("TileSpec.parsePreset success cases", function() {
+    const cases: Array<[string, string]> = [
+        [
+            '3x3 0:0 1:1, 2x2 0:0 0:0',
+            '3x3 0:0 1:1, 2x2 0:0 0:0',
+        ],
+        [
+            '3x3 0:0 1:1,     0:0 0:0, 4x4 0:0 0:0,     0:2 3:3',
+            '3x3 0:0 1:1, 3x3 0:0 0:0, 4x4 0:0 0:0, 4x4 0:2 3:3',
+        ],
+        [
+            '3x3 0:0 1:1, 0:0 0:0',
+            '3x3 0:0 1:1, 3x3 0:0 0:0',
+        ],
+    ];
+    for (let [input, output] of cases) {
+        it(`${JSON.stringify(input)} roundtrips to ${JSON.stringify(output)}`, function () {
+            const roundtrip = function(s: string) {
+                return parsePreset(s)
+                    .map(x => x.toString())
+                    .join(', ');
+            };
+            expect(roundtrip(input)).equal(output);
+        });
+    }
+});
+
+describe("TileSpec.parsePreset error cases", function() {
+    const badPresets = [
+        '0:0 1:1',
+        '3:b 1:1',
+        '3x3 0:b 1:1',
+        '3xa 0:0 1:1',
+        '3x3 0:a 1:1',
+        '3x3 0:0 1:a',
+        'xx3 0:0 1:0',
+        '3x3 x:0 1:0',
+        '3x3 0:0 x:0',
+        'bx3 0:0 1:0',
+        '3x3 b:0 1:0',
+        '3x3 0:0 b:0',
+    ];
+    for (let input of badPresets) {
+        it(`${JSON.stringify(input)} is invalid`, () => {
+            expect(() => {parsePreset(input);}).throws();
+        });
+    }
 });
 
 describe("TileSpec.XY.dot", function() {

@@ -1,12 +1,14 @@
+const MAX_TUPLE_MEMBER_VALUE = Number.MAX_SAFE_INTEGER;
+
 /**
  * TileSpec represents a rectangular area on display by means of specifying a
  * number of evenly spaced tiles and two corners.
  */
 export class TileSpec {
-    gridWidth: number;
-    gridHeight: number;
-    luc: XY;
-    rdc: XY;
+    readonly gridWidth: number;
+    readonly gridHeight: number;
+    readonly luc: XY;
+    readonly rdc: XY;
 
     constructor(gridWidth: number, gridHeight: number, luc: XY, rdc: XY) {
         this.gridWidth = gridWidth;
@@ -33,15 +35,42 @@ export class TileSpec {
                 (this.rdc.y + 1 - this.luc.y) * elemSize.height));
     }
 
+    get gridSize(): GridSize {
+        return new GridSize(this.gridWidth, this.gridHeight);
+    }
+}
+
+export class GridSize {
+    constructor(
+        // Number of columns.
+        readonly width: number,
+        // Number of rows.
+        readonly height: number) {}
+    
+    toString(): string {
+        return `${this.width}x${this.height}`;
+    }
+}
+
+
+export function parseGridSizesIgnoringErrors(s: string): GridSize[] {
+    return s.split(',').flatMap(
+        (part: string) => {
+            const size = parseGridSizeIgnoringErrors(part.trim());
+            return size ? [size] : [];
+        });
+}
+
+function parseGridSizeIgnoringErrors(s: string): GridSize|null {
+    const parts = s.split("x").map(Number);
+    if (parts.length !== 2 || parts.every(x => !isNaN(x))) {
+        return null;
+    }
+    return new GridSize(parts[0], parts[1]);
 }
 
 export class XY {
-    x: number;
-    y: number;
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
+    constructor(readonly x: number, readonly y: number) {}
     clone() {
         return new XY(this.x, this.y);
     }
@@ -316,20 +345,34 @@ export function adjoiningSides(a: Edges, b: Edges, distTol: number) {
     return result;
 }
 
-
-
-
-/** parsePreset parses a string like "8x8 0:0 0:7, 8x8 0:0 2:7" */
+/**
+ * parsePreset parses a sequence of TileSpec objects from a string like "8x8 0:0
+ * 0:7, 8x10 0:0 2:7" or "8x8 0:0 0:7, 0:0 2:7"
+ *
+ * The 8x8 and 8x10 values above are the "grid size." The grid size may be
+ * omitted in all but the first component of the preset.
+ */
 export function parsePreset(preset: string): Array<TileSpec> {
-    return preset.split(",")
-        .map(x => x.trim())
-        .map(parseSinglePreset);
+    const parts = preset.split(',').map(x => x.trim());
+
+    let mostRecentSpec: TileSpec|null = null;
+    return parts.map((part: string, index: number): TileSpec => {
+        if (hasImpliedGridSize(part)) {
+            if (mostRecentSpec === null) {
+                throw new Error(`preset component[${index}] ${part} of ${preset} is missing grid size (e.g., '3x3')`);
+            }
+            part = `${mostRecentSpec.gridWidth}x${mostRecentSpec.gridHeight} ${part}`;
+        }
+        const parsed = parseSinglePreset(part);
+        mostRecentSpec = parsed;
+        return parsed;
+    });
 }
 
 function parseSinglePreset(preset: string) {
     const ps = preset.trim().split(" ");
     if (ps.length != 3) {
-        throw new Error("Bad preset: " + preset);
+        throw new Error(`Bad preset: ${JSON.stringify(preset)}`);
     }
     const gridFormat = parseTuple(ps[0], "x");
     const luc = parseTuple(ps[1], ":");
@@ -340,21 +383,29 @@ function parseSinglePreset(preset: string) {
         || gridFormat.x <= luc.x || gridFormat.x <= rdc.x
         || gridFormat.y <= luc.y || gridFormat.y <= rdc.y
         || luc.x > rdc.x || luc.y > rdc.y) {
-        throw new Error("Bad preset: " + preset);
+        throw new Error(`Bad preset: ${JSON.stringify(preset)}`);
     }
     return new TileSpec(gridFormat.x, gridFormat.y, luc, rdc);
 }
 
+function hasImpliedGridSize(singlePreset: string): boolean {
+    return singlePreset.trim().split(" ").length === 2;
+}
+
+
+/**
+ * Parses a value like like 6x4 or 1:2 into {X: 6, Y: 4} or {X: 1, Y: 2}.
+ */
 function parseTuple(unparsed: string, delim: string) {
     // parsing grid size in unparsed XdelimY, like 6x4 or 1:2
     const gssk = unparsed.split(delim);
 
-    if (gssk.length != 2) {
+    if (gssk.length !== 2) {
         throw new Error("Failed to split " + unparsed + " by delimiter " + delim + " into two numbers");
     }
     const numbers = gssk.map(Number);
-    if (numbers.some(n => isNaN(n) || n < 0 || n > 40)) {
-        throw new Error("All elements of tuple must be intgers in [0, 40] : " + unparsed)
+    if (numbers.some(n => isNaN(n) || n < 0 || n > MAX_TUPLE_MEMBER_VALUE)) {
+        throw new Error(`All elements of tuple must be intgers in [0, ${MAX_TUPLE_MEMBER_VALUE}]: ${JSON.stringify(unparsed)}`)
     }
     return new XY(numbers[0], numbers[1]);
 }

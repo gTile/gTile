@@ -95,12 +95,19 @@ let monitorsChangedConnect: any = false;
 
 const SHELL_VERSION = ShellVersion.defaultVersion();
 
-let presetState = new Array();
-presetState["current_variant"] = 0;
-presetState["last_call"] = '';
-presetState["last_grid_format"] = '';
-presetState["last_preset"] = '';
-presetState["last_window_title"] = '';
+interface ResizeActionInfo {
+    variantIndex: number;
+    lastCallTime: Date;
+    presetName: string;
+    windowTitle: string;
+};
+
+const lastResizeInfo: ResizeActionInfo = {
+    variantIndex: 0,
+    lastCallTime: new Date(), // now
+    presetName: '',
+    windowTitle: '',
+};
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -620,38 +627,20 @@ const GTileStatusButton = new Lang.Class({
 /*****************************************************************
   SETTINGS
  *****************************************************************/
-
-function parseTuple(format, delimiter) {
-    // parsing grid size in format XdelimY, like 6x4 or 1:2
-    let gssk = format.trim().split(delimiter);
-    if (gssk.length != 2
-        || isNaN(gssk[0]) || gssk[0] < 0 || gssk[0] > 99
-        || isNaN(gssk[1]) || gssk[1] < 0 || gssk[1] > 99) {
-        log("Bad format " + format + ", delimiter " + delimiter);
-        return { X: Number(-1), Y: Number(-1) };
-    }
-    return { X: Number(gssk[0]), Y: Number(gssk[1]) };
-}
-
-function initGridSizes(grid_sizes) {
+function initGridSizes(configValue: string): void {
     gridSettings[SETTINGS_GRID_SIZES] = []
-    let gss = grid_sizes.split(",");
-    let no_grids = true;
-    for (var key in gss) {
-        let grid_format = parseTuple(gss[key], "x");
-        if (grid_format.X == -1) {
-            continue;
-        }
-        no_grids = false;
-        gridSettings[SETTINGS_GRID_SIZES].push(new GridSettingsButton(grid_format.X + "x" + grid_format.Y, grid_format.X, grid_format.Y));
-    }
-    if (no_grids) {
-        gridSettings[SETTINGS_GRID_SIZES] = [
-            new GridSettingsButton('8x6', 8, 6),
-            new GridSettingsButton('6x4', 6, 4),
-            new GridSettingsButton('4x4', 4, 4),
+    let gridSizes = tilespec.parseGridSizesIgnoringErrors(configValue);
+    if (gridSizes.length === 0) {
+        gridSizes = [
+            new tilespec.GridSize(8, 6),
+            new tilespec.GridSize(6, 4),
+            new tilespec.GridSize(4, 4),
         ];
     }
+    gridSettings[SETTINGS_GRID_SIZES] = gridSizes.map(
+        (size: tilespec.GridSize) => {
+            return new GridSettingsButton(size.toString(), size.width, size.height);
+        });
 }
 
 function getBoolSetting(settingName: BoolSettingName): boolean {
@@ -678,7 +667,7 @@ function getIntSetting(settings_string) {
 
 function initSettings() {
     log("Init settings");
-    let gridSizes = settings.get_string(SETTINGS_GRID_SIZES);
+    const gridSizes = settings.get_string(SETTINGS_GRID_SIZES);
     log(SETTINGS_GRID_SIZES + " set to " + gridSizes);
     initGridSizes(gridSizes);
 
@@ -895,12 +884,20 @@ function getFocusWindow(): any {
         .find(w => w.has_focus());
 }
 
-function workAreaRectByMonitorIndex(monitorIndex: number) {
+function workAreaRectByMonitorIndex(monitorIndex: number): tilespec.Rect|null {
     const monitor = activeMonitors()[monitorIndex];
+    if (!monitor) {
+        return null;
+    }
     const waLegacy = getWorkArea(monitor, monitorIndex);
-    return new tilespec.Rect(
+
+    const margin = new tilespec.Size(
+        gridSettings[SETTINGS_WINDOW_MARGIN],
+        gridSettings[SETTINGS_WINDOW_MARGIN]);
+
+    return (new tilespec.Rect(
         new tilespec.XY(waLegacy.x, waLegacy.y),
-        new tilespec.Size(waLegacy.width, waLegacy.height));
+        new tilespec.Size(waLegacy.width, waLegacy.height))).inset(margin);
 }
 
 
@@ -1238,8 +1235,7 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
  * Resize window to the given preset.
  * @param  {number}  Identifier of the resize preset (1 - 30)
  */
-function presetResize(presetName: number, settingName: StringSettingName) {
-
+function presetResize(presetName: number, settingName: StringSettingName): void {
     // Check if there's a focusable window
     let window = getFocusApp();
     if (!window) {
@@ -1262,98 +1258,60 @@ function presetResize(presetName: number, settingName: StringSettingName) {
     //  - x2:y2 is right down corner tile coordinates in grid tiles
     //  - a preset can define multiple variants (e.g. "3x2 0:0 0:1,0:0 1:1,0:0 2:1")
     //  - variants can be activated using the same shortcut consecutively
-    let presetString = settings.get_string(settingName) || '';
+    const presetString = settings.get_string(settingName) || '';
     log("Preset resize " + presetName + "  is " + presetString);
-    let ps_variants = presetString.split(",");
 
-    // retrieve and validate preset string / first preset variant
-    let ps = ps_variants[0].trim().split(" ");
-    if (ps.length != 3) {
-        log("Bad preset " + presetName + " settings " + presetString);
+    let tileSpecs: tilespec.TileSpec[] = [];
+    try {
+        tileSpecs = tilespec.parsePreset(presetString);
+    } catch (err) {
+        log(`Bad preset ${presetName} ${JSON.stringify(presetString)}: ${err}`);
+        return;
+    }
+    if (tileSpecs.length === 0) {
         return;
     }
 
     // parse the preset string (grid size, left-upper-corner, right-down-corner)
-    let grid_format = parseTuple(ps[0], "x");
-    let luc = parseTuple(ps[1], ":");
-    let rdc = parseTuple(ps[2], ":");
+    let gridSize = tileSpecs[0].gridSize;
 
     // handle preset variants (if there are any)
-    let ps_variant_count = ps_variants.length;
-    if (ps_variant_count > 1) {
-        if (presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
-            presetState["last_preset"] == presetName &&
-            presetState["last_window_title"] == window.get_title()) {
+    let variantCount = tileSpecs.length;
+    if (variantCount > 1) {
+        if ((lastResizeInfo.lastCallTime.getTime() + gridSettings[SETTINGS_MAX_TIMEOUT]) > new Date().getTime() &&
+            lastResizeInfo.presetName === presetName.toString() &&
+            lastResizeInfo.windowTitle == window.get_title()) {
             // within timeout (default: 2s), same preset & same window:
             // increase variant counter, but consider upper boundary
-            presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
+            lastResizeInfo.variantIndex = (lastResizeInfo.variantIndex + 1) % variantCount;
         } else {
             // timeout, new preset or new window:
-            // update presetState["last_preset"] and reset variant counter
-            presetState["current_variant"] = 0;
+            // update presetState.last_preset and reset variant counter
+            lastResizeInfo.variantIndex = 0;
         }
     } else {
-        presetState["current_variant"] = 0;
+        lastResizeInfo.variantIndex = 0;
     }
 
     // retrieve current preset variant
-    if (presetState["current_variant"] > 0) {
-        ps = ps_variants[presetState["current_variant"]].trim().split(" ");
-
-        if (ps.length == 3) {
-            // handle complete variant definitions
-            grid_format = parseTuple(ps[0], "x");
-            luc = parseTuple(ps[1], ":");
-            rdc = parseTuple(ps[2], ":");
-        } else if (ps.length == 2) {
-            // handle short variant definitions - grid format is taken from
-            // a previous variant
-            grid_format = presetState["last_grid_format"];
-            luc = parseTuple(ps[0], ":");
-            rdc = parseTuple(ps[1], ":");
-        } else {
-            log("Bad preset " + presetName + " settings " + presetString);
-            return;
-        }
-    }
-
-    log("Parsed " + grid_format.X + "x" + grid_format.Y + " "
-        + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
-    if (grid_format.X < 1 || luc.X < 0 || rdc.X < 0 ||
-        grid_format.Y < 1 || luc.Y < 0 || rdc.Y < 0 ||
-        grid_format.X <= luc.X || grid_format.X <= rdc.X ||
-        grid_format.Y <= luc.Y || grid_format.Y <= rdc.Y ||
-        luc.X > rdc.X || luc.Y > rdc.Y) {
-        log("Bad preset " + presetName + " settings " + presetString);
-        return;
-    }
-    log("Parsed preset " + presetName + " " + grid_format.X + "x" + grid_format.Y +
-        " " + luc.X + ":" + luc.Y + " " + rdc.X + ":" + rdc.Y);
+    const tileSpec = tileSpecs[lastResizeInfo.variantIndex];
 
     // do the maths to resize the window
-    let mind = window.get_monitor();
-    let work_area = getWorkAreaByMonitorIdx(mind);
-    let grid_element_width = work_area.width / grid_format.X;
-    let grid_element_height = work_area.height / grid_format.Y;
+    const workArea = workAreaRectByMonitorIndex(window.get_monitor());
+    if (!workArea) {
+        log(`Failed to get active work area for window while performing preset ${presetName} ${JSON.stringify(presetString)}`);
+        return;
+    }
+    const rect = tileSpec.toFrameRect(workArea);
+    moveWindowToRect(window, rect);
 
-    let wx = Math.round(work_area.x + luc.X * grid_element_width);
-    let wy = Math.round(work_area.y + luc.Y * grid_element_height);
-    let ww = Math.round((rdc.X + 1 - luc.X) * grid_element_width);
-    let wh = Math.round((rdc.Y + 1 - luc.Y) * grid_element_height);
-
-    log("Resize preset " + presetName + " resizing to wx " + wx + " wy " + wy + " ww " + ww + " wh " + wh);
-    moveResizeWindowWithMargins(window, wx, wy, ww, wh);
-
-    presetState["last_preset"] = presetName;
-    presetState["last_grid_format"] = grid_format;
-    presetState["last_window_title"] = window.get_title();
-    presetState["last_call"] = new Date().getTime();
-
-    log("Resize preset last call: " + presetState["last_call"])
+    lastResizeInfo.presetName = presetName.toString();
+    lastResizeInfo.windowTitle = window.get_title();
+    lastResizeInfo.lastCallTime = new Date();
 }
 
 // Move the window to the next monitor.
-function moveWindowToNextMonitor() {
+function moveWindowToNextMonitor(): void {
     log("moveWindowToNextMonitor");
     let window = getFocusWindow();
     if (!window) {
@@ -1373,10 +1331,11 @@ function moveWindowToNextMonitor() {
     const srcMonitorIndex = window.get_monitor();
     const dstMonitorIndex = (srcMonitorIndex + 1) % numMonitors;
 
-    const margin = new tilespec.Size(
-        gridSettings[SETTINGS_WINDOW_MARGIN],
-        gridSettings[SETTINGS_WINDOW_MARGIN]);
-    const workArea = workAreaRectByMonitorIndex(dstMonitorIndex).inset(margin);
+    const workArea = workAreaRectByMonitorIndex(dstMonitorIndex);
+    if (!workArea) {
+        log(`Failed to get active work area for window while moving it to the next monitor.`);
+        return;
+    }
     const rect = ts.toFrameRect(workArea);
     moveWindowToRect(window, rect);
 }
@@ -1386,6 +1345,9 @@ function moveWindowToNextMonitor() {
  * move its origin.
  */
 function moveWindowToRect(window: any, rect: tilespec.Rect) {
+    // The move_frame line is a workaround for a bug affecting gnome terminal
+    // windows. See https://github.com/gTile/gTile/issues/176#issue-751198339.
+    window.move_frame(true, rect.origin.x, rect.origin.y);
     window.move_resize_frame(
         true,
         rect.origin.x,

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es3",
     "module": "system",
-    "lib": ["es6"],
+    "lib": ["es2019"],
 
     "strict": false,
     "downlevelIteration": true,

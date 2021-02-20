@@ -22,6 +22,9 @@ interface Version {
 const VERSION_34: Version = {major:3, minor: 34};
 const VERSION_36: Version = {major:3, minor: 36};
 
+/**
+ * ShellVersion is used to parse the version string
+ */
 export class ShellVersion {
     readonly major: number;
     readonly minor: number;
@@ -33,19 +36,19 @@ export class ShellVersion {
             throw new Error(`invalid version supplied: ${version}`);
         }
         this.major = parts[0];
+        this.minor = parts[1];
+        // Tolerate "40.alpha.1" for example. See https://github.com/gTile/gTile/issues/187.
         if (isNaN(this.minor)) {
             this.minor = 0;
-        } else {    
-            this.minor = parts[1];
         }
         if (isNaN(this.major)) {
-            throw new Error(`invalid version supplied: ${version}; got major = ${this.major}, minor = ${this.minor}`);
+            throw new Error(`invalid version supplied: ${JSON.stringify(version)}; got major = ${this.major}, minor = ${this.minor}`);
         }
         this.rawVersion = version;
     }
 
     public static defaultVersion(): ShellVersion {
-        return new ShellVersion(getConfig().PACKAGE_VERSION);
+        return ShellVersion.parse(getConfig().PACKAGE_VERSION);
     }
 
     public static parse(version: string): ShellVersion {
