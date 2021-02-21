@@ -611,7 +611,7 @@ export enum MaximizeFlags {
  *
  * Based on https://developer.gnome.org/st/stable/st-st-box-layout.html.
  */
-export interface BoxLayout extends StWidget, ClutterActor {
+export interface StBoxLayout extends StWidget, ClutterActor, ClutterContainer {
 
 }
 
@@ -628,12 +628,20 @@ export interface StBin extends ClutterContainer, ClutterActor, StWidget {
 export interface StButton extends ClutterContainer, ClutterActor, StWidget, StBin {
 }
 
+
+/**
+ * @see https://gjs-docs.gnome.org/st10~1.0_api/st.label
+ */
+export interface StLabel extends ClutterContainer, ClutterActor, StWidget, StBin {
+    text: string;
+}
+
 /**
  * 
  */
 export interface StWidget extends ClutterActor {
     // add_accessible_state(state): someTYpe;
-    // add_style_class_name(style_class): someTYpe;
+    add_style_class_name(style_class: string): void;
     add_style_pseudo_class(pseudo_class: string): void;
     // ensure_style(): someTYpe;
     // get_accessible_name(): someTYpe;

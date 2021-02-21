@@ -7,7 +7,7 @@ import { ShellVersion } from './shellversion';
 import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkeys';
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
-import { BoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
+import { StBoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StLabel, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
 import { BoolSettingName, NumberSettingName, StringSettingName } from './settings_data';
 
 /*****************************************************************
@@ -256,7 +256,7 @@ const keyBindingGlobalResizes: Bindings = new Map([
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
     private gridShowing: boolean = false;
-    private gridWidget: BoxLayout | null = null;
+    private gridWidget: StBoxLayout | null = null;
 
     enable() {
         this.gridShowing = false;
@@ -264,7 +264,7 @@ class App {
 
         initSettings();
 
-        const gridWidget: BoxLayout = (new St.BoxLayout({ style_class: 'grid-preview' }));
+        const gridWidget: StBoxLayout = (new St.BoxLayout({ style_class: 'grid-preview' }));
         this.gridWidget = gridWidget;
         Main.uiGroup.add_actor(gridWidget);
         this.initGrids(gridWidget);
@@ -303,7 +303,7 @@ class App {
         return this.gridsByMonitorKey[getMonitorKey(monitor)];
     }
 
-    initGrids(gridWidget: BoxLayout) {
+    initGrids(gridWidget: StBoxLayout) {
         log("initGrids");
         log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
         const monitors = activeMonitors();
@@ -596,10 +596,10 @@ class App {
                 let monitor = monitors[monitorIdx];
                 let grid = this.getGrid(monitor);
                 if (app) {
-                    grid?.topbar._set_app(app, title);
+                    grid?.topbar.setApp(app, title);
                 }
                 else {
-                    grid?.topbar._set_title(title);
+                    grid?.topbar.setTitle(title);
                 }
             }
 
@@ -1085,7 +1085,7 @@ function setInitialSelection() {
     let wheight = focusMetaWindow.get_frame_rect().height;
     const grid = globalApp.getGrid(monitor);
     if (!grid) {
-        log("no grid ");
+        log("no grid widget available in setInitialSelection");
         return;
     }
     const delegate = grid.elementsDelegate;
@@ -1406,15 +1406,14 @@ function moveWindowToRect(window: any, rect: tilespec.Rect) {
   PROTOTYPES
  *****************************************************************/
 
-function TopBar(title) {
-    this._init(title);
-}
-
-TopBar.prototype = {
-
-    _init: function (title) {
+class TopBar {
+    readonly actor: StBoxLayout;
+    private readonly _stlabel: StLabel;
+    private readonly _closebutton: StButton;
+    private readonly _connect_id: number;
+    
+    constructor(private _title: string) {
         this.actor = new St.BoxLayout({ style_class: 'top-box' });
-        this._title = title;
 
         this._stlabel = new St.Label({ style_class: 'grid-title', text: this._title });
 
@@ -1422,31 +1421,29 @@ TopBar.prototype = {
         this._closebutton.add_style_class_name('close-button-container');
         this._connect_id = this._closebutton.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 
-        this.actor.add_actor(this._closebutton);
-        this.actor.add_actor(this._stlabel);
-    },
+        this.actor.add_child(this._closebutton);
+        this.actor.add_child(this._stlabel);
+    }
 
-    _set_title: function (title) {
+    setTitle(title: string) {
         this._title = title;
         this._stlabel.text = this._title;
-    },
+    }
 
-    _set_app: function (app, title) {
+    setApp(app: ShellApp, title: string) {
         this._title = app.get_name() + " - " + title;
         log("title: " + this._title);
         this._stlabel.text = this._title;
 
-    },
+    }
 
-    _onButtonPress() {
-        log("Close button");
+    private _onButtonPress() {
         globalApp.hideTiling();
-    },
+    }
 
     destroy() {
         this._closebutton.disconnect(this._connect_id);
-        super.destroy();
-    },
+    }
 };
 
 interface ToggleSettingsButtonListenerActor extends ClutterActor {
@@ -1515,7 +1512,7 @@ Signals.addSignalMethods(ToggleSettingsButton.prototype);
 
 class ActionButton {
     readonly actor: StButton;
-    readonly icon: BoxLayout;
+    readonly icon: StBoxLayout;
 
     constructor(readonly grid: Grid, classname: string) {
         this.grid = grid;
@@ -1749,10 +1746,10 @@ class Grid {
     readonly tableWidth = 320;
     readonly tableHeight: number;
     readonly borderwidth = 2;
-    readonly actor: BoxLayout;
+    readonly actor: StBoxLayout;
     readonly bottomBarTableLayout: GridLayout;
     readonly animation_time: number;
-    readonly topbar: any; //TopBar;
+    readonly topbar: TopBar;
     readonly bottombarContainer: StBin;
     readonly bottombar: StWidget;
     readonly veryBottomBar: StWidget;
@@ -1777,7 +1774,7 @@ class Grid {
     elements: GridElement[][] = [];
 
 
-    constructor(private readonly gridWidget: BoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
+    constructor(private readonly gridWidget: StBoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
         let workArea = getWorkArea(monitor, monitor_idx);
 
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
@@ -1962,8 +1959,8 @@ class Grid {
         }
     }
 
-    forceGridElementDelegate(x, y, w, h) {
-        this.elementsDelegate.forceArea(this.elements[y][x], this.elements[h][w]);
+    forceGridElementDelegate(x: number, y: number, w: number, h: number) {
+        this.elementsDelegate?.forceArea(this.elements[y][x], this.elements[h][w]);
     }
 
     refresh() {
@@ -2091,7 +2088,7 @@ class Grid {
         }
 
         this.elementsDelegate._destroy();
-        this.topbar._destroy();
+        this.topbar.destroy();
 
         this.monitor = null;
         this.rows = 0;
@@ -2114,7 +2111,7 @@ class GridElementDelegate {
     currentElement: GridElement | null = null;
     activatedActors: GridElement[] = [];
 
-    constructor(private readonly gridWidget: BoxLayout) { }
+    constructor(private readonly gridWidget: StBoxLayout) { }
 
     _allSelected() {
         return (this.activatedActors.length === (nbCols * nbRows));
