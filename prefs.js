@@ -94,6 +94,7 @@ const pretty_names = {
     'action-move-left'        : 'Global move window left',
     'action-move-right'       : 'Global move window right',
     'action-move-up'          : 'Global move window up',
+    'action-move-next-monitor': 'Global move window to next monitor',
     'move-left-vi'            : 'Vi-style move left',
     'move-right-vi'           : 'Vi-style move right',
     'move-up-vi'              : 'Vi-style move up',
