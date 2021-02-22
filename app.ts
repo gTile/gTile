@@ -129,7 +129,7 @@ interface SettingsObject {
     connect(eventName: string, callback: () => void): void;
 };
 
-let launcher;
+let launcher: GTileStatusButtonInterface | null;
 let tracker: ShellWindowTracker;
 let nbCols = 0;
 let nbRows = 0;
@@ -189,18 +189,18 @@ const key_bindings_tiling: Bindings = new Map([
     ['set-tiling', () => { keySetTiling(); }],
     ['change-grid-size', () => { keyChangeTiling(); }],
     ['autotile-main', () => { AutoTileMain(); }],
-    ['autotile-1', () => { AutoTileNCols(1); }],
-    ['autotile-2', () => { AutoTileNCols(2); }],
-    ['autotile-3', () => { AutoTileNCols(3); }],
-    ['autotile-4', () => { AutoTileNCols(4); }],
-    ['autotile-5', () => { AutoTileNCols(5); }],
-    ['autotile-6', () => { AutoTileNCols(6); }],
-    ['autotile-7', () => { AutoTileNCols(7); }],
-    ['autotile-8', () => { AutoTileNCols(8); }],
-    ['autotile-9', () => { AutoTileNCols(9); }],
-    ['autotile-10', () => { AutoTileNCols(10); }],
-    ['snap-to-neighbors', () => { SnapToNeighborsBind(); }],
-    ['snap-to-neighbors', () => { SnapToNeighborsBind(); }],
+    ['autotile-1', () => { autoTileNCols(1); }],
+    ['autotile-2', () => { autoTileNCols(2); }],
+    ['autotile-3', () => { autoTileNCols(3); }],
+    ['autotile-4', () => { autoTileNCols(4); }],
+    ['autotile-5', () => { autoTileNCols(5); }],
+    ['autotile-6', () => { autoTileNCols(6); }],
+    ['autotile-7', () => { autoTileNCols(7); }],
+    ['autotile-8', () => { autoTileNCols(8); }],
+    ['autotile-9', () => { autoTileNCols(9); }],
+    ['autotile-10', () => { autoTileNCols(10); }],
+    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
+    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
 ]);
 
 const key_bindings_presets: Bindings = new Map([
@@ -257,6 +257,7 @@ class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
     private gridShowing: boolean = false;
     private gridWidget: StBoxLayout | null = null;
+
 
     enable() {
         this.gridShowing = false;
@@ -455,73 +456,81 @@ class App {
         this.logState();
 
         log("issue#168/showTiling with fix");
-        focusMetaWindow = getFocusApp();
-        if (!focusMetaWindow) {
-            log("No focus window");
-            return;
-        }
-        const wmType = focusMetaWindow.get_window_type();
-        const layer = focusMetaWindow.get_layer();
+
+        const window = getFocusApp();
+        // TODO: remove this global side effect
+        focusMetaWindow = window;
 
         if (!this.gridWidget) {
             return;
         }
 
-        this.gridWidget.visible = true;
-        if (focusMetaWindow && wmType != WindowType.DESKTOP && layer > 0) {
-            log("issue#168/focusMetaWindow");
-            const monitors = activeMonitors();
-            for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
-                let monitor = monitors[monitorIdx];
-                const grid = this.getGrid(monitor);
-
-                if (grid === null) {
-                    log(`issue#168/showTiling ERROR: did not find grid for monitor ${getMonitorKey(monitor)}`);
-                    continue;
-                }
-
-                let window = getFocusApp();
-                let pos_x;
-                let pos_y;
-                if (window && window.get_monitor() == monitorIdx) {
-                    log("issue#168/matched monitor");
-                    pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
-                    pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
-                    let [mouse_x, mouse_y, mask] = global.get_pointer();
-                    let act_x = pos_x - grid.actor.width / 2;
-                    let act_y = pos_y - grid.actor.height / 2;
-                    if (mouse_x >= act_x
-                        && mouse_x <= act_x + grid.actor.width
-                        && mouse_y >= act_y
-                        && mouse_y <= act_y + grid.actor.height) {
-                        log("Mouse x " + mouse_x + " y " + mouse_y +
-                            " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
-                            ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
-                        pos_x = mouse_x + grid.actor.width / 2;
-                        pos_y = mouse_y + grid.actor.height / 2;
-                    }
-                }
-                else {
-                    pos_x = monitor.x + monitor.width / 2;
-                    pos_y = monitor.y + monitor.height / 2;
-                }
-
-                grid.set_position(
-                    Math.floor(pos_x - grid.actor.width / 2),
-                    Math.floor(pos_y - grid.actor.height / 2)
-                );
-
-                grid.show();
+        const shouldShowTiling = ((): boolean => {
+            if (!window) {
+                // The tiling UI is for manipulating a particular window.
+                return false;
             }
+            const wmType = window.get_window_type();
+            const layer = window.get_layer();
+            return wmType !== WindowType.DESKTOP && layer > 0;
+        })();
 
-            this.gridShowing = true;
-            this.onFocus();
-            launcher.activate();
-            bindKeyControls();
-        } else {
-            log("issue#168/no focus window");
+        if (!shouldShowTiling) {
+            return;
         }
 
+        this.gridWidget.visible = true;
+        const monitors = activeMonitors();
+        for (let monitorIdx = 0; monitorIdx < monitors.length; monitorIdx++) {
+            const monitor = monitors[monitorIdx];
+            const grid = this.getGrid(monitor);
+
+            if (grid === null) {
+                log(`issue#168/showTiling ERROR: did not find grid for monitor ${getMonitorKey(monitor)}`);
+                continue;
+            }
+
+            let pos_x;
+            let pos_y;
+            if (window && window.get_monitor() === monitorIdx) {
+                // Set pos_x, pos_y to center of the selected window initially.
+                pos_x = window.get_frame_rect().width / 2 + window.get_frame_rect().x;
+                pos_y = window.get_frame_rect().height / 2 + window.get_frame_rect().y;
+
+                // Old logic with no justifying comments: If the mouse is active
+                // and within the rectangle,  set pos_x and pos_y  at mouse
+                // position + half the size of the Grid window.
+                let [mouse_x, mouse_y, mask] = global.get_pointer();
+                let act_x = pos_x - grid.actor.width / 2;
+                let act_y = pos_y - grid.actor.height / 2;
+                if (mouse_x >= act_x
+                    && mouse_x <= act_x + grid.actor.width
+                    && mouse_y >= act_y
+                    && mouse_y <= act_y + grid.actor.height) {
+                    log("Mouse x " + mouse_x + " y " + mouse_y +
+                        " is inside grid actor rectangle, changing actor X from " + pos_x + " to " + (mouse_x + grid.actor.width / 2) +
+                        ", Y from " + pos_y + " to " + (mouse_y + grid.actor.height / 2));
+                    pos_x = mouse_x + grid.actor.width / 2;
+                    pos_y = mouse_y + grid.actor.height / 2;
+                }
+            }
+            else {
+                pos_x = monitor.x + monitor.width / 2;
+                pos_y = monitor.y + monitor.height / 2;
+            }
+
+            grid.set_position(
+                Math.floor(pos_x - grid.actor.width / 2),
+                Math.floor(pos_y - grid.actor.height / 2)
+            );
+
+            grid.show();
+        }
+
+        this.gridShowing = true;
+        this.onFocus();
+        launcher?.activate();
+        bindKeyControls();
         this.moveGrids();
     }
 
@@ -542,7 +551,7 @@ class App {
             unbindHotkeys(key_bindings_tiling);
             keyControlBound = false;
         }
-        launcher.destroy();
+        launcher?.destroy();
         launcher = null;
         Main.uiGroup.remove_actor(this.gridWidget);
         this.destroyGrids();
@@ -557,11 +566,13 @@ class App {
             grid.elementsDelegate?.reset();
             grid.hide(false);
         }
-        this.gridWidget.visible = false;
+        if (this.gridWidget) {
+            this.gridWidget.visible = false;
+        }
 
         resetFocusMetaWindow();
 
-        launcher.deactivate();
+        launcher?.deactivate();
         this.gridShowing = false;
         unbindKeyControls();
     }
@@ -625,6 +636,12 @@ function changed_settings() {
     }
     log("changed_settings complete");
 }
+
+interface GTileStatusButtonInterface {
+    activate(): void;
+    deactivate(): void;
+    destroy(): void;
+};
 
 const GTileStatusButton = new Lang.Class({
     Name: 'GTileStatusButton',
@@ -805,9 +822,8 @@ function _getVisibleBorderPadding(metaWindow: Window) {
     return [borderX, borderY];
 }
 
-function move_maximize_window(metaWindow, x, y) {
-    let borderX, borderY, vBorderX, vBorderY;
-    [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
+function move_maximize_window(metaWindow: Window, x: number, y: number) {
+    const [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
 
     x = x - borderX;
     y = y - borderY;
@@ -825,7 +841,7 @@ function move_maximize_window(metaWindow, x, y) {
  * @param width
  * @param height
  */
-function moveResizeWindowWithMargins(metaWindow, x: number, y: number, width: number, height: number): void {
+function moveResizeWindowWithMargins(metaWindow: Window, x: number, y: number, width: number, height: number): void {
 
     let [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
     let [vBorderX, vBorderY] = _getVisibleBorderPadding(metaWindow);
@@ -913,16 +929,9 @@ function getFocusApp(): Window | null {
         return null;
     }
 
-    let windows = WorkspaceManager.get_active_workspace().list_windows();
-    let focusedWindow = false;
-    for (let i = 0; i < windows.length; ++i) {
-        let metaWindow = windows[i];
-        if (metaWindow.has_focus()) {
-            return metaWindow;
-        }
-    }
-
-    return null;
+    return WorkspaceManager.get_active_workspace().list_windows().find(
+        (window: Window): boolean => window.has_focus()
+    ) || null;
 }
 
 function getFocusWindow(): any {
@@ -1611,7 +1620,7 @@ class AutoTileTwoList extends ActionButton {
 
     _onButtonPress() {
         log("AutotileTwoList");
-        AutoTileNCols(2);
+        autoTileNCols(2);
         log("AutoTileTwoList _onButtonPress Emitting signal resize-done");
         this.emit('resize-done');
         log("Autotile2 done");
@@ -1620,7 +1629,7 @@ class AutoTileTwoList extends ActionButton {
 
 Signals.addSignalMethods(AutoTileTwoList.prototype);
 
-function AutoTileNCols(cols) {
+function autoTileNCols(cols: number) {
     log("AutoTileNCols " + cols);
     let window = getFocusApp();
     if (!window) {
@@ -1635,6 +1644,9 @@ function AutoTileNCols(cols) {
     const monitors = activeMonitors();
     let monitor = monitors[mind];
     let workArea = getWorkAreaByMonitor(monitor);
+    if (!workArea) {
+        return;
+    }
     let windows = getNotFocusedWindowsOfMonitor(monitor);
 
     let nbWindowOnEachSide = Math.ceil((windows.length + 1) / cols);
@@ -1643,7 +1655,7 @@ function AutoTileNCols(cols) {
     let countWin = 0;
 
     moveResizeWindowWithMargins(
-        focusMetaWindow,
+        window,
         workArea.x + countWin % cols * workArea.width / cols,
         workArea.y + (Math.floor(countWin / cols) * winHeight),
         workArea.width / cols,
@@ -1671,7 +1683,7 @@ function AutoTileNCols(cols) {
     log("AutoTileNCols done");
 }
 
-function SnapToNeighborsBind() {
+function snapToNeighborsBind() {
     log("SnapToNeighbors keybind invoked");
     let window = getFocusApp();
     if (!window) {
@@ -1996,7 +2008,7 @@ class Grid {
     }
 
     hide(immediate: boolean) {
-        log("hide " + immediate);
+        log(`Grid hide immediate=${immediate}`);
         this.elementsDelegate?.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0;
         if (!immediate && time > 0) {

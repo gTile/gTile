@@ -418,6 +418,9 @@ export interface Rectangle {
 export interface Strut {
 }
 
+/**
+ * See https://gjs-docs.gnome.org/meta5~5_api/meta.window.
+ */
 export interface Window {
     activate(current_time: number): void;
     activate_with_workspace(current_time: number, workspace: Workspace): void;
@@ -504,9 +507,22 @@ export interface Window {
     lower(): void;
     make_above(): void;
     make_fullscreen(): void;
-    //maximize(directions): void;
+    maximize(directions: MaximizeFlags): void;
     minimize(): void;
-    //move_frame(user_op, root_x_nw, root_y_nw): void;
+    
+    /**
+     * Moves the window to the desired location on window's assigned workspace,
+     * using the northwest edge of the frame as the reference, instead of the
+     * actual window's origin, but only if a frame is present. Otherwise, acts
+     * identically to meta_window_move().
+     *
+     * @param user_op to indicate whether or not this is a user operation
+     * @param root_x_nw desired x pos
+     * @param root_y_nw desired y pos
+     * @see https://gjs-docs.gnome.org/meta5~5_api/meta.window#method-move_frame.
+     */
+    move_frame(user_op: boolean, root_x_nw: number, root_y_nw: number): void;
+
     /**
      * Resizes the window so that its outer bounds (including frame) fit within
      * the given rect.
