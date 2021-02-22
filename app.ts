@@ -1061,10 +1061,10 @@ function keyChangeTiling() {
     }
     let next_key: number = 0;
     let found = false;
-    const currentIndex = gridSizes.findIndex((size: tilespec.GridSize): boolean => 
+    const currentIndex = gridSizes.findIndex((size: tilespec.GridSize): boolean =>
         size.width === nbCols && size.height === nbRows)
-    
-    const newIndex = currentIndex === -1 ? 0 : (currentIndex +1) % gridSizes.length;
+
+    const newIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % gridSizes.length;
     const newGridSize = gridSizes[newIndex];
     globalApp.setGridSize(newGridSize);
     setInitialSelection();
@@ -1088,41 +1088,10 @@ function setInitialSelection() {
         log("no grid widget available in setInitialSelection");
         return;
     }
-    const delegate = grid.elementsDelegate;
-
-    log("Set initial selection");
-    log("Focus window position x " + wx + " y " + wy + " width " + wwidth + " height " + wheight);
-    log("Focus monitor position x " + monitor.x + " y " + monitor.y + " width " + monitor.width + " height " + monitor.height);
-    log("Workarea position x " + workArea.x + " y " + workArea.y + " width " + workArea.width + " height " + workArea.height);
-    let wax = Math.max(wx - workArea.x, 0);
-    let way = Math.max(wy - workArea.y, 0);
-    let grid_element_width = workArea.width / nbCols;
-    let grid_element_height = workArea.height / nbRows;
-    log("width " + grid_element_width + " height " + grid_element_height);
-    let lux = Math.min(Math.max(Math.round(wax / grid_element_width), 0), nbCols - 1);
-    log("wx " + (wx - workArea.x) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + lux);
-    let luy = Math.min(Math.max(Math.round(way / grid_element_height), 0), grid.rows - 1);
-    log("wy " + (wy - workArea.y) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + luy);
-    let rdx = Math.min(Math.max(Math.round((wax + wwidth) / grid_element_width) - 1, lux), grid.cols - 1);
-    log("wx + wwidth " + (wx + wwidth - workArea.x - 1) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + rdx);
-    let rdy = Math.min(Math.max(Math.round((way + wheight) / grid_element_height) - 1, luy), grid.rows - 1);
-    log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
-    log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
-
-    grid.forceGridElementDelegate(lux, luy, rdx, rdy);
-
-    grid.elements[luy][lux]._onButtonPress();
-    grid.elements[rdy][rdx]._onHoverChanged();
-
-    const cX = delegate?.currentElement?.coordx;
-    const cY = delegate?.currentElement?.coordy;
-    const fX = delegate?.first?.coordx;
-    const fY = delegate?.first?.coordy;
-
-    log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    grid.setInitialSelection(focusMetaWindow);
 }
 
-function keyMoveResizeEvent(type: string, key: string, is_global = false) {
+function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key: 'bottom' | 'top' | 'left' | 'right' | 'up' | 'down', is_global = false) {
     if (is_global) {
         focusMetaWindow = getFocusApp();
     }
@@ -1149,43 +1118,48 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
             delegate.currentElement._onButtonPress();
         }
     }
-    if (!delegate?.currentElement) {
-        log("gTime currentElement is not set!");
-    }
     if (!delegate) {
         return;
     }
-    let cX = delegate.currentElement?.coordx;
-    let cY = delegate.currentElement?.coordy;
-    let fX = delegate.first?.coordx;
-    let fY = delegate.first?.coordy;
+    if (!delegate.currentElement) {
+        log("bug: keyMoveResizeEvent currentElement is not set!");
+        return;
+    }
+    const cX = delegate.currentElement.coordx;
+    const cY = delegate.currentElement.coordy;
+    const fX = delegate.first?.coordx;
+    const fY = delegate.first?.coordy;
 
     log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     log("Grid cols " + nbCols + " rows " + nbRows);
-    if (type == 'move') {
+    if (type === 'move') {
+        if (fX === undefined || fY === undefined) {
+            log(`bug: tried to move window without a 'first' selection`);
+            return;
+        }
         switch (key) {
             case 'right':
                 if (fX < nbCols - 1 && cX < nbCols - 1) {
-                    delegate.first = grid.elements[fY][fX + 1];
-                    grid.elements[cY][cX + 1]._onHoverChanged();
+                    delegate.first = grid.getElement(fY, fX + 1);
+                    grid.getElement(cY, cX + 1)?._onHoverChanged();
                 }
                 break;
             case 'left':
                 if (fX > 0 && cX > 0) {
-                    delegate.first = grid.elements[fY][fX - 1];
-                    grid.elements[cY][cX - 1]._onHoverChanged();
+                    delegate.first = grid.getElement(fY, fX - 1);
+                    grid.getElement(cY, cX - 1)?._onHoverChanged();
                 }
                 break;
             case 'up':
                 if (fY > 0 && cY > 0) {
-                    delegate.first = grid.elements[fY - 1][fX];
-                    grid.elements[cY - 1][cX]._onHoverChanged();
+                    delegate.first = grid.getElement(fY - 1, fX);
+                    grid.getElement(cY - 1, cX)?._onHoverChanged();
                 }
                 break;
             case 'down':
                 if (fY < nbRows - 1 && cY < nbRows - 1) {
-                    delegate.first = grid.elements[fY + 1][fX];
-                    grid.elements[cY + 1][cX]._onHoverChanged();
+                    delegate.first = grid.getElement(fY + 1, fX);
+                    grid.getElement(cY + 1, cX)?._onHoverChanged();
                 }
                 break;
         }
@@ -1193,85 +1167,86 @@ function keyMoveResizeEvent(type: string, key: string, is_global = false) {
         switch (key) {
             case 'right':
                 if (cX < nbCols - 1) {
-                    grid.elements[cY][cX + 1]._onHoverChanged();
+                    grid.getElement(cY, cX + 1)?._onHoverChanged();
                 }
                 break;
             case 'left':
                 if (cX > 0) {
-                    grid.elements[cY][cX - 1]._onHoverChanged();
+                    grid.getElement(cY, cX - 1)?._onHoverChanged();
                 }
                 break;
             case 'up':
                 if (cY > 0) {
-                    grid.elements[cY - 1][cX]._onHoverChanged();
+                    grid.getElement(cY - 1, cX)?._onHoverChanged();
                 }
                 break;
             case 'down':
                 if (cY < nbRows - 1) {
-                    grid.elements[cY + 1][cX]._onHoverChanged();
+                    grid.getElement(cY + 1, cX)?._onHoverChanged();
                 }
                 break;
         }
     } else if (type == "contract") {
+        if (fX === undefined || fY === undefined) {
+            log(`bug: tried to contract window without a 'first' selection`);
+            return;
+        }
         switch (key) {
             case 'left':
                 // Contract left edge of current window right one column
                 if (cX > fX) {
-                    delegate.first = grid.elements[fY][fX + 1];
+                    delegate.first = grid.getElement(fY, fX + 1);
                 }
                 break;
             case 'right':
                 // Contract right edge of current window left one column
                 if (cX > fX) {
-                    grid.elements[cY][cX - 1]._onHoverChanged();
+                    grid.getElement(cY, cX - 1)?._onHoverChanged();
                 }
                 break;
             case 'top':
                 // Contract top edge of current window down one row
                 if (cY > fY) {
-                    delegate.first = grid.elements[fY + 1][fX];
+                    delegate.first = grid.getElement(fY + 1, fX);
                 }
                 break;
             case 'bottom':
                 // Contract bottom edge of current window up one row
                 if (cY > fY) {
-                    grid.elements[cY - 1][cX]._onHoverChanged();
+                    grid.getElement(cY - 1, cX)?._onHoverChanged();
                 }
                 break;
         }
 
     } else if (type == "expand") {
-
+        if (fX === undefined || fY === undefined) {
+            log(`bug: tried to expand window without a 'first' selection`);
+            return;
+        }
         switch (key) {
             case 'right':
                 if (cX < nbCols) {
-                    grid.elements[cY][cX + 1]._onHoverChanged();
+                    grid.getElement(cY, cX + 1)?._onHoverChanged();
                 }
                 break;
             case 'left':
                 if (fX > 0) {
-                    delegate.first = grid.elements[fY][fX - 1];
+                    delegate.first = grid.getElement(fY, fX - 1);
                 }
                 break;
             case 'top':
                 if (fY > 0) {
-                    delegate.first = grid.elements[fY - 1][fX];
+                    delegate.first = grid.getElement(fY - 1, fX);
                 }
                 break;
             case 'bottom':
                 if (cY < nbRows - 1) {
-                    grid.elements[cY + 1][cX]._onHoverChanged();
+                    grid.getElement(cY + 1, cX)?._onHoverChanged();
                 }
                 break;
         }
     }
 
-    cX = delegate.currentElement.coordx;
-    cY = delegate.currentElement.coordy;
-    fX = delegate.first.coordx;
-    fY = delegate.first.coordy;
-
-    log("After move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     if (is_global) {
         keySetTiling();
     }
@@ -1411,7 +1386,7 @@ class TopBar {
     private readonly _stlabel: StLabel;
     private readonly _closebutton: StButton;
     private readonly _connect_id: number;
-    
+
     constructor(private _title: string) {
         this.actor = new St.BoxLayout({ style_class: 'top-box' });
 
@@ -1740,6 +1715,8 @@ class GridSettingsButton {
     }
 }
 
+const GRID_WIDGET_BORDER_SIZE = 1;
+
 class Grid {
     connectHideTiling: any;
 
@@ -1758,7 +1735,7 @@ class Grid {
 
     readonly tableContainer: any;
     readonly table: StWidget;
-    readonly table_table_layout: any;
+    readonly tableLayoutManager: GridLayout;
     monitor: Monitor | null;
     readonly monitor_idx: number;
     x: number;
@@ -1770,8 +1747,8 @@ class Grid {
     readonly normalScaleY: number;
     interceptHide: boolean;
     isEntered: boolean;
-    elementsDelegate: GridElementDelegate | null = null;
-    elements: GridElement[][] = [];
+    elementsDelegate: GridElementDelegate;
+    private elements: GridElement[][] = [];
 
 
     constructor(private readonly gridWidget: StBoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
@@ -1859,7 +1836,7 @@ class Grid {
             button.actor.connect('notify::hover', () => this._onSettingsButton());
             colNum++;
         }
-        this.bottombar.height *= (rowNum+1);
+        this.bottombar.height *= (rowNum + 1);
 
         this.tableContainer = new St.Bin({
             style_class: 'table-container',
@@ -1868,18 +1845,18 @@ class Grid {
             track_hover: true
         });
 
+        this.tableLayoutManager = new Clutter.GridLayout() as GridLayout;
         this.table = new St.Widget({
             style_class: 'table',
             can_focus: true,
             track_hover: true,
             reactive: true,
             height: this.tableHeight,
-            width: this.tableWidth - 2,
-            layout_manager: new Clutter.GridLayout()
+            width: this.tableWidth - GRID_WIDGET_BORDER_SIZE * 2,
+            layout_manager: this.tableLayoutManager,
         });
-        this.table_table_layout = this.table.layout_manager;
-        this.table_table_layout.set_row_homogeneous(true);
-        this.table_table_layout.set_column_homogeneous(true);
+        this.tableLayoutManager.set_row_homogeneous(true);
+        this.tableLayoutManager.set_column_homogeneous(true);
         this.tableContainer.add_actor(this.table);
 
         this.actor.add_child(this.topbar.actor);
@@ -1919,6 +1896,8 @@ class Grid {
         this.y = 0;
 
         this.interceptHide = false;
+        const delegate = new GridElementDelegate(this, this.gridWidget);
+        this.elementsDelegate = delegate;
         this._displayElements();
 
         this.normalScaleY = this.actor.scale_y;
@@ -1929,7 +1908,7 @@ class Grid {
         return `grid with actor ${this.actor}`;
     }
 
-    _displayElements() {
+    private _displayElements() {
         if (this.monitor === null) {
             return;
         }
@@ -1939,24 +1918,24 @@ class Grid {
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
         let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
 
-        const delegate = new GridElementDelegate(this.gridWidget);
-        this.elementsDelegate = delegate;
-        this.elementsDelegate.connect('resize-done', (actor, event) => this._onResize(actor, event));
+        this.elementsDelegate.connect('resize-done', (actor, event) => this._onResize());
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (c == 0) {
                     this.elements[r] = new Array();
                 }
 
-                let element = new GridElement(delegate, this.monitor, width, height, c, r);
+                const element = new GridElement(this.elementsDelegate, this.monitor, width, height, c, r);
 
                 this.elements[r][c] = element;
-                // TODO: Is setting _delegate needed?
-                (element.actor as any)._delegate = delegate;
-                this.table_table_layout.attach(element.actor, c, r, 1, 1);
+                this.tableLayoutManager.attach(element.actor, c, r, 1, 1);
                 element.show();
             }
         }
+    }
+
+    getElement(row: number, col: number): GridElement | null {
+        return this.elements[row][col] || null;
     }
 
     forceGridElementDelegate(x: number, y: number, w: number, h: number) {
@@ -1965,7 +1944,6 @@ class Grid {
 
     refresh() {
         log("Grid.refresh from " + this.cols + ":" + this.rows + " to " + nbCols + ":" + nbRows);
-        //this.elementsDelegate._logActiveActors("Grid refresh active actors");
         this.elementsDelegate._resetGrid();
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
@@ -2017,9 +1995,9 @@ class Grid {
         this.interceptHide = false;
     }
 
-    hide(immediate) {
+    hide(immediate: boolean) {
         log("hide " + immediate);
-        this.elementsDelegate.reset();
+        this.elementsDelegate?.reset();
         let time = (gridSettings[SETTINGS_ANIMATION]) ? 0.3 : 0;
         if (!immediate && time > 0) {
             (this.actor as any).ease({
@@ -2041,14 +2019,67 @@ class Grid {
         }
     }
 
+    setInitialSelection(focusMetaWindow: Window) {
+        // The window being focused is part of the monitor that this Grid is
+        // responsible for manipulating.
+        if (focusMetaWindow.get_monitor() !== this.monitor_idx) {
+            return;
+        }
+        if (!this.monitor) {
+            return;
+        }
+
+        const monitor = this.monitor;
+        const workArea = getWorkArea(this.monitor, this.monitor_idx);
+
+        let wx = focusMetaWindow.get_frame_rect().x;
+        let wy = focusMetaWindow.get_frame_rect().y;
+        let wwidth = focusMetaWindow.get_frame_rect().width;
+        let wheight = focusMetaWindow.get_frame_rect().height;
+
+        const grid = this;
+        const delegate = grid.elementsDelegate;
+
+        log("Set initial selection");
+        log("Focus window position x " + wx + " y " + wy + " width " + wwidth + " height " + wheight);
+        log("Focus monitor position x " + monitor.x + " y " + monitor.y + " width " + monitor.width + " height " + monitor.height);
+        log("Workarea position x " + workArea.x + " y " + workArea.y + " width " + workArea.width + " height " + workArea.height);
+        let wax = Math.max(wx - workArea.x, 0);
+        let way = Math.max(wy - workArea.y, 0);
+        let grid_element_width = workArea.width / nbCols;
+        let grid_element_height = workArea.height / nbRows;
+        log("width " + grid_element_width + " height " + grid_element_height);
+        let lux = Math.min(Math.max(Math.round(wax / grid_element_width), 0), nbCols - 1);
+        log("wx " + (wx - workArea.x) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + lux);
+        let luy = Math.min(Math.max(Math.round(way / grid_element_height), 0), grid.rows - 1);
+        log("wy " + (wy - workArea.y) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + luy);
+        let rdx = Math.min(Math.max(Math.round((wax + wwidth) / grid_element_width) - 1, lux), grid.cols - 1);
+        log("wx + wwidth " + (wx + wwidth - workArea.x - 1) + " el_width " + grid_element_width + " max " + (nbCols - 1) + " res " + rdx);
+        let rdy = Math.min(Math.max(Math.round((way + wheight) / grid_element_height) - 1, luy), grid.rows - 1);
+        log("wy + wheight " + (wy + wheight - workArea.y - 1) + " el_height " + grid_element_height + " max " + (nbRows - 1) + " res " + rdy);
+        log("Initial tile selection is " + lux + ":" + luy + " - " + rdx + ":" + rdy);
+
+        grid.forceGridElementDelegate(lux, luy, rdx, rdy);
+
+        grid.elements[luy][lux]._onButtonPress();
+        grid.elements[rdy][rdx]._onHoverChanged();
+
+        const cX = delegate?.currentElement?.coordx;
+        const cY = delegate?.currentElement?.coordy;
+        const fX = delegate?.first?.coordx;
+        const fY = delegate?.first?.coordy;
+
+        log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
+    }
+
     _onHideComplete() {
     }
 
     _onShowComplete() {
     }
 
-    _onResize(actor, event) {
-        log("resize-done: " + actor);
+    _onResize() {
+        log("resize-done");
         globalApp.updateRegions();
         if (gridSettings[SETTINGS_AUTO_CLOSE]) {
             log("Emitting hide-tiling");
@@ -2057,7 +2088,7 @@ class Grid {
     }
 
     _onMouseEnter() {
-        log("onMouseEnter");
+        log("Grid: onMouseEnter");
         if (!this.isEntered) {
             this.elementsDelegate?.reset();
             this.isEntered = true;
@@ -2065,7 +2096,7 @@ class Grid {
     }
 
     _onMouseLeave() {
-        log("onMouseLeave");
+        log("Grid: onMouseLeave");
         let [x, y, mask] = global.get_pointer();
         if (this.elementsDelegate && (x <= this.actor.x || x >= (this.actor.x + this.actor.width)) || (y <= this.actor.y || y >= (this.actor.y + this.actor.height))) {
             this.isEntered = false;
@@ -2087,7 +2118,7 @@ class Grid {
             }
         }
 
-        this.elementsDelegate._destroy();
+        this.elementsDelegate?._destroy();
         this.topbar.destroy();
 
         this.monitor = null;
@@ -2106,60 +2137,68 @@ class Grid {
 
 Signals.addSignalMethods(Grid.prototype);
 class GridElementDelegate {
-    activated: boolean = false;
+    // The first element clicked in the rectangular selection.
     first: GridElement | null = null;
+    // 
     currentElement: GridElement | null = null;
-    activatedActors: GridElement[] = [];
+    // Elements that are in a highlighted state in the UI. The highlighting
+    // happens when the grid rectangle selcted includes a particular grid
+    // element.
+    private activatedElements: GridElement[] = [];
+    private activated: boolean = false;
 
-    constructor(private readonly gridWidget: StBoxLayout) { }
+    constructor(private readonly grid: Grid, private readonly gridWidget: StBoxLayout) { }
 
-    _allSelected() {
-        return (this.activatedActors.length === (nbCols * nbRows));
+    private allSelected(): boolean {
+        return (this.activatedElements.length === (nbCols * nbRows));
     }
 
-    _onButtonPress(gridElement: GridElement) {
+    onButtonPress(gridElement: GridElement) {
         log("GridElementDelegate _onButtonPress " + gridElement.coordx + ":" + gridElement.coordy);
         //this._logActiveActors("GridElementDelegate _onButtonPress active actors");
         if (!this.currentElement) {
             this.currentElement = gridElement;
         }
-        if (this.activated == false) {
+        if (!this.activated) {
             log("GridElementDelegate first activation");
             this.activated = true;
             gridElement.active = true;
-            this.activatedActors = new Array();
-            this.activatedActors.push(gridElement);
+            this.activatedElements = [gridElement];
             this.first = gridElement;
+            return;
         }
-        else {
-            log("GridElementDelegate resize");
-            //Check this.activatedActors if equals to nbCols * nbRows
-            //before doing anything with the window it must be unmaximized
-            //if so move the window then maximize instead of change size
-            //if not move the window and change size
 
-            if (!focusMetaWindow) {
+        log("GridElementDelegate resize");
+        //Check this.activatedActors if equals to nbCols * nbRows
+        //before doing anything with the window it must be unmaximized
+        //if so move the window then maximize instead of change size
+        //if not move the window and change size
+
+        if (!focusMetaWindow) {
+            return;
+        }
+
+        reset_window(focusMetaWindow);
+
+        if (this.first) {
+            const computedSize = this._computeAreaPositionSize(this.first, gridElement);
+            if (!computedSize) {
                 return;
             }
+            const [areaX, areaY, areaWidth, areaHeight] = computedSize;
 
-            reset_window(focusMetaWindow);
-
-            let areaWidth, areaHeight, areaX, areaY;
-            [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(this.first, gridElement);
-
-            if (this._allSelected() && gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] === false) {
+            if (this.allSelected() && gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] === false) {
                 move_maximize_window(focusMetaWindow, areaX, areaY);
             }
             else {
                 moveResizeWindowWithMargins(focusMetaWindow, areaX, areaY, areaWidth, areaHeight);
             }
-            //this._logActiveActors("GridElementDelegate _onButtonPress end active actors");
-
-            this._resizeDone();
         }
+
+        this._resizeDone();
     }
 
-    _resizeDone() {
+    private _resizeDone() {
         log("resizeDone, emitting signal resize-done");
         this.emit('resize-done');
     }
@@ -2178,10 +2217,10 @@ class GridElementDelegate {
             this.currentElement._deactivate();
         }
 
-        for (var act in this.activatedActors) {
-            this.activatedActors[act]._deactivate();
+        for (let act of this.activatedElements) {
+            act._deactivate();
         }
-        this.activatedActors = new Array();
+        this.activatedElements = new Array();
     }
 
     _getVarFromGridElement(fromGridElement: GridElement, toGridElement: GridElement) {
@@ -2201,28 +2240,29 @@ class GridElementDelegate {
         if (!fromGridElement.monitor) {
             return;
         }
-        const grid = globalApp.getGrid(fromGridElement.monitor);
-        if (!grid) {
-            return;
-        }
+
         for (let r = minY; r <= maxY; r++) {
             for (let c = minX; c <= maxX; c++) {
-                let element = grid.elements[r][c];
-                element._activate();
-                this.activatedActors.push(element);
+                const highlightedElement = this.grid.getElement(r, c);
+                if (!highlightedElement) {
+                    log(`bug: GridElementDelegate refreshGrid is out of sync with Grid: trying to highlight element (row=${r}, col=${c}) and getElement() returned null.`);
+                    continue;
+                }
+                highlightedElement._activate();
+                this.activatedElements.push(highlightedElement);
             }
         }
 
         this._displayArea(fromGridElement, toGridElement);
     }
 
-    _computeAreaPositionSize(fromGridElement: GridElement, toGridElement: GridElement) {
+    _computeAreaPositionSize(fromGridElement: GridElement, toGridElement: GridElement): [number, number, number, number] | null {
         let [minX, maxX, minY, maxY] = this._getVarFromGridElement(fromGridElement, toGridElement);
 
         let monitor = fromGridElement.monitor;
         const workArea = getWorkAreaByMonitor(monitor);
         if (!workArea) {
-            return;
+            return null;
         }
 
         let areaWidth = Math.round((workArea.width / nbCols) * ((maxX - minX) + 1));
@@ -2235,8 +2275,11 @@ class GridElementDelegate {
     }
 
     forceArea(fromGridElement: GridElement, toGridElement: GridElement) {
-        let areaWidth, areaHeight, areaX, areaY;
-        [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
+        const computedSize = this._computeAreaPositionSize(fromGridElement, toGridElement);
+        if (!computedSize) {
+            return;
+        }
+        const [areaX, areaY, areaWidth, areaHeight] = computedSize;
         this.gridWidget.width = areaWidth;
         this.gridWidget.height = areaHeight;
         this.gridWidget.x = areaX;
@@ -2244,7 +2287,11 @@ class GridElementDelegate {
     }
 
     _displayArea(fromGridElement: GridElement, toGridElement: GridElement) {
-        const [areaX, areaY, areaWidth, areaHeight] = this._computeAreaPositionSize(fromGridElement, toGridElement);
+        const computedSize = this._computeAreaPositionSize(fromGridElement, toGridElement);
+        if (!computedSize) {
+            return;
+        }
+        const [areaX, areaY, areaWidth, areaHeight] = computedSize;
 
         this.gridWidget.add_style_pseudo_class('activate');
 
@@ -2266,7 +2313,7 @@ class GridElementDelegate {
         }
     }
 
-    _hideArea() {
+    private _hideArea() {
         this.gridWidget.remove_style_pseudo_class('activate');
     }
 
@@ -2293,10 +2340,10 @@ class GridElementDelegate {
     }
 
     _destroy() {
-        this.activated = null;
+        this.activated = false;
         this.first = null;
         this.currentElement = null;
-        this.activatedActors = null;
+        this.activatedElements = [];
     }
 
     // Methods replaced by Signals.addSignalMethods.
@@ -2341,7 +2388,7 @@ class GridElement {
     }
 
     _onButtonPress() {
-        this.delegate._onButtonPress(this);
+        this.delegate.onButtonPress(this);
     }
 
     _onHoverChanged() {
