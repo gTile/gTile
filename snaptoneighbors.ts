@@ -3,6 +3,7 @@ https://github.com/tpyl/gssnaptoneighbors
  by Timo Pylvanainen <tpyl@iki.fi>
  */
 
+import { Window } from './gnometypes';
 import {log} from './logging';
 
 declare const imports: any;
@@ -141,7 +142,7 @@ interface MetaRectangle {
  * both vertically and horizontally. The expnasion that results
  * in closer to 1 aspect ratio is selected. 
  */
-export function snapToNeighbors(window: MetaWindow) {
+export function snapToNeighbors(window: Window) {
 	log("snapToNeighbors " + window.get_title());
     // Unmaximize first
     if (window.maximized_horizontally || window.maximized_vertically)

@@ -42,6 +42,16 @@ You can alternatively manually install the latest version from GitHub master bra
    shell, which keeps all your windows open. Type `Alt`+`F2`, then type `r` and
    hit enter.)
 
+
+### Debugging
+
+If you encounter buggy behavior, it may help to view the log messages gTile
+writes. These may be viewed with the following shell command:
+
+```shell
+journalctl --follow /usr/bin/gnome-shell | grep "gTile"
+```
+
 ## Configuration
 
 For configuration, please use the built-in preferences dialog (Gnome Tweak Tool -> Extensions -> gTile -> Preferences).
@@ -170,11 +180,10 @@ Shortcut | Description
 
 This extension is developed at [GitHub](https://github.com/gTile/gtile).
 
-See gTile help in Preferences for info on development and debugging.
-
 It was originally developed by [vibou](https://github.com/vibou) with help from multiple contributors, and is now community supported.
 
 gTile is licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html)
 
+For debugging, enable debug in preferences, and in terminal run journalctl /usr/bin/gnome-shell -f
 
 ## Enjoy!

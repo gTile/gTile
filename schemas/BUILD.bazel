@@ -1,0 +1,42 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+
+exports_files([
+    "gschemas.compiled",
+    "org.gnome.shell.extensions.gtile.gschema.xml",
+])
+
+
+ts_library(
+    name = "extract_settings_type_definition_lib",
+    srcs = ["extract_settings_type_definition.ts"],
+    tsconfig = "//:tsconfig-tools.json",
+    deps = [
+        "@npm//@types",
+        "@npm//yargs",
+        "@npm//jsdom",
+        #"@npm//@types:yargs",
+    ],
+)
+
+# An executable to generate a type definition fro the .xml file in this
+# directory.
+#
+# We could use this in a rule, but it's easier to make the IDE recognize the
+# generated file if we simply run the program whenever the XML file changes.
+# Running a tool is necessary to generate gschemas.compiled anyway.
+#
+# See
+# https://bazelbuild.github.io/rules_nodejs/Built-ins.html#nodejs_binary-entry_point
+# for documentation of the nodejs_binary rule and how to make it work with
+# Typescript.
+nodejs_binary(
+    name = "extract_settings_type_definition",
+    data = [
+        ":extract_settings_type_definition_lib",
+    ],
+    entry_point = "extract_settings_type_definition.ts",
+    node_modules = "@npm//:node_modules",
+    visibility = ["//visibility:public"],
+)

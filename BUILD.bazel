@@ -37,8 +37,8 @@ filegroup(
         "extension.js",
         "metadata.json",
         "prefs.js",
-        "schemas/gschemas.compiled",
-        "schemas/org.gnome.shell.extensions.gtile.gschema.xml",
+        "//schemas:gschemas.compiled",
+        "//schemas:org.gnome.shell.extensions.gtile.gschema.xml",
         "settings.js",
         "stylesheet.css",
         "LICENSE"
@@ -50,6 +50,7 @@ filegroup(
 exports_files([
     "tsconfig.json",
     "tsconfig-app.json",
+    "tsconfig-tools.json",
 ])
 
 # NOTE: this will move to node_modules/BUILD in a later release
@@ -67,10 +68,21 @@ ts_library(
     srcs = ["app.ts"],
     tsconfig = "//:tsconfig-app.json",
     deps = [
-        ":logging_lib",
+        ":gnometypes_lib",
         ":hotkeys_lib",
+        ":logging_lib",
+        ":settings_data_lib",
         ":shellversion_lib",
         ":snaptoneighbors_lib",
+        ":tilespec_lib",
+    ],
+)
+
+ts_library(
+    name = "gnometypes_lib",
+    srcs = ["gnometypes.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [
     ],
 )
 
@@ -80,6 +92,7 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",
+        ":settings_data_lib",
     ],
 )
 
@@ -89,6 +102,13 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
     ],
+)
+
+ts_library(
+    name = "settings_data_lib",
+    srcs = ["settings_data.ts"],
+    tsconfig = "//:tsconfig-app.json",
+    deps = [],
 )
 
 
@@ -107,7 +127,15 @@ ts_library(
     tsconfig = "//:tsconfig-app.json",
     deps = [
         ":logging_lib",
+        ":gnometypes_lib",
     ],
+)
+
+
+ts_library(
+    name = "tilespec_lib",
+    srcs = ["tilespec.ts"],
+    tsconfig = "//:tsconfig.json",
 )
 
 ts_library(
@@ -122,9 +150,11 @@ ts_library(
     testonly = 1,
     srcs = [
         "shellversion.spec.ts",
+        "tilespec.spec.ts",
     ],
     deps = [
         ":shellversion_lib",
+        ":tilespec_lib",
         "@npm//@types/chai",
         "@npm//@types/jasmine",
         "@npm//chai",

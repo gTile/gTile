@@ -18,6 +18,7 @@ const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
+const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
 const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
@@ -94,6 +95,7 @@ const pretty_names = {
     'action-move-left'        : 'Global move window left',
     'action-move-right'       : 'Global move window right',
     'action-move-up'          : 'Global move window up',
+    'action-move-next-monitor': 'Global move window to next monitor',
     'move-left-vi'            : 'Vi-style move left',
     'move-right-vi'           : 'Vi-style move right',
     'move-up-vi'              : 'Vi-style move up',
@@ -267,7 +269,7 @@ function presets_tab(notebook) {
         row_spacing: 10,
     });
 
-    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is left bottom quarter of screen)";
+    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is right bottom quarter of screen)";
     pr_grid.add(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
@@ -306,6 +308,7 @@ function margins_tab(notebook) {
         use_markup: false,
         wrap: true,
     }));
+    add_check("Apply margin to fullscreen windows", SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED, mg_grid, settings);
     add_int ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Insets primary right"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 240, 1, 10);

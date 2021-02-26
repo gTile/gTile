@@ -25,6 +25,10 @@
 			<default><![CDATA[['Down']]]></default>
 			<summary>Move window down.</summary>
 		</key>
+		<key type="as" name="move-next-monitor">
+			<default><![CDATA[['']]]></default>
+			<summary>Move window to next monitor.</summary>
+		</key>
 		<key type="as" name="resize-left">
 			<default><![CDATA[['<Shift>Left']]]></default>
 			<summary>Resize window - increase width.</summary>
@@ -261,6 +265,10 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Global move window down.</summary>
 		</key>
+		<key type="as" name="action-move-next-monitor">
+			<default><![CDATA[['']]]></default>
+			<summary>Global move window to next monitor.</summary>
+		</key>
 		<key type="as" name="autotile-main">
 			<default><![CDATA[['m']]]></default>
 			<summary>Autotile with main window.</summary>
@@ -458,6 +466,10 @@
 		<key type = "i" name="window-margin">
 			<default>0</default>
 			<summary>Gaps between windows in the middle of screen</summary>
+		</key>
+		<key type = "b" name="window-margin-fullscreen-enabled">
+			<default>false</default>
+			<summary>Apply margin to fullscreen windows</summary>
 		</key>
 		<key type = "i" name="max-timeout">
 			<default>2000</default>
