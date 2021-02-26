@@ -135,7 +135,10 @@ You can do auto tiling for all windows on screen
 
 1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
 2. Click on one of 2 autotile buttons, or
-3. Press one of `[1..9,0]` (total 10 available) for vertical columns autotiling, or `M` for "main" autotailing
+3. Press one of `[1..9,0]` (total 10 available) for vertical columns autotiling, or `M` for "main" autotailing.
+    * Press `M` multiple times to cycle through variants.
+    * Main variables are configurable. 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cUZA5RKK6mE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Snap-To-Neighbors
 
