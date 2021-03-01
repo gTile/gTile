@@ -85,6 +85,7 @@ interface ParsedSettings {
     [SETTINGS_WINDOW_MARGIN]: any;
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: any;
     [SETTINGS_MAX_TIMEOUT]: any;
+    [SETTINGS_MAIN_WINDOW_SIZES]: Array<string>;
 
     [SETTINGS_INSETS_PRIMARY]: any;
     [SETTINGS_INSETS_PRIMARY_LEFT]: any;
@@ -109,6 +110,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_WINDOW_MARGIN]: null,
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: null,
     [SETTINGS_MAX_TIMEOUT]: null,
+    [SETTINGS_MAIN_WINDOW_SIZES]: [],
 
     [SETTINGS_INSETS_PRIMARY]: null,
     [SETTINGS_INSETS_PRIMARY_LEFT]: null,
@@ -771,7 +773,7 @@ function initSettings() {
         nbCols = gridSettings[SETTINGS_GRID_SIZES][0].width;
         nbRows = gridSettings[SETTINGS_GRID_SIZES][0].height;
     }
-    let mainWindowSizesString = settings.get_string(SETTINGS_MAIN_WINDOW_SIZES);
+    const mainWindowSizesString = settings.get_string(SETTINGS_MAIN_WINDOW_SIZES);
     log(SETTINGS_MAIN_WINDOW_SIZES + " settings found " + mainWindowSizesString);
     mainWindowSizes = []
     let mainWindowSizesArray = mainWindowSizesString.split(",");
@@ -1597,28 +1599,29 @@ function AutoTileMain() {
     log("SETTINGS_MAIN_WINDOW_SIZES:" + mainWindowSizes);
     let ps_variants = mainWindowSizes;
     log("Main window sizes: " + ps_variants)
+
     // handle preset variants (if there are any)
-    let ps_variant_count = ps_variants.length;
-    if(ps_variant_count > 1) {
-        if( presetState["last_call"] + gridSettings[SETTINGS_MAX_TIMEOUT] > new Date().getTime() &&
-            presetState["last_preset"] == preset  &&
-            presetState["last_window_title"] == window.get_title() ) {
+    let variantCount = ps_variants.length;
+    if (variantCount > 1) {
+        if ((lastResizeInfo.lastCallTime.getTime() + gridSettings[SETTINGS_MAX_TIMEOUT]) > new Date().getTime() &&
+            lastResizeInfo.presetName === preset.toString() &&
+            lastResizeInfo.windowTitle == window.get_title()) {
             // within timeout (default: 2s), same preset & same window:
             // increase variant counter, but consider upper boundary
-            presetState["current_variant"] = (presetState["current_variant"] + 1) % ps_variant_count;
+            lastResizeInfo.variantIndex = (lastResizeInfo.variantIndex + 1) % variantCount;
         } else {
             // timeout, new preset or new window:
-            // update presetState["last_preset"] and reset variant counter
-            presetState["current_variant"] = 0;
+            // update presetState.last_preset and reset variant counter
+            lastResizeInfo.variantIndex = 0;
         }
     } else {
-        presetState["current_variant"] = 0;
+        lastResizeInfo.variantIndex = 0;
     }
 
-    let mainRatio = ps_variants[presetState["current_variant"]];
+    let mainRatio = ps_variants[lastResizeInfo.variantIndex];
     let mainWidth = workArea.width*mainRatio;
     let minorWidth = workArea.width - mainWidth;
-    move_resize_window_with_margins(
+    moveResizeWindowWithMargins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
@@ -1648,12 +1651,11 @@ function AutoTileMain() {
     }
     log("AutoTileMain done");
 
-    presetState["last_preset"] = preset;
-    presetState["last_grid_format"] = preset;
-    presetState["last_window_title"] = window.get_title();
-    presetState["last_call"] = new Date().getTime();
+    lastResizeInfo.presetName = preset;
+    lastResizeInfo.windowTitle = window.get_title();
+    lastResizeInfo.lastCallTime = new Date();
 
-    log("Resize preset last call: " + presetState["last_call"])
+    log("Resize preset last call: " + lastResizeInfo.lastCallTime)
 }
 
 class AutoTileTwoList extends ActionButton {
