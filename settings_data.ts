@@ -110,6 +110,7 @@ export type KeyBindingSettingName = (
 // A setting name for a string-valued setting.
 export type StringSettingName = (
     "grid-sizes" |
+    "main-window-sizes" |
     "resize1" |
     "resize10" |
     "resize11" |

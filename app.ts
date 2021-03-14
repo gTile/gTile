@@ -60,6 +60,7 @@ const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
+const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
 
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
@@ -84,6 +85,7 @@ interface ParsedSettings {
     [SETTINGS_WINDOW_MARGIN]: any;
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: any;
     [SETTINGS_MAX_TIMEOUT]: any;
+    [SETTINGS_MAIN_WINDOW_SIZES]: Array<string>;
 
     [SETTINGS_INSETS_PRIMARY]: any;
     [SETTINGS_INSETS_PRIMARY_LEFT]: any;
@@ -108,6 +110,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_WINDOW_MARGIN]: null,
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: null,
     [SETTINGS_MAX_TIMEOUT]: null,
+    [SETTINGS_MAIN_WINDOW_SIZES]: [],
 
     [SETTINGS_INSETS_PRIMARY]: null,
     [SETTINGS_INSETS_PRIMARY_LEFT]: null,
@@ -140,6 +143,7 @@ let settings: SettingsObject = Settings.get();
 settings.connect('changed', changed_settings);
 let keyControlBound: any = false;
 let enabled = false;
+let mainWindowSizes = new Array();;
 let monitorsChangedConnect: any = false;
 
 const SHELL_VERSION = ShellVersion.defaultVersion();
@@ -769,6 +773,22 @@ function initSettings() {
         nbCols = gridSettings[SETTINGS_GRID_SIZES][0].width;
         nbRows = gridSettings[SETTINGS_GRID_SIZES][0].height;
     }
+    const mainWindowSizesString = settings.get_string(SETTINGS_MAIN_WINDOW_SIZES);
+    log(SETTINGS_MAIN_WINDOW_SIZES + " settings found " + mainWindowSizesString);
+    mainWindowSizes = []
+    let mainWindowSizesArray = mainWindowSizesString.split(",");
+
+    for (var i in mainWindowSizesArray) {
+        let size = mainWindowSizesArray[i];
+        if (size.includes("/")) {
+            let fraction = size.split("/");
+            let ratio = parseFloat(fraction[0]) / parseFloat(fraction[1]);
+            mainWindowSizes.push(ratio);
+        } else {
+            mainWindowSizes.push(parseFloat(size));
+        }
+    };
+    log(SETTINGS_MAIN_WINDOW_SIZES + " set to " + mainWindowSizes);
     log("Init complete, nbCols " + nbCols + " nbRows " + nbRows);
 
 }
@@ -1549,6 +1569,7 @@ class AutoTileMainAndList extends ActionButton {
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
 function AutoTileMain() {
+    let preset = "AutoTileMain";
     log("AutoTileMain");
     let window = getFocusApp();
     if (!window) {
@@ -1575,11 +1596,36 @@ function AutoTileMain() {
         return;
     }
 
+    log("SETTINGS_MAIN_WINDOW_SIZES:" + mainWindowSizes);
+    let ps_variants = mainWindowSizes;
+    log("Main window sizes: " + ps_variants)
+
+    // handle preset variants (if there are any)
+    let variantCount = ps_variants.length;
+    if (variantCount > 1) {
+        if ((lastResizeInfo.lastCallTime.getTime() + gridSettings[SETTINGS_MAX_TIMEOUT]) > new Date().getTime() &&
+            lastResizeInfo.presetName === preset.toString() &&
+            lastResizeInfo.windowTitle == window.get_title()) {
+            // within timeout (default: 2s), same preset & same window:
+            // increase variant counter, but consider upper boundary
+            lastResizeInfo.variantIndex = (lastResizeInfo.variantIndex + 1) % variantCount;
+        } else {
+            // timeout, new preset or new window:
+            // update presetState.last_preset and reset variant counter
+            lastResizeInfo.variantIndex = 0;
+        }
+    } else {
+        lastResizeInfo.variantIndex = 0;
+    }
+
+    let mainRatio = ps_variants[lastResizeInfo.variantIndex];
+    let mainWidth = workArea.width*mainRatio;
+    let minorWidth = workArea.width - mainWidth;
     moveResizeWindowWithMargins(
         focusMetaWindow,
         workArea.x,
         workArea.y,
-        workArea.width / 2,
+        mainWidth,
         workArea.height);
 
 
@@ -1596,14 +1642,20 @@ function AutoTileMain() {
 
         moveResizeWindowWithMargins(
             metaWindow,
-            workArea.x + workArea.width / 2,
+            workArea.x + mainWidth,
             newOffset,
-            workArea.width / 2,
+            minorWidth,
             winHeight
         );
         countWin++;
     }
     log("AutoTileMain done");
+
+    lastResizeInfo.presetName = preset;
+    lastResizeInfo.windowTitle = window.get_title();
+    lastResizeInfo.lastCallTime = new Date();
+
+    log("Resize preset last call: " + lastResizeInfo.lastCallTime)
 }
 
 class AutoTileTwoList extends ActionButton {

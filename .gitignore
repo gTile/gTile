@@ -19,6 +19,9 @@ bazel-bazel-example
 Vagrantfile
 .idea/
 
+# Since we use Bazel
+Makefile
+
 # Node
 # Logs
 logs
