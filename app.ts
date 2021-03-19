@@ -82,8 +82,8 @@ interface ParsedSettings {
     [SETTINGS_SHOW_ICON]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
     [SETTINGS_MOVERESIZE_ENABLED]: any;
-    [SETTINGS_WINDOW_MARGIN]: any;
-    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: any;
+    [SETTINGS_WINDOW_MARGIN]: number;
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: boolean;
     [SETTINGS_MAX_TIMEOUT]: any;
     [SETTINGS_MAIN_WINDOW_SIZES]: Array<string>;
 
@@ -107,8 +107,8 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_SHOW_ICON]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
     [SETTINGS_MOVERESIZE_ENABLED]: null,
-    [SETTINGS_WINDOW_MARGIN]: null,
-    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: null,
+    [SETTINGS_WINDOW_MARGIN]: 0,
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: false,
     [SETTINGS_MAX_TIMEOUT]: null,
     [SETTINGS_MAIN_WINDOW_SIZES]: [],
 
@@ -727,10 +727,10 @@ function getBoolSetting(settingName: BoolSettingName): boolean {
     return value;
 }
 
-function getIntSetting(settings_string) {
-    let iss = settings.get_int(settings_string);
+function getIntSetting(settingsValue: NumberSettingName) {
+    let iss = settings.get_int(settingsValue);
     if (iss === undefined) {
-        log("Undefined settings " + settings_string);
+        log("Undefined settings " + settingsValue);
         return 0;
     } else {
         return iss;
