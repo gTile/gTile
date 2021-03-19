@@ -63,7 +63,7 @@ export function parseGridSizesIgnoringErrors(s: string): GridSize[] {
 
 function parseGridSizeIgnoringErrors(s: string): GridSize|null {
     const parts = s.split("x").map(Number);
-    if (parts.length !== 2 || parts.every(x => !isNaN(x))) {
+    if (parts.length !== 2 || !parts.every(x => !isNaN(x))) {
         return null;
     }
     return new GridSize(parts[0], parts[1]);
