@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 // import {describe, it} from 'mocha';
 
-import {LineSegment, XY, parsePreset, adjoiningSides, Edges, Side, Rect, Size} from './tilespec';
+import {LineSegment, XY, parsePreset, adjoiningSides, Edges, Side, Rect, Size, GridSize, parseGridSizesIgnoringErrors} from './tilespec';
 
 describe('1 = 1', () => {
     it('should do that', () => {
@@ -54,6 +54,35 @@ describe("TileSpec.parsePreset error cases", function() {
     for (let input of badPresets) {
         it(`${JSON.stringify(input)} is invalid`, () => {
             expect(() => {parsePreset(input);}).throws();
+        });
+    }
+});
+
+
+describe("TileSpec.parseGridSizesIgnoringErrors", function() {
+    function sizesToString(sizes: GridSize[]): string {
+        return sizes.map(s => s.toString()).join(', ');
+    }
+
+    const cases: Array<[string, GridSize[]]> = [
+        [
+            '4x5,3x2',
+            [new GridSize(4, 5), new GridSize(3, 2)],
+        ],
+        [
+            ' 4x5, 3x2 ',
+            [new GridSize(4, 5), new GridSize(3, 2)],
+        ],
+        [
+            '4x5,  3x2, axb, 3x3',
+            [new GridSize(4, 5), new GridSize(3, 2), new GridSize(3, 3)],
+        ],
+    ];
+    
+    for (let [input, want] of cases) {
+        const wantString = sizesToString(want);
+        it(`${JSON.stringify(input)} roundtrips to ${JSON.stringify(wantString)}`, function () {
+            expect(sizesToString(parseGridSizesIgnoringErrors(input))).equal(wantString);
         });
     }
 });
