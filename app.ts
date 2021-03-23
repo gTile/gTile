@@ -41,6 +41,7 @@ const WorkspaceManager: WorkspaceManagerInterface = (
 
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Gio = imports.gi.Gio;
 const Settings = Me.imports.settings;
 
 interface WorkArea {
@@ -655,7 +656,10 @@ const GTileStatusButton = new Lang.Class({
         this.parent(0.0, "gTile", false);
         //Done by default in PanelMenuButton - Just need to override the method
         if (SHELL_VERSION.version_at_least_34()) {
-            this.add_style_class_name(classname);
+            this._icon = new St.Icon({ style_class: 'system-status-icon' });
+            this._icon.gicon = Gio.icon_new_for_string(Me.path + "/images/icon.svg");
+            this.add_actor(this._icon);
+            this.add_style_class_name('panel-status-button');
             this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
         } else {
             this.actor.add_style_class_name(classname);
