@@ -106,6 +106,22 @@ const pretty_names = {
     'resize-down-vi'          : 'Vi-style resize shorter'
 }
 
+function set_child(widget, child) {
+    if (Gtk.get_major_version() >= 4) {
+        widget.set_child(child);
+    } else {
+        widget.add(child);
+    }
+}
+
+function box_append(box, child) {
+    if (Gtk.get_major_version() >= 4) {
+        box.append(child);
+    } else {
+        box.add(child);
+    }
+}
+
 function init() {
 
 }
@@ -114,10 +130,12 @@ function accel_tab(notebook) {
     let settings = Settings.get();
     let ks_grid = new Gtk.Grid({
         column_spacing: 10,
-        margin: 24,
         orientation: Gtk.Orientation.VERTICAL,
         row_spacing: 10,
     });
+
+    ks_grid.set_margin_start(24);
+    ks_grid.set_margin_top(24);
 
     let model = new Gtk.ListStore();
 
@@ -133,8 +151,8 @@ function accel_tab(notebook) {
     }
 
     let treeview = new Gtk.TreeView({
-        'expand': true,
-        'model': model
+        'model': model,
+        'hexpand': true
     });
 
     let col;
@@ -198,17 +216,17 @@ function accel_tab(notebook) {
     treeview.append_column(col);
 
     let text = "Keyboard shortcuts. Arrows are used to move window and are not re-assignable.";
-    ks_grid.add(new Gtk.Label({
+    ks_grid.attach_next_to(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
         justify: Gtk.Justification.LEFT,
         use_markup: false,
         wrap: true,
-    }));
-    ks_grid.add(treeview);
+    }), null, Gtk.PositionType.BOTTOM, 1, 1);
+    ks_grid.attach_next_to(treeview, null, Gtk.PositionType.BOTTOM, 1, 1);
 
     let ks_window = new Gtk.ScrolledWindow({'vexpand': true});
-    ks_window.add(ks_grid);
+    set_child(ks_window, ks_grid)
     let ks_label = new Gtk.Label({
         label: "Accelerators",
         halign: Gtk.Align.START,
@@ -222,10 +240,12 @@ function basics_tab(notebook) {
 
     let bs_grid = new Gtk.Grid({
         column_spacing: 10,
-        margin: 24,
         orientation: Gtk.Orientation.VERTICAL,
         row_spacing: 10,
     });
+
+    bs_grid.set_margin_start(24);
+    bs_grid.set_margin_top(24);
 
     add_check("Auto close", SETTINGS_AUTO_CLOSE, bs_grid, settings);
     add_check("Animation",  SETTINGS_ANIMATION,  bs_grid, settings);
@@ -242,21 +262,21 @@ function basics_tab(notebook) {
 
     add_check("Debug", SETTINGS_DEBUG    , bs_grid, settings);
     let text = "To see debug messages, in terminal run journalctl /usr/bin/gnome-shell -f";
-    bs_grid.add(new Gtk.Label({
+    bs_grid.attach_next_to(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
         justify: Gtk.Justification.LEFT,
         use_markup: false,
         wrap: true,
-    }));
+    }), null, Gtk.PositionType.BOTTOM, 1, 1)
 
     let bs_window = new Gtk.ScrolledWindow({'vexpand': true});
-    bs_window.add(bs_grid);
+    set_child(bs_window, bs_grid);
     let bs_label = new Gtk.Label({
         label: "Basic",
         halign: Gtk.Align.START,
         use_markup: false,
-    })
+    });
     notebook.append_page(bs_window, bs_label);
 }
 
@@ -264,25 +284,27 @@ function presets_tab(notebook) {
     let settings = Settings.get();
     let pr_grid = new Gtk.Grid({
         column_spacing: 10,
-        margin: 24,
         orientation: Gtk.Orientation.VERTICAL,
         row_spacing: 10,
     });
 
+    pr_grid.set_margin_start(24);
+    pr_grid.set_margin_top(24);
+
     let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is right bottom quarter of screen)";
-    pr_grid.add(new Gtk.Label({
+    pr_grid.attach_next_to(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
         justify: Gtk.Justification.LEFT,
         use_markup: false,
         wrap: true,
-    }));
+    }), null, Gtk.PositionType.BOTTOM, 1, 1)
 
     for (var ind = 1; ind <= 30; ind++) {
         add_text ("Preset resize " + ind, SETTINGS_PRESET_RESIZE + ind, pr_grid, settings, 20);
     }
     let pr_window = new Gtk.ScrolledWindow({'vexpand': true});
-    pr_window.add(pr_grid);
+    set_child(pr_window, pr_grid);
     let pr_label = new Gtk.Label({
         label: "Resize presets",
         halign: Gtk.Align.START,
@@ -295,19 +317,21 @@ function margins_tab(notebook) {
     let settings = Settings.get();
     let mg_grid = new Gtk.Grid({
         column_spacing: 10,
-        margin: 24,
         orientation: Gtk.Orientation.VERTICAL,
         row_spacing: 10,
     });
 
+    mg_grid.set_margin_start(24);
+    mg_grid.set_margin_top(24);
+
     let text = "Window margins and invisible borders around screen.";
-    mg_grid.add(new Gtk.Label({
+    mg_grid.attach_next_to(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,
         justify: Gtk.Justification.LEFT,
         use_markup: false,
         wrap: true,
-    }));
+    }), null, Gtk.PositionType.BOTTOM, 1, 1)
     add_check("Apply margin to fullscreen windows", SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED, mg_grid, settings);
     add_int ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Insets primary left"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 240, 1, 10);
@@ -320,7 +344,7 @@ function margins_tab(notebook) {
     add_int ("Insets secondary bottom"  , SETTINGS_INSETS_SECONDARY_BOTTOM , mg_grid, settings, 0, 240, 1, 10);
 
     let mg_window = new Gtk.ScrolledWindow({'vexpand': true});
-    mg_window.add(mg_grid);
+    set_child(mg_window, mg_grid);
     let mg_label = new Gtk.Label({
         label: "Margins",
         halign: Gtk.Align.START,
@@ -356,12 +380,15 @@ function buildPrefsWidget() {
     help_tab(notebook);
 
     let main_vbox = new Gtk.Box({   orientation: Gtk.Orientation.VERTICAL,
-                                    spacing: 10,
-                                    border_width: 10});
+                                    spacing: 10
+                                });
 
-    main_vbox.pack_start(notebook, true, true, 0);
-
-    main_vbox.show_all();
+    if (Gtk.get_major_version() >= 4) {
+        main_vbox.prepend(notebook, true, true, 0);
+    } else {
+        main_vbox.pack_start(notebook, true, true, 0);
+        main_vbox.show_all();
+    }
 
     return main_vbox;
 }
@@ -369,20 +396,20 @@ function buildPrefsWidget() {
 function add_check(check_label, SETTINGS, grid, settings) {
     let check = new Gtk.CheckButton({ label: check_label, margin_top: 6 });
     settings.bind(SETTINGS, check, 'active', Gio.SettingsBindFlags.DEFAULT);
-    grid.add(check);
+    grid.attach_next_to(check, null, Gtk.PositionType.BOTTOM, 1, 1);
 }
 
 function add_int(int_label, SETTINGS, grid, settings, minv, maxv, incre, page) {
     let item = new IntSelect(int_label);
     item.set_args(minv, maxv, incre, page);
     settings.bind(SETTINGS, item.spin, 'value', Gio.SettingsBindFlags.DEFAULT);
-    grid.add(item.actor);
+    grid.attach_next_to(item.actor, null, Gtk.PositionType.BOTTOM, 1, 1);
 }
 function add_text(text_label, SETTINGS, grid, settings, width) {
     let item = new TextEntry(text_label);
     item.set_args(width);
     settings.bind(SETTINGS, item.textentry, 'text', Gio.SettingsBindFlags.DEFAULT);
-    grid.add(item.actor);
+    grid.attach_next_to(item.actor, null, Gtk.PositionType.BOTTOM, 1, 1);
 }
 
 // grabbed from sysmonitor code
@@ -398,9 +425,10 @@ const IntSelect = new Lang.Class({
         this.spin = new Gtk.SpinButton({
             halign: Gtk.Align.END
         });
-        this.actor = new Gtk.HBox();
-        this.actor.add(this.label);
-        this.actor.add(this.spin);
+        this.actor = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
+        this.actor.set_homogeneous(true);
+        box_append(this.actor, this.label)
+        box_append(this.actor, this.spin)
         this.spin.set_numeric(true);
     },
     set_args: function(minv, maxv, incre, page){
@@ -418,9 +446,10 @@ const TextEntry = new Lang.Class({
     _init: function(name) {
         this.label = new Gtk.Label({label: name + ":"});
         this.textentry = new Gtk.Entry();
-        this.actor = new Gtk.HBox();
-        this.actor.add(this.label);
-        this.actor.add(this.textentry);
+        this.actor = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
+        this.actor.set_homogeneous(true);
+        box_append(this.actor, this.label);
+        box_append(this.actor, this.textentry);
         this.textentry.set_text("");
     },
     set_args: function(width){
@@ -433,9 +462,16 @@ const TextEntry = new Lang.Class({
 
 
 function append_hotkey(model, settings, name, pretty_name) {
-    let [key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
+    let _ok, key, mods;
 
-    let row = model.insert(55);
+    if (Gtk.get_major_version() >= 4) {
+        // ignore ok as failure treated as disabled
+        [_ok, key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
+    } else {
+        [key, mods] = Gtk.accelerator_parse(settings.get_strv(name)[0]);
+    }
+
+    let row = model.insert(-1);
 
     model.set(row, [0, 1, 2, 3], [name, pretty_name, mods, key ]);
 }
