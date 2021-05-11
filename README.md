@@ -11,7 +11,7 @@ This extension is particularly useful for window management on (multiple) large 
 
 ## Installation
 
-Preferred installation is from [Gnome Extensions](https://extensions.gnome.org).
+Preferred installation is from [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
 
 
 ### Installation from source
