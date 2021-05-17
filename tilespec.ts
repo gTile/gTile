@@ -53,12 +53,16 @@ export class GridSize {
 }
 
 
+export function flattenGridSizeArray(a: Array<Array<GridSize>>): Array<GridSize> {
+    return a.reduce(function (flat, toFlatten) {
+        return flat.concat(toFlatten);
+    }, []);
+};
 export function parseGridSizesIgnoringErrors(s: string): GridSize[] {
-    return s.split(',').flatMap(
-        (part: string) => {
-            const size = parseGridSizeIgnoringErrors(part.trim());
-            return size ? [size] : [];
-        });
+    return flattenGridSizeArray( s.split(',').map((part) => {
+        const size = parseGridSizeIgnoringErrors(part.trim());
+        return size ? [size] : [];
+    }));
 }
 
 function parseGridSizeIgnoringErrors(s: string): GridSize|null {
