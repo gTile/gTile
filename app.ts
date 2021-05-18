@@ -1960,8 +1960,6 @@ class Grid {
         this.y = 0;
 
         this.interceptHide = false;
-        const delegate = new GridElementDelegate(this, this.gridWidget);
-        this.elementsDelegate = delegate;
         this._displayElements();
 
         this.normalScaleY = this.actor.scale_y;
@@ -1982,6 +1980,8 @@ class Grid {
         let width = (this.tableWidth / this.cols);// - 2*this.borderwidth;
         let height = (this.tableHeight / this.rows);// - 2*this.borderwidth;
 
+        const delegate = new GridElementDelegate(this, this.gridWidget);
+        this.elementsDelegate = delegate;
         this.elementsDelegate.connect('resize-done', (actor, event) => this._onResize());
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
