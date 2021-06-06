@@ -36,6 +36,28 @@ describe("TileSpec.parsePreset success cases", function() {
     }
 });
 
+describe("TileSpec.isFullscreen", function() {
+    const cases: Array<[string, boolean]> = [
+        [
+            '3x3 0:0 1:1',
+            false,
+        ],
+        [
+            '3x3 0:0 2:2',
+            true,
+        ],
+        [
+            '3x10 0:0 2:9',
+            true,
+        ],
+    ];
+    for (let [input, output] of cases) {
+        it(`${JSON.stringify(input)} should have fullscreen = ${JSON.stringify(output)}`, function () {
+            expect(parsePreset(input)[0].isFullscreen()).equal(output);
+        });
+    }
+});
+
 describe("TileSpec.parsePreset error cases", function() {
     const badPresets = [
         '0:0 1:1',

@@ -82,21 +82,21 @@ interface ParsedSettings {
     [SETTINGS_SHOW_ICON]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
     [SETTINGS_MOVERESIZE_ENABLED]: any;
-    [SETTINGS_WINDOW_MARGIN]: any;
-    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: any;
+    [SETTINGS_WINDOW_MARGIN]: number;
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: boolean;
     [SETTINGS_MAX_TIMEOUT]: any;
     [SETTINGS_MAIN_WINDOW_SIZES]: Array<string>;
 
-    [SETTINGS_INSETS_PRIMARY]: any;
-    [SETTINGS_INSETS_PRIMARY_LEFT]: any;
-    [SETTINGS_INSETS_PRIMARY_RIGHT]: any;
-    [SETTINGS_INSETS_PRIMARY_TOP]: any;
-    [SETTINGS_INSETS_PRIMARY_BOTTOM]: any;
-    [SETTINGS_INSETS_SECONDARY]: any;
-    [SETTINGS_INSETS_SECONDARY_LEFT]: any;
-    [SETTINGS_INSETS_SECONDARY_RIGHT]: any;
-    [SETTINGS_INSETS_SECONDARY_TOP]: any;
-    [SETTINGS_INSETS_SECONDARY_BOTTOM]: any;
+    [SETTINGS_INSETS_PRIMARY]: number;
+    [SETTINGS_INSETS_PRIMARY_LEFT]: number;
+    [SETTINGS_INSETS_PRIMARY_RIGHT]: number;
+    [SETTINGS_INSETS_PRIMARY_TOP]: number;
+    [SETTINGS_INSETS_PRIMARY_BOTTOM]: number;
+    [SETTINGS_INSETS_SECONDARY]: number;
+    [SETTINGS_INSETS_SECONDARY_LEFT]: number;
+    [SETTINGS_INSETS_SECONDARY_RIGHT]: number;
+    [SETTINGS_INSETS_SECONDARY_TOP]: number;
+    [SETTINGS_INSETS_SECONDARY_BOTTOM]: number;
     [SETTINGS_DEBUG]: any;
 }
 
@@ -107,21 +107,21 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_SHOW_ICON]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
     [SETTINGS_MOVERESIZE_ENABLED]: null,
-    [SETTINGS_WINDOW_MARGIN]: null,
-    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: null,
+    [SETTINGS_WINDOW_MARGIN]: 0,
+    [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: false,
     [SETTINGS_MAX_TIMEOUT]: null,
     [SETTINGS_MAIN_WINDOW_SIZES]: [],
 
-    [SETTINGS_INSETS_PRIMARY]: null,
-    [SETTINGS_INSETS_PRIMARY_LEFT]: null,
-    [SETTINGS_INSETS_PRIMARY_RIGHT]: null,
-    [SETTINGS_INSETS_PRIMARY_TOP]: null,
-    [SETTINGS_INSETS_PRIMARY_BOTTOM]: null,
-    [SETTINGS_INSETS_SECONDARY]: null,
-    [SETTINGS_INSETS_SECONDARY_LEFT]: null,
-    [SETTINGS_INSETS_SECONDARY_RIGHT]: null,
-    [SETTINGS_INSETS_SECONDARY_TOP]: null,
-    [SETTINGS_INSETS_SECONDARY_BOTTOM]: null,
+    [SETTINGS_INSETS_PRIMARY]: 0,
+    [SETTINGS_INSETS_PRIMARY_LEFT]: 0,
+    [SETTINGS_INSETS_PRIMARY_RIGHT]: 0,
+    [SETTINGS_INSETS_PRIMARY_TOP]: 0,
+    [SETTINGS_INSETS_PRIMARY_BOTTOM]: 0,
+    [SETTINGS_INSETS_SECONDARY]: 0,
+    [SETTINGS_INSETS_SECONDARY_LEFT]: 0,
+    [SETTINGS_INSETS_SECONDARY_RIGHT]: 0,
+    [SETTINGS_INSETS_SECONDARY_TOP]: 0,
+    [SETTINGS_INSETS_SECONDARY_BOTTOM]: 0,
     [SETTINGS_DEBUG]: null,
 };
 
@@ -727,10 +727,10 @@ function getBoolSetting(settingName: BoolSettingName): boolean {
     return value;
 }
 
-function getIntSetting(settings_string) {
-    let iss = settings.get_int(settings_string);
+function getIntSetting(settingsValue: NumberSettingName) {
+    let iss = settings.get_int(settingsValue);
     if (iss === undefined) {
-        log("Undefined settings " + settings_string);
+        log("Undefined settings " + settingsValue);
         return 0;
     } else {
         return iss;
@@ -751,20 +751,6 @@ function initSettings() {
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
     gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] = getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
-    gridSettings[SETTINGS_INSETS_PRIMARY] =
-    {
-        top: getIntSetting(SETTINGS_INSETS_PRIMARY_TOP),
-        bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM),
-        left: getIntSetting(SETTINGS_INSETS_PRIMARY_LEFT),
-        right: getIntSetting(SETTINGS_INSETS_PRIMARY_RIGHT)
-    }; // Insets on primary monitor
-    gridSettings[SETTINGS_INSETS_SECONDARY] =
-    {
-        top: getIntSetting(SETTINGS_INSETS_SECONDARY_TOP),
-        bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM),
-        left: getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT),
-        right: getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT)
-    };
 
     gridSettings[SETTINGS_MAX_TIMEOUT] = getIntSetting(SETTINGS_MAX_TIMEOUT);
 
@@ -791,6 +777,40 @@ function initSettings() {
     log(SETTINGS_MAIN_WINDOW_SIZES + " set to " + mainWindowSizes);
     log("Init complete, nbCols " + nbCols + " nbRows " + nbRows);
 
+}
+
+type MonitorTier = 'primary' | 'secondary';
+
+function getMonitorTier(monitor: Monitor): MonitorTier {
+    return isPrimaryMonitor(monitor) ? 'primary' : 'secondary';
+}
+
+interface Insets {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+}
+
+function getMonitorInsets(tier: MonitorTier): Insets {
+    switch (tier) {
+        case 'primary':
+            return {
+                top: getIntSetting(SETTINGS_INSETS_PRIMARY_TOP),
+                bottom: getIntSetting(SETTINGS_INSETS_PRIMARY_BOTTOM),
+                left: getIntSetting(SETTINGS_INSETS_PRIMARY_LEFT),
+                right: getIntSetting(SETTINGS_INSETS_PRIMARY_RIGHT)
+            }; // Insets on primary monitor
+        case 'secondary':
+            return {
+                top: getIntSetting(SETTINGS_INSETS_SECONDARY_TOP),
+                bottom: getIntSetting(SETTINGS_INSETS_SECONDARY_BOTTOM),
+                left: getIntSetting(SETTINGS_INSETS_SECONDARY_LEFT),
+                right: getIntSetting(SETTINGS_INSETS_SECONDARY_RIGHT)
+            };
+        default:
+            throw new Error(`unknown monitor name ${JSON.stringify(tier)}`);
+    }
 }
 
 
@@ -964,22 +984,6 @@ function getFocusWindow(): any {
         .find(w => w.has_focus());
 }
 
-function workAreaRectByMonitorIndex(monitorIndex: number): tilespec.Rect | null {
-    const monitor = activeMonitors()[monitorIndex];
-    if (!monitor) {
-        return null;
-    }
-    const waLegacy = getWorkArea(monitor, monitorIndex);
-
-    const margin = new tilespec.Size(
-        gridSettings[SETTINGS_WINDOW_MARGIN],
-        gridSettings[SETTINGS_WINDOW_MARGIN]);
-
-    return (new tilespec.Rect(
-        new tilespec.XY(waLegacy.x, waLegacy.y),
-        new tilespec.Size(waLegacy.width, waLegacy.height))).inset(margin);
-}
-
 
 // TODO: This type is incomplete. Its definition is based purely on usage in
 // this file and may be missing methods from the Gnome object.
@@ -1014,16 +1018,34 @@ function getWorkAreaByMonitor(monitor: Monitor): WorkArea | null {
     return null;
 }
 
+/**
+ * @deprecated Use {@link workAreaRectByMonitorIndex} instead.
+ */
 function getWorkAreaByMonitorIdx(monitor_idx: number): WorkArea {
     const monitors = activeMonitors();
     let monitor = monitors[monitor_idx];
     return getWorkArea(monitor, monitor_idx);
 }
 
+function workAreaRectByMonitorIndex(monitorIndex: number): tilespec.Rect | null {
+    const monitor = activeMonitors()[monitorIndex];
+    if (!monitor) {
+        return null;
+    }
+    const waLegacy = getWorkArea(monitor, monitorIndex);
+
+    return (new tilespec.Rect(
+        new tilespec.XY(waLegacy.x, waLegacy.y),
+        new tilespec.Size(waLegacy.width, waLegacy.height)));
+}
+
+/**
+ * @deprecated Use {@link workAreaRectByMonitorIndex} instead.
+ */
 function getWorkArea(monitor: Monitor, monitor_idx: number): WorkArea {
     const wkspace = WorkspaceManager.get_active_workspace();
     const work_area = wkspace.get_work_area_for_monitor(monitor_idx);
-    const insets = (isPrimaryMonitor(monitor)) ? gridSettings[SETTINGS_INSETS_PRIMARY] : gridSettings[SETTINGS_INSETS_SECONDARY];
+    const insets = getMonitorInsets(getMonitorTier(monitor));
     return {
         x: work_area.x + insets.left,
         y: work_area.y + insets.top,
@@ -1352,7 +1374,14 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
         log(`Failed to get active work area for window while performing preset ${presetName} ${JSON.stringify(presetString)}`);
         return;
     }
-    const rect = tileSpec.toFrameRect(workArea);
+    // The rectangle already incorporates insets, but it doesn't incorporate
+    // window margin.
+    const zeroMargins = tileSpec.isFullscreen() && !getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
+    const marginSize = new tilespec.Size(
+        zeroMargins ? 0 : gridSettings[SETTINGS_WINDOW_MARGIN],
+        zeroMargins ? 0 : gridSettings[SETTINGS_WINDOW_MARGIN]);
+    const rect = tileSpec.toFrameRect(workArea).inset(marginSize);
+
     moveWindowToRect(window, rect);
 
     lastResizeInfo.presetName = presetName.toString();
@@ -1619,7 +1648,7 @@ function AutoTileMain() {
     }
 
     let mainRatio = ps_variants[lastResizeInfo.variantIndex];
-    let mainWidth = workArea.width*mainRatio;
+    let mainWidth = workArea.width * mainRatio;
     let minorWidth = workArea.width - mainWidth;
     moveResizeWindowWithMargins(
         focusMetaWindow,

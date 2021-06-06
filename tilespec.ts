@@ -38,6 +38,15 @@ export class TileSpec {
     get gridSize(): GridSize {
         return new GridSize(this.gridWidth, this.gridHeight);
     }
+
+    viewSize(): GridSize {
+        const sizeXY = this.rdc.minus(this.luc);
+        return new GridSize(sizeXY.x + 1, sizeXY.y + 1);
+    }
+
+    isFullscreen(): boolean {
+        return this.viewSize().equals(this.gridSize);
+    }
 }
 
 export class GridSize {
@@ -49,6 +58,10 @@ export class GridSize {
     
     toString(): string {
         return `${this.width}x${this.height}`;
+    }
+
+    equals(other: GridSize): boolean {
+        return this.width === other.width && this.height == other.height;
     }
 }
 
