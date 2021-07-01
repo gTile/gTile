@@ -363,7 +363,7 @@
 			<summary>Preset resize11 settings.</summary>
 		</key>
 		<key type = "s" name="resize12">
-			<default>'3x3 0:2 1:2'</default>
+			<default>'2x3 0:2 1:2'</default>
 			<summary>Preset resize12 settings.</summary>
 		</key>
 		<key type = "s" name="resize13">
