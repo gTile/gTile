@@ -1,195 +1,171 @@
-*{
-z-index: 99;
+* {
+  z-index: 99;
 }
 
-.grid-title{
-	font-size: 12px;
-    font-weight: bold;
-    color: #ffffff;
-    padding: .5em;
-    text-align:center;
+.top-box {
+  padding: 15px 15px 15px 15px;
 }
 
-.grid-panel{
-    background-color: rgba(10,10,10,0.7);
-    -webkit-filter: blur(2px);
-    width:320px;
-    border-radius: 10px;
+.grid-title {
+  font-size: 12px;
+  color: rgba(238, 238, 236, 1);
+  padding: 5px;
+  text-align: left;
 }
 
-.table-container
-{
-	
+.grid-panel {
+  width: 320px;
+  border-radius: 10px;
+  background-color: rgba(40, 40, 40, 1);
+  box-shadow: 0 0 5px rgba(31, 31, 31, 0.2);
 }
 
-.table{
-	spacing-rows: 2px;
-	spacing-columns: 2px;
+.table-container {
+  padding: 10px;
+  background-color: rgba(238, 238, 236, 0.1);
 }
 
-.table-element{
-    background-color: rgba(240,240,240,0.4);
-	margin: 1px;
+.table {
+  spacing-rows: 2px;
+  spacing-columns: 2px;
 }
 
-.table-element:activate
-{
-    background-color: rgba(240,240,240,0.8);
+.table-element {
+  background-color: rgba(238, 238, 236, 0.3);
+  margin: 5px;
+  border-radius: 2px;
 }
 
-.tiling-icon
-{
-    width: 24px;
-    height: 24px;
-    background-image: url("images/launcher_16.png");
-    background-size: 16px 16px;
+.table-element:activate {
+  background-color: rgba(240, 240, 240, 0.5);
 }
 
-.tiling-icon:hover
-{
-    background-image: url("images/launcher_16_hover.png");
+.tiling-icon {
+  width: 24px;
+  height: 24px;
+  background-image: url("images/launcher_16.png");
+  background-size: 16px 16px;
 }
 
-.tiling-icon:activate
-{
-    background-image: url("images/launcher_16_activated.png");
+.tiling-icon:hover {
+  background-image: url("images/launcher_16_hover.png");
 }
 
-.close-button-container
-{
-	background-color: rgba(0,120,255,0);
+.tiling-icon:activate {
+  background-image: url("images/launcher_16_activated.png");
 }
 
-.close-button
-{
-    width:24px;
-    height:24px;
-    background-image: url("images/close_button.png");
+.close-button-container {
+  background-color: rgba(0, 120, 255, 0);
 }
 
-.close-button:hover
-{
-    width:24px;
-    height:24px;
-    background-image: url("images/close_button_hover.png");
+.close-button {
+  width: 24px;
+  height: 24px;
+  background-image: url("images/close_button.png");
 }
 
-.top-box
-{
-    padding:3px;
+.close-button:hover {
+  width: 24px;
+  height: 24px;
+  background-image: url("images/close_button_hover.png");
 }
 
-.settings-button
-{
-    background-color: rgba(0,120,255,0.4);
-    color: rgba(255,255,255,0.4);
-    border-radius:0px;
-    border:1px rgba(0,200,255,0.4);
+.animation-icon {
+  background-image: url("images/animation-icon.png");
+  background-size: 24px 24px;
+  height: 24px;
+  width: 24px;
 }
 
-.settings-button:activate
-{
-   background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
+.auto-close-icon {
+  background-image: url("images/auto-close-icon.png");
+  background-size: 24px 24px;
+  height: 24px;
+  width: 24px;
 }
 
-.settings-button:activate:hover
-{
-    background-color: rgba(30,150,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
+.action-main-list {
+  background-image: url("images/autoTile_0.png");
+  background-size: 24px 24px;
+  height: 24px;
+  width: 24px;
 }
 
-.settings-button:hover
-{
-    background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
+.action-two-list {
+  background-image: url("images/autoTile_1.png");
+  background-size: 24px 24px;
+  height: 24px;
+  width: 24px;
 }
 
-.animation-icon
-{
-    background-image: url("images/animation-icon.png");
-    background-size: 36px 36px;
-    height:36px;
-    width:36px;
+.action-scale {
+  background-image: url("images/scale-icon.png");
+  background-size: 24px 24px;
+  height: 24px;
+  width: 24px;
 }
 
-.auto-close-icon
-{
-    background-image: url("images/auto-close-icon.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
+.settings-label {
 }
 
-.action-main-list
-{
-    background-image: url("images/autoTile_0.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
+.settings-label:hover {
 }
 
-.action-two-list
-{
-    background-image: url("images/autoTile_1.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
+.grid-preview {
+  background-color: rgba(238, 238, 236, 0.0);
+  border: 2px solid rgba(238, 238, 236, 0.0);
+  border-radius: 10px;
+  z-index: 90;
 }
 
-.action-scale
-{
-    background-image: url("images/scale-icon.png");
- 	background-size: 36px 36px;
- 	 height:36px;
-    width:36px;
+.grid-preview:activate {
+  background-color: rgba(170, 170, 151, 0.01);
+  box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
+  border: 2px solid rgba(238, 238, 236, 0.7);
 }
 
-.settings-label
-{
-    
+.bottom-box-container {
+  background-color: rgba(238, 238, 236, 0.05);
+  padding: 10px;
 }
 
-.settings-label:hover
-{
-   
+.bottom-box-container .settings-button {
+  border: 1px solid rgba(31, 31, 31, 1);
+  color: rgba(238, 238, 236, 1);
+  background-color: rgba(238, 238, 236, 0.1);
+  border-radius: 20px;
+  padding: 0;
+  margin: 5px;
+  font-size: 12px;
+  line-height: 12px;
 }
 
-.grid-preview
-{
-     background-color: rgba(241,122,73,0.0);
-     border: rgba(217,108,59,0.0);
+.bottom-box-container .settings-button:hover,
+.bottom-box-container .settings-button:activate {
+  border: 1px solid rgba(27, 106, 203, 1);
+  background-color: rgba(238, 238, 236, 0.3);
 }
 
-.grid-preview:activate
-{
-    background-color: rgba(241,122,73,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
+.bottom-box {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
 }
 
-.bottom-box-container
-{
-
-	padding:10px 0px 0px 0px;
+.very-bottom-box {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
+  margin: 15px 20px 10px 50px;
 }
 
-.bottom-box
-{
-	spacing-rows: 0px;
-	spacing-columns: 2px;
+.very-bottom-box-container .settings-button{
+  margin-right: 30px;
+  height: 26px;
 }
 
-.very-bottom-box-container
-{
-	padding:2px 0px 10px 0px;
+.very-bottom-box-container .settings-button:hover,
+.settings-button:activate {
+  border: 2px solid rgba(27, 106, 203, 1);
+  background-color: rgba(27, 106, 203, 1);
+  border-radius: 50px;
 }
-
-.very-bottom-box
-{
-    spacing-rows: 0px;
-	spacing-columns: 2px;
-}
-
