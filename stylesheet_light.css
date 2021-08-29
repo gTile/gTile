@@ -4,20 +4,20 @@ z-index: 99;
 
 .grid-title{
     font-size: 12px;
-    color: #ffffff;
+    color: #111111;
     padding: .5em;
     text-align: center;
 }
 
 .grid-panel{
-    background-color: #2c2c2c;
+    background-color: #f6f5f4;
     -webkit-filter: blur(2px);
     width:320px;
     border-radius: 10px;
     padding: 12px;
     padding-top: 6px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
-    border-color: #1b1b1b;
+    border-color: #cdc7c2;
     border-width: 1px;
 }
 
@@ -28,14 +28,14 @@ z-index: 99;
 }
 
 .table-element{
-    background-color: #4b4b4b;
+    background-color: #b1aca9;
     margin: 2px;
     border-radius: 2px;
 }
 
 .table-element:activate
 {
-    background-color: #646464;
+    background-color: #928f8c;
     
 }
 
@@ -58,7 +58,7 @@ z-index: 99;
     background-size: 22px 22px;
     height: 20px;
     width: 20px;
-    background-image: url("images/light_window-close.svg");
+    background-image: url("images/dark_window-close.svg");
     padding: 2px;
     padding-left: 5px;
     padding-left: 5px;
@@ -68,8 +68,8 @@ z-index: 99;
 
 .close-button:hover
 {
-    background-color: #646464;
-    border-color: #202020;
+    background-color: #cccac7;
+    border-color: #cccac7;
 }
 
 .top-box
@@ -79,22 +79,25 @@ z-index: 99;
 
 .settings-button
 {
-    background-color: #4b4b4b;
+    color: #111111;
+    background-color: #f7f6f6;
     border-radius: 8px;
+    border-width: 1px;
+    border-color: #c9c3bd;
     margin: 4px;
     padding: 4px;
 }
 .settings-button:hover 
 {
-    background-color: #646464;
+    background-color: #e8e6e3;
 }
 .settings-button:activate
 {
-    background-color: #686868;
+    background-color: #dad6d2;
 }
 .settings-button:activate:hover
 {
-    background-color: #707070;
+    background-color: #d1ccc7;
 }
 
 .animation-icon,    
@@ -108,26 +111,26 @@ z-index: 99;
 }
 .animation-icon
 {
-    background-image: url(images/light_animation.svg);
+    background-image: url(images/dark_animation.svg);
 }
 .auto-close-icon
 {
-    background-image: url(images/light_auto-close.svg);
+    background-image: url(images/dark_auto-close.svg);
 }
 .action-main-list
 {
-    background-image: url(images/light_auto-tile-0.svg);
+    background-image: url(images/dark_auto-tile-0.svg);
 }
 .action-two-list
 {
-    background-image: url(images/light_auto-tile-1.svg);
+    background-image: url(images/dark_auto-tile-1.svg);
 }
 
 .action-scale
 {
-    background-image: url(images/scale-icon.png);
-        background-size: 36px 36px;
-        height:36px;
+    background-image: url(images/dark_scale-icon.png);
+    background-size: 36px 36px;
+    height:36px;
     width:36px;
 }
 
