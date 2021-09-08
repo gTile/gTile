@@ -2,194 +2,187 @@
 z-index: 99;
 }
 
-.grid-title{
-	font-size: 12px;
-    font-weight: bold;
-    color: #ffffff;
-    padding: .5em;
-    text-align:center;
-}
-
-.grid-panel{
-    background-color: rgba(10,10,10,0.7);
-    -webkit-filter: blur(2px);
-    width:320px;
+/**
+ * Default style start
+ * Main container
+ */
+ .gtile-default {
+    width: 320px;
     border-radius: 10px;
+    background-color: rgba(40, 40, 40, 1);
+    box-shadow: 0 0 5px rgba(31, 31, 31, 0.2);
 }
 
-.table-container
-{
-	
+/**
+ * Title bar
+ */
+.gtile-default__title-container {
+    padding: 15px 15px 15px 15px;
 }
 
-.table{
-	spacing-rows: 2px;
-	spacing-columns: 2px;
+.gtile-default__title {
+    font-size: 12px;
+    color: rgba(238, 238, 236, 1);
+    padding: 5px;
+    text-align: left;
 }
 
-.table-element{
-    background-color: rgba(240,240,240,0.4);
-	margin: 1px;
+.gtile-default__close-container {
+    background-color: rgba(0, 120, 255, 0);
 }
 
-.table-element:activate
-{
-    background-color: rgba(240,240,240,0.8);
+.gtile-default__close {
+    width: 24px;
+    height: 24px;
+    background-image: url("images/close_button.png");
 }
 
-.tiling-icon
-{
+.gtile-default__close:hover {
+    width: 24px;
+    height: 24px;
+    background-image: url("images/close_button_hover.png");
+}
+
+/**
+ * Tile container
+ */
+.gtile-default__tile-container {
+    padding: 10px;
+    background-color: rgba(238, 238, 236, 0.1);
+}
+
+.gtile-default__tile-table {
+    spacing-rows: 2px;
+    spacing-columns: 2px;
+}
+
+.gtile-default__tile-table-item {
+    background-color: rgba(238, 238, 236, 0.3);
+    margin: 5px;
+    border-radius: 2px;
+}
+
+.gtile-default__tile-table-item:activate {
+    background-color: rgba(240, 240, 240, 0.5);
+}
+
+/**
+ * Preset container
+ */
+.gtile-default__preset-container {
+    background-color: rgba(238, 238, 236, 0.05);
+    padding: 10px;
+}
+
+.gtile-default__preset {
+    spacing-rows: 0px;
+    spacing-columns: 2px;
+}
+
+.gtile-default__preset-button {
+    border: 1px solid rgba(31, 31, 31, 1);
+    color: rgba(238, 238, 236, 1);
+    background-color: rgba(238, 238, 236, 0.1);
+    border-radius: 20px;
+    padding: 0;
+    margin: 5px;
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.gtile-default__preset-button:hover,
+.gtile-default__preset-button:activate {
+    border: 1px solid rgba(27, 106, 203, 1);
+    background-color: rgba(238, 238, 236, 0.3);
+}
+
+/**
+ * Actions container
+ */
+
+.gtile-default__action-button--animation {
+    background-image: url("images/animation-icon.png");
+    background-size: 24px 24px;
+    height: 24px;
+    width: 24px;
+}
+
+.gtile-default__action-button--auto-close {
+    background-image: url("images/auto-close-icon.png");
+    background-size: 24px 24px;
+    height: 24px;
+    width: 24px;
+}
+
+
+.gtile-default__action-button--main-and-list {
+    background-image: url("images/autoTile_0.png");
+    background-size: 24px 24px;
+    height: 24px;
+    width: 24px;
+}
+
+.gtile-default__action-button--two-list {
+    background-image: url("images/autoTile_1.png");
+    background-size: 24px 24px;
+    height: 24px;
+    width: 24px;
+}
+
+.gtile-default__action-button--scale {
+    background-image: url("images/scale-icon.png");
+    background-size: 24px 24px;
+    height: 24px;
+    width: 24px;
+}
+
+.gtile-default__action {
+    spacing-rows: 0px;
+    spacing-columns: 2px;
+    margin: 15px 20px 10px 50px;
+}
+
+.gtile-default__action-button {
+    margin-right: 30px;
+    height: 26px;
+}
+
+.gtile-default__action-button:hover,
+.gtile-default__action-button:activate {
+    border: 2px solid rgba(27, 106, 203, 1);
+    background-color: rgba(27, 106, 203, 1);
+    border-radius: 50px;
+}
+
+/**
+ * Grid preview
+ */
+.gtile-default__preview {
+    background-color: rgba(238, 238, 236, 0.6);
+    border: 2px solid rgba(238, 238, 236, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
+    z-index: 90;
+}
+
+.gtile-default__preview:hover {
+    background-color: rgba(170, 170, 151, 0);
+}
+
+/**
+ * Panel icon
+ */
+.gtile-default__icon {
     width: 24px;
     height: 24px;
     background-image: url("images/launcher_16.png");
     background-size: 16px 16px;
 }
 
-.tiling-icon:hover
-{
+.gtile-default__icon:hover {
     background-image: url("images/launcher_16_hover.png");
 }
 
-.tiling-icon:activate
-{
+.gtile-default__icon:activate {
     background-image: url("images/launcher_16_activated.png");
 }
-
-.close-button-container
-{
-	background-color: rgba(0,120,255,0);
-}
-
-.close-button
-{
-    width:24px;
-    height:24px;
-    background-image: url("images/close_button.png");
-}
-
-.close-button:hover
-{
-    width:24px;
-    height:24px;
-    background-image: url("images/close_button_hover.png");
-}
-
-.top-box
-{
-    padding:3px;
-}
-
-.settings-button
-{
-    background-color: rgba(0,120,255,0.4);
-    color: rgba(255,255,255,0.4);
-    border-radius:0px;
-    border:1px rgba(0,200,255,0.4);
-}
-
-.settings-button:activate
-{
-   background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.settings-button:activate:hover
-{
-    background-color: rgba(30,150,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.settings-button:hover
-{
-    background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-}
-
-.animation-icon
-{
-    background-image: url("images/animation-icon.png");
-    background-size: 36px 36px;
-    height:36px;
-    width:36px;
-}
-
-.auto-close-icon
-{
-    background-image: url("images/auto-close-icon.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
-}
-
-.action-main-list
-{
-    background-image: url("images/autoTile_0.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
-}
-
-.action-two-list
-{
-    background-image: url("images/autoTile_1.png");
-    background-size: 36px 36px;
-     height:36px;
-    width:36px;
-}
-
-.action-scale
-{
-    background-image: url("images/scale-icon.png");
- 	background-size: 36px 36px;
- 	 height:36px;
-    width:36px;
-}
-
-.settings-label
-{
-    
-}
-
-.settings-label:hover
-{
-   
-}
-
-.grid-preview
-{
-     background-color: rgba(241,122,73,0.0);
-     border: rgba(217,108,59,0.0);
-}
-
-.grid-preview:activate
-{
-    background-color: rgba(241,122,73,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-.bottom-box-container
-{
-
-	padding:10px 0px 0px 0px;
-}
-
-.bottom-box
-{
-	spacing-rows: 0px;
-	spacing-columns: 2px;
-}
-
-.very-bottom-box-container
-{
-	padding:2px 0px 10px 0px;
-}
-
-.very-bottom-box
-{
-    spacing-rows: 0px;
-	spacing-columns: 2px;
-}
-
