@@ -1,21 +1,25 @@
-*{
-z-index: 99;
+* {
+    z-index: 99;
 }
+
 
 /**
  * Default style start
  * Main container
  */
- .gtile-default {
+
+.gtile-default {
     width: 320px;
     border-radius: 10px;
     background-color: rgba(40, 40, 40, 1);
     box-shadow: 0 0 5px rgba(31, 31, 31, 0.2);
 }
 
+
 /**
  * Title bar
  */
+
 .gtile-default__title-container {
     padding: 15px 15px 15px 15px;
 }
@@ -43,9 +47,11 @@ z-index: 99;
     background-image: url("images/close_button_hover.png");
 }
 
+
 /**
  * Tile container
  */
+
 .gtile-default__tile-container {
     padding: 10px;
     background-color: rgba(238, 238, 236, 0.1);
@@ -66,9 +72,11 @@ z-index: 99;
     background-color: rgba(240, 240, 240, 0.5);
 }
 
+
 /**
  * Preset container
  */
+
 .gtile-default__preset-container {
     background-color: rgba(238, 238, 236, 0.05);
     padding: 10px;
@@ -96,6 +104,7 @@ z-index: 99;
     background-color: rgba(238, 238, 236, 0.3);
 }
 
+
 /**
  * Actions container
  */
@@ -113,7 +122,6 @@ z-index: 99;
     height: 24px;
     width: 24px;
 }
-
 
 .gtile-default__action-button--main-and-list {
     background-image: url("images/autoTile_0.png");
@@ -154,9 +162,11 @@ z-index: 99;
     border-radius: 50px;
 }
 
+
 /**
  * Grid preview
  */
+
 .gtile-default__preview {
     background-color: rgba(238, 238, 236, 0.6);
     border: 2px solid rgba(238, 238, 236, 0.7);
@@ -169,9 +179,11 @@ z-index: 99;
     background-color: rgba(170, 170, 151, 0);
 }
 
+
 /**
  * Panel icon
  */
+
 .gtile-default__icon {
     width: 24px;
     height: 24px;
@@ -192,187 +204,195 @@ z-index: 99;
  * Classic style start
  * Main container
  */
- .gtile-classic {
-    background-color: rgba(10,10,10,0.7);
+
+.gtile-classic {
+    background-color: rgba(10, 10, 10, 0.7);
     -webkit-filter: blur(2px);
-    width:320px;
+    width: 320px;
     border-radius: 10px;
-  }
-  
-  /**
+}
+
+
+/**
   * Title bar
   */
-  .gtile-classic__title-container {
-    padding:3px;
-  }
-  
-  .gtile-classic__title {
+
+.gtile-classic__title-container {
+    padding: 3px;
+}
+
+.gtile-classic__title {
     font-size: 12px;
     font-weight: bold;
     color: #ffffff;
     padding: .5em;
-    text-align:center;
-  }
-  
-  .gtile-classic__close-container {
-    background-color: rgba(0,120,255,0);
-  }
-  
-  .gtile-classic__close {
-    width:24px;
-    height:24px;
+    text-align: center;
+}
+
+.gtile-classic__close-container {
+    background-color: rgba(0, 120, 255, 0);
+}
+
+.gtile-classic__close {
+    width: 24px;
+    height: 24px;
     background-image: url("images/close_button.png");
-  }
-  
-  .gtile-classic__close:hover {
-    width:24px;
-    height:24px;
+}
+
+.gtile-classic__close:hover {
+    width: 24px;
+    height: 24px;
     background-image: url("images/close_button_hover.png");
-  }
-  
-  /**
+}
+
+
+/**
   * Tile container
   */
-  .gtile-classic__tile-container {
-  }
-  
-  .gtile-classic__tile-table {
-	spacing-rows: 2px;
-	spacing-columns: 2px;
-  }
-  
-  .gtile-classic__tile-table-item {
-    background-color: rgba(240,240,240,0.4);
-	margin: 1px;
-  }
-  
-  .gtile-classic__tile-table-item:activate {
-    background-color: rgba(240,240,240,0.8);
-  }
-  
-  /**
+
+.gtile-classic__tile-container {}
+
+.gtile-classic__tile-table {
+    spacing-rows: 2px;
+    spacing-columns: 2px;
+}
+
+.gtile-classic__tile-table-item {
+    background-color: rgba(240, 240, 240, 0.4);
+    margin: 1px;
+}
+
+.gtile-classic__tile-table-item:activate {
+    background-color: rgba(240, 240, 240, 0.8);
+}
+
+
+/**
   * Preset container
   */
-  .gtile-classic__preset-container {
+
+.gtile-classic__preset-container {
     background-color: rgba(238, 238, 236, 0.05);
     padding: 10px;
-  }
-  
-  .gtile-classic__preset {
+}
+
+.gtile-classic__preset {
     spacing-rows: 0px;
     spacing-columns: 2px;
-  }
+}
 
-  .gtile-classic__preset-container {
-    padding:10px 0px 0px 0px;
-  }
-  
-  .gtile-classic__preset-button {
-    background-color: rgba(0,120,255,0.4);
-    color: rgba(255,255,255,0.4);
-    border-radius:0px;
-    border:1px rgba(0,200,255,0.4);
-  }
-  
-  .gtile-classic__preset-button:hover,
-  .gtile-classic__preset-button:activate {
-    background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-  }
-  
-  /**
+.gtile-classic__preset-container {
+    padding: 10px 0px 0px 0px;
+}
+
+.gtile-classic__preset-button {
+    background-color: rgba(0, 120, 255, 0.4);
+    color: rgba(255, 255, 255, 0.4);
+    border-radius: 0px;
+    border: 1px rgba(0, 200, 255, 0.4);
+}
+
+.gtile-classic__preset-button:hover,
+.gtile-classic__preset-button:activate {
+    background-color: rgba(0, 120, 255, 0.7);
+    color: rgba(255, 255, 255, 1);
+    border: 1px rgba(0, 200, 255, 0.7);
+}
+
+
+/**
   * Actions container
   */
 
-  .gtile-classic__action-button--animation {
+.gtile-classic__action-button--animation {
     background-image: url("images/animation-icon.png");
     background-size: 36px 36px;
-    height:36px;
-    width:36px;
-  }
-  
-  .gtile-classic__action-button--auto-close {
+    height: 36px;
+    width: 36px;
+}
+
+.gtile-classic__action-button--auto-close {
     background-image: url("images/auto-close-icon.png");
     background-size: 36px 36px;
-    height:36px;
-    width:36px;
-  }
-  
-  
-  .gtile-classic__action-button--main-and-list {
+    height: 36px;
+    width: 36px;
+}
+
+.gtile-classic__action-button--main-and-list {
     background-image: url("images/autoTile_0.png");
     background-size: 36px 36px;
-    height:36px;
-    width:36px;
-  }
-  
-  .gtile-classic__action-button--two-list {
+    height: 36px;
+    width: 36px;
+}
+
+.gtile-classic__action-button--two-list {
     background-image: url("images/autoTile_1.png");
     background-size: 36px 36px;
-    height:36px;
-    width:36px;
-  }
-  
-  .gtile-classic__action-button--scale {
+    height: 36px;
+    width: 36px;
+}
+
+.gtile-classic__action-button--scale {
     background-image: url("images/scale-icon.png");
     background-size: 36px 36px;
-    height:36px;
-    width:36px;
-  }
-  
-  .gtile-classic__action {
+    height: 36px;
+    width: 36px;
+}
+
+.gtile-classic__action {
     spacing-rows: 0px;
     spacing-columns: 2px;
-  }
-    
-  .gtile-classic__action-container {
-	padding:2px 0px 10px 0px;
-  }
-  
-  .gtile-classic__action-button {
-    background-color: rgba(0,120,255,0.4);
-    color: rgba(255,255,255,0.4);
-    border-radius:0px;
-    border:1px rgba(0,200,255,0.4);
-  }
-  
-  .gtile-classic__action-button:hover,
-  .gtile-classic__action-button:activate {
-    background-color: rgba(0,120,255,0.7);
-    color: rgba(255,255,255,1);
-    border:1px rgba(0,200,255,0.7);
-  }
-  
-  /**
+}
+
+.gtile-classic__action-container {
+    padding: 2px 0px 10px 0px;
+}
+
+.gtile-classic__action-button {
+    background-color: rgba(0, 120, 255, 0.4);
+    color: rgba(255, 255, 255, 0.4);
+    border-radius: 0px;
+    border: 1px rgba(0, 200, 255, 0.4);
+}
+
+.gtile-classic__action-button:hover,
+.gtile-classic__action-button:activate {
+    background-color: rgba(0, 120, 255, 0.7);
+    color: rgba(255, 255, 255, 1);
+    border: 1px rgba(0, 200, 255, 0.7);
+}
+
+
+/**
   * Grid preview
   */
-  .gtile-classic__preview {
-    background-color: rgba(241,122,73,0.0);
-    border: rgba(217,108,59,0.0);
-  }
-  
-  .gtile-classic__preview:hover {
-    background-color: rgba(241,122,73,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
-  }
-  
-  /**
+
+.gtile-classic__preview {
+    background-color: rgba(241, 122, 73, 0.0);
+    border: rgba(217, 108, 59, 0.0);
+}
+
+.gtile-classic__preview:hover {
+    background-color: rgba(241, 122, 73, 0.4);
+    border: 1px solid rgba(217, 108, 59, 0.8);
+}
+
+
+/**
   * Panel icon
   */
-  .gtile-classic__icon {
+
+.gtile-classic__icon {
     width: 24px;
     height: 24px;
     background-image: url("images/launcher_16.png");
     background-size: 16px 16px;
-  }
-  
-  .gtile-classic__icon:hover {
+}
+
+.gtile-classic__icon:hover {
     background-image: url("images/launcher_16_hover.png");
-  }
-  
-  .gtile-classic__icon:activate {
+}
+
+.gtile-classic__icon:activate {
     background-image: url("images/launcher_16_activated.png");
-  }
-  
-  
+}
