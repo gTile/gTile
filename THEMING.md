@@ -4,10 +4,16 @@ Before the theming, before you must the follow developing instructions.
 
 ## Adding new theme
 
-1. Add your theme name into [the schema](/schemas/org.gnome.shell.extensions.gtile.gschema.xml) under themes.
+1. Add your theme name into [the schema](/schemas/org.gnome.shell.extensions.gtile.gschema.xml) under `themes`.
+
+
+This name is creating your style classes. For example, the new theme name is "Gnome 40"; the plugin applies the following regular expression to the theme name and for this example `[THEME NAME]` is `gnome-40`.
+
+Regular expression: `/[^A-Za-z0-9]/g`
+ 
 2. Run `glib-compile-schemas schemas`
 
-### Anatomy of extension
+### Extension structure
 
 ![Anatomy](./images/anatomy.svg)
 
