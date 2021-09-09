@@ -1,0 +1,171 @@
+*{
+z-index: 99;
+}
+
+.grid-title{
+    font-size: 12px;
+    color: #111111;
+    padding: .5em;
+    text-align: center;
+}
+
+.grid-panel{
+    background-color: #f6f5f4;
+    -webkit-filter: blur(2px);
+    width:320px;
+    border-radius: 10px;
+    padding: 12px;
+    padding-top: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
+    border-color: #cdc7c2;
+    border-width: 1px;
+}
+
+.table{
+    spacing-rows: 2px;
+    spacing-columns: 2px;
+    padding: 4px;
+}
+
+.table-element{
+    background-color: #b1aca9;
+    margin: 2px;
+    border-radius: 2px;
+}
+
+.table-element:activate
+{
+    background-color: #928f8c;
+    
+}
+
+.tiling-icon
+{
+    width: 24px;
+    height: 24px;
+    background-image: url("images/light_launcher.svg");
+    background-size: 16px 16px;
+
+}
+
+.close-button-container
+{
+    background-color: rgba(0,120,255,0);
+}
+
+.close-button
+{
+    background-size: 22px 22px;
+    height: 20px;
+    width: 20px;
+    background-image: url("images/dark_window-close.svg");
+    padding: 2px;
+    padding-left: 5px;
+    padding-left: 5px;
+    border-radius: 50px;
+    border-width: 1px;
+}
+
+.close-button:hover
+{
+    background-color: #cccac7;
+    border-color: #cccac7;
+}
+
+.top-box
+{
+    padding:3px;
+}
+
+.settings-button
+{
+    color: #111111;
+    background-color: #f7f6f6;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #c9c3bd;
+    margin: 4px;
+    padding: 4px;
+}
+.settings-button:hover 
+{
+    background-color: #e8e6e3;
+}
+.settings-button:activate
+{
+    background-color: #dad6d2;
+}
+.settings-button:activate:hover
+{
+    background-color: #d1ccc7;
+}
+
+.animation-icon,    
+.auto-close-icon,
+.action-main-list,    
+.action-two-list
+{
+    background-size: 32px 32px;
+    height:34px;
+    width:34px;
+}
+.animation-icon
+{
+    background-image: url(images/dark_animation.svg);
+}
+.auto-close-icon
+{
+    background-image: url(images/dark_auto-close.svg);
+}
+.action-main-list
+{
+    background-image: url(images/dark_auto-tile-0.svg);
+}
+.action-two-list
+{
+    background-image: url(images/dark_auto-tile-1.svg);
+}
+
+.action-scale
+{
+    background-image: url(images/dark_scale-icon.png);
+    background-size: 36px 36px;
+    height:36px;
+    width:36px;
+}
+
+.grid-preview
+{
+        background-color: rgba(241,122,73,0.0);
+        border: rgba(217,108,59,0.0);
+}
+
+.grid-preview:activate
+{
+    background-color: rgba(241,122,73,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+}
+
+.bottom-box-container
+{
+
+    padding:10px 0px 0px 0px;
+}
+
+.bottom-box
+{
+    spacing-rows: 0px;
+    spacing-columns: 2px;
+}
+
+.very-bottom-box-container
+{
+    padding:2px 0px 10px 0px;
+}
+
+.very-bottom-box
+{
+    spacing-rows: 0px;
+    spacing-columns: 2px;
+}
+

@@ -32,19 +32,19 @@
 }
 
 .gtile-default__close-container {
-    background-color: rgba(0, 120, 255, 0);
+    margin-right: 3px;
 }
 
 .gtile-default__close {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/close_button.png");
+    width: 22px;
+    height: 22px;
+    background-image: url("images/icons/light/32/close.png");
+    background-size: 16px 16px;
+    border-radius: 22px;
 }
 
 .gtile-default__close:hover {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/close_button_hover.png");
+    background-color: rgba(238, 238, 236, 0.1);
 }
 
 
@@ -100,7 +100,6 @@
 
 .gtile-default__preset-button:hover,
 .gtile-default__preset-button:activate {
-    border: 1px solid rgba(27, 106, 203, 1);
     background-color: rgba(238, 238, 236, 0.3);
 }
 
@@ -110,49 +109,50 @@
  */
 
 .gtile-default__action-button--animation {
-    background-image: url("images/animation-icon.png");
+    background-image: url("images/icons/light/32/animation.png");
     background-size: 24px 24px;
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
 }
 
 .gtile-default__action-button--auto-close {
-    background-image: url("images/auto-close-icon.png");
+    background-image: url("images/icons/light/32/auto-close.png");
     background-size: 24px 24px;
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
 }
 
 .gtile-default__action-button--main-and-list {
-    background-image: url("images/autoTile_0.png");
+    background-image: url("images/icons/light/32/auto-tile-0.png");
     background-size: 24px 24px;
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
 }
 
 .gtile-default__action-button--two-list {
-    background-image: url("images/autoTile_1.png");
+    background-image: url("images/icons/light/32/auto-tile-1.png");
     background-size: 24px 24px;
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
 }
 
 .gtile-default__action-button--scale {
-    background-image: url("images/scale-icon.png");
+    background-image: url("images/icons/light/32/scale.png");
     background-size: 24px 24px;
-    height: 24px;
-    width: 24px;
+    height: 32px;
+    width: 32px;
 }
 
 .gtile-default__action {
     spacing-rows: 0px;
     spacing-columns: 2px;
-    margin: 15px 20px 10px 50px;
+    margin: 15px 0px 15px 32px;
 }
 
 .gtile-default__action-button {
-    margin-right: 30px;
-    height: 26px;
+    margin-right: 32px;
+    height: 33px;
+    border: 2px solid rgba(238,237,236,0);
 }
 
 .gtile-default__action-button:hover,
@@ -162,21 +162,26 @@
     border-radius: 50px;
 }
 
+.gtile-default__action-button:hover{
+    border: 2px solid rgba(238,237,236,0.1);
+}
 
 /**
  * Grid preview
  */
 
 .gtile-default__preview {
-    background-color: rgba(238, 238, 236, 0.6);
-    border: 2px solid rgba(238, 238, 236, 0.7);
+    background-color: rgba(238, 238, 236, 0);
+    border: 2px solid rgba(238, 238, 236, 0);
     border-radius: 10px;
-    box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
+    box-shadow: 0 0 3px rgba(40, 40, 40, 0);
     z-index: 90;
 }
 
-.gtile-default__preview:hover {
-    background-color: rgba(170, 170, 151, 0);
+.gtile-default__preview:activate {
+    background-color: rgba(238, 238, 236, 0.1);
+    border: 2px solid rgba(238, 238, 236, 0.4);
+    box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
 }
 
 
@@ -187,16 +192,15 @@
 .gtile-default__icon {
     width: 24px;
     height: 24px;
-    background-image: url("images/launcher_16.png");
+    background-image: url("images/launcher/light/16/default.png");
     background-size: 16px 16px;
 }
-
 .gtile-default__icon:hover {
-    background-image: url("images/launcher_16_hover.png");
+    background-image: url("images/launcher/light/16/hover.png");
 }
 
 .gtile-default__icon:activate {
-    background-image: url("images/launcher_16_activated.png");
+    background-image: url("images/launcher/light/16/active.png");
 }
 
 
@@ -234,15 +238,15 @@
 }
 
 .gtile-classic__close {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/close_button.png");
+    width: 22px;
+    height: 22px;
+    background-image: url("images/icons/light/32/close.png");
+    background-size: 16px 16px;
+    border-radius: 22px;
 }
 
 .gtile-classic__close:hover {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/close_button_hover.png");
+    background-color: rgba(238, 238, 236, 0.1);
 }
 
 
@@ -305,35 +309,35 @@
   */
 
 .gtile-classic__action-button--animation {
-    background-image: url("images/animation-icon.png");
+    background-image: url("images/icons/light/32/animation.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
 .gtile-classic__action-button--auto-close {
-    background-image: url("images/auto-close-icon.png");
+    background-image: url("images/icons/light/32/auto-close.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
 .gtile-classic__action-button--main-and-list {
-    background-image: url("images/autoTile_0.png");
+    background-image: url("images/icons/light/32/auto-tile-0.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
 .gtile-classic__action-button--two-list {
-    background-image: url("images/autoTile_1.png");
+    background-image: url("images/icons/light/32/auto-tile-1.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
 .gtile-classic__action-button--scale {
-    background-image: url("images/scale-icon.png");
+    background-image: url("images/icons/light/32/scale.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
@@ -372,7 +376,7 @@
     border: rgba(217, 108, 59, 0.0);
 }
 
-.gtile-classic__preview:hover {
+.gtile-classic__preview:active {
     background-color: rgba(241, 122, 73, 0.4);
     border: 1px solid rgba(217, 108, 59, 0.8);
 }
@@ -385,14 +389,421 @@
 .gtile-classic__icon {
     width: 24px;
     height: 24px;
-    background-image: url("images/launcher_16.png");
+    background-image: url("images/launcher/light/16/default.png");
     background-size: 16px 16px;
 }
 
 .gtile-classic__icon:hover {
-    background-image: url("images/launcher_16_hover.png");
+    background-image: url("images/launcher/light/16/hover.png");
 }
 
 .gtile-classic__icon:activate {
-    background-image: url("images/launcher_16_activated.png");
+    background-image: url("images/launcher/light/16/active.png");
 }
+
+
+
+/**
+ * Minimal dark style start
+ * Main container
+ */
+
+.gtile-minimal-dark {
+    background-color: #2c2c2c;
+    -webkit-filter: blur(2px);
+    width:320px;
+    border-radius: 10px;
+    padding: 12px;
+    padding-top: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
+    border-color: #1b1b1b;
+    border-width: 1px;
+}
+
+
+/**
+* Title bar
+*/
+
+.gtile-minimal-dark__title-container {
+  padding: 3px;
+}
+
+.gtile-minimal-dark__title {
+    font-size: 12px;
+    color: #ffffff;
+    padding: .5em;
+    text-align: center;
+}
+
+.gtile-minimal-dark__close-container {
+    background-color: rgba(0,120,255,0);
+}
+
+.gtile-minimal-dark__close {
+    background-size: 22px 22px;
+    height: 20px;
+    width: 20px;
+    background-image: url("images/icons/light/32/close.png");
+    padding: 2px;
+    padding-left: 5px;
+    padding-left: 5px;
+    border-radius: 50px;
+    border-width: 1px;
+}
+
+.gtile-minimal-dark__close:hover {
+    background-color: #646464;
+    border-color: #202020;
+}
+
+
+/**
+* Tile container
+*/
+
+.gtile-minimal-dark__tile-container {}
+
+.gtile-minimal-dark__tile-table {
+    spacing-rows: 2px;
+    spacing-columns: 2px;
+    padding: 4px;
+}
+
+.gtile-minimal-dark__tile-table-item {
+    background-color: #4b4b4b;
+    margin: 2px;
+    border-radius: 2px;
+}
+
+.gtile-minimal-dark__tile-table-item:activate {
+    background-color: #646464;
+}
+
+
+/**
+* Preset container
+*/
+
+.gtile-minimal-dark__preset-container {
+}
+
+.gtile-minimal-dark__preset {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
+}
+
+.gtile-minimal-dark__preset-container {
+  padding: 10px 0px 0px 0px;
+}
+
+.gtile-minimal-dark__preset-button {
+    background-color: #4b4b4b;
+    border-radius: 8px;
+    margin: 4px;
+    padding: 4px;
+}
+
+.gtile-minimal-dark__preset-button:hover,
+.gtile-minimal-dark__preset-button:activate {
+    background-color: #707070;
+}
+
+
+/**
+* Actions container
+*/
+.gtile-minimal-dark__action-button--animation,
+.gtile-minimal-dark__action-button--auto-close,
+.gtile-minimal-dark__action-button--main-and-list,
+.gtile-minimal-dark__action-button--two-list{
+    background-size: 32px 32px;
+    height:34px;
+    width:34px;
+}
+
+.gtile-minimal-dark__action-button--animation {
+    background-image: url("images/icons/light/32/animation.png");
+}
+
+.gtile-minimal-dark__action-button--auto-close {
+    background-image: url("images/icons/light/32/auto-close.png");
+}
+
+.gtile-minimal-dark__action-button--main-and-list {
+    background-image: url("images/icons/light/32/auto-tile-0.png");
+}
+
+.gtile-minimal-dark__action-button--two-list {
+    background-image: url("images/icons/light/32/auto-tile-1.png");
+}
+
+.gtile-minimal-dark__action-button--scale {
+    background-image: url("images/icons/dark/32/scale.png");
+    background-size: 36px 36px;
+    height:36px;
+    width:36px;
+}
+
+.gtile-minimal-dark__action {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
+}
+
+.gtile-minimal-dark__action-container {
+    padding:2px 0px 10px 0px;
+}
+
+.gtile-minimal-dark__action-button {
+    background-color: #4b4b4b;
+    border-radius: 8px;
+    margin: 4px;
+    padding: 4px;
+}
+
+.gtile-minimal-dark__action-button:hover,
+.gtile-minimal-dark__action-button:activate {
+    background-color: #707070;
+}
+
+
+/**
+* Grid preview
+*/
+
+.gtile-minimal-dark__preview {
+    background-color: rgba(241,122,73,0.0);
+    border: rgba(217,108,59,0.0);
+}
+
+.gtile-minimal-dark__preview:activate {
+    background-color: rgba(241,122,73,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+}
+
+
+/**
+* Panel icon
+*/
+
+.gtile-minimal-dark__icon {
+  width: 24px;
+  height: 24px;
+  background-image: url("images/launcher/light/16/default.png");
+  background-size: 16px 16px;
+}
+
+.gtile-minimal-dark__icon:hover {
+  background-image: url("images/launcher/light/16/hover.png");
+}
+
+.gtile-minimal-dark__icon:activate {
+  background-image: url("images/launcher/light/16/active.png");
+}
+
+
+
+/**
+ * Minimal light style start
+ * Main container
+ */
+
+ .gtile-minimal-light {
+    background-color: #f6f5f4;
+    -webkit-filter: blur(2px);
+    width:320px;
+    border-radius: 10px;
+    padding: 12px;
+    padding-top: 6px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
+    border-color: #cdc7c2;
+    border-width: 1px;
+  }
+  
+  
+  /**
+  * Title bar
+  */
+  
+  .gtile-minimal-light__title-container {
+  padding: 3px;
+  }
+  
+  .gtile-minimal-light__title {
+    font-size: 12px;
+    color: #111111;
+    padding: .5em;
+    text-align: center;
+  }
+  
+  .gtile-minimal-light__close-container {
+    background-color: rgba(0,120,255,0);
+  }
+  
+  .gtile-minimal-light__close {
+    background-size: 22px 22px;
+    height: 20px;
+    width: 20px;
+    background-image: url("images/dark_close.png");
+    padding: 2px;
+    padding-left: 5px;
+    padding-left: 5px;
+    border-radius: 50px;
+    border-width: 1px;
+  }
+  
+  .gtile-minimal-light__close:hover {
+    background-color: #cccac7;
+    border-color: #cccac7;
+  }
+  
+  
+  /**
+  * Tile container
+  */
+  
+  .gtile-minimal-light__tile-container {}
+  
+  .gtile-minimal-light__tile-table {
+    spacing-rows: 2px;
+    spacing-columns: 2px;
+    padding: 4px;
+  }
+  
+  .gtile-minimal-light__tile-table-item {
+    background-color: #b1aca9;
+    margin: 2px;
+    border-radius: 2px;
+  }
+  
+  .gtile-minimal-light__tile-table-item:activate {
+    background-color: #928f8c;
+  }
+  
+  
+  /**
+  * Preset container
+  */
+  
+  .gtile-minimal-light__preset-container {
+  }
+  
+  .gtile-minimal-light__preset {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
+  }
+  
+  .gtile-minimal-light__preset-container {
+  padding: 10px 0px 0px 0px;
+  }
+  
+  .gtile-minimal-light__preset-button {
+    color: #111111;
+    background-color: #f7f6f6;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #c9c3bd;
+    margin: 4px;
+    padding: 4px;
+  }
+  
+  .gtile-minimal-light__preset-button:hover,
+  .gtile-minimal-light__preset-button:activate {
+    background-color: #e8e6e3;
+  }
+  
+  
+  /**
+  * Actions container
+  */
+  .gtile-minimal-light__action-button--animation,
+  .gtile-minimal-light__action-button--auto-close,
+  .gtile-minimal-light__action-button--main-and-list,
+  .gtile-minimal-light__action-button--two-list{
+    background-size: 32px 32px;
+    height:34px;
+    width:34px;
+  }
+  
+  .gtile-minimal-light__action-button--animation {
+    background-image: url("images/dark_animation.png");
+  }
+  
+  .gtile-minimal-light__action-button--auto-close {
+    background-image: url("images/dark_auto-close.png");
+  }
+  
+  .gtile-minimal-light__action-button--main-and-list {
+    background-image: url("images/dark_auto-tile-0.png");
+  }
+  
+  .gtile-minimal-light__action-button--two-list {
+    background-image: url("images/dark_auto-tile-1.png");
+  }
+  
+  .gtile-minimal-light__action-button--scale {
+    background-image: url("images/icons/dark/32/scale.png");
+    background-size: 36px 36px;
+    height:36px;
+    width:36px;
+  }
+  
+  .gtile-minimal-light__action {
+  spacing-rows: 0px;
+  spacing-columns: 2px;
+  }
+  
+  .gtile-minimal-light__action-container {
+    padding:2px 0px 10px 0px;
+  }
+  
+  .gtile-minimal-light__action-button {
+    color: #111111;
+    background-color: #f7f6f6;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #c9c3bd;
+    margin: 4px;
+    padding: 4px;
+  }
+  
+  .gtile-minimal-light__action-button:hover,
+  .gtile-minimal-light__action-button:activate {
+    background-color: #e8e6e3;
+  }
+  
+  
+  /**
+  * Grid preview
+  */
+  
+  .gtile-minimal-light__preview {
+    background-color: rgba(241,122,73,0.0);
+    border: rgba(217,108,59,0.0);
+  }
+  
+  .gtile-minimal-light__preview:activate {
+    background-color: rgba(241,122,73,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+  }
+  
+  
+  /**
+  * Panel icon
+  */
+  
+  .gtile-minimal-light__icon {
+    width: 24px;
+    height: 24px;
+    background-image: url("images/launcher/dark/16/default.png");
+    background-size: 16px 16px;
+  }
+  
+  .gtile-minimal-light__icon:hover {
+  background-image: url("images/launcher/dark/16/hover.png");
+  }
+  
+  .gtile-minimal-light__icon:activate {
+  background-image: url("images/launcher/dark/16/active.png");
+  }
+  
