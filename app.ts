@@ -165,7 +165,7 @@ const lastResizeInfo: ResizeActionInfo = {
     windowTitle: '',
 };
 
-let theme = 'gtile-default';
+let theme = getTheme();
 
 // Hangouts workaround
 let excludedApplications = new Array(
@@ -743,14 +743,11 @@ function getIntSetting(settingsValue: NumberSettingName) {
 
 function initSettings() {
     log("Init settings");
+    theme = getTheme();
+
     const gridSizes = settings.get_string(SETTINGS_GRID_SIZES) || '';
     log(SETTINGS_GRID_SIZES + " set to " + gridSizes);
     initGridSizes(gridSizes);
-
-    let themeName = settings.get_string(SETTINGS_THEME) || 'Default';
-    themeName = themeName.toLowerCase().replace(/[^A-Za-z0-9]/g,'-');
-    theme = `gtile-${themeName}`;
-    log("Theme changed to the" + theme);
 
     getBoolSetting(SETTINGS_AUTO_CLOSE);
     getBoolSetting(SETTINGS_ANIMATION);
@@ -1466,7 +1463,8 @@ class TopBar {
 
         this._closebutton = new St.Button({
             style_class: `${theme}__close`,
-        })
+        });
+
         this._closebutton.add_style_class_name(`${theme}__close-container`);
         this._connect_id = this._closebutton.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 
@@ -1483,7 +1481,6 @@ class TopBar {
         this._title = app.get_name() + " - " + title;
         log("title: " + this._title);
         this._stlabel.text = this._title;
-
     }
 
     private _onButtonPress() {
@@ -1530,8 +1527,22 @@ ToggleSettingsButton.prototype = {
             can_focus: true,
             track_hover: true
         });
-        this.label = new St.Label({ style_class: 'settings-label', reactive: true, can_focus: true, track_hover: true, text: this.text });
-        this.icon = new St.BoxLayout({ style_class: `${theme}__action-button--${this.text}`, reactive: true, can_focus: true, track_hover: true });
+
+        this.label = new St.Label({
+            style_class: `${theme}__action-label`,
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
+            text: this.text
+        });
+
+        this.icon = new St.BoxLayout({
+            style_class: `${theme}__action-button--${this.text}`,
+            reactive: true,
+            can_focus: true,
+            track_hover: true
+        });
+
         this.actor.add_actor(this.icon);
         this.property = property;
         this._update();
@@ -1560,9 +1571,9 @@ ToggleSettingsButton.prototype = {
 Signals.addSignalMethods(ToggleSettingsButton.prototype);
 
 const ACTION_CLASSES = {
-    BUTTON: `${theme}__action-button`,
-    MAIN_AND_LIST :`${theme}__action-button--main-and-list`,
-    TWO_LIST: `${theme}__action-button--two-list`,
+    BUTTON: "__action-button",
+    MAIN_AND_LIST : "__action-button--main-and-list",
+    TWO_LIST: "__action-button--two-list",
 }
 
 class ActionButton {
@@ -1572,7 +1583,7 @@ class ActionButton {
     constructor(readonly grid: Grid, classname: string) {
         this.grid = grid;
         this.actor = new St.Button({
-            style_class: ACTION_CLASSES.BUTTON,
+            style_class: `${getTheme()}${ACTION_CLASSES.BUTTON}`,
             reactive: true,
             can_focus: true,
             track_hover: true
@@ -1602,8 +1613,9 @@ class AutoTileMainAndList extends ActionButton {
     readonly classname: string;
 
     constructor(grid: Grid) {
-        super(grid, ACTION_CLASSES.MAIN_AND_LIST);
-        this.classname = ACTION_CLASSES.MAIN_AND_LIST;
+        const theme =`${getTheme()}${ACTION_CLASSES.MAIN_AND_LIST}`
+        super(grid, theme);
+        this.classname = theme;
         log("AutoTileMainAndList connect button-press-event");
         this.connect('button-press-event', () => this._onButtonPress());
     }
@@ -1713,8 +1725,9 @@ class AutoTileTwoList extends ActionButton {
     readonly classname: string;
 
     constructor(grid: Grid) {
-        super(grid,  ACTION_CLASSES.TWO_LIST);
-        this.classname = ACTION_CLASSES.TWO_LIST;
+        const theme =`${getTheme()}${ACTION_CLASSES.TWO_LIST}`
+        super(grid, theme);
+        this.classname = theme;
         log("AutoTileTwoList connect button-press-event");
         this.connect('button-press-event', () => this._onButtonPress());
     }
@@ -2540,3 +2553,13 @@ class GridElement {
         this.active = false;
     }
 };
+
+function getTheme(){
+    let themeName = settings.get_string(SETTINGS_THEME) || 'Default';
+    themeName = themeName.toLowerCase().replace(/[^A-Za-z0-9]/g,'-');
+
+    const theme = `gtile-${themeName}`;
+    log("Theme changed to the" + theme);
+
+    return theme;
+}
