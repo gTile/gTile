@@ -43,7 +43,7 @@ filegroup(
         "stylesheet.css",
         "LICENSE"
     ] + glob([
-        "images/*",
+        "images/**",
     ]),
 )
 
