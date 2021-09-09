@@ -520,7 +520,7 @@
 			<summary>Active theme.</summary>
 		</key>
 		<key type="as" name="themes">
-			<default><![CDATA[['Default', 'Classic']]]></default>
+			<default><![CDATA[['Default', 'Classic', 'Minimal Dark', 'Minimal Light']]]></default>
 			<summary>You can add or remove themes. Element classes are automatically changed by theme name.</summary>
 		</key>
 	</schema>
