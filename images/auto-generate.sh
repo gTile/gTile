@@ -1,45 +1,25 @@
 #!/bin/bash
 mkdir "$PWD"/icons/light/16
+mkdir "$PWD"/icons/light/32
+mkdir "$PWD"/icons/light/48
+
 for file in $PWD/icons/light/source/*.svg
     do
         filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=16 --export-filename="$PWD"/icons/light/16/"${filename}.png"
-    done
-
-mkdir "$PWD"/icons/light/32
-for file in $PWD/icons/light/source/*.svg
-    do
-        filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=32 --export-filename="$PWD"/icons/light/32/"${filename}.png"
-    done
-
-
-mkdir "$PWD"/icons/light/48
-for file in $PWD/icons/light/source/*.svg
-    do
-        filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=48 --export-filename="$PWD"/icons/light/48/"${filename}.png"
     done
 
 mkdir "$PWD"/icons/dark/16
+mkdir "$PWD"/icons/dark/32
+mkdir "$PWD"/icons/dark/48
+
 for file in $PWD/icons/dark/source/*.svg
     do
         filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=16 --export-filename="$PWD"/icons/dark/16/"${filename}.png"
-    done
-
-mkdir "$PWD"/icons/dark/32
-for file in $PWD/icons/dark/source/*.svg
-    do
-        filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=32 --export-filename="$PWD"/icons/dark/32/"${filename}.png"
-    done
-
-
-mkdir "$PWD"/icons/dark/48
-for file in $PWD/icons/dark/source/*.svg
-    do
-        filename=$(basename "$file" .svg)
         inkscape "$file" --export-type=png --export-background-opacity=0 --export-width=48 --export-filename="$PWD"/icons/dark/48/"${filename}.png"
     done
 
