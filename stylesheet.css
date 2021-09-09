@@ -644,7 +644,7 @@
     background-size: 22px 22px;
     height: 20px;
     width: 20px;
-    background-image: url("images/dark_close.png");
+    background-image: url("images/icons/dark/32/close.png");
     padding: 2px;
     padding-left: 5px;
     padding-left: 5px;
@@ -726,19 +726,19 @@
   }
   
   .gtile-minimal-light__action-button--animation {
-    background-image: url("images/dark_animation.png");
+    background-image: url("images/icons/dark/32/animation.png");
   }
   
   .gtile-minimal-light__action-button--auto-close {
-    background-image: url("images/dark_auto-close.png");
+    background-image: url("images/icons/dark/32/auto-close.png");
   }
   
   .gtile-minimal-light__action-button--main-and-list {
-    background-image: url("images/dark_auto-tile-0.png");
+    background-image: url("images/icons/dark/32/auto-tile-0.png");
   }
   
   .gtile-minimal-light__action-button--two-list {
-    background-image: url("images/dark_auto-tile-1.png");
+    background-image: url("images/icons/dark/32/auto-tile-1.png");
   }
   
   .gtile-minimal-light__action-button--scale {
