@@ -21,6 +21,10 @@ You can use the above-mentioned class names to style your theme.
 
 You must add `gtile-[THEME NAME]__` to the beginning of classes outside the main container.
 
+### Styling the extension
+
+Put your CSS codes into the [stylesheet](./stylesheet.css).
+
 ### Install extension
 
 Install extension with Bazel
