@@ -105,7 +105,8 @@ export type KeyBindingSettingName = (
     "set-tiling" |
     "show-toggle-tiling" |
     "show-toggle-tiling-alt" |
-    "snap-to-neighbors");
+    "snap-to-neighbors" |
+    "themes");
 
 // A setting name for a string-valued setting.
 export type StringSettingName = (
@@ -140,7 +141,8 @@ export type StringSettingName = (
     "resize6" |
     "resize7" |
     "resize8" |
-    "resize9");
+    "resize9" |
+    "theme");
 
 // Any valid setting name.
 export type AnySettingName = (
@@ -184,6 +186,7 @@ export type AnySettingName = (
     "insets-secondary-left" |
     "insets-secondary-right" |
     "insets-secondary-top" |
+    "main-window-sizes" |
     "max-timeout" |
     "move-down" |
     "move-down-vi" |
@@ -268,6 +271,8 @@ export type AnySettingName = (
     "show-toggle-tiling" |
     "show-toggle-tiling-alt" |
     "snap-to-neighbors" |
+    "theme" |
+    "themes" |
     "window-margin" |
     "window-margin-fullscreen-enabled");
 
@@ -391,6 +396,9 @@ interface RawConfigObject {
 
     /** Top gap around border of screen for secondary monitor */
     ["insets-secondary-top"]: number;
+
+    /** "Autotile Main window sizes. (Ratio of the screen to take up. Can be a decimal or a ratio). */
+    ["main-window-sizes"]: string;
 
     /** Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling. */
     ["max-timeout"]: number;
@@ -643,6 +651,12 @@ interface RawConfigObject {
 
     /** Snap window size to neighbors */
     ["snap-to-neighbors"]: string[];
+
+    /** Active theme. */
+    ["theme"]: string;
+
+    /** You can add or remove themes. Element classes are automatically changed by theme name. */
+    ["themes"]: string[];
 
     /** Gaps between windows in the middle of screen */
     ["window-margin"]: number;

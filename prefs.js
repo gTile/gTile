@@ -33,6 +33,10 @@ const SETTINGS_INSETS_SECONDARY_LEFT = 'insets-secondary-left';
 const SETTINGS_INSETS_SECONDARY_RIGHT = 'insets-secondary-right';
 const SETTINGS_INSETS_SECONDARY_TOP = 'insets-secondary-top';
 const SETTINGS_INSETS_SECONDARY_BOTTOM = 'insets-secondary-bottom';
+
+const SETTINGS_THEME = 'theme';
+const SETTINGS_THEMES = 'themes';
+
 // Globals
 const pretty_names = {
     'show-toggle-tiling': 'Display gTile',
@@ -369,19 +373,62 @@ function help_tab(notebook) {
     notebook.append_page(hl_link, hl_label);
 }
 
+function theme_tab(notebook) {
+    const settings = Settings.get();
+    const options = settings.get_strv(SETTINGS_THEMES);
+  
+    const grid = new Gtk.Grid({
+      column_spacing: 10,
+      orientation: Gtk.Orientation.VERTICAL,
+      row_spacing: 10,
+    });
+  
+    grid.set_margin_start(24);
+    grid.set_margin_top(24);
+  
+    grid.attach_next_to(new Gtk.Label({
+      label: 'Theme',
+      halign: Gtk.Align.START,
+      justify: Gtk.Justification.LEFT,
+      use_markup: false,
+      wrap: true,
+    }), null, Gtk.PositionType.BOTTOM, 1, 1)
+  
+    let themes = add_combobox(options, grid, function (active) {
+      settings.set_string(SETTINGS_THEME, active);
+    });
+  
+    const active = settings.get_string(SETTINGS_THEME);
+  
+    themes.set_active(options.indexOf(active) || 0);
+  
+    let window = new Gtk.ScrolledWindow({ 'vexpand': true });
+  
+    set_child(window, grid);
+    let label = new Gtk.Label({
+      label: "Theme",
+      halign: Gtk.Align.START,
+      use_markup: false,
+    });
+  
+    notebook.append_page(window, label);
+}
+
 function buildPrefsWidget() {
 
     let notebook = new Gtk.Notebook();
 
     basics_tab(notebook);
+    theme_tab(notebook);
     accel_tab(notebook);
     presets_tab(notebook);
     margins_tab(notebook);
     help_tab(notebook);
 
-    let main_vbox = new Gtk.Box({   orientation: Gtk.Orientation.VERTICAL,
-                                    spacing: 10
-                                });
+    let main_vbox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 10
+    });
 
     if (Gtk.get_major_version() >= 4) {
         main_vbox.prepend(notebook, true, true, 0);
@@ -405,11 +452,46 @@ function add_int(int_label, SETTINGS, grid, settings, minv, maxv, incre, page) {
     settings.bind(SETTINGS, item.spin, 'value', Gio.SettingsBindFlags.DEFAULT);
     grid.attach_next_to(item.actor, null, Gtk.PositionType.BOTTOM, 1, 1);
 }
+
 function add_text(text_label, SETTINGS, grid, settings, width) {
     let item = new TextEntry(text_label);
     item.set_args(width);
     settings.bind(SETTINGS, item.textentry, 'text', Gio.SettingsBindFlags.DEFAULT);
     grid.attach_next_to(item.actor, null, Gtk.PositionType.BOTTOM, 1, 1);
+}
+
+function add_combobox(options, grid, callback) {
+    let model = new Gtk.ListStore();
+    model.set_column_types([
+        GObject.TYPE_STRING,
+        GObject.TYPE_STRING
+    ]);
+
+    let combobox = new Gtk.ComboBox({ model: model });
+    let renderer = new Gtk.CellRendererText();
+
+    combobox.pack_start(renderer, true);
+    combobox.add_attribute(renderer, 'text', 1);
+
+    for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        model.set(model.append(), [0, 1], [option, option]);
+    }
+
+    combobox.connect('changed', function () {
+        let [success, iter] = combobox.get_active_iter();
+        if (!success)
+            return;
+        let value = model.get_value(iter, 0);
+
+        if (typeof callback !== 'undefined') {
+            callback(value)
+        }
+    });
+
+    grid.attach_next_to(combobox, null, Gtk.PositionType.BOTTOM, 1, 1);
+
+    return combobox;
 }
 
 // grabbed from sysmonitor code

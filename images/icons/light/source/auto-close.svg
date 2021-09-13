@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866668"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="light_auto-close.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="6.6136925"
+     inkscape:cx="46.645652"
+     inkscape:cy="51.5597"
+     inkscape:window-width="3840"
+     inkscape:window-height="2091"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs2">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2200">
+      <rect
+         style="fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:2.02228;stroke-miterlimit:3.6;stroke-dasharray:none;stroke-opacity:1"
+         id="rect2202"
+         width="37.173183"
+         height="16.37603"
+         x="-15.88731"
+         y="14.067148"
+         ry="0.22588995"
+         transform="rotate(-41.886947)" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2"
+     style="display:inline">
+    <circle
+       style="fill:none;stroke:#e7e7e7;stroke-width:2.5;stroke-miterlimit:3.5999999;stroke-dasharray:none;stroke-opacity:1"
+       id="path941"
+       cx="16.890747"
+       cy="16.291613"
+       r="9.8641205" />
+    <rect
+       style="fill:#e7e7e7;fill-opacity:1;stroke:none;stroke-width:3.4291;stroke-miterlimit:3.6;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1153"
+       width="2.5751374"
+       height="10.347448"
+       x="15.661945"
+       y="11.352831"
+       ry="1.1026281" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline" />
+</svg>
