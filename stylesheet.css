@@ -376,7 +376,7 @@
     border: rgba(217, 108, 59, 0.0);
 }
 
-.gtile-classic__preview:active {
+.gtile-classic__preview:activate {
     background-color: rgba(241, 122, 73, 0.4);
     border: 1px solid rgba(217, 108, 59, 0.8);
 }
