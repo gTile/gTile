@@ -428,7 +428,7 @@ function buildPrefsWidget() {
     });
 
     if (Gtk.get_major_version() >= 4) {
-        main_vbox.prepend(notebook, true, true, 0);
+        main_vbox.prepend(notebook);
     } else {
         main_vbox.pack_start(notebook, true, true, 0);
         main_vbox.show_all();
