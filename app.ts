@@ -660,10 +660,10 @@ const GTileStatusButton = new Lang.Class({
         //Done by default in PanelMenuButton - Just need to override the method
         if (SHELL_VERSION.version_at_least_34()) {
             this.add_style_class_name(classname);
-            this.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+            this.connect('button-press-event', this._onButtonPress.bind(this));
         } else {
             this.actor.add_style_class_name(classname);
-            this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+            this.actor.connect('button-press-event', this._onButtonPress.bind(this));
         }
         log("GTileStatusButton _init done");
     },
@@ -1502,7 +1502,7 @@ class ToggleSettingsButtonListener {
 
     addActor(actor: ToggleSettingsButtonListenerActor) {
         log("ToggleSettingsButtonListener Connect update-toggle");
-        actor.connect('update-toggle', Lang.bind(this, this._updateToggle));
+        actor.connect('update-toggle', this._updateToggle.bind(this));
         this.actors.push(actor);
     }
 
@@ -1547,9 +1547,9 @@ ToggleSettingsButton.prototype = {
         this.property = property;
         this._update();
         log("ToggleSettingsButton Connect button-press-event");
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.actor.connect('button-press-event', this._onButtonPress.bind(this));
         log("ToggleSettingsButton Connect update-toggle");
-        this.connect('update-toggle', Lang.bind(this, this._update))
+        this.connect('update-toggle', this._update.bind(this))
     },
 
     _update: function () {
@@ -1593,7 +1593,7 @@ class ActionButton {
         this.actor.add_actor(this.icon);
 
         log("ActionButton Connect button-press-event");
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.actor.connect('button-press-event', this._onButtonPress.bind(this));
     }
 
     _onButtonPress() {
@@ -2012,11 +2012,11 @@ class Grid {
 
         let action = new AutoTileMainAndList(this);
         this.veryBottomBarTableLayout.attach(action.actor, 2, 0, 1, 1);
-        action.connect('resize-done', Lang.bind(this, this._onResize));
+        action.connect('resize-done', this._onResize.bind(this));
 
         action = new AutoTileTwoList(this);
         this.veryBottomBarTableLayout.attach(action.actor, 3, 0, 1, 1);
-        action.connect('resize-done', Lang.bind(this, this._onResize));
+        action.connect('resize-done', this._onResize.bind(this));
 
         this.x = 0;
         this.y = 0;
@@ -2499,7 +2499,7 @@ class GridElement {
 
         this.id = getMonitorKey(monitor) + "-" + coordx + ":" + coordy;
 
-        this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this.actor.connect('button-press-event', this._onButtonPress.bind(this));
         this.hoverConnect = this.actor.connect('notify::hover', () => this._onHoverChanged());
         this.active = false;
     }
