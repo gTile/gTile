@@ -130,8 +130,7 @@ function init() {
 
 }
 
-function accel_tab(notebook) {
-    let settings = Settings.get();
+function accel_tab(notebook, settings) {
     let ks_grid = new Gtk.Grid({
         column_spacing: 10,
         orientation: Gtk.Orientation.VERTICAL,
@@ -239,8 +238,7 @@ function accel_tab(notebook) {
     notebook.append_page(ks_window, ks_label);
 }
 
-function basics_tab(notebook) {
-    let settings = Settings.get();
+function basics_tab(notebook, settings) {
 
     let bs_grid = new Gtk.Grid({
         column_spacing: 10,
@@ -284,8 +282,7 @@ function basics_tab(notebook) {
     notebook.append_page(bs_window, bs_label);
 }
 
-function presets_tab(notebook) {
-    let settings = Settings.get();
+function presets_tab(notebook, settings) {
     let pr_grid = new Gtk.Grid({
         column_spacing: 10,
         orientation: Gtk.Orientation.VERTICAL,
@@ -317,8 +314,7 @@ function presets_tab(notebook) {
     notebook.append_page(pr_window, pr_label);
 }
 
-function margins_tab(notebook) {
-    let settings = Settings.get();
+function margins_tab(notebook, settings) {
     let mg_grid = new Gtk.Grid({
         column_spacing: 10,
         orientation: Gtk.Orientation.VERTICAL,
@@ -373,8 +369,7 @@ function help_tab(notebook) {
     notebook.append_page(hl_link, hl_label);
 }
 
-function theme_tab(notebook) {
-    const settings = Settings.get();
+function theme_tab(notebook, settings) {
     const options = settings.get_strv(SETTINGS_THEMES);
   
     const grid = new Gtk.Grid({
@@ -417,12 +412,14 @@ function theme_tab(notebook) {
 function buildPrefsWidget() {
 
     let notebook = new Gtk.Notebook();
+    let settings = Settings.get();
 
-    basics_tab(notebook);
-    theme_tab(notebook);
-    accel_tab(notebook);
-    presets_tab(notebook);
-    margins_tab(notebook);
+
+    basics_tab(notebook, settings);
+    theme_tab(notebook, settings);
+    accel_tab(notebook, settings);
+    presets_tab(notebook, settings);
+    margins_tab(notebook, settings);
     help_tab(notebook);
 
     let main_vbox = new Gtk.Box({

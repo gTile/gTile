@@ -13,9 +13,6 @@ const Shell = imports.gi.Shell;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 
-// Globals
-const mySettings = Settings.get();
-
 /**
  * Bindings is a dictionary that maps a hotkey name to a function that handles
  * the press of the key that is bound to that action.
@@ -26,6 +23,8 @@ export type BindingsOld = {[name in KeyBindingSettingName]: () => void};
 
 export function bind(keyBindings: Bindings) {
     log("Binding keys");
+    let mySettings = Settings.get();
+
     keyBindings.forEach((callback: () => void, key: KeyBindingSettingName) => {
         //const key = keyString as KeyBindingSettingName;
         if (Main.wm.addKeybinding && Shell.ActionMode) { // introduced in 3.16
