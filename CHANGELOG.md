@@ -1,6 +1,18 @@
 CHANGE LOG
 ----------
 
+### V47
+
+New and changed functionality:
+- Theme support. Light, dark, classic and default themes.
+
+Bug fixes:
+- Fix - wrong argument list for Box.packing, in prefs
+
+Changes enforced by gnome-shell policies and upgrades:
+- Get rid of globals in hotkeys
+- Partially move out of Lang
+
 ### V28
 
 -   Increase max margins to 240 - fix #40
