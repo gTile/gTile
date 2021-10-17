@@ -659,6 +659,9 @@ const GTileStatusButton = new Lang.Class({
         this.parent(0.0, "gTile", false);
         //Done by default in PanelMenuButton - Just need to override the method
         if (SHELL_VERSION.version_at_least_34()) {
+            const icon = new St.Icon({ style_class: 'panel-icon' });
+
+            this.add_actor(icon);
             this.add_style_class_name(classname);
             this.connect('button-press-event', this._onButtonPress.bind(this));
         } else {

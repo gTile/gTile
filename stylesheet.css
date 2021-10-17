@@ -2,6 +2,9 @@
     z-index: 99;
 }
 
+.panel-icon{
+    padding: 0 13px;
+}
 
 /**
  * Default style start
