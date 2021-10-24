@@ -91,9 +91,9 @@ For configuration, please use the built-in preferences dialog (Gnome Tweak Tool 
 
 What these buttons do:
 
-- ![Toggle animation icon](https://raw.githubusercontent.com/gTile/gTile/master/images/animation-icon-black.png) <- this one toggles the animation of the changes to the preview drawing.
+- ![Toggle animation icon](https://raw.githubusercontent.com/gTile/gTile/master/images/icons/dark/32/animation.png) <- this one toggles the animation of the changes to the preview drawing.
 
-- ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/auto-close-icon-black.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
+- ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/icons/dark/32/auto-close.png) <- this one toggles the auto-closing of the gTile window after applying the changes.
 
 ### Using the mouse
 
