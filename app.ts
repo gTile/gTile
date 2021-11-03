@@ -1202,14 +1202,16 @@ function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key
             return;
         }
         switch (key) {
-            case 'right':
-                // first or currentElement can be moved right.
-                if (fX < nbCols - 1 || cX < nbCols - 1) {
-                    // Move each right, but no further than last column
+            case 'right': {
+                const canMoveAny = fX < nbCols - 1 || cX < nbCols - 1;
+                const canMoveBoth = fX < nbCols - 1 && cX < nbCols - 1;
+
+                if (canMoveBoth || gridSettings[SETTINGS_BORDER_MOVE_CONTRACT_ENABLED] && canMoveAny) {
                     delegate.first = grid.getElement(fY, Math.min(fX + 1, nbCols-1));
                     grid.getElement(cY, Math.min(cX + 1, nbCols - 1))?._onHoverChanged();
                 }
                 break;
+            }
             case 'left':
                 if (fX > 0 && cX > 0) {
                     delegate.first = grid.getElement(fY, fX - 1);
@@ -1222,14 +1224,16 @@ function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key
                     grid.getElement(cY - 1, cX)?._onHoverChanged();
                 }
                 break;
-            case 'down':
-                // first or currentElement can be moved down.
-                if (fY < nbRows - 1 || cY < nbRows - 1) {
-                    // Move each down, but no further than row column
+            case 'down': {
+                const canMoveAny = fY < nbRows - 1 || cY < nbRows - 1;
+                const canMoveBoth = fY < nbRows - 1 && cY < nbRows - 1;
+
+                if (canMoveBoth || gridSettings[SETTINGS_BORDER_MOVE_CONTRACT_ENABLED] && canMoveAny) {
                     delegate.first = grid.getElement(Math.min(fY + 1, nbRows - 1), fX);
                     grid.getElement(Math.min(cY + 1, nbRows - 1), cX)?._onHoverChanged();
                 }
                 break;
+            }
         }
     } else if (type == "resize") {
         switch (key) {
