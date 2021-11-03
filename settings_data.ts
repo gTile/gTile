@@ -7,6 +7,7 @@
 export type BoolSettingName = (
     "animation" |
     "auto-close" |
+    "border-move-contract-enabled" |
     "debug" |
     "global-presets" |
     "moveresize-enabled" |
@@ -173,6 +174,7 @@ export type AnySettingName = (
     "autotile-8" |
     "autotile-9" |
     "autotile-main" |
+    "border-move-contract-enabled" |
     "cancel-tiling" |
     "change-grid-size" |
     "debug" |
@@ -357,6 +359,9 @@ interface RawConfigObject {
 
     /** Autotile with main window. */
     ["autotile-main"]: string[];
+
+    /** Enables selection contracting when moved into the grid border. */
+    ["border-move-contract-enabled"]: boolean;
 
     /** Cancel tiling. */
     ["cancel-tiling"]: string[];

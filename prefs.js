@@ -17,6 +17,7 @@ const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
+const SETTINGS_BORDER_MOVE_CONTRACT_ENABLED = 'border-move-contract-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
@@ -257,6 +258,8 @@ function basics_tab(notebook, settings) {
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
 
     add_check("Enable accelerators for moving and resizing windows", SETTINGS_MOVERESIZE_ENABLED  , bs_grid, settings);
+
+    add_check("Contract selection when moved into the bottom/right border", SETTINGS_BORDER_MOVE_CONTRACT_ENABLED, bs_grid, settings);
 
     add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
 

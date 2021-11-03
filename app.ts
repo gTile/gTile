@@ -57,6 +57,7 @@ const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
+const SETTINGS_BORDER_MOVE_CONTRACT_ENABLED = 'border-move-contract-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
@@ -83,6 +84,7 @@ interface ParsedSettings {
     [SETTINGS_SHOW_ICON]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
     [SETTINGS_MOVERESIZE_ENABLED]: any;
+    [SETTINGS_BORDER_MOVE_CONTRACT_ENABLED]: any;
     [SETTINGS_WINDOW_MARGIN]: number;
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: boolean;
     [SETTINGS_MAX_TIMEOUT]: any;
@@ -109,6 +111,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_SHOW_ICON]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
     [SETTINGS_MOVERESIZE_ENABLED]: null,
+    [SETTINGS_BORDER_MOVE_CONTRACT_ENABLED]: null,
     [SETTINGS_WINDOW_MARGIN]: 0,
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: false,
     [SETTINGS_MAX_TIMEOUT]: null,
@@ -757,6 +760,7 @@ function initSettings() {
     getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
     getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
+    getBoolSetting(SETTINGS_BORDER_MOVE_CONTRACT_ENABLED);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
     gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] = getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
@@ -1222,8 +1226,8 @@ function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key
                 // first or currentElement can be moved down.
                 if (fY < nbRows - 1 || cY < nbRows - 1) {
                     // Move each down, but no further than row column
-                    delegate.first = grid.getElement(Math.min(fY + 1, nbCols - 1), fX);
-                    grid.getElement(Math.min(cY + 1, nbCols - 1), cX)?._onHoverChanged();
+                    delegate.first = grid.getElement(Math.min(fY + 1, nbRows - 1), fX);
+                    grid.getElement(Math.min(cY + 1, nbRows - 1), cX)?._onHoverChanged();
                 }
                 break;
         }
