@@ -109,11 +109,11 @@ What these buttons do:
    1. Hit `Enter` and the window will resize
    2. Hit `Escape` to cancel resize
 
-When you try to select the top left corder position, you may be blocked by the window not fitting on the grid.
+When you try to select the top left corner position, you may be blocked by the window not fitting on the grid.
 
 <img src="https://user-images.githubusercontent.com/1788593/140314817-63365883-c922-46c2-80a4-196f69a5d472.gif" width="200">
 
-If you enable `Contract selection when moved into the bottom/right border` in options, the selection will shrink automaticaly.
+If you enable `Contract selection when moved into the bottom/right border` in options, the selection will shrink automatically.
 
 <img src="https://user-images.githubusercontent.com/1788593/140314812-36518a3f-0f91-4927-b492-255bf06eee35.gif" width="200">
 
