@@ -102,11 +102,20 @@ What these buttons do:
 
 ### Using the keyboard
 
-4. Use the arrow keys to select the coordinate of the first corner and Shift-arrow to select the second coordinate
-5. a) Hit `Space` to change the grid scheme [optional]
-5. b) Hit `Enter` and the window will resize
-5. c) Hit `Escape` to cancel resize
+1. Hit `Space` to change the grid scheme [optional]
+2. Use the arrow keys to select the coordinate of the first corner and Shift-arrow to select the second coordinate.
+   * You can also use `HJKL` to move and `Shift-HJKL` to resize 
+3. Then either
+   1. Hit `Enter` and the window will resize
+   2. Hit `Escape` to cancel resize
 
+When you try to select the top left corder position, you may be blocked by the window not fitting on the grid.
+
+<img src="https://user-images.githubusercontent.com/1788593/140314817-63365883-c922-46c2-80a4-196f69a5d472.gif" width="200">
+
+If you enable `Contract selection when moved into the bottom/right border` in options, the selection will shrink automaticaly.
+
+<img src="https://user-images.githubusercontent.com/1788593/140314812-36518a3f-0f91-4927-b492-255bf06eee35.gif" width="200">
 
 ## Usage with no interface
 
