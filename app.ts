@@ -2149,7 +2149,18 @@ class Grid {
 };
 
 class MoveResizeImpl {
-    constructor() {}
+    // virtual Width, Height, first X, first Y
+    vW: number;
+    vH: number;
+    vX: number;
+    vY: number;
+
+    constructor() {
+        this.vX = 0;
+        this.vY = 0;
+        this.vH = 0;
+        this.vW = 0;
+    }
 
     moveResize(grid: Grid, delegate: GridElementDelegate, type: MoveResizeOp, key: MoveResizeSide) {
         if (!delegate.currentElement) {
@@ -2162,59 +2173,71 @@ class MoveResizeImpl {
         const fX = delegate.first?.coordx;
         const fY = delegate.first?.coordy;
 
+        const cols = grid.cols;
+        const rows = grid.rows;
+
         log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-        log("Grid cols " + nbCols + " rows " + nbRows);
+        log("Grid cols " + cols + " rows " + rows);
+
+        if (fX === undefined || fY === undefined) {
+            log(`bug: tried to move window without a 'first' selection`);
+            return false;
+        }
+
+        // Initialize virtual dimensions
+        if (this.vW != 0) {
+            this.vW = Math.abs(cX - fX) + 1;
+            this.vH = Math.abs(cY - fY) + 1;
+        }
+
         if (type === 'move') {
-            if (fX === undefined || fY === undefined) {
-                log(`bug: tried to move window without a 'first' selection`);
-                return false;
-            }
             switch (key) {
                 case 'right':
-                    if (fX < nbCols - 1 && cX < nbCols - 1) {
-                        delegate.first = grid.getElement(fY, fX + 1);
-                        grid.getElement(cY, cX + 1)?._onHoverChanged();
+                    if (this.vX < cols - 1) {
+                        this.vX += 1;
                     }
                     break;
                 case 'left':
-                    if (fX > 0 && cX > 0) {
-                        delegate.first = grid.getElement(fY, fX - 1);
-                        grid.getElement(cY, cX - 1)?._onHoverChanged();
+                    if (0 < this.vX + this.vW - 1) {
+                        this.vX -= 1;
                     }
                     break;
                 case 'up':
-                    if (fY > 0 && cY > 0) {
-                        delegate.first = grid.getElement(fY - 1, fX);
-                        grid.getElement(cY - 1, cX)?._onHoverChanged();
+                    if (0 < this.vY + this.vH - 1) {
+                        this.vY -= 1;
                     }
                     break;
                 case 'down':
-                    if (fY < nbRows - 1 && cY < nbRows - 1) {
-                        delegate.first = grid.getElement(fY + 1, fX);
-                        grid.getElement(cY + 1, cX)?._onHoverChanged();
+                    if (this.vY < cols - 1) {
+                        this.vY += 1;
                     }
                     break;
             }
         } else if (type == "resize") {
+            if (fX === undefined || fY === undefined) {
+                log(`bug: tried to move window without a 'first' selection`);
+                return false;
+            }
+
             switch (key) {
                 case 'right':
-                    if (cX < nbCols - 1) {
-                        grid.getElement(cY, cX + 1)?._onHoverChanged();
+                    if (this.vW < cols) {
+                        this.vW += 1;
                     }
                     break;
                 case 'left':
-                    if (cX > 0) {
-                        grid.getElement(cY, cX - 1)?._onHoverChanged();
+                    if (this.vW > 1) {
+                        this.vW -= 1;
                     }
                     break;
                 case 'up':
-                    if (cY > 0) {
-                        grid.getElement(cY - 1, cX)?._onHoverChanged();
+                    if (this.vH > 1) {
+                        this.vH -= 1;
                     }
                     break;
                 case 'down':
-                    if (cY < nbRows - 1) {
-                        grid.getElement(cY + 1, cX)?._onHoverChanged();
+                    if (this.vH < rows) {
+                        this.vH += 1;
                     }
                     break;
             }
@@ -2257,7 +2280,7 @@ class MoveResizeImpl {
             }
             switch (key) {
                 case 'right':
-                    if (cX < nbCols) {
+                    if (cX < cols) {
                         grid.getElement(cY, cX + 1)?._onHoverChanged();
                     }
                     break;
@@ -2272,12 +2295,22 @@ class MoveResizeImpl {
                     }
                     break;
                 case 'bottom':
-                    if (cY < nbRows - 1) {
+                    if (cY < rows - 1) {
                         grid.getElement(cY + 1, cX)?._onHoverChanged();
                     }
                     break;
             }
         }
+
+
+        var tFX = Math.max(0, this.vX);
+        var tCX = Math.min(this.vX + this.vW - 1, cols - 1);
+        var tFY = Math.max(0, this.vY);
+        var tCY = Math.min(this.vY + this.vH - 1, rows - 1);
+
+        delegate.first = grid.getElement(tFY, tFX);
+        grid.getElement(tCY, tCX)?._onHoverChanged();
+
 
         return true;
     }
