@@ -10,6 +10,9 @@ import * as tilespec from "./tilespec";
 import { StBoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StLabel, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
 import { BoolSettingName, NumberSettingName, StringSettingName } from './settings_data';
 
+type MoveResizeOp = 'contract' | 'move' | 'expand' | 'resize';
+type MoveResizeSide = 'bottom' | 'top' | 'left' | 'right' | 'up' | 'down';
+
 /*****************************************************************
 
   This extension has been developed by vibou
@@ -1137,12 +1140,6 @@ function setInitialSelection() {
     let mind = focusMetaWindow.get_monitor();
     const monitors = activeMonitors();
     let monitor = monitors[mind];
-    let workArea = getWorkArea(monitor, mind);
-
-    let wx = focusMetaWindow.get_frame_rect().x;
-    let wy = focusMetaWindow.get_frame_rect().y;
-    let wwidth = focusMetaWindow.get_frame_rect().width;
-    let wheight = focusMetaWindow.get_frame_rect().height;
     const grid = globalApp.getGrid(monitor);
     if (!grid) {
         log("no grid widget available in setInitialSelection");
@@ -1151,7 +1148,7 @@ function setInitialSelection() {
     grid.setInitialSelection(focusMetaWindow);
 }
 
-function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key: 'bottom' | 'top' | 'left' | 'right' | 'up' | 'down', is_global = false) {
+function keyMoveResizeEvent(type: MoveResizeOp, key: MoveResizeSide, is_global = false) {
     if (is_global) {
         focusMetaWindow = getFocusApp();
     }
@@ -1167,144 +1164,9 @@ function keyMoveResizeEvent(type: 'contract' | 'move' | 'expand' | 'resize', key
     if (!grid) {
         return;
     }
-    const delegate = grid.elementsDelegate;
 
-    if (!delegate?.currentElement) {
-        log("Key event while no mouse activation - set current and second element");
-        setInitialSelection();
-    } else {
-        if (!delegate.first) {
-            log("currentElement is there but no first yet");
-            delegate.currentElement._onButtonPress();
-        }
-    }
-    if (!delegate) {
-        return;
-    }
-    if (!delegate.currentElement) {
-        log("bug: keyMoveResizeEvent currentElement is not set!");
-        return;
-    }
-    const cX = delegate.currentElement.coordx;
-    const cY = delegate.currentElement.coordy;
-    const fX = delegate.first?.coordx;
-    const fY = delegate.first?.coordy;
-
-    log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-    log("Grid cols " + nbCols + " rows " + nbRows);
-    if (type === 'move') {
-        if (fX === undefined || fY === undefined) {
-            log(`bug: tried to move window without a 'first' selection`);
-            return;
-        }
-        switch (key) {
-            case 'right':
-                if (fX < nbCols - 1 && cX < nbCols - 1) {
-                    delegate.first = grid.getElement(fY, fX + 1);
-                    grid.getElement(cY, cX + 1)?._onHoverChanged();
-                }
-                break;
-            case 'left':
-                if (fX > 0 && cX > 0) {
-                    delegate.first = grid.getElement(fY, fX - 1);
-                    grid.getElement(cY, cX - 1)?._onHoverChanged();
-                }
-                break;
-            case 'up':
-                if (fY > 0 && cY > 0) {
-                    delegate.first = grid.getElement(fY - 1, fX);
-                    grid.getElement(cY - 1, cX)?._onHoverChanged();
-                }
-                break;
-            case 'down':
-                if (fY < nbRows - 1 && cY < nbRows - 1) {
-                    delegate.first = grid.getElement(fY + 1, fX);
-                    grid.getElement(cY + 1, cX)?._onHoverChanged();
-                }
-                break;
-        }
-    } else if (type == "resize") {
-        switch (key) {
-            case 'right':
-                if (cX < nbCols - 1) {
-                    grid.getElement(cY, cX + 1)?._onHoverChanged();
-                }
-                break;
-            case 'left':
-                if (cX > 0) {
-                    grid.getElement(cY, cX - 1)?._onHoverChanged();
-                }
-                break;
-            case 'up':
-                if (cY > 0) {
-                    grid.getElement(cY - 1, cX)?._onHoverChanged();
-                }
-                break;
-            case 'down':
-                if (cY < nbRows - 1) {
-                    grid.getElement(cY + 1, cX)?._onHoverChanged();
-                }
-                break;
-        }
-    } else if (type == "contract") {
-        if (fX === undefined || fY === undefined) {
-            log(`bug: tried to contract window without a 'first' selection`);
-            return;
-        }
-        switch (key) {
-            case 'left':
-                // Contract left edge of current window right one column
-                if (cX > fX) {
-                    delegate.first = grid.getElement(fY, fX + 1);
-                }
-                break;
-            case 'right':
-                // Contract right edge of current window left one column
-                if (cX > fX) {
-                    grid.getElement(cY, cX - 1)?._onHoverChanged();
-                }
-                break;
-            case 'top':
-                // Contract top edge of current window down one row
-                if (cY > fY) {
-                    delegate.first = grid.getElement(fY + 1, fX);
-                }
-                break;
-            case 'bottom':
-                // Contract bottom edge of current window up one row
-                if (cY > fY) {
-                    grid.getElement(cY - 1, cX)?._onHoverChanged();
-                }
-                break;
-        }
-
-    } else if (type == "expand") {
-        if (fX === undefined || fY === undefined) {
-            log(`bug: tried to expand window without a 'first' selection`);
-            return;
-        }
-        switch (key) {
-            case 'right':
-                if (cX < nbCols) {
-                    grid.getElement(cY, cX + 1)?._onHoverChanged();
-                }
-                break;
-            case 'left':
-                if (fX > 0) {
-                    delegate.first = grid.getElement(fY, fX - 1);
-                }
-                break;
-            case 'top':
-                if (fY > 0) {
-                    delegate.first = grid.getElement(fY - 1, fX);
-                }
-                break;
-            case 'bottom':
-                if (cY < nbRows - 1) {
-                    grid.getElement(cY + 1, cX)?._onHoverChanged();
-                }
-                break;
-        }
+    if(!grid.moveResize(focusMetaWindow, type, key)){
+        return
     }
 
     if (is_global) {
@@ -1878,6 +1740,8 @@ class Grid {
     isEntered: boolean;
     elementsDelegate: GridElementDelegate;
     private elements: GridElement[][] = [];
+    private moveResizeImpl: MoveResizeImpl | null = null;
+
 
 
     constructor(private readonly gridWidget: StBoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
@@ -2083,6 +1947,7 @@ class Grid {
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
+        this._clearMoveResizeState();
     }
 
     set_position(x: number, y: number): void {
@@ -2146,6 +2011,7 @@ class Grid {
             this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
+        this._clearMoveResizeState();
     }
 
     setInitialSelection(focusMetaWindow: Window) {
@@ -2201,6 +2067,45 @@ class Grid {
         log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     }
 
+    moveResize(window: Window, type: MoveResizeOp, key: MoveResizeSide) {
+        const delegate = this.elementsDelegate;
+
+        if (!delegate) {
+            return false;
+        }
+
+        if (!delegate.currentElement) {
+            log("Key event while no mouse activation - set current and second element");
+            this.setInitialSelection(window);
+        }
+
+        if (!delegate.currentElement) {
+            log("bug: currentElement must be set in moveResize");
+            return;
+        }
+        
+        if (!delegate.first) {
+            log("currentElement is there but no first yet");
+            delegate.currentElement._onButtonPress();
+        }
+        
+        if (!delegate.first) {
+            log("bug: first must be set in moveResize");
+            return;
+        }
+
+        if (this.moveResizeImpl == null) {
+            this.moveResizeImpl = new MoveResizeImpl(delegate.currentElement, delegate.first);
+        }
+
+        return this.moveResizeImpl.moveResize(this, delegate, type, key);
+    }
+
+    _clearMoveResizeState() {
+        log("Clear moveResize state");
+        this.moveResizeImpl = null;
+    }
+
     _onHideComplete() {
     }
 
@@ -2214,6 +2119,7 @@ class Grid {
             log("Emitting hide-tiling");
             this.emit('hide-tiling');
         }
+        this._clearMoveResizeState();
     }
 
     _onMouseEnter() {
@@ -2263,6 +2169,146 @@ class Grid {
     disconnect(id: number): void { }
     emit(name: string, ...args: any): void { }
 };
+
+class MoveResizeImpl {
+    // virtual Width, Height, first X, first Y
+    vW: number;
+    vH: number;
+    vX: number;
+    vY: number;
+
+    constructor(current: GridElement, first: GridElement) {
+        const cX = current.coordx;
+        const cY = current.coordy;
+        const fX = first.coordx;
+        const fY = first.coordy;
+
+        this.vW = Math.abs(cX - fX) + 1;
+        this.vH = Math.abs(cY - fY) + 1;
+        this.vX = Math.min(cX, fX);
+        this.vY = Math.min(cY, fY);
+    }
+
+    moveResize(grid: Grid, delegate: GridElementDelegate, type: MoveResizeOp, key: MoveResizeSide) {
+        const cols = grid.cols;
+        const rows = grid.rows;
+
+        log(`Before move/resize vX = ${this.vX}, vY = ${this.vY}, vW = ${this.vW}, vH = ${this.vH}`)
+
+        if (type === 'move') {
+            switch (key) {
+                case 'right':
+                    if (this.vX < cols - 1) {
+                        this.vX += 1;
+                    }
+                    break;
+                case 'left':
+                    if (0 < this.vX + this.vW - 1) {
+                        this.vX -= 1;
+                    }
+                    break;
+                case 'up':
+                    if (0 < this.vY + this.vH - 1) {
+                        this.vY -= 1;
+                    }
+                    break;
+                case 'down':
+                    if (this.vY < rows - 1) {
+                        this.vY += 1;
+                    }
+                    break;
+            }
+        } else if (type == "resize") {
+            switch (key) {
+                case 'right':
+                    if (this.vW < cols) {
+                        this.vW += 1;
+                    }
+                    break;
+                case 'left':
+                    if (this.vW > 1) {
+                        this.vW -= 1;
+                    }
+                    break;
+                case 'up':
+                    if (this.vH > 1) {
+                        this.vH -= 1;
+                    }
+                    break;
+                case 'down':
+                    if (this.vH < rows) {
+                        this.vH += 1;
+                    }
+                    break;
+            }
+        } else if (type == "contract") {
+            switch (key) {
+                case 'left':
+                    // Contract left edge of current window right one column
+                    if (this.vX < cols - 1 && this.vW > 1) {
+                        this.vX += 1;
+                        this.vW -= 1;
+                    }
+                    break;
+                case 'right':
+                    // Contract right edge of current window left one column
+                    if (0 < this.vX + this.vW - 1 && this.vW > 1) {
+                        this.vW -= 1;
+                    }
+                    break;
+                case 'top':
+                    // Contract top edge of current window down one row
+                    if (this.vY < rows - 1 && this.vH > 1) {
+                        this.vY += 1;
+                        this.vH -= 1;
+                    }
+                    break;
+                case 'bottom':
+                    // Contract bottom edge of current window up one row
+                    if (0 < this.vY + this.vH - 1 && this.vH > 1) {
+                        this.vH -= 1;
+                    }
+                    break;
+            }
+
+        } else if (type == "expand") {
+            switch (key) {
+                case 'right':
+                    if (this.vW < cols) {
+                        this.vW += 1;
+                    }
+                    break;
+                case 'left':
+                    if (this.vW < cols) {
+                        this.vW += 1;
+                        this.vX -= 1;
+                    }
+                    break;
+                case 'top':
+                    if (this.vH < rows) {
+                        this.vH += 1;
+                        this.vY -= 1;
+                    }
+                    break;
+                case 'bottom':
+                    if (this.vH < rows) {
+                        this.vH += 1;
+                    }
+                    break;
+            }
+        }
+
+        var tFX = Math.max(0, this.vX);
+        var tCX = Math.min(this.vX + this.vW - 1, cols - 1);
+        var tFY = Math.max(0, this.vY);
+        var tCY = Math.min(this.vY + this.vH - 1, rows - 1);
+
+        delegate.first = grid.getElement(tFY, tFX);
+        grid.getElement(tCY, tCX)?._onHoverChanged();
+
+        return true;
+    }
+}
 
 Signals.addSignalMethods(Grid.prototype);
 class GridElementDelegate {
