@@ -1740,7 +1740,7 @@ class Grid {
     isEntered: boolean;
     elementsDelegate: GridElementDelegate;
     private elements: GridElement[][] = [];
-    private moveResizeImpl: MoveResizeImpl;
+    private moveResizeImpl: MoveResizeImpl | null = null;
 
 
 
@@ -1893,8 +1893,6 @@ class Grid {
 
         this.normalScaleY = this.actor.scale_y;
         this.normalScaleX = this.actor.scale_x;
-
-        this.moveResizeImpl = new MoveResizeImpl();
     }
 
     state(): string {
@@ -1949,6 +1947,7 @@ class Grid {
         this.cols = nbCols;
         this.rows = nbRows;
         this._displayElements();
+        this._clearMoveResizeState();
     }
 
     set_position(x: number, y: number): void {
@@ -2012,6 +2011,7 @@ class Grid {
             this.actor.scale_x = 0;
             this.actor.scale_y = 0;
         }
+        this._clearMoveResizeState();
     }
 
     setInitialSelection(focusMetaWindow: Window) {
@@ -2077,12 +2077,33 @@ class Grid {
         if (!delegate.currentElement) {
             log("Key event while no mouse activation - set current and second element");
             this.setInitialSelection(window);
-        } else if (!delegate.first) {
+        }
+
+        if (!delegate.currentElement) {
+            log("bug: currentElement must be set in moveResize");
+            return;
+        }
+        
+        if (!delegate.first) {
             log("currentElement is there but no first yet");
             delegate.currentElement._onButtonPress();
         }
+        
+        if (!delegate.first) {
+            log("bug: first must be set in moveResize");
+            return;
+        }
+
+        if (this.moveResizeImpl == null) {
+            this.moveResizeImpl = new MoveResizeImpl(delegate.currentElement, delegate.first);
+        }
 
         return this.moveResizeImpl.moveResize(this, delegate, type, key);
+    }
+
+    _clearMoveResizeState() {
+        log("Clear moveResize state");
+        this.moveResizeImpl = null;
     }
 
     _onHideComplete() {
@@ -2098,6 +2119,7 @@ class Grid {
             log("Emitting hide-tiling");
             this.emit('hide-tiling');
         }
+        this._clearMoveResizeState();
     }
 
     _onMouseEnter() {
@@ -2155,40 +2177,23 @@ class MoveResizeImpl {
     vX: number;
     vY: number;
 
-    constructor() {
-        this.vX = 0;
-        this.vY = 0;
-        this.vH = 0;
-        this.vW = 0;
+    constructor(current: GridElement, first: GridElement) {
+        const cX = current.coordx;
+        const cY = current.coordy;
+        const fX = first.coordx;
+        const fY = first.coordy;
+
+        this.vW = Math.abs(cX - fX) + 1;
+        this.vH = Math.abs(cY - fY) + 1;
+        this.vX = Math.min(cX, fX);
+        this.vY = Math.min(cY, fY);
     }
 
     moveResize(grid: Grid, delegate: GridElementDelegate, type: MoveResizeOp, key: MoveResizeSide) {
-        if (!delegate.currentElement) {
-            log("bug: keyMoveResizeEvent currentElement is not set!");
-            return false;
-        }
-
-        const cX = delegate.currentElement.coordx;
-        const cY = delegate.currentElement.coordy;
-        const fX = delegate.first?.coordx;
-        const fY = delegate.first?.coordy;
-
         const cols = grid.cols;
         const rows = grid.rows;
 
-        log("Before move/resize first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
-        log("Grid cols " + cols + " rows " + rows);
-
-        if (fX === undefined || fY === undefined) {
-            log(`bug: tried to move window without a 'first' selection`);
-            return false;
-        }
-
-        // Initialize virtual dimensions
-        if (this.vW != 0) {
-            this.vW = Math.abs(cX - fX) + 1;
-            this.vH = Math.abs(cY - fY) + 1;
-        }
+        log(`Before move/resize vX = ${this.vX}, vY = ${this.vY}, vW = ${this.vW}, vH = ${this.vH}`)
 
         if (type === 'move') {
             switch (key) {
@@ -2208,17 +2213,12 @@ class MoveResizeImpl {
                     }
                     break;
                 case 'down':
-                    if (this.vY < cols - 1) {
+                    if (this.vY < rows - 1) {
                         this.vY += 1;
                     }
                     break;
             }
         } else if (type == "resize") {
-            if (fX === undefined || fY === undefined) {
-                log(`bug: tried to move window without a 'first' selection`);
-                return false;
-            }
-
             switch (key) {
                 case 'right':
                     if (this.vW < cols) {
@@ -2242,66 +2242,61 @@ class MoveResizeImpl {
                     break;
             }
         } else if (type == "contract") {
-            if (fX === undefined || fY === undefined) {
-                log(`bug: tried to contract window without a 'first' selection`);
-                return false;
-            }
             switch (key) {
                 case 'left':
                     // Contract left edge of current window right one column
-                    if (cX > fX) {
-                        delegate.first = grid.getElement(fY, fX + 1);
+                    if (this.vX < cols - 1 && this.vW > 1) {
+                        this.vX += 1;
+                        this.vW -= 1;
                     }
                     break;
                 case 'right':
                     // Contract right edge of current window left one column
-                    if (cX > fX) {
-                        grid.getElement(cY, cX - 1)?._onHoverChanged();
+                    if (0 < this.vX + this.vW - 1 && this.vW > 1) {
+                        this.vW -= 1;
                     }
                     break;
                 case 'top':
                     // Contract top edge of current window down one row
-                    if (cY > fY) {
-                        delegate.first = grid.getElement(fY + 1, fX);
+                    if (this.vY < rows - 1 && this.vH > 1) {
+                        this.vY += 1;
+                        this.vH -= 1;
                     }
                     break;
                 case 'bottom':
                     // Contract bottom edge of current window up one row
-                    if (cY > fY) {
-                        grid.getElement(cY - 1, cX)?._onHoverChanged();
+                    if (0 < this.vY + this.vH - 1 && this.vH > 1) {
+                        this.vH -= 1;
                     }
                     break;
             }
 
         } else if (type == "expand") {
-            if (fX === undefined || fY === undefined) {
-                log(`bug: tried to expand window without a 'first' selection`);
-                return false;
-            }
             switch (key) {
                 case 'right':
-                    if (cX < cols) {
-                        grid.getElement(cY, cX + 1)?._onHoverChanged();
+                    if (this.vW < cols) {
+                        this.vW += 1;
                     }
                     break;
                 case 'left':
-                    if (fX > 0) {
-                        delegate.first = grid.getElement(fY, fX - 1);
+                    if (this.vW < cols) {
+                        this.vW += 1;
+                        this.vX -= 1;
                     }
                     break;
                 case 'top':
-                    if (fY > 0) {
-                        delegate.first = grid.getElement(fY - 1, fX);
+                    if (this.vH < rows) {
+                        this.vH += 1;
+                        this.vY -= 1;
                     }
                     break;
                 case 'bottom':
-                    if (cY < rows - 1) {
-                        grid.getElement(cY + 1, cX)?._onHoverChanged();
+                    if (this.vH < rows) {
+                        this.vH += 1;
                     }
                     break;
             }
         }
-
 
         var tFX = Math.max(0, this.vX);
         var tCX = Math.min(this.vX + this.vW - 1, cols - 1);
@@ -2310,7 +2305,6 @@ class MoveResizeImpl {
 
         delegate.first = grid.getElement(tFY, tFX);
         grid.getElement(tCY, tCX)?._onHoverChanged();
-
 
         return true;
     }
