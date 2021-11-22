@@ -32,7 +32,6 @@ type MoveResizeSide = 'bottom' | 'top' | 'left' | 'right' | 'up' | 'down';
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
-const Lang = imports.lang;
 const GObject = imports.gi.GObject;
 const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
@@ -1331,7 +1330,7 @@ class TopBar {
         });
 
         this._closebutton.add_style_class_name(`${theme}__close-container`);
-        this._connect_id = this._closebutton.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+        this._connect_id = this._closebutton.connect('button-press-event', this._onButtonPress);
 
         this.actor.add_child(this._closebutton);
         this.actor.add_child(this._stlabel);
