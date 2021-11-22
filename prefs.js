@@ -13,6 +13,7 @@ const Settings = Me.imports.settings;
 // Redefining globals from extension.js - do not know how to do it better :-(
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
+const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
@@ -249,7 +250,8 @@ function basics_tab(notebook, settings) {
     bs_grid.set_margin_start(24);
     bs_grid.set_margin_top(24);
 
-    add_check("Auto close", SETTINGS_AUTO_CLOSE, bs_grid, settings);
+    add_check("Auto close on resize", SETTINGS_AUTO_CLOSE, bs_grid, settings);
+    add_check("Auto close on keyboard shortcut", SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT, bs_grid, settings);
     add_check("Animation",  SETTINGS_ANIMATION,  bs_grid, settings);
     add_check("Show icon",  SETTINGS_SHOW_ICON,  bs_grid, settings);
 

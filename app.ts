@@ -56,6 +56,7 @@ interface WorkArea {
 // Globals
 const SETTINGS_GRID_SIZES = 'grid-sizes';
 const SETTINGS_AUTO_CLOSE = 'auto-close';
+const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
@@ -82,6 +83,7 @@ const SETTINGS_THEME = 'theme';
 interface ParsedSettings {
     [SETTINGS_GRID_SIZES]: tilespec.GridSize[];
     [SETTINGS_AUTO_CLOSE]: any;
+    [SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT]: any;
     [SETTINGS_ANIMATION]: any;
     [SETTINGS_SHOW_ICON]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
@@ -108,6 +110,7 @@ interface ParsedSettings {
 const gridSettings: ParsedSettings = {
     [SETTINGS_GRID_SIZES]: [],
     [SETTINGS_AUTO_CLOSE]: null,
+    [SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT]: null,
     [SETTINGS_ANIMATION]: null,
     [SETTINGS_SHOW_ICON]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
@@ -756,6 +759,7 @@ function initSettings() {
     initGridSizes(gridSizes);
 
     getBoolSetting(SETTINGS_AUTO_CLOSE);
+    getBoolSetting(SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT);
     getBoolSetting(SETTINGS_ANIMATION);
     getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
@@ -1258,6 +1262,10 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
     lastResizeInfo.presetName = presetName.toString();
     lastResizeInfo.windowTitle = window.get_title();
     lastResizeInfo.lastCallTime = new Date();
+
+    if (gridSettings[SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT]) {
+        globalApp.hideTiling();
+    }
 }
 
 // Move the window to the next monitor.

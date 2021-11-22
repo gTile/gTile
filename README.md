@@ -107,6 +107,10 @@ What these buttons do:
 5. b) Hit `Enter` and the window will resize
 5. c) Hit `Escape` to cancel resize
 
+### Using the keyboard with configured presets
+
+4. Press the accelerator key binding configured for the desired preset
+5. Window will resize, GUI stays open allowing for additional window resizing. Alternatively, enable Basic setting "Auto close on keyboard shortcut" to automatically exit after a single command.
 
 ## Usage with no interface
 

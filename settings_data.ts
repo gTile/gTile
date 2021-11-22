@@ -7,6 +7,7 @@
 export type BoolSettingName = (
     "animation" |
     "auto-close" |
+    "auto-close-keyboard-shortcut" |
     "debug" |
     "global-presets" |
     "moveresize-enabled" |
@@ -162,6 +163,7 @@ export type AnySettingName = (
     "action-move-up" |
     "animation" |
     "auto-close" |
+    "auto-close-keyboard-shortcut" |
     "autotile-1" |
     "autotile-10" |
     "autotile-2" |
@@ -324,6 +326,9 @@ interface RawConfigObject {
 
     /** Close gTile after window have been resized. */
     ["auto-close"]: boolean;
+
+    /** Close gTile after window has been resized using a keyboard shortcut. */
+    ["auto-close-keyboard-shortcut"]: boolean;
 
     /** Autotile 1 column. */
     ["autotile-1"]: string[];
