@@ -4,7 +4,6 @@ const GObject = imports.gi.GObject;
 const Gdk = imports.gi.Gdk;
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;
-const Lang = imports.lang;
 
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();
@@ -493,10 +492,11 @@ function add_combobox(options, grid, callback) {
 
 // grabbed from sysmonitor code
 
-const IntSelect = new Lang.Class({
-        Name: 'gTile.IntSelect',
+const IntSelect = GObject.registerClass({
+        GTypeName: 'gTile.IntSelect',
+    }, class IntSelect extends GObject.Object {
 
-    _init: function(name) {
+    _init(name) {
         this.label = new Gtk.Label({
             label: name + ":",
             halign: Gtk.Align.START
@@ -509,20 +509,22 @@ const IntSelect = new Lang.Class({
         box_append(this.actor, this.label)
         box_append(this.actor, this.spin)
         this.spin.set_numeric(true);
-    },
-    set_args: function(minv, maxv, incre, page){
+    }
+
+    set_args(minv, maxv, incre, page){
         this.spin.set_range(minv, maxv);
         this.spin.set_increments(incre, page);
-    },
-    set_value: function(value){
+    }
+
+    set_value(value){
         this.spin.set_value(value);
     }
 });
 
-const TextEntry = new Lang.Class({
+const TextEntry = GObject.registerClass({
         Name: 'gTile.TextEntry',
-
-    _init: function(name) {
+    },  class TextEntry extends GObject.Object {
+    _init(name) {
         this.label = new Gtk.Label({label: name + ":"});
         this.textentry = new Gtk.Entry();
         this.actor = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
@@ -530,11 +532,13 @@ const TextEntry = new Lang.Class({
         box_append(this.actor, this.label);
         box_append(this.actor, this.textentry);
         this.textentry.set_text("");
-    },
-    set_args: function(width){
+    }
+
+    set_args(width){
         this.textentry.set_width_chars(width);
-    },
-    set_value: function(value){
+    }
+
+    set_value(value){
         this.textentry.set_text(value);
     }
 });
