@@ -33,6 +33,7 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
 const Lang = imports.lang;
+const GObject = imports.gi.GObject;
 const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
@@ -654,12 +655,11 @@ interface GTileStatusButtonInterface {
     destroy(): void;
 };
 
-const GTileStatusButton = new Lang.Class({
-    Name: 'GTileStatusButton',
-    Extends: PanelMenu.Button,
-
-    _init: function (classname: string) {
-        this.parent(0.0, "gTile", false);
+const GTileStatusButton = GObject.registerClass({
+    GTypeName: 'GTileStatusButton',
+}, class GTileStatusButton extends PanelMenu.Button {
+    _init(classname: string) {
+        super._init(0.0, "gTile", false);
         //Done by default in PanelMenuButton - Just need to override the method
         if (SHELL_VERSION.version_at_least_34()) {
             const icon = new St.Icon({ style_class: 'system-status-icon' });
@@ -672,39 +672,39 @@ const GTileStatusButton = new Lang.Class({
             this.actor.connect('button-press-event', this._onButtonPress.bind(this));
         }
         log("GTileStatusButton _init done");
-    },
+    }
 
-    reset: function () {
+    reset() {
         this.activated = false;
         if (SHELL_VERSION.version_at_least_34()) {
             this.remove_style_pseudo_class('activate');
         } else {
             this.actor.remove_style_pseudo_class('activate');
         }
-    },
+    }
 
-    activate: function () {
+    activate() {
         if (SHELL_VERSION.version_at_least_34()) {
             this.add_style_pseudo_class('activate');
         } else {
             this.actor.add_style_pseudo_class('activate');
         }
-    },
+    }
 
-    deactivate: function () {
+    deactivate() {
         if (SHELL_VERSION.version_at_least_34()) {
             this.remove_style_pseudo_class('activate');
         } else {
             this.actor.remove_style_pseudo_class('activate');
         }
-    },
+    }
 
-    _onButtonPress: function (actor, event) {
+    _onButtonPress(actor, event) {
         log(`_onButtonPress Click Toggle Status on system panel ${this}`);
         globalApp.toggleTiling();
-    },
+    }
 
-    _destroy: function () {
+    _destroy() {
         this.activated = null;
     }
 
