@@ -12,6 +12,7 @@ export type BoolSettingName = (
     "global-presets" |
     "moveresize-enabled" |
     "show-icon" |
+    "target-presets-to-monitor-of-mouse" |
     "window-margin-fullscreen-enabled");
 
 // A setting name for a number-valued setting.
@@ -273,6 +274,7 @@ export type AnySettingName = (
     "show-toggle-tiling" |
     "show-toggle-tiling-alt" |
     "snap-to-neighbors" |
+    "target-presets-to-monitor-of-mouse" |
     "theme" |
     "themes" |
     "window-margin" |
@@ -656,6 +658,9 @@ interface RawConfigObject {
 
     /** Snap window size to neighbors */
     ["snap-to-neighbors"]: string[];
+
+    /** Keyboard shortcuts will target the monitor where the mouse curser is. */
+    ["target-presets-to-monitor-of-mouse"]: boolean;
 
     /** Active theme. */
     ["theme"]: string;

@@ -463,6 +463,10 @@
 			<default>true</default>
 			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
 		</key>
+		<key type = "b" name="target-presets-to-monitor-of-mouse">
+			<default>false</default>
+			<summary>Keyboard shortcuts will target the monitor where the mouse curser is.</summary>
+		</key>
 		<key type = "b" name="moveresize-enabled">
 			<default>true</default>
 			<summary>Enables shortcuts for moving and resizing the current window.</summary>

@@ -60,6 +60,7 @@ const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE = "target-presets-to-monitor-of-mouse";
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
@@ -87,6 +88,7 @@ interface ParsedSettings {
     [SETTINGS_ANIMATION]: any;
     [SETTINGS_SHOW_ICON]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
+    [SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE]: any;
     [SETTINGS_MOVERESIZE_ENABLED]: any;
     [SETTINGS_WINDOW_MARGIN]: number;
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: boolean;
@@ -114,6 +116,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_ANIMATION]: null,
     [SETTINGS_SHOW_ICON]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
+    [SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE]: null,
     [SETTINGS_MOVERESIZE_ENABLED]: null,
     [SETTINGS_WINDOW_MARGIN]: 0,
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: false,
@@ -762,6 +765,7 @@ function initSettings() {
     getBoolSetting(SETTINGS_ANIMATION);
     getBoolSetting(SETTINGS_SHOW_ICON);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
+    getBoolSetting(SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE);
     getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
@@ -1242,8 +1246,26 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
     // retrieve current preset variant
     const tileSpec = tileSpecs[lastResizeInfo.variantIndex];
 
+    // target monitor of current window
+    let monitorIdx = window.get_monitor();
+    // optionally target monitor where curser is currently
+    if (gridSettings[SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE]) {
+        const [mouseX, mouseY, mask] = global.get_pointer();
+        log(`current mouse position ${mouseX}, ${mouseY}`);
+        const monitors = activeMonitors();
+        log(`monitors: ${JSON.stringify(monitors)}`);
+        for (let idx = 0; idx < monitors.length; idx++) {
+            let monitor = monitors[idx];
+            if (mouseX >= monitor.x && mouseX <= monitor.x + (monitor.x + monitor.width)
+                && mouseY >= monitor.y && mouseY <= (monitor.y + monitor.height)) {
+                monitorIdx = idx;
+            }
+        }
+    }
+
+
     // do the maths to resize the window
-    const workArea = workAreaRectByMonitorIndex(window.get_monitor());
+    const workArea = workAreaRectByMonitorIndex(monitorIdx);
     if (!workArea) {
         log(`Failed to get active work area for window while performing preset ${presetName} ${JSON.stringify(presetString)}`);
         return;
