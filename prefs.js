@@ -16,6 +16,7 @@ const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
+const SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE = "target-presets-to-monitor-of-mouse";
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
@@ -256,6 +257,7 @@ function basics_tab(notebook, settings) {
 
     add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES, bs_grid, settings, 30);
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
+    add_check("Keyboard presets target monitor of mouse", SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE, bs_grid, settings);
 
     add_check("Enable accelerators for moving and resizing windows", SETTINGS_MOVERESIZE_ENABLED  , bs_grid, settings);
 
