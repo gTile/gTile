@@ -1,5 +1,16 @@
 CHANGE LOG
 ----------
+### V48
+
+New and changed functionality:
+
+- More intuitive behavior on manual window move/resize around screen edges
+- Autoclose GUI after keyboard shortcut (disabled by default)
+- Keyboard shortcut target monitor with mouse (disabled by default)
+
+Changes enforced by gnome-shell:
+
+- Remove deprecated Lang
 
 ### V47
 
