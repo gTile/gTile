@@ -1575,66 +1575,42 @@ function AutoTileMain() {
 
     if (workArea.width > workArea.height) {
 
-        let mainRatio = ps_variants[lastResizeInfo.variantIndex];
-        let mainWidth = workArea.width * mainRatio;
+        let mainRatio  = ps_variants[lastResizeInfo.variantIndex];
+        let mainWidth  = workArea.width * mainRatio;
         let minorWidth = workArea.width - mainWidth;
-        moveResizeWindowWithMargins(
-            focusMetaWindow,
-            workArea.x,
-            workArea.y,
-            mainWidth,
-            workArea.height);
-
-
-        let winHeight = workArea.height / notFocusedwindows.length;
-        let countWin = 0;
-
+        moveResizeWindowWithMargins(focusMetaWindow,workArea.x, workArea.y, mainWidth, workArea.height);
+        let winHeight  = workArea.height / notFocusedwindows.length;
+        let countWin   = 0;
         log("AutoTileMain MonitorHeight: " + monitor.height + ":" + notFocusedwindows.length);
-
         for (let windowIdx in notFocusedwindows) {
             let metaWindow = notFocusedwindows[windowIdx].meta_window;
-
             let newOffset = workArea.y + (countWin * winHeight);
             reset_window(metaWindow);
-
-            moveResizeWindowWithMargins(
-                metaWindow,
-                workArea.x + mainWidth,
-                newOffset,
-                minorWidth,
-                winHeight
-            );
+            moveResizeWindowWithMargins(metaWindow, workArea.x + mainWidth, newOffset, minorWidth, winHeight);
             countWin++;
         }
-        log("AutoTileMain done");
-
-        lastResizeInfo.presetName = preset;
-        lastResizeInfo.windowTitle = window.get_title();
-        lastResizeInfo.lastCallTime = new Date();
-
-        log("Resize preset last call: " + lastResizeInfo.lastCallTime)
     } else {
         // Arrange vertical screen
-        let mainRatio = ps_variants[lastResizeInfo.variantIndex];
-        let mainWidth = workArea.height * mainRatio;
-        let minorWidth = workArea.height - mainWidth;
-        moveResizeWindowWithMargins(focusMetaWindow, workArea.x, workArea.y, workArea.width, mainWidth);
-        let winHeight = workArea.width / notFocusedwindows.length;
-        let countWin = 0;
-        log("AutoTileMain MonitorHeight: " + monitor.height + ":" + notFocusedwindows.length);
+        let mainRatio   = ps_variants[lastResizeInfo.variantIndex];
+        let mainHeight  = workArea.height * mainRatio;
+        let minorHeight = workArea.height - mainHeight;
+        moveResizeWindowWithMargins(focusMetaWindow, workArea.x, workArea.y + minorHeight, workArea.width, mainHeight);
+        let winWidth    = workArea.width / notFocusedwindows.length;
+        let countWin    = 0;
+        log("AutoTileMain MonitorWidth: " + monitor.width + ":" + notFocusedwindows.length);
         for (let windowIdx in notFocusedwindows) {
             let metaWindow = notFocusedwindows[windowIdx].meta_window;
-            let newOffset = workArea.x + (countWin * winHeight);
+            let newOffset = workArea.x + (countWin * winWidth);
             reset_window(metaWindow);
-            moveResizeWindowWithMargins(metaWindow, newOffset, workArea.y + mainWidth, winHeight, minorWidth);
+            moveResizeWindowWithMargins(metaWindow, newOffset, workArea.y, winWidth, minorHeight);
             countWin++;
         }
-        log("AutoTileMain done");
-        lastResizeInfo.presetName = preset;
-        lastResizeInfo.windowTitle = window.get_title();
-        lastResizeInfo.lastCallTime = new Date();
-        log("Resize preset last call: " + lastResizeInfo.lastCallTime);
     }
+    log("AutoTileMain done");
+    lastResizeInfo.presetName   = preset;
+    lastResizeInfo.windowTitle  = window.get_title();
+    lastResizeInfo.lastCallTime = new Date();
+    log("Resize preset last call: " + lastResizeInfo.lastCallTime);
 }
 
 class AutoTileTwoList extends ActionButton {
