@@ -13,6 +13,9 @@ This extension is particularly useful for window management on (multiple) large 
 
 Preferred installation is from [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
 
+### Error after upgrade
+
+Log out and log back in.
 
 ### Installation from source
 You can alternatively manually install the latest version from GitHub master branch:
@@ -41,10 +44,6 @@ You can alternatively manually install the latest version from GitHub master bra
 3. Log out and log back in. (If you don't want to log out, you can restart gnome
    shell, which keeps all your windows open. Type `Alt`+`F2`, then type `r` and
    hit enter.)
-
-### Error after upgrade
-
-Log out and log back in.
 
 ### Debugging
 
