@@ -165,6 +165,11 @@
     border: 2px solid rgba(238,237,236,0.1);
 }
 
+.gtile-default__grid_lines_preview {
+    background-color: rgba(0,0,0,0);
+    border: 1px solid rgba(217,108,59,0.8);
+}
+
 /**
  * Grid preview
  */
@@ -363,6 +368,11 @@
     background-color: rgba(0, 120, 255, 0.7);
     color: rgba(255, 255, 255, 1);
     border: 1px rgba(0, 200, 255, 0.7);
+}
+
+.gtile-classic__grid_lines_preview {
+    background-color: rgba(0,0,0,0);
+    border: 1px solid rgba(217,108,59,0.8);
 }
 
 
@@ -576,7 +586,12 @@
 }
 
 .gtile-minimal-dark__preview:activate {
-    background-color: rgba(241,122,73,0.4);
+    background-color: rgba(241,0,0,0.4);
+    border: 1px solid rgba(217,108,59,0.8);
+}
+
+.gtile-minimal-dark__grid_lines_preview {
+    background-color: rgba(0,0,0,0);
     border: 1px solid rgba(217,108,59,0.8);
 }
 
@@ -770,6 +785,11 @@
   .gtile-minimal-light__action-button:activate {
     background-color: #e8e6e3;
   }
+
+  .gtile-minimal-light__grid_lines_preview {
+    background-color: rgba(0,0,0,0);
+    border: 1px solid rgba(217,108,59,0.8);
+}
   
   
   /**
