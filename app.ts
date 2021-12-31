@@ -1759,11 +1759,13 @@ class GridSettingsButton {
     readonly text: string;
     readonly cols: number;
     readonly rows: number;
+    active: boolean;
 
-    constructor(gridSize: tilespec.GridSize) {
+    constructor(gridSize: tilespec.GridSize, active: boolean) {
         this.text = gridSize.toString();
         this.cols = gridSize.width;
         this.rows = gridSize.height;
+        this.active = active;
 
         this.actor = new St.Button({
             style_class: `${theme}__preset-button`,
@@ -1773,7 +1775,23 @@ class GridSettingsButton {
             label: this.text,
         });
 
+        if (this.active) {
+            this.activate();
+        }
+
         this.actor.connect('button-press-event', () => this._onButtonPress());
+    }
+
+    deactivate() {
+        log("Deactivating GridSettingsButton ${cols}:${rows}");
+        this.active = false;
+        this.actor.remove_style_pseudo_class('activate');
+    }
+
+    activate() {
+        log("Activating GridSettingsButton ${cols}:${rows}");
+        this.active = true;
+        this.actor.add_style_pseudo_class('activate');
     }
 
     _onButtonPress() {
@@ -1800,6 +1818,7 @@ class Grid {
     readonly veryBottomBar: StWidget;
     readonly veryBottomBarContainer: any;
     readonly veryBottomBarTableLayout: GridLayout;
+    readonly gridSettingsButtons: GridSettingsButton[];
 
     readonly tableContainer: any;
     readonly table: StWidget;
@@ -1895,16 +1914,25 @@ class Grid {
         let colNum = 0;
         let maxPerRow = 4;
 
+        this.rows = rows;
+        this.cols = cols;
+
+        this.gridSettingsButtons = [];
+
         for (let gridSize of gridSettings[SETTINGS_GRID_SIZES]) {
             if (colNum >= maxPerRow) {
                 colNum = 0;
                 rowNum += 1;
             }
 
-            const button = new GridSettingsButton(gridSize);
+            const isActiveGrid = this.cols == gridSize.width && this.rows == gridSize.height;
+            const button = new GridSettingsButton(gridSize, isActiveGrid);
+
             this.bottomBarTableLayout.attach(button.actor, colNum, rowNum, 1, 1);
             button.actor.connect('notify::hover', () => this._onSettingsButton());
             colNum++;
+
+            this.gridSettingsButtons.push(button);
         }
         this.bottombar.height *= (rowNum + 1);
 
@@ -1936,9 +1964,7 @@ class Grid {
 
         this.monitor = monitor;
         this.monitor_idx = monitor_idx;
-        this.rows = rows;
         this.title = title;
-        this.cols = cols;
 
         this.isEntered = false;
 
@@ -2025,6 +2051,7 @@ class Grid {
         this.rows = nbRows;
         this._displayElements();
         this._clearMoveResizeState();
+        this._updateGridSizeButtons();
     }
 
     set_position(x: number, y: number): void {
@@ -2239,6 +2266,16 @@ class Grid {
         this.cols = 0;
         log("Disconnect hide-tiling");
         this.disconnect(this.connectHideTiling);
+    }
+
+    _updateGridSizeButtons() {
+        for (let button of this.gridSettingsButtons) {
+            if (this.cols == button.cols && this.rows == button.rows) {
+                button.activate();
+            } else {
+                button.deactivate();
+            }
+        }
     }
 
     // Methods replaced by Signals.addSignalMethods.
