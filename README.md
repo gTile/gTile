@@ -68,6 +68,7 @@ For configuration, please use the built-in preferences dialog (Gnome Tweak Tool 
 * Grid schemes:
   * Are defined in the preferences window (*Basic* tab)
   * Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces, columns first, then rows)
+  * Grid lines can be shown when changing the grid size (*Basic* tab, disabled by default)
 * Resize presets:
   * Are defined in the preferences window (*Reset presets* tab) 
   * Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
