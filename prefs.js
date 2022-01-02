@@ -429,7 +429,9 @@ function buildPrefsWidget() {
 
     let main_vbox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
-        spacing: 10
+        spacing: 10,
+        'width-request': 820,
+        'height-request': 600
     });
 
     if (Gtk.get_major_version() >= 4) {
