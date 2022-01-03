@@ -628,17 +628,24 @@ class App {
             let topOffset = workArea.topLeft().y;
             let leftOffset = workArea.topLeft().x;
 
+            log(`Starting to draw grid lines for monitor ${JSON.stringify(monitor)}`);
+
             for(let i = 1; i <= gridSize.width; i++) {
                 for(let u = 1; u <= gridSize.height; u++) {
                     const newGridWidget = new St.BoxLayout({ style_class: `${theme}__grid_lines_preview` });
+                    const posX = leftOffset + tileWidth * (i - 1);
+                    const posY = topOffset + tileHeight * (u - 1);
+
                     gridTiles.push(newGridWidget);
 
                     Main.uiGroup.add_actor(newGridWidget);
 
                     newGridWidget.width = tileWidth;
                     newGridWidget.height = tileHeight;
-                    newGridWidget.x = leftOffset + tileWidth * (i - 1);
-                    newGridWidget.y = topOffset + tileHeight * (u - 1);
+                    newGridWidget.x = posX;
+                    newGridWidget.y = posY;
+
+                    log(`Grid line of size ${tileWidth}:${tileHeight} is drawn at ${posX}:${posY} (monitor offset ${monitor.x}:${monitor.y})`)
                 }
             }
         }
