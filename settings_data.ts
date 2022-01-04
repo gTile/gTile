@@ -13,7 +13,8 @@ export type BoolSettingName = (
     "moveresize-enabled" |
     "show-icon" |
     "target-presets-to-monitor-of-mouse" |
-    "window-margin-fullscreen-enabled");
+    "window-margin-fullscreen-enabled" |
+    "show-grid-lines");
 
 // A setting name for a number-valued setting.
 export type NumberSettingName = (

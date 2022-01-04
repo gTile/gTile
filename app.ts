@@ -38,6 +38,7 @@ const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const Workspace = imports.ui.workspace;
+const Mainloop = imports.mainloop;
 // Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
 const WorkspaceManager: WorkspaceManagerInterface = (
     global.screen || global.workspace_manager);
@@ -66,6 +67,7 @@ const SETTINGS_WINDOW_MARGIN = 'window-margin';
 const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
+const SETTINGS_SHOW_GRID_LINES = 'show-grid-lines';
 
 const SETTINGS_INSETS_PRIMARY = 'insets-primary';
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
@@ -94,6 +96,7 @@ interface ParsedSettings {
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: boolean;
     [SETTINGS_MAX_TIMEOUT]: any;
     [SETTINGS_MAIN_WINDOW_SIZES]: Array<string>;
+    [SETTINGS_SHOW_GRID_LINES]: boolean;
 
     [SETTINGS_INSETS_PRIMARY]: number;
     [SETTINGS_INSETS_PRIMARY_LEFT]: number;
@@ -122,6 +125,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED]: false,
     [SETTINGS_MAX_TIMEOUT]: null,
     [SETTINGS_MAIN_WINDOW_SIZES]: [],
+    [SETTINGS_SHOW_GRID_LINES]: false,
 
     [SETTINGS_INSETS_PRIMARY]: 0,
     [SETTINGS_INSETS_PRIMARY_LEFT]: 0,
@@ -377,6 +381,10 @@ class App {
         nbCols = gridSize.width;
         nbRows = gridSize.height;
         this.refreshGrids();
+
+        if (gridSettings[SETTINGS_SHOW_GRID_LINES]) {
+            this._showGridLines(gridSize);
+        }
     }
 
     moveGrids() {
@@ -604,6 +612,52 @@ class App {
         return this.gridShowing;
     }
 
+    _showGridLines(gridSize: tilespec.GridSize): void {
+        log("Started drawing grid lines...");
+
+        let gridTiles:Array<StBoxLayout> = [];
+
+        for(let monitorIdx = 0; monitorIdx < activeMonitors().length; monitorIdx++) {
+            const workArea = workAreaRectByMonitorIndex(monitorIdx);
+            const monitor = activeMonitors()[monitorIdx];
+
+            if (!workArea) { continue; }
+
+            let tileHeight = workArea.size.height / gridSize.height;
+            let tileWidth = workArea.size.width / gridSize.width;
+            let topOffset = workArea.topLeft().y;
+            let leftOffset = workArea.topLeft().x;
+
+            log(`Starting to draw grid lines for monitor ${JSON.stringify(monitor)}`);
+
+            for(let i = 1; i <= gridSize.width; i++) {
+                for(let u = 1; u <= gridSize.height; u++) {
+                    const newGridWidget = new St.BoxLayout({ style_class: `${theme}__grid_lines_preview` });
+                    const posX = leftOffset + tileWidth * (i - 1);
+                    const posY = topOffset + tileHeight * (u - 1);
+
+                    gridTiles.push(newGridWidget);
+
+                    Main.uiGroup.add_actor(newGridWidget);
+
+                    newGridWidget.width = tileWidth;
+                    newGridWidget.height = tileHeight;
+                    newGridWidget.x = posX;
+                    newGridWidget.y = posY;
+
+                    log(`Grid line of size ${tileWidth}:${tileHeight} is drawn at ${posX}:${posY} (monitor offset ${monitor.x}:${monitor.y})`)
+                }
+            }
+        }
+
+        Mainloop.timeout_add(1000, () => {
+            log("Removing grid lines...");
+            for(let tile of gridTiles) {
+                Main.uiGroup.remove_actor(tile);
+            }
+        });
+    }
+
     /**
      * onFocus is called when the global focus changes.
      */
@@ -767,6 +821,7 @@ function initSettings() {
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
     getBoolSetting(SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE);
     getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
+    getBoolSetting(SETTINGS_SHOW_GRID_LINES);
 
     gridSettings[SETTINGS_WINDOW_MARGIN] = getIntSetting(SETTINGS_WINDOW_MARGIN);
     gridSettings[SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED] = getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
@@ -1711,11 +1766,13 @@ class GridSettingsButton {
     readonly text: string;
     readonly cols: number;
     readonly rows: number;
+    active: boolean;
 
-    constructor(gridSize: tilespec.GridSize) {
+    constructor(gridSize: tilespec.GridSize, active: boolean) {
         this.text = gridSize.toString();
         this.cols = gridSize.width;
         this.rows = gridSize.height;
+        this.active = active;
 
         this.actor = new St.Button({
             style_class: `${theme}__preset-button`,
@@ -1725,7 +1782,23 @@ class GridSettingsButton {
             label: this.text,
         });
 
+        if (this.active) {
+            this.activate();
+        }
+
         this.actor.connect('button-press-event', () => this._onButtonPress());
+    }
+
+    deactivate() {
+        log("Deactivating GridSettingsButton ${cols}:${rows}");
+        this.active = false;
+        this.actor.remove_style_pseudo_class('activate');
+    }
+
+    activate() {
+        log("Activating GridSettingsButton ${cols}:${rows}");
+        this.active = true;
+        this.actor.add_style_pseudo_class('activate');
     }
 
     _onButtonPress() {
@@ -1752,6 +1825,7 @@ class Grid {
     readonly veryBottomBar: StWidget;
     readonly veryBottomBarContainer: any;
     readonly veryBottomBarTableLayout: GridLayout;
+    readonly gridSettingsButtons: GridSettingsButton[];
 
     readonly tableContainer: any;
     readonly table: StWidget;
@@ -1847,16 +1921,25 @@ class Grid {
         let colNum = 0;
         let maxPerRow = 4;
 
+        this.rows = rows;
+        this.cols = cols;
+
+        this.gridSettingsButtons = [];
+
         for (let gridSize of gridSettings[SETTINGS_GRID_SIZES]) {
             if (colNum >= maxPerRow) {
                 colNum = 0;
                 rowNum += 1;
             }
 
-            const button = new GridSettingsButton(gridSize);
+            const isActiveGrid = this.cols == gridSize.width && this.rows == gridSize.height;
+            const button = new GridSettingsButton(gridSize, isActiveGrid);
+
             this.bottomBarTableLayout.attach(button.actor, colNum, rowNum, 1, 1);
             button.actor.connect('notify::hover', () => this._onSettingsButton());
             colNum++;
+
+            this.gridSettingsButtons.push(button);
         }
         this.bottombar.height *= (rowNum + 1);
 
@@ -1888,9 +1971,7 @@ class Grid {
 
         this.monitor = monitor;
         this.monitor_idx = monitor_idx;
-        this.rows = rows;
         this.title = title;
-        this.cols = cols;
 
         this.isEntered = false;
 
@@ -1977,6 +2058,7 @@ class Grid {
         this.rows = nbRows;
         this._displayElements();
         this._clearMoveResizeState();
+        this._updateGridSizeButtons();
     }
 
     set_position(x: number, y: number): void {
@@ -2191,6 +2273,16 @@ class Grid {
         this.cols = 0;
         log("Disconnect hide-tiling");
         this.disconnect(this.connectHideTiling);
+    }
+
+    _updateGridSizeButtons() {
+        for (let button of this.gridSettingsButtons) {
+            if (this.cols == button.cols && this.rows == button.rows) {
+                button.activate();
+            } else {
+                button.deactivate();
+            }
+        }
     }
 
     // Methods replaced by Signals.addSignalMethods.

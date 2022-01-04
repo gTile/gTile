@@ -24,6 +24,7 @@ const SETTINGS_MAX_TIMEOUT = 'max-timeout';
 const SETTINGS_PRESET_RESIZE = 'resize';
 const SETTINGS_MAIN_WINDOW_SIZES = 'main-window-sizes';
 const SETTINGS_DEBUG = 'debug';
+const SETTINGS_SHOW_GRID_LINES = 'show-grid-lines';
 
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
 const SETTINGS_INSETS_PRIMARY_RIGHT = 'insets-primary-right';
@@ -260,6 +261,7 @@ function basics_tab(notebook, settings) {
     add_check("Keyboard presets target monitor of mouse", SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE, bs_grid, settings);
 
     add_check("Enable accelerators for moving and resizing windows", SETTINGS_MOVERESIZE_ENABLED  , bs_grid, settings);
+    add_check("Show grid lines when changing grid size", SETTINGS_SHOW_GRID_LINES, bs_grid, settings);
 
     add_int("Maximum timeout for preset cycling (ms)", SETTINGS_MAX_TIMEOUT, bs_grid, settings, 500, 10000, 100, 1000);
 
@@ -427,7 +429,9 @@ function buildPrefsWidget() {
 
     let main_vbox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
-        spacing: 10
+        spacing: 10,
+        'width-request': 820,
+        'height-request': 600
     });
 
     if (Gtk.get_major_version() >= 4) {

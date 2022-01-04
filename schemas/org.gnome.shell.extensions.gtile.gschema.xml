@@ -459,6 +459,10 @@
 			<default>true</default>
 			<summary>Show gTile icon on a panel.</summary>
 		</key>
+		<key type = "b" name="show-grid-lines">
+			<default>false</default>
+			<summary>Show grid lines when changing grid size</summary>
+		</key>
 		<key type = "b" name="global-presets">
 			<default>true</default>
 			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
