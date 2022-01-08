@@ -622,6 +622,10 @@ class App {
         return this.gridShowing;
     }
 
+    isGridShowing(): boolean {
+        return this.gridShowing;
+    }
+
     _showGridLines(gridSize: tilespec.GridSize): void {
         log("Started drawing grid lines...");
 
@@ -1729,20 +1733,22 @@ function autoTileNCols(cols: number) {
     }
     let windows = getNotFocusedWindowsOfMonitor(monitor);
 
-    let nbWindowOnEachSide = Math.ceil((windows.length + 1) / cols);
+    let nbWindowOnEachSide = Math.ceil((windows.length + (globalApp.isGridShowing() ? 1 : 0)) / cols);
     let winHeight = workArea.height / nbWindowOnEachSide;
 
     let countWin = 0;
 
-    moveResizeWindowWithMargins(
-        window,
-        workArea.x + countWin % cols * workArea.width / cols,
-        workArea.y + (Math.floor(countWin / cols) * winHeight),
-        workArea.width / cols,
-        winHeight
-    );
+    if(globalApp.isGridShowing()) {
+        moveResizeWindowWithMargins(
+            window,
+            workArea.x + countWin % cols * workArea.width / cols,
+            workArea.y + (Math.floor(countWin / cols) * winHeight),
+            workArea.width / cols,
+            winHeight
+        );
 
-    countWin++;
+        countWin++;
+    }
 
     // todo make function
     for (let windowIdx in windows) {
