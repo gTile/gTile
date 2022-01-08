@@ -1268,7 +1268,7 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
 
     let tileSpecs: tilespec.TileSpec[] = [];
     try {
-        tileSpecs = tilespec.parsePreset(presetString);
+        tileSpecs = tilespec.parsePreset(presetString, currentGridSize());
     } catch (err) {
         log(`Bad preset ${presetName} ${JSON.stringify(presetString)}: ${err}`);
         return;
@@ -1388,6 +1388,11 @@ function moveWindowToRect(window: any, rect: tilespec.Rect) {
         rect.origin.y,
         rect.size.width,
         rect.size.height);
+}
+
+// Converts global nbCols & nbRows to GridSize object
+function currentGridSize() {
+    return new tilespec.GridSize(nbCols, nbRows);
 }
 
 /*****************************************************************

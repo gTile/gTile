@@ -297,7 +297,10 @@ function presets_tab(notebook, settings) {
     pr_grid.set_margin_start(24);
     pr_grid.set_margin_top(24);
 
-    let text = "Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is right bottom quarter of screen)";
+    let text = `
+      Resize presets (grid size and 2 corner tiles - 0:0 is top left tile, columns first, e.g. '4x2 2:1 3:1' is right bottom quarter of screen)
+      If grid size is omitted, global grid size will be used.
+    `;
     pr_grid.attach_next_to(new Gtk.Label({
         label: text,
         halign: Gtk.Align.START,

@@ -83,7 +83,14 @@ function parseGridSizeIgnoringErrors(s: string): GridSize|null {
 }
 
 export class XY {
-    constructor(readonly x: number, readonly y: number) {}
+    x:number
+    y:number
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
     clone() {
         return new XY(this.x, this.y);
     }
@@ -363,18 +370,23 @@ export function adjoiningSides(a: Edges, b: Edges, distTol: number) {
  * 0:7, 8x10 0:0 2:7" or "8x8 0:0 0:7, 0:0 2:7"
  *
  * The 8x8 and 8x10 values above are the "grid size." The grid size may be
- * omitted in all but the first component of the preset.
+ * omitted, then fallback grid size will be used.
  */
-export function parsePreset(preset: string): Array<TileSpec> {
+export function parsePreset(preset: string, fallback?: GridSize): Array<TileSpec> {
     const parts = preset.split(',').map(x => x.trim());
 
     let mostRecentSpec: TileSpec|null = null;
     return parts.map((part: string, index: number): TileSpec => {
         if (hasImpliedGridSize(part)) {
             if (mostRecentSpec === null) {
-                throw new Error(`preset component[${index}] ${part} of ${preset} is missing grid size (e.g., '3x3')`);
+                if (fallback === undefined) {
+                    throw new Error(`preset component[${index}] ${part} of ${preset} is missing grid size (e.g., '3x3') and no fallback is specified`);
+                } else {
+                    part = `${fallback.width}x${fallback.height} ${part}`;
+                }
+            } else {
+                part = `${mostRecentSpec.gridWidth}x${mostRecentSpec.gridHeight} ${part}`;
             }
-            part = `${mostRecentSpec.gridWidth}x${mostRecentSpec.gridHeight} ${part}`;
         }
         const parsed = parseSinglePreset(part);
         mostRecentSpec = parsed;
@@ -388,8 +400,11 @@ function parseSinglePreset(preset: string) {
         throw new Error(`Bad preset: ${JSON.stringify(preset)}`);
     }
     const gridFormat = parseTuple(ps[0], "x");
-    const luc = parseTuple(ps[1], ":");
-    const rdc = parseTuple(ps[2], ":");
+    let luc = parseTuple(ps[1], ":");
+    let rdc = parseTuple(ps[2], ":");
+
+    luc = convertNegativeCoords(gridFormat, luc);
+    rdc = convertNegativeCoords(gridFormat, rdc);
 
     if (gridFormat.x < 1 || luc.x < 0 || rdc.x < 0
         || gridFormat.y < 1 || luc.y < 0 || rdc.y < 0
@@ -405,6 +420,23 @@ function hasImpliedGridSize(singlePreset: string): boolean {
     return singlePreset.trim().split(" ").length === 2;
 }
 
+/**
+ * Converts negative coordinates (e.g. -1:-1) to a positive format on a specified grid.
+ * If x or y is a positive number, it is ignored.
+ * E.g. -1:-1 on a 3:3 grid is a 2:2, as well as -1:2.
+ */
+function convertNegativeCoords(gridFormat:XY, coords: XY) {
+    if (coords.x < 0) {
+        coords.x = gridFormat.x + coords.x;
+    }
+
+    if (coords.y < 0) {
+        coords.y = gridFormat.y + coords.y;
+    }
+
+    return coords;
+}
+
 
 /**
  * Parses a value like like 6x4 or 1:2 into {X: 6, Y: 4} or {X: 1, Y: 2}.
@@ -417,7 +449,7 @@ function parseTuple(unparsed: string, delim: string) {
         throw new Error("Failed to split " + unparsed + " by delimiter " + delim + " into two numbers");
     }
     const numbers = gssk.map(Number);
-    if (numbers.some(n => isNaN(n) || n < 0 || n > MAX_TUPLE_MEMBER_VALUE)) {
+    if (numbers.some(n => isNaN(n) || n > MAX_TUPLE_MEMBER_VALUE)) {
         throw new Error(`All elements of tuple must be intgers in [0, ${MAX_TUPLE_MEMBER_VALUE}]: ${JSON.stringify(unparsed)}`)
     }
     return new XY(numbers[0], numbers[1]);

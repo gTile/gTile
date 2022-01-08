@@ -84,6 +84,8 @@ For configuration, please use the built-in preferences dialog (Gnome Tweak Tool 
     | **↓**     | **1**    | 0:1       | 1:1       | 2:1       |
     -->
   * Grid size format variants can either reuse the last grid format (e.g `6x4 0:2 3:3, 0:0 3:3`) or define a new grid (e.g `6x4 0:2 3:3, 8x6 0:0 3:3`)
+  * If grid size is not specified, global grid size will be used (unless it is specified in the first coordinate)
+  * Negative values are allowed. E.g. `3x3 -1:-1 -1:-1` will correspond to the bottom right corner on the screen on a 3x3 grid (same as `3x3 2:2 2:2`)
   * Grids defined here can differ from the grid sizes defined in the *Basic* tab
 
 ## Usage with interface
