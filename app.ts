@@ -60,6 +60,7 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
+const SETTINGS_GLOBAL_AUTO_TILING = 'global-auto-tiling';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE = "target-presets-to-monitor-of-mouse";
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
@@ -89,6 +90,7 @@ interface ParsedSettings {
     [SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT]: any;
     [SETTINGS_ANIMATION]: any;
     [SETTINGS_SHOW_ICON]: any;
+    [SETTINGS_GLOBAL_AUTO_TILING]: any;
     [SETTINGS_GLOBAL_PRESETS]: any;
     [SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE]: any;
     [SETTINGS_MOVERESIZE_ENABLED]: any;
@@ -118,6 +120,7 @@ const gridSettings: ParsedSettings = {
     [SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT]: null,
     [SETTINGS_ANIMATION]: null,
     [SETTINGS_SHOW_ICON]: null,
+    [SETTINGS_GLOBAL_AUTO_TILING]: null,
     [SETTINGS_GLOBAL_PRESETS]: null,
     [SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE]: null,
     [SETTINGS_MOVERESIZE_ENABLED]: null,
@@ -210,6 +213,11 @@ const key_bindings_tiling: Bindings = new Map([
     ['cancel-tiling', () => { keyCancelTiling(); }],
     ['set-tiling', () => { keySetTiling(); }],
     ['change-grid-size', () => { keyChangeTiling(); }],
+    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
+    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
+]);
+
+const key_bindings_auto_tiling: Bindings = new Map([
     ['autotile-main', () => { AutoTileMain(); }],
     ['autotile-1', () => { autoTileNCols(1); }],
     ['autotile-2', () => { autoTileNCols(2); }],
@@ -221,8 +229,6 @@ const key_bindings_tiling: Bindings = new Map([
     ['autotile-8', () => { autoTileNCols(8); }],
     ['autotile-9', () => { autoTileNCols(9); }],
     ['autotile-10', () => { autoTileNCols(10); }],
-    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
-    ['snap-to-neighbors', () => { snapToNeighborsBind(); }],
 ]);
 
 const key_bindings_presets: Bindings = new Map([
@@ -299,6 +305,9 @@ class App {
         }
 
         bindHotkeys(keyBindings);
+        if (gridSettings[SETTINGS_GLOBAL_AUTO_TILING]) {
+            bindHotkeys(key_bindings_auto_tiling);
+        }
         if (gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             bindHotkeys(key_bindings_presets);
         }
@@ -570,6 +579,7 @@ class App {
         }
 
         unbindHotkeys(keyBindings);
+        unbindHotkeys(key_bindings_auto_tiling);
         unbindHotkeys(key_bindings_presets);
         unbindHotkeys(keyBindingGlobalResizes);
         if (keyControlBound) {
@@ -818,6 +828,7 @@ function initSettings() {
     getBoolSetting(SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT);
     getBoolSetting(SETTINGS_ANIMATION);
     getBoolSetting(SETTINGS_SHOW_ICON);
+    getBoolSetting(SETTINGS_GLOBAL_AUTO_TILING);
     getBoolSetting(SETTINGS_GLOBAL_PRESETS);
     getBoolSetting(SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE);
     getBoolSetting(SETTINGS_MOVERESIZE_ENABLED);
@@ -1135,6 +1146,9 @@ function bindKeyControls() {
             global.display.disconnect(focusConnect);
         }
         focusConnect = global.display.connect('notify::focus-window', () => globalApp.onFocus());
+        if (!gridSettings[SETTINGS_GLOBAL_AUTO_TILING]) {
+            bindHotkeys(key_bindings_auto_tiling);
+        }
         if (!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             bindHotkeys(key_bindings_presets);
         }
@@ -1149,6 +1163,9 @@ function unbindKeyControls() {
             log("Disconnect notify:focus-window");
             global.display.disconnect(focusConnect);
             focusConnect = false;
+        }
+        if (!gridSettings[SETTINGS_GLOBAL_AUTO_TILING]) {
+            unbindHotkeys(key_bindings_auto_tiling);
         }
         if (!gridSettings[SETTINGS_GLOBAL_PRESETS]) {
             unbindHotkeys(key_bindings_presets);
@@ -2194,12 +2211,12 @@ class Grid {
             log("bug: currentElement must be set in moveResize");
             return;
         }
-        
+
         if (!delegate.first) {
             log("currentElement is there but no first yet");
             delegate.currentElement._onButtonPress();
         }
-        
+
         if (!delegate.first) {
             log("bug: first must be set in moveResize");
             return;
@@ -2435,7 +2452,7 @@ Signals.addSignalMethods(Grid.prototype);
 class GridElementDelegate {
     // The first element clicked in the rectangular selection.
     first: GridElement | null = null;
-    // 
+    //
     currentElement: GridElement | null = null;
     // Elements that are in a highlighted state in the UI. The highlighting
     // happens when the grid rectangle selcted includes a particular grid
