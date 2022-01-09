@@ -9,6 +9,7 @@ export type BoolSettingName = (
     "auto-close" |
     "auto-close-keyboard-shortcut" |
     "debug" |
+    "global-auto-tiling" |
     "global-presets" |
     "moveresize-enabled" |
     "show-icon" |
@@ -180,6 +181,7 @@ export type AnySettingName = (
     "cancel-tiling" |
     "change-grid-size" |
     "debug" |
+    "global-auto-tiling" |
     "global-presets" |
     "grid-sizes" |
     "insets-primary-bottom" |
@@ -374,6 +376,9 @@ interface RawConfigObject {
 
     /** Put debug lines into global.log. To see, run journalctl /usr/bin/gnome-shell -f in terminal */
     ["debug"]: boolean;
+
+    /** Auto tiling keyboard hotkeys are always active (as opposed active only when tiling window is visible). */
+    ["global-auto-tiling"]: boolean;
 
     /** Keyboard presets are always active (as opposed active only when tiling window is visible). */
     ["global-presets"]: boolean;
@@ -675,4 +680,3 @@ interface RawConfigObject {
     /** Apply margin to fullscreen windows */
     ["window-margin-fullscreen-enabled"]: boolean;
 }
-    

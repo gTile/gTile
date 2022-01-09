@@ -15,6 +15,7 @@ const SETTINGS_AUTO_CLOSE = 'auto-close';
 const SETTINGS_AUTO_CLOSE_KEYBOARD_SHORTCUT = "auto-close-keyboard-shortcut";
 const SETTINGS_ANIMATION = 'animation';
 const SETTINGS_SHOW_ICON = 'show-icon';
+const SETTINGS_GLOBAL_AUTO_TILING = 'global-auto-tiling';
 const SETTINGS_GLOBAL_PRESETS = 'global-presets';
 const SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE = "target-presets-to-monitor-of-mouse";
 const SETTINGS_MOVERESIZE_ENABLED = 'moveresize-enabled';
@@ -257,6 +258,21 @@ function basics_tab(notebook, settings) {
     add_check("Show icon",  SETTINGS_SHOW_ICON,  bs_grid, settings);
 
     add_text ("Grid sizes (like 6x4,8x6,21x11)", SETTINGS_GRID_SIZES, bs_grid, settings, 30);
+    add_check("Global auto tiling hotkeys (works without gTile activated)", SETTINGS_GLOBAL_AUTO_TILING  , bs_grid, settings);
+    let globalAutoTilingWarning = '<span foreground="red">Warning: Make sure to change the auto tiling hotkeys when activating this setting, ' +
+        'as the default hotkeys use 0-9 and M. This option will bind these hotkeys globally, making them unusable for other functions!</span>';
+    let globalAutoTilingWarningLabel = new Gtk.Label({
+        label: globalAutoTilingWarning,
+        halign: Gtk.Align.START,
+        justify: Gtk.Justification.LEFT,
+        use_markup: true,
+        visible: false,
+        wrap: true,
+    })
+    bs_grid.attach_next_to(globalAutoTilingWarningLabel, null, Gtk.PositionType.BOTTOM, 1, 1)
+    settings.connect('changed::'+SETTINGS_GLOBAL_AUTO_TILING, () => {
+        globalAutoTilingWarningLabel.visible = settings.get_boolean(SETTINGS_GLOBAL_AUTO_TILING);
+    })
     add_check("Global resize presets (works without gTile activated)", SETTINGS_GLOBAL_PRESETS  , bs_grid, settings);
     add_check("Keyboard presets target monitor of mouse", SETTINGS_TARGET_PRESETS_TO_MONITOR_OF_MOUSE, bs_grid, settings);
 
@@ -376,16 +392,16 @@ function help_tab(notebook) {
 
 function theme_tab(notebook, settings) {
     const options = settings.get_strv(SETTINGS_THEMES);
-  
+
     const grid = new Gtk.Grid({
       column_spacing: 10,
       orientation: Gtk.Orientation.VERTICAL,
       row_spacing: 10,
     });
-  
+
     grid.set_margin_start(24);
     grid.set_margin_top(24);
-  
+
     grid.attach_next_to(new Gtk.Label({
       label: 'Theme',
       halign: Gtk.Align.START,
@@ -393,24 +409,24 @@ function theme_tab(notebook, settings) {
       use_markup: false,
       wrap: true,
     }), null, Gtk.PositionType.BOTTOM, 1, 1)
-  
+
     let themes = add_combobox(options, grid, function (active) {
       settings.set_string(SETTINGS_THEME, active);
     });
-  
+
     const active = settings.get_string(SETTINGS_THEME);
-  
+
     themes.set_active(options.indexOf(active) || 0);
-  
+
     let window = new Gtk.ScrolledWindow({ 'vexpand': true });
-  
+
     set_child(window, grid);
     let label = new Gtk.Label({
       label: "Theme",
       halign: Gtk.Align.START,
       use_markup: false,
     });
-  
+
     notebook.append_page(window, label);
 }
 

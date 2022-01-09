@@ -463,6 +463,10 @@
 			<default>false</default>
 			<summary>Show grid lines when changing grid size</summary>
 		</key>
+		<key type = "b" name="global-auto-tiling">
+			<default>false</default>
+			<summary>Auto tiling keyboard hotkeys are always active (as opposed active only when tiling window is visible).</summary>
+		</key>
 		<key type = "b" name="global-presets">
 			<default>true</default>
 			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
