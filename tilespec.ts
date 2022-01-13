@@ -29,8 +29,8 @@ export class TileSpec {
             Math.floor(workArea.size.height / this.gridHeight));
         return new Rect(
             new XY(
-                workArea.origin.x + this.luc.x * elemSize.width,
-                workArea.origin.y + this.luc.y * elemSize.height),
+                workArea.origin.x + (this.luc.x - 1) * elemSize.width,
+                workArea.origin.y + (this.luc.y - 1) * elemSize.height),
             new Size((this.rdc.x + 1 - this.luc.x) * elemSize.width,
                 (this.rdc.y + 1 - this.luc.y) * elemSize.height));
     }
@@ -406,13 +406,6 @@ function parseSinglePreset(preset: string) {
     luc = convertNegativeCoords(gridFormat, luc);
     rdc = convertNegativeCoords(gridFormat, rdc);
 
-    if (gridFormat.x < 1 || luc.x < 0 || rdc.x < 0
-        || gridFormat.y < 1 || luc.y < 0 || rdc.y < 0
-        || gridFormat.x <= luc.x || gridFormat.x <= rdc.x
-        || gridFormat.y <= luc.y || gridFormat.y <= rdc.y
-        || luc.x > rdc.x || luc.y > rdc.y) {
-        throw new Error(`Bad preset: ${JSON.stringify(preset)}`);
-    }
     return new TileSpec(gridFormat.x, gridFormat.y, luc, rdc);
 }
 
@@ -423,15 +416,15 @@ function hasImpliedGridSize(singlePreset: string): boolean {
 /**
  * Converts negative coordinates (e.g. -1:-1) to a positive format on a specified grid.
  * If x or y is a positive number, it is ignored.
- * E.g. -1:-1 on a 3:3 grid is a 2:2, as well as -1:2.
+ * E.g. -1:-1 on a 3:3 grid is a 3:3, as well as -1:3.
  */
 function convertNegativeCoords(gridFormat:XY, coords: XY) {
     if (coords.x < 0) {
-        coords.x = gridFormat.x + coords.x;
+        coords.x = gridFormat.x + coords.x + 1;
     }
 
     if (coords.y < 0) {
-        coords.y = gridFormat.y + coords.y;
+        coords.y = gridFormat.y + coords.y + 1;
     }
 
     return coords;
