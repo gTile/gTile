@@ -75,6 +75,7 @@ ts_library(
         ":shellversion_lib",
         ":snaptoneighbors_lib",
         ":tilespec_lib",
+        ":preset_parser_lib"
     ],
 )
 
@@ -131,11 +132,20 @@ ts_library(
     ],
 )
 
+ts_library(
+    name = "preset_parser_lib",
+    srcs = ["preset_parser.ts"],
+    tsconfig = "//:tsconfig.json",
+    deps = [
+        ":tilespec_lib"
+    ]
+)
+
 
 ts_library(
     name = "tilespec_lib",
     srcs = ["tilespec.ts"],
-    tsconfig = "//:tsconfig.json",
+    tsconfig = "//:tsconfig.json"
 )
 
 ts_library(
