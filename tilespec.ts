@@ -21,8 +21,8 @@ export class TileSpec {
 
     toFrameRect(workArea: Rect) {
         const elemSize = new Size(
-            Math.floor(workArea.size.width / this.gridWidth),
-            Math.floor(workArea.size.height / this.gridHeight));
+            workArea.size.width / this.gridWidth,
+            workArea.size.height / this.gridHeight);
 
         let left;
         let top;
@@ -31,47 +31,47 @@ export class TileSpec {
 
         if (this.luc.types.x == 'tile') {
             const positiveTileNumber = this._convertNegativeCoord(this.gridWidth, this.luc.xy.x);
-            left = workArea.origin.x + (positiveTileNumber - 1) * elemSize.width;
+            left = Math.round(workArea.origin.x + (positiveTileNumber - 1) * elemSize.width);
         } else if (this.luc.types.x == 'approx_percentage') {
             const snappedToGrid = Math.round(this.gridWidth * this.luc.xy.x);
-            left = workArea.origin.x + snappedToGrid * elemSize.width;
+            left = Math.round(workArea.origin.x + snappedToGrid * elemSize.width);
         } else {
-            left = workArea.origin.x + workArea.size.width * this.luc.xy.x;
+            left = Math.round(workArea.origin.x + workArea.size.width * this.luc.xy.x);
         }
 
         if (this.luc.types.y == 'tile') {
             const positiveTileNumber = this._convertNegativeCoord(this.gridHeight, this.luc.xy.y);
-            top = workArea.origin.y + (positiveTileNumber - 1) * elemSize.height
+            top = Math.round(workArea.origin.y + (positiveTileNumber - 1) * elemSize.height);
         } else if (this.luc.types.y == 'approx_percentage') {
             const snappedToGrid = Math.round(this.gridHeight * this.luc.xy.y);
-            top = workArea.origin.y + snappedToGrid * elemSize.height;
+            top = Math.round(workArea.origin.y + snappedToGrid * elemSize.height);
         } else {
-            top = workArea.origin.y + workArea.size.height * this.luc.xy.y;
+            top = Math.round(workArea.origin.y + workArea.size.height * this.luc.xy.y);
         }
 
         if (this.rdc.types.x == 'tile') {
             const positiveTileNumber = this._convertNegativeCoord(this.gridWidth, this.rdc.xy.x);
-            right = workArea.origin.x + positiveTileNumber * elemSize.width;
+            right = Math.round(workArea.origin.x + positiveTileNumber * elemSize.width);
         } else if (this.rdc.types.x == 'approx_percentage') {
             const snappedToGrid = Math.round(this.gridWidth * this.rdc.xy.x);
-            right= workArea.origin.x + snappedToGrid * elemSize.width;
+            right= Math.round(workArea.origin.x + snappedToGrid * elemSize.width);
         } else {
-            right = workArea.origin.x + workArea.size.width * this.rdc.xy.x;
+            right = Math.round(workArea.origin.x + workArea.size.width * this.rdc.xy.x);
         }
 
         if (this.rdc.types.y == 'tile') {
             const positiveTileNumber = this._convertNegativeCoord(this.gridHeight, this.rdc.xy.y);
-            bottom = workArea.origin.y + positiveTileNumber * elemSize.height
+            bottom = Math.round(workArea.origin.y + positiveTileNumber * elemSize.height);
         } else if (this.rdc.types.y == 'approx_percentage') {
             const snappedToGrid = Math.round(this.gridHeight * this.rdc.xy.y);
-            bottom = workArea.origin.y + snappedToGrid * elemSize.height;
+            bottom = Math.round(workArea.origin.y + snappedToGrid * elemSize.height);
         } else {
-            bottom = workArea.origin.y + workArea.size.height * this.rdc.xy.y;
+            bottom = Math.round(workArea.origin.y + workArea.size.height * this.rdc.xy.y);
         }
 
         return new Rect(
             new XY(left, top),
-            new Size(right - left, bottom - top)
+            new Size(right - left - 1, bottom - top - 1)
         );
     }
 
