@@ -29,23 +29,6 @@ export function parsePreset(preset: string, fallback?: GridSize): Array<TileSpec
     });
 }
 
-/**
- * Converts negative coordinates (e.g. -1:-1) to a positive format on a specified grid.
- * If x or y is a positive number, it is ignored.
- * E.g. -1:-1 on a 3:3 grid is a 3:3, as well as -1:3.
- */
-function convertNegativeCoords(gridFormat:XY, tuple: TupleHolder) {
-    if (tuple.xy.x < 0 && tuple.types.x == 'tile') {
-        tuple.xy.x = gridFormat.x + tuple.xy.x + 1;
-    }
-
-    if (tuple.xy.y < 0 && tuple.types.y == 'tile') {
-        tuple.xy.y = gridFormat.y + tuple.xy.y + 1;
-    }
-
-    return tuple;
-}
-
 function parseSinglePreset(preset: string) {
     const ps = preset.trim().split(" ");
     if (ps.length != 3) {
@@ -54,9 +37,6 @@ function parseSinglePreset(preset: string) {
     const gridFormat = parseTuple(ps[0], "x");
     let luc = new TupleHolder(ps[1]);
     let rdc = new TupleHolder(ps[2]);
-
-    luc = convertNegativeCoords(gridFormat, luc);
-    rdc = convertNegativeCoords(gridFormat, rdc);
 
     return new TileSpec(gridFormat.x, gridFormat.y, luc, rdc);
 }

@@ -30,47 +30,43 @@ export class TileSpec {
         let bottom;
 
         if (this.luc.types.x == 'tile') {
-            left = workArea.origin.x + (this.luc.xy.x - 1) * elemSize.width;
+            const positiveTileNumber = this._convertNegativeCoord(this.gridWidth, this.luc.xy.x);
+            left = workArea.origin.x + (positiveTileNumber - 1) * elemSize.width;
+        } else if (this.luc.types.x == 'approx_percentage') {
+            const snappedToGrid = Math.round(this.gridWidth * this.luc.xy.x);
+            left = workArea.origin.x + snappedToGrid * elemSize.width;
         } else {
-            if (this.luc.approximate) {
-                const snappedToGrid = Math.round(this.gridWidth * this.luc.xy.x);
-                left = workArea.origin.x + snappedToGrid * elemSize.width;
-            } else {
-                left = workArea.origin.x + workArea.size.width * this.luc.xy.x;
-            }
+            left = workArea.origin.x + workArea.size.width * this.luc.xy.x;
         }
 
         if (this.luc.types.y == 'tile') {
-            top = workArea.origin.y + (this.luc.xy.y - 1) * elemSize.height
+            const positiveTileNumber = this._convertNegativeCoord(this.gridHeight, this.luc.xy.y);
+            top = workArea.origin.y + (positiveTileNumber - 1) * elemSize.height
+        } else if (this.luc.types.y == 'approx_percentage') {
+            const snappedToGrid = Math.round(this.gridHeight * this.luc.xy.y);
+            top = workArea.origin.y + snappedToGrid * elemSize.height;
         } else {
-            if (this.luc.approximate) {
-                const snappedToGrid = Math.round(this.gridHeight * this.luc.xy.y);
-                top = workArea.origin.y + snappedToGrid * elemSize.height;
-            } else {
-                top = workArea.origin.y + workArea.size.height * this.luc.xy.y;
-            }
+            top = workArea.origin.y + workArea.size.height * this.luc.xy.y;
         }
 
         if (this.rdc.types.x == 'tile') {
-            right = workArea.origin.x + this.rdc.xy.x * elemSize.width;
+            const positiveTileNumber = this._convertNegativeCoord(this.gridWidth, this.rdc.xy.x);
+            right = workArea.origin.x + positiveTileNumber * elemSize.width;
+        } else if (this.rdc.types.x == 'approx_percentage') {
+            const snappedToGrid = Math.round(this.gridWidth * this.rdc.xy.x);
+            right= workArea.origin.x + snappedToGrid * elemSize.width;
         } else {
-            if (this.rdc.approximate) {
-                const snappedToGrid = Math.round(this.gridWidth * this.rdc.xy.x);
-                right= workArea.origin.x + snappedToGrid * elemSize.width;
-            } else {
-                right = workArea.origin.x + workArea.size.width * this.rdc.xy.x;
-            }
+            right = workArea.origin.x + workArea.size.width * this.rdc.xy.x;
         }
 
         if (this.rdc.types.y == 'tile') {
-            bottom = workArea.origin.y + this.rdc.xy.y * elemSize.height
+            const positiveTileNumber = this._convertNegativeCoord(this.gridHeight, this.rdc.xy.y);
+            bottom = workArea.origin.y + positiveTileNumber * elemSize.height
+        } else if (this.rdc.types.y == 'approx_percentage') {
+            const snappedToGrid = Math.round(this.gridHeight * this.rdc.xy.y);
+            bottom = workArea.origin.y + snappedToGrid * elemSize.height;
         } else {
-            if (this.rdc.approximate) {
-                const snappedToGrid = Math.round(this.gridHeight * this.rdc.xy.y);
-                bottom = workArea.origin.y + snappedToGrid * elemSize.height;
-            } else {
-                bottom = workArea.origin.y + workArea.size.height * this.rdc.xy.y;
-            }
+            bottom = workArea.origin.y + workArea.size.height * this.rdc.xy.y;
         }
 
         return new Rect(
@@ -91,15 +87,26 @@ export class TileSpec {
     isFullscreen(): boolean {
         return this.viewSize().equals(this.gridSize);
     }
+
+    /**
+     * Converts negative coordinates (e.g. -1:-1) to a positive format on a specified grid.
+     * If x or y is a positive number, it is ignored.
+     * E.g. -1:-1 on a 3:3 grid is a 3:3, as well as -1:3.
+     */
+    _convertNegativeCoord(gridEdges: number, coord: number) {
+        if (coord < 0) {
+            return gridEdges + coord + 1;
+        } else {
+            return coord;
+        }
+    }
 }
 
 export const MAX_TUPLE_MEMBER_VALUE = Number.MAX_SAFE_INTEGER;
 
 /**
  * Tuple Holder represents a single starting or ending point (x and y coordinates),
- * as well as the type of the coordinate - "tile" or "percentage" now.
- * approximate flag shows if the coordinates should we approximated to a grid
- * or are absolute.
+ * as well as the type of the coordinate - "tile", "approx_percentage" or "percentage" now.
  *
  * E.g. ~0.75:0.75 is {X:0.75,Y:0.75}, types - 'percentage' & 'percentage'
  * approximate - true.
@@ -108,61 +115,77 @@ export class TupleHolder {
     raw: string;
     xy: XY;
     types: CoordinateTypesHolder;
-    approximate: boolean;
 
     constructor(raw: string) {
         this.raw = raw;
 
-        // Converting raw string to properties of the holder.
-        const gssk = this.raw.split('~');
+        const gssk = this.raw.split(':');
 
-        if (gssk.length > 2 || gssk.length < 1) {
-            throw new Error("Failed to split " + this.raw + " into two numbers");
-        }
+        this._validateTuple(gssk);
 
-        if (gssk.length == 2) {
-            this.approximate = true;
-            this.xy = this._parseTuple(gssk[1]);
-            this.types = this._parseTypes(gssk[1]);
-        } else {
-            this.approximate = false;
-            this.xy = this._parseTuple(gssk[0]);
-            this.types = this._parseTypes(gssk[0]);
-        }
+        this.xy = this._parseTuple(gssk);
+        this.types = this._parseTypes(gssk);
     }
 
     toString() {
         return this.raw;
     }
 
-    _parseTuple(tuple: string) {
-        const gssk = tuple.split(':');
+    _parseTuple(tuple: Array<string>) {
+        const x = this._parseCoordinate(tuple[0]);
+        const y = this._parseCoordinate(tuple[1]);
 
-        if (gssk.length !== 2) {
-            throw new Error("Failed to split " + tuple + " into two numbers");
-        }
-
-        const numbers = gssk.map(Number);
-        if (numbers.some(n => isNaN(n) || n > MAX_TUPLE_MEMBER_VALUE)) {
-            throw new Error(`All elements of tuple must be intgers in [-inf, ${MAX_TUPLE_MEMBER_VALUE}]: ${tuple}`)
-        }
-
-        return new XY(numbers[0], numbers[1]);
+        return new XY(x, y);
     }
 
-    _parseTypes(tuple: string) {
-        const gssk = tuple.split(':');
-
-        const typeX = gssk[0].includes('.') ? 'percentage' : 'tile';
-        const typeY = gssk[1].includes('.') ? 'percentage' : 'tile';
+    _parseTypes(tuple: Array<string>) {
+        const typeX = this._parseType(tuple[0]);
+        const typeY = this._parseType(tuple[1]);
 
         return new CoordinateTypesHolder(typeX, typeY);
+    }
+
+    _parseCoordinate(coord: string) {
+        return Number(coord.replace('~', ''));
+    }
+
+    _parseType(coord: string) {
+        if (coord.includes('~')) {
+            return 'approx_percentage';
+        } else if (coord.includes('.')) {
+            return 'percentage';
+        } else {
+            return 'tile';
+        }
+    }
+
+    _validateTuple(gssk: Array<string>) {
+        if (gssk.length !== 2) {
+            throw new Error(`Failed to split ${this.raw} into two numbers`);
+        }
+
+        this._validateCoordinate(gssk[0]);
+        this._validateCoordinate(gssk[1]);
+    }
+
+    /**
+     * Allowed values:
+     * 1.0 (exact match)
+     * Any float from 0.0 till 0.999..., with or without preceding approx indicator (~)
+     * Any positive or negative integer, except 0
+     */
+    _validateCoordinate(coord: string) {
+        const testRegex = /(~?0\.[0-9]+|1\.0|-?[1-9]+[0-9]*)/;
+
+        if (!testRegex.test(coord)) {
+            throw new Error(`Failed to parse ${coord} in tuple ${this.raw}`);
+        }
     }
 }
 
 /**
  * Holds coordinate types for the tuple.
- * Currently 2 types are supported - tile and percentage.
+ * Currently 3 types are supported - tile, approx_percentage and percentage.
  */
 export class CoordinateTypesHolder {
     x:CoordinateType
@@ -174,9 +197,15 @@ export class CoordinateTypesHolder {
     }
 }
 
+/**
+ * Tile represents a tile number (integer from 1 till infinity).
+ * Percentage represents a percentage of the screen (float'y syntax: 0.75 represents 75% of the display).
+ * Approx percentage represents a the same percentage, but will be snapped to the currently set grid size.
+*/
 type CoordinateType = (
     "tile" |
-    "percentage"
+    "percentage" |
+    "approx_percentage"
 );
 
 export class GridSize {
