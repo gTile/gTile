@@ -318,124 +318,124 @@
 			<summary>Snap window size to neighbors</summary>
 		</key>
 		<key type = "s" name="resize1">
-			<default>'4x4 0:2 1:3, 0:1 2:3, 0:0 3:3, 0:3 0:3'</default>
+			<default>'4x4 1:3 2:4, 1:2 3:4, 1:1 4:4, 1:4 1:4'</default>
 			<summary>Preset resize1 settings (example 6x4 1:2 3:3).</summary>
 		</key>
 		<key type = "s" name="resize2">
-			<default>'4x4 0:2 3:3,0:1 3:3,0:0 3:3,0:3 3:3'</default>
+			<default>'4x4 1:3 4:4,1:2 4:4,1:1 4:4,1:4 4:4'</default>
 			<summary>Preset resize2 settings.</summary>
 		</key>
 		<key type = "s" name="resize3">
-			<default>'4x4 2:2 3:3,1:1 3:3,0:0 3:3,3:3 3:3'</default>
+			<default>'4x4 3:3 4:4,2:2 4:4,1:1 4:4,4:4 4:4'</default>
 			<summary>Preset resize3 settings.</summary>
 		</key>
 		<key type = "s" name="resize4">
-			<default>'4x4 0:0 1:3,0:0 2:3,0:0 3:3,0:0 0:3'</default>
+			<default>'4x4 1:1 2:4,1:1 3:4,1:1 4:4,1:1 1:4'</default>
 			<summary>Preset resize4 settings.</summary>
 		</key>
 		<key type = "s" name="resize5">
-			<default>'8x8 2:2 5:5, 1:1 6:6,0:0 7:7,16x16 5:5 9:9'</default>
+			<default>'8x8 3:3 6:6, 2:2 7:7,1:1 8:8,16x16 6:6 10:10'</default>
 			<summary>Preset resize5 settings.</summary>
 		</key>
 		<key type = "s" name="resize6">
-			<default>'4x4 2:0 3:3,1:0 3:3,0:0 3:3,3:0 3:3'</default>
+			<default>'4x4 3:1 4:4,2:1 4:4,1:1 4:4,4:1 4:4'</default>
 			<summary>Preset resize6 settings.</summary>
 		</key>
 		<key type = "s" name="resize7">
-			<default>'4x4 0:0 1:1,0:0 2:2,0:0 3:3,0:0 0:0'</default>
+			<default>'4x4 1:1 2:2,1:1 3:3,1:1 4:4,1:1 1:1'</default>
 			<summary>Preset resize7 settings.</summary>
 		</key>
 		<key type = "s" name="resize8">
-			<default>'4x4 0:0 3:1,0:0 3:2,0:0 3:3,0:0 3:0'</default>
+			<default>'4x4 1:1 4:2,1:1 4:3,1:1 4:4,1:1 4:1'</default>
 			<summary>Preset resize8 settings.</summary>
 		</key>
 		<key type = "s" name="resize9">
-			<default>'4x4 2:0 3:1,1:0 3:2,0:0 3:3,3:0 3:0'</default>
+			<default>'4x4 3:1 4:2,2:1 4:3,1:1 4:4,4:1 4:1'</default>
 			<summary>Preset resize9 settings.</summary>
 		</key>
 		<key type = "s" name="resize10">
-			<default>'11x17 3:5 7:9'</default>
+			<default>'11x17 4:6 8:10'</default>
 			<summary>Preset resize10 settings.</summary>
 		</key>
 
 		<key type = "s" name="resize11">
-			<default>'2x3 0:2 0:2'</default>
+			<default>'2x3 1:3 1:3'</default>
 			<summary>Preset resize11 settings.</summary>
 		</key>
 		<key type = "s" name="resize12">
-			<default>'2x3 0:2 1:2'</default>
+			<default>'2x3 1:3 2:3'</default>
 			<summary>Preset resize12 settings.</summary>
 		</key>
 		<key type = "s" name="resize13">
-			<default>'2x3 1:2 1:2'</default>
+			<default>'2x3 2:3 2:3'</default>
 			<summary>Preset resize13 settings.</summary>
 		</key>
 		<key type = "s" name="resize14">
-			<default>'2x3 0:1 0:1'</default>
+			<default>'2x3 1:2 1:2'</default>
 			<summary>Preset resize14 settings.</summary>
 		</key>
 		<key type = "s" name="resize15">
-			<default>'2x3 1:0 1:1'</default>
+			<default>'2x3 2:1 2:2'</default>
 			<summary>Preset resize15 settings.</summary>
 		</key>
 		<key type = "s" name="resize16">
-			<default>'2x3 1:1 1:1'</default>
+			<default>'2x3 2:2 2:2'</default>
 			<summary>Preset resize16 settings.</summary>
 		</key>
 		<key type = "s" name="resize17">
-			<default>'2x3 0:0 0:0'</default>
+			<default>'2x3 1:1 1:1'</default>
 			<summary>Preset resize17 settings.</summary>
 		</key>
 		<key type = "s" name="resize18">
-			<default>'2x3 0:0 0:1'</default>
+			<default>'2x3 1:1 1:2'</default>
 			<summary>Preset resize18 settings.</summary>
 		</key>
 		<key type = "s" name="resize19">
-			<default>'2x3 1:0 1:0'</default>
+			<default>'2x3 2:1 2:1'</default>
 			<summary>Preset resize19 settings.</summary>
 		</key>
 		<key type = "s" name="resize20">
-			<default>'3x3 1:1 2:2'</default>
+			<default>'3x3 2:2 3:3'</default>
 			<summary>Preset resize20 settings.</summary>
 		</key>
 		<key type = "s" name="resize21">
-			<default>'3x3 0:2 0:2'</default>
+			<default>'3x3 1:3 1:3'</default>
 			<summary>Preset resize21 settings.</summary>
 		</key>
 		<key type = "s" name="resize22">
-			<default>'3x3 1:2 1:2'</default>
+			<default>'3x3 2:3 2:3'</default>
 			<summary>Preset resize22 settings.</summary>
 		</key>
 		<key type = "s" name="resize23">
-			<default>'3x3 2:2 2:2'</default>
+			<default>'3x3 3:3 3:3'</default>
 			<summary>Preset resize23 settings.</summary>
 		</key>
 		<key type = "s" name="resize24">
-			<default>'3x3 0:1 0:1'</default>
+			<default>'3x3 1:2 1:2'</default>
 			<summary>Preset resize24 settings.</summary>
 		</key>
 		<key type = "s" name="resize25">
-			<default>'3x3 1:1 1:1'</default>
+			<default>'3x3 2:2 2:2'</default>
 			<summary>Preset resize25 settings.</summary>
 		</key>
 		<key type = "s" name="resize26">
-			<default>'3x3 2:1 2:1'</default>
+			<default>'3x3 3:2 3:2'</default>
 			<summary>Preset resize26 settings.</summary>
 		</key>
 		<key type = "s" name="resize27">
-			<default>'3x3 0:0 0:0'</default>
+			<default>'3x3 1:1 1:1'</default>
 			<summary>Preset resize27 settings.</summary>
 		</key>
 		<key type = "s" name="resize28">
-			<default>'3x3 1:0 1:0'</default>
+			<default>'3x3 2:1 2:1'</default>
 			<summary>Preset resize28 settings.</summary>
 		</key>
 		<key type = "s" name="resize29">
-			<default>'3x3 2:0 2:0'</default>
+			<default>'3x3 3:1 3:1'</default>
 			<summary>Preset resize29 settings.</summary>
 		</key>
 		<key type = "s" name="resize30">
-			<default>'3x3 1:1 2:2'</default>
+			<default>'3x3 2:2 3:3'</default>
 			<summary>Preset resize30 settings.</summary>
 		</key>
 
