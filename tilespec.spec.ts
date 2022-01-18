@@ -60,7 +60,6 @@ describe("TileSpec.isFullscreen", function() {
 
 describe("TileSpec.parsePreset error cases", function() {
     const badPresets = [
-        '0:0 1:1',
         '3:b 1:1',
         '3x3 0:b 1:1',
         '3xa 0:0 1:1',

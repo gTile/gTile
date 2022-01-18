@@ -7,6 +7,7 @@ import { ShellVersion } from './shellversion';
 import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkeys';
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
+import * as PresetParser from './preset_parser';
 import { StBoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StLabel, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
 import { BoolSettingName, NumberSettingName, StringSettingName } from './settings_data';
 
@@ -1289,7 +1290,7 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
 
     let tileSpecs: tilespec.TileSpec[] = [];
     try {
-        tileSpecs = tilespec.parsePreset(presetString);
+        tileSpecs = PresetParser.parsePreset(presetString, currentGridSize());
     } catch (err) {
         log(`Bad preset ${presetName} ${JSON.stringify(presetString)}: ${err}`);
         return;
@@ -1381,7 +1382,7 @@ function moveWindowToNextMonitor(): void {
         return;
     }
 
-    const ts = tilespec.parsePreset("5x5 1:1 3:3")[0];
+    const ts = PresetParser.parsePreset("5x5 1:1 3:3")[0];
 
     const srcMonitorIndex = window.get_monitor();
     const dstMonitorIndex = (srcMonitorIndex + 1) % numMonitors;
@@ -1409,6 +1410,11 @@ function moveWindowToRect(window: any, rect: tilespec.Rect) {
         rect.origin.y,
         rect.size.width,
         rect.size.height);
+}
+
+// Converts global nbCols & nbRows to GridSize object
+function currentGridSize() {
+    return new tilespec.GridSize(nbCols, nbRows);
 }
 
 /*****************************************************************
