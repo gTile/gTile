@@ -79,13 +79,8 @@ export class TileSpec {
         return new GridSize(this.gridWidth, this.gridHeight);
     }
 
-    viewSize(): GridSize {
-        const sizeXY = this.rdc.xy.minus(this.luc.xy);
-        return new GridSize(sizeXY.x + 1, sizeXY.y + 1);
-    }
-
-    isFullscreen(): boolean {
-        return this.viewSize().equals(this.gridSize);
+    isFullscreen(workArea: Rect): boolean {
+        return this.toFrameRect(workArea).equal(workArea, 1);
     }
 
     /**

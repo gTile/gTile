@@ -1349,7 +1349,7 @@ function presetResize(presetName: number, settingName: StringSettingName): void 
     }
     // The rectangle already incorporates insets, but it doesn't incorporate
     // window margin.
-    const zeroMargins = tileSpec.isFullscreen() && !getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
+    const zeroMargins = tileSpec.isFullscreen(workArea) && !getBoolSetting(SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED);
     const marginSize = new tilespec.Size(
         zeroMargins ? 0 : gridSettings[SETTINGS_WINDOW_MARGIN],
         zeroMargins ? 0 : gridSettings[SETTINGS_WINDOW_MARGIN]);

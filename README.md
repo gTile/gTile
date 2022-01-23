@@ -69,24 +69,35 @@ For configuration, please use the built-in preferences dialog (Gnome Tweak Tool 
   * Are defined in the preferences window (*Basic* tab)
   * Written as a comma-separated list of grid sizes like `8x7,3x2,4x6,4x7` (no spaces, columns first, then rows)
   * Grid lines can be shown when changing the grid size (*Basic* tab, disabled by default)
-* Resize presets:
-  * Are defined in the preferences window (*Reset presets* tab) 
-  * Format: grid size, top left corner tile, bottom right corner tile[, additional format variants]
-  * Coordinate origin: The tile at `0:0` always corresponds to the **top left**, no matter the grid size. 
-    In a `6x4` grid `5:3` is the bottom right tile
-  * Format examples: `2x2 0:1 0:1` or `6x4 0:2 3:3, 0:0 3:3, 3x2 0:0 1:1` for multiple cyclable presets
-    
-    ![gTile Preset specification illustrated](https://user-images.githubusercontent.com/11145016/57080232-61310a00-6cf2-11e9-9ba2-bdd55b62fd2c.png)
-    <!--
-    | columns → | index    | 0         | 1         | 2         |
-    | --------- | -------- | --------- | --------- | --------- |
-    | **rows**  | **0**    | 0:0       | 1:0       | 2:0       |
-    | **↓**     | **1**    | 0:1       | 1:1       | 2:1       |
-    -->
-  * Grid size format variants can either reuse the last grid format (e.g `6x4 0:2 3:3, 0:0 3:3`) or define a new grid (e.g `6x4 0:2 3:3, 8x6 0:0 3:3`)
-  * If grid size is not specified, global grid size will be used (unless it is specified in the first coordinate)
-  * Negative values are allowed. E.g. `3x3 -1:-1 -1:-1` will correspond to the bottom right corner on the screen on a 3x3 grid (same as `3x3 2:2 2:2`)
-  * Grids defined here can differ from the grid sizes defined in the *Basic* tab
+
+## Resize presets
+
+Resize presets are defined in the preferences window (*Resize presets* tab).
+
+* Presets can be cycled. One keyboard shortcut can have several presets attached, which will change on subsequent presses of the hotkey. E.g. `3x3 1:1 1:1, 2:2 2:2` on the first press will put the window on the top left corner, on the second press - in the middle of the screen.
+
+Presets have a format of "[grid size] [top left coordinate]:[bottom right coordinate]".
+
+* Grid size is specified as "XxY", where X represents a number of columns and Y represents a number of rows. E.g. 3x3 divides the screen into 3 columns and 3 rows, the same way as in grid schemes under *Basic*.
+* Grid size can be omitted. In that case preset will use the current grid set by the user in the UI or through the keyboard shortcut.
+* If grid size is specified in the first place, it can be omitted in the subsequent places. gTile will use the grid size specified in the first place. E.g. `3x3 1:1 1:1, 2:2 2:2` (when `2:2 2:2` is triggered, gTile will use 3x3 grid size).
+* Grids defined in the presets can differ from the grid sizes defined in the *Basic* tab.
+
+gTile allows several coordinate types.
+
+1. "Tile" represents a tile number and tiles start from 1.
+  E.g. `3x3 1:1 1:1` is the top left corner of the screen that goes to the third of the width and the third of the height. Tiles are always integer values.
+2. Negative tile works in the same way, but from the other side.
+  E.g. `3x3 -1:-1 -1:-1` represents a bottom right corner of the screen.
+3. Percentage type is represented by floating point numbers from 0.0 till 1.0. For example, 0.25 represents a quarter of the width or height. When these types are used, grid sizes are ignored.
+  E.g. `0.0:0.0 0.5:0.5` represents a top left quarter of the screen (window is placed from x:0, y:0 and spans for 25% of the width and height).
+4. Percentage type coordinates can be forced to be approximated to some grid size by adding `~` before the coordinate.
+  E.g. `0.0:0.0 ~0.25:~0.25` will make gTile to try to place the window in the top left corner, 25% of the width/height of the screen but gTile will snap it to the nearest grid line.
+  When the grid is set to 3x3, the window will be placed at the top left corner, spanning for a third of the screen size, as it is the closest approximation of `~0.25:~0.25`, which respects the grid size.
+
+Coordinates can be mixed and matched freely, e.g. `0.0:2 ~0.5:4` is a perfectly valid syntax.
+
+* Format examples: `2x2 1:2 1:2` or `6x4 1:3 4:4, 1:1 4:4, 3x2 1:1 2:2` for multiple cyclable presets
 
 ## Usage with interface
 
