@@ -27,7 +27,7 @@
         "karma-jasmine": "^3.1.0",
         "karma-requirejs": "^1.1.0",
         "karma-sourcemap-loader": "^0.3.7",
-        "karma": "^5.0.2",
+        "karma": "^6.3.14",
         "mocha": "^8.1.1",
         "requirejs": "^2.3.6",
         "rollup": "^2.23.0",
