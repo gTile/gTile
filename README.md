@@ -56,7 +56,7 @@ journalctl --follow /usr/bin/gnome-shell | grep "gTile"
 
 ## Configuration
 
-For configuration, please use the built-in preferences dialog (Gnome Tweak Tool -> Extensions -> gTile -> Preferences).
+For configuration, please use the preferences dialog accesible within the [Extensions App](https://apps.gnome.org/app/org.gnome.Extensions) under the gTile listing. *Older Gnome Shell versions use the [Tweak Tool](https://wiki.gnome.org/action/show/Apps/Tweaks) for extension management.*
 
 * Keyboard shortcuts:
   * Can be assigned from the preferences window (*Accelerators* tab)
