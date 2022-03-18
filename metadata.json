@@ -7,7 +7,8 @@
     "3.36",
     "3.38",
     "40",
-    "41"
+    "41",
+    "42"
   ],
   "url": "https://github.com/gTile",
   "settings-schema": "org.gnome.shell.extensions.gtile",
