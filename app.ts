@@ -285,6 +285,8 @@ class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
     private gridShowing: boolean = false;
     private gridWidget: StBoxLayout | null = null;
+    private gridLinesTimeout: Object = null;
+    private gridTiles:Array<StBoxLayout> = [];
 
 
     enable() {
@@ -573,6 +575,9 @@ class App {
         log("Extension disable begin");
         enabled = false;
 
+        // Notice for extension reviewer - this will call Mainloop.RemoveTimeout
+        this._hideGridLines();
+
         if (monitorsChangedConnect) {
             log("Disconnecting monitors-changed");
             Main.layoutManager.disconnect(monitorsChangedConnect);
@@ -627,10 +632,23 @@ class App {
         return this.gridShowing;
     }
 
+    _hideGridLines(removeTimeout: boolean = true): void {
+        if (this.gridLinesTimeout != null) {
+            log("Removing grid lines...");
+            if(removeTimeout) {
+                Mainloop.timeout_remove(this.gridLinesTimeout);
+            }
+            this.gridLinesTimeout = null;   
+            for(let tile of this.gridTiles) {
+                Main.uiGroup.remove_actor(tile);
+            }
+        }
+        this.gridTiles = []
+    }
+    
     _showGridLines(gridSize: tilespec.GridSize): void {
+        this._hideGridLines();
         log("Started drawing grid lines...");
-
-        let gridTiles:Array<StBoxLayout> = [];
 
         for(let monitorIdx = 0; monitorIdx < activeMonitors().length; monitorIdx++) {
             const workArea = workAreaRectByMonitorIndex(monitorIdx);
@@ -644,32 +662,40 @@ class App {
             let leftOffset = workArea.topLeft().x;
 
             log(`Starting to draw grid lines for monitor ${JSON.stringify(monitor)}`);
+            for(let i = 1; i < gridSize.width; i++) {
+                const newGridWidget = new St.BoxLayout({ style_class: `${theme}__grid_lines_preview` });
+                const posX = leftOffset + tileWidth * i;
 
-            for(let i = 1; i <= gridSize.width; i++) {
-                for(let u = 1; u <= gridSize.height; u++) {
-                    const newGridWidget = new St.BoxLayout({ style_class: `${theme}__grid_lines_preview` });
-                    const posX = leftOffset + tileWidth * (i - 1);
-                    const posY = topOffset + tileHeight * (u - 1);
+                newGridWidget.width = 1;
+                newGridWidget.height = workArea.size.height;
+                newGridWidget.x = posX;
+                newGridWidget.y = 0;
 
-                    gridTiles.push(newGridWidget);
+                this.gridTiles.push(newGridWidget);
 
-                    Main.uiGroup.add_actor(newGridWidget);
+                Main.uiGroup.add_actor(newGridWidget);
 
-                    newGridWidget.width = tileWidth;
-                    newGridWidget.height = tileHeight;
-                    newGridWidget.x = posX;
-                    newGridWidget.y = posY;
-
-                    log(`Grid line of size ${tileWidth}:${tileHeight} is drawn at ${posX}:${posY} (monitor offset ${monitor.x}:${monitor.y})`)
-                }
+                log(`Grid vertical line of size ${tileWidth}:${tileHeight} is drawn at ${posX}:0 (monitor offset ${monitor.x}:${monitor.y})`)
             }
+            for(let u = 1; u <= gridSize.height; u++) {
+                const newGridWidget = new St.BoxLayout({ style_class: `${theme}__grid_lines_preview` });
+                const posY = topOffset + tileHeight * u;
+
+                newGridWidget.width = workArea.size.width;
+                newGridWidget.height = 1;
+                newGridWidget.x = 0;
+                newGridWidget.y = posY;
+
+                this.gridTiles.push(newGridWidget);
+
+                Main.uiGroup.add_actor(newGridWidget);
+
+                log(`Grid horizontal line of size ${tileWidth}:${tileHeight} is drawn at 0:${posY} (monitor offset ${monitor.x}:${monitor.y})`)
+            }            
         }
 
-        Mainloop.timeout_add(1000, () => {
-            log("Removing grid lines...");
-            for(let tile of gridTiles) {
-                Main.uiGroup.remove_actor(tile);
-            }
+        this.gridLinesTimeout = Mainloop.timeout_add(1000, () => {
+            this._hideGridLines(false);
         });
     }
 
