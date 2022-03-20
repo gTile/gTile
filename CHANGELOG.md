@@ -1,5 +1,19 @@
 CHANGE LOG
 ----------
+### V49
+
+Breaking change:
+
+- Tile coordinates now starts with 1 instead of 0. If you defined custom accelerators, you need to increase all coordinates by 1.
+- Tiling will not work on coordinates cotnaining 0.
+
+New and changed functionality:
+
+- Tile coordinates can be specified from right (down) edge by using negative nubmer, i.e. -3:-1 -4:-2
+- Tile coordinates can be specified as float in range 0.0 .. 1.0, prefixed by "~", i.e. ~0.1:~0.2 ~0.5:~0.6
+- All styles of tile coordinates can be mixed and matched, i.e. 2:-3 ~0.5:-1
+- Fixed rounding error for shortcuts window placement
+
 ### V48
 
 New and changed functionality:
