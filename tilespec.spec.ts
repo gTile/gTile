@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 // import {describe, it} from 'mocha';
 
-import {LineSegment, XY, parsePreset, adjoiningSides, Edges, Side, Rect, Size, GridSize, parseGridSizesIgnoringErrors} from './tilespec';
+import {LineSegment, XY, adjoiningSides, Edges, Side, Rect, Size, GridSize, parseGridSizesIgnoringErrors} from './tilespec';
+import {parsePreset} from './preset_parser';
 
 describe('1 = 1', () => {
     it('should do that', () => {
@@ -37,23 +38,27 @@ describe("TileSpec.parsePreset success cases", function() {
 });
 
 describe("TileSpec.isFullscreen", function() {
-    const cases: Array<[string, boolean]> = [
+    const dummyWorkArea = new Rect(new XY(0, 0), new Size(50, 50));
+    const cases: Array<[string, Rect, boolean]> = [
         [
             '3x3 0:0 1:1',
+            dummyWorkArea,
             false,
         ],
         [
             '3x3 0:0 2:2',
+            dummyWorkArea,
             true,
         ],
         [
             '3x10 0:0 2:9',
+            dummyWorkArea,
             true,
         ],
     ];
-    for (let [input, output] of cases) {
+    for (let [input, workArea, output] of cases) {
         it(`${JSON.stringify(input)} should have fullscreen = ${JSON.stringify(output)}`, function () {
-            expect(parsePreset(input)[0].isFullscreen()).equal(output);
+            expect(parsePreset(input)[0].isFullscreen(workArea)).equal(output);
         });
     }
 });
