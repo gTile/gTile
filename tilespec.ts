@@ -15,11 +15,11 @@ export class TileSpec {
         this.rdc = rdc;
     }
 
-    toString() {
+    toString(): string {
         return `${[this.gridWidth, this.gridHeight].join('x')} ${this.luc.toString()} ${this.rdc.toString}`;
     }
 
-    toFrameRect(workArea: Rect) {
+    toFrameRect(workArea: Rect): Rect {
         const elemSize = new Size(
             workArea.size.width / this.gridWidth,
             workArea.size.height / this.gridHeight);

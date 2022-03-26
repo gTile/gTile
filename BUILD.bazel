@@ -165,6 +165,7 @@ ts_library(
     deps = [
         ":shellversion_lib",
         ":tilespec_lib",
+        ":preset_parser_lib",
         "@npm//@types/chai",
         "@npm//@types/jasmine",
         "@npm//chai",
