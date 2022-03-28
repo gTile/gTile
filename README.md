@@ -17,6 +17,10 @@ Preferred installation is from [Gnome Extensions](https://extensions.gnome.org/e
 
 Log out and log back in.
 
+### User-defined shortcuts not working / working incorrectly after upgrade to V50
+
+See issue https://github.com/gTile/gTile/issues/280
+
 ### Installation from source
 You can alternatively manually install the latest version from GitHub master branch:
 
