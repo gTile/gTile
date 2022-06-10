@@ -27,12 +27,7 @@ describe("TileSpec.parsePreset success cases", function() {
     ];
     for (let [input, output] of cases) {
         it(`${JSON.stringify(input)} roundtrips to ${JSON.stringify(output)}`, function () {
-            const roundtrip = function(s: string) {
-                return parsePreset(s)
-                    .map(x => x.toString())
-                    .join(', ');
-            };
-            expect(roundtrip(input)).equal(output);
+            expect(parsePreset(input).toString()).equal(output);
         });
     }
 });
