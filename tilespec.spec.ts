@@ -13,16 +13,16 @@ describe('1 = 1', () => {
 describe("TileSpec.parsePreset success cases", function() {
     const cases: Array<[string, string]> = [
         [
-            '3x3 1:1 2:2, 2x2 1:1 1:1',
-            '3x3 1:1 2:2, 2x2 1:1 1:1',
+            ' 3x3 1:1 2:2, 2x2 1:1 1:1',
+            ' 3x3 1:1 2:2, 2x2 1:1 1:1',
         ],
         [
-            '3x3 1:1 2:2,     1:1 1:1, 4x4 1:1 1:1,     1:3 4:4',
-            '3x3 1:1 2:2, 3x3 1:1 1:1, 4x4 1:1 1:1, 4x4 1:3 4:4',
+            ' 3x3 1:1 2:2,     1:1 1:1, 4x4 1:1 1:1,     1:3 4:4',
+            ' 3x3 1:1 2:2, 3x3 1:1 1:1, 4x4 1:1 1:1, 4x4 1:3 4:4',
         ],
         [
-            '3x3 1:1 2:2, 1:1 1:1',
-            '3x3 1:1 2:2, 3x3 1:1 1:1',
+            ' 3x3 1:1 2:2, 1:1 1:1',
+            ' 3x3 1:1 2:2, 3x3 1:1 1:1',
         ],
     ];
     for (let [input, output] of cases) {
@@ -75,20 +75,23 @@ describe("TileSpec.isFullscreen", function() {
 
 describe("TileSpec.parsePreset error cases", function() {
     const badPresets = [
+        '0x0 3:3 3:3',
+        '0x1 3:3 3:3',
+        '1x0 3:3 3:3',
         '3:3 0:0',
         '3:3 0:1',
         '3:3 1:0',
         '3:b 1:1',
-        '3x3 0:b 1:1',
-        '3xa 0:0 1:1',
-        '3x3 0:a 1:1',
-        '3x3 0:0 1:a',
-        'xx3 0:0 1:0',
-        '3x3 x:0 1:0',
-        '3x3 0:0 x:0',
-        'bx3 0:0 1:0',
-        '3x3 b:0 1:0',
-        '3x3 0:0 b:0',
+        '3x3 1:b 1:1',
+        '3xa 1:1 1:1',
+        '3x3 1:a 1:1',
+        '3x3 1:1 1:a',
+        'xx3 1:1 1:1',
+        '3x3 x:1 1:1',
+        '3x3 1:1 x:1',
+        'bx3 1:1 1:1',
+        '3x3 b:1 1:1',
+        '3x3 1:1 b:1',
     ];
     for (let input of badPresets) {
         it(`${JSON.stringify(input)} is invalid`, () => {
