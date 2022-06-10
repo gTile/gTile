@@ -41,17 +41,32 @@ describe("TileSpec.isFullscreen", function() {
     const dummyWorkArea = new Rect(new XY(0, 0), new Size(50, 50));
     const cases: Array<[string, Rect, boolean]> = [
         [
-            '3x3 0:0 1:1',
+            '3x3 1:1 2:2',
             dummyWorkArea,
             false,
         ],
         [
-            '3x3 0:0 2:2',
+            '3x3 1:1 3:3',
             dummyWorkArea,
             true,
         ],
         [
-            '3x10 0:0 2:9',
+            '3x10 1:1 3:10',
+            dummyWorkArea,
+            true,
+        ],
+        [
+            '3x3 -2:-2 -1:-1',
+            dummyWorkArea,
+            false,
+        ],
+        [
+            '3x3 -3:-3 -1:-1',
+            dummyWorkArea,
+            true,
+        ],
+        [
+            '3x10 -3:-10 -1:-1',
             dummyWorkArea,
             true,
         ],
