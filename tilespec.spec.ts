@@ -24,6 +24,18 @@ describe("TileSpec.parsePreset success cases", function() {
             ' 3x3 1:1 2:2, 1:1 1:1',
             ' 3x3 1:1 2:2, 3x3 1:1 1:1',
         ],
+        [
+            ' 3x3 -2:-2 -1:-1, 2x2 -1:-1 -1:-1',
+            ' 3x3 2:2 3:3, 2x2 2:2 2:2',
+        ],
+        [
+            ' 3x3 -3:1 2:2,    1:1 -1:-1, 4x4 1:1 -1:-2, -3:-3 4:-1',
+            ' 3x3 1:1 2:2, 3x3 1:1 3:3, 4x4 1:1 4:3, 4x4 2:2 4:4',
+        ],
+        [
+            ' 3x3 -1:-1 -1:-1, -3:1 3:-1',
+            ' 3x3 3:3 3:3, 3x3 1:1 3:3',
+        ],
     ];
     for (let [input, output] of cases) {
         it(`${JSON.stringify(input)} roundtrips to ${JSON.stringify(output)}`, function () {
