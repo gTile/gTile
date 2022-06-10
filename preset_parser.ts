@@ -37,7 +37,10 @@ function parseSinglePreset(preset: string) {
     const gridFormat = parseTuple(ps[0], "x");
     let luc = new TupleHolder(ps[1]);
     let rdc = new TupleHolder(ps[2]);
-
+    if    (gridFormat.x < 1 or gridFormat.x > 100 
+        or gridFormat.y < 1 or gridFormat.y > 100) {
+        throw new Error(`Bad preset: ${JSON.stringify(preset)} grid size out of range 1..100`);
+    }    
     return new TileSpec(gridFormat.x, gridFormat.y, luc, rdc);
 }
 
