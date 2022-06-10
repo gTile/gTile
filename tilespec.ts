@@ -16,7 +16,7 @@ export class TileSpec {
     }
 
     toString(): string {
-        return `${[this.gridWidth, this.gridHeight].join('x')} ${this.luc.toString()} ${this.rdc.toString()}`;
+        return ` ${[this.gridWidth, this.gridHeight].join('x')} ${this.luc.toString()} ${this.rdc.toString()}`;
     }
 
     toFrameRect(workArea: Rect): Rect {
