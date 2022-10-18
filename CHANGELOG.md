@@ -3,6 +3,7 @@ CHANGE LOG
 ### 51
 
 Maintenance release, bumped up gnome-shell version
+Minor fixes to stylesheet
 
 ### V49
 
