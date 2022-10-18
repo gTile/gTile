@@ -1,5 +1,9 @@
 CHANGE LOG
 ----------
+### 51
+
+Maintenance release, bumped up gnome-shell version
+
 ### V49
 
 Breaking change:
