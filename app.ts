@@ -220,8 +220,8 @@ const key_bindings_tiling: Bindings = new Map([
 ]);
 
 const key_bindings_auto_tiling: Bindings = new Map([
-    ['autotile-main-left', () => { AutoTileMain('left'); }],
-    ['autotile-main-right', () => { AutoTileMain('right'); }],
+    ['autotile-main', () => { AutoTileMain('left'); }],
+    ['autotile-main-inverted', () => { AutoTileMain('right'); }],
     ['autotile-1', () => { autoTileNCols(1); }],
     ['autotile-2', () => { autoTileNCols(2); }],
     ['autotile-3', () => { autoTileNCols(3); }],
@@ -282,8 +282,8 @@ const keyBindingGlobalResizes: Bindings = new Map([
     ['action-move-right', () => { keyMoveResizeEvent('move', 'right', true); }],
     ['action-move-up', () => { keyMoveResizeEvent('move', 'up', true); }],
     ['action-move-next-monitor', () => { moveWindowToNextMonitor(); }],
-    ['action-autotile-main-left', () => { AutoTileMain('left', true); }],
-    ['action-autotile-main-right', () => { AutoTileMain('right', true); }],
+    ['action-autotile-main', () => { AutoTileMain('left', true); }],
+    ['action-autotile-main-inverted', () => { AutoTileMain('right', true); }],
 ]);
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
