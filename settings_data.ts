@@ -32,7 +32,8 @@ export type NumberSettingName = (
 
 // A setting for a key binding i.e. a 'preset' in the app.ts code.
 export type KeyBindingSettingName = (
-    "action-autotile-main" |
+    "action-autotile-main-left" |
+    "action-autotile-main-right" |
     "action-change-tiling" |
     "action-contract-bottom" |
     "action-contract-left" |
@@ -57,7 +58,8 @@ export type KeyBindingSettingName = (
     "autotile-7" |
     "autotile-8" |
     "autotile-9" |
-    "autotile-main" |
+    "autotile-main-left" |
+    "autotile-main-right" |
     "cancel-tiling" |
     "change-grid-size" |
     "move-down" |
@@ -151,7 +153,8 @@ export type StringSettingName = (
 
 // Any valid setting name.
 export type AnySettingName = (
-    "action-autotile-main" |
+    "action-autotile-main-left" |
+    "action-autotile-main-right" |
     "action-change-tiling" |
     "action-contract-bottom" |
     "action-contract-left" |
@@ -179,7 +182,8 @@ export type AnySettingName = (
     "autotile-7" |
     "autotile-8" |
     "autotile-9" |
-    "autotile-main" |
+    "autotile-main-left" |
+    "autotile-main-right" |
     "cancel-tiling" |
     "change-grid-size" |
     "debug" |
@@ -287,8 +291,11 @@ export type AnySettingName = (
     "window-margin-fullscreen-enabled");
 
 interface RawConfigObject {
-    /** Global autotile with main window. */
-    ["action-autotile-main"]: string[];
+    /** Global autotile with main window to the right. */
+    ["action-autotile-main-left"]: string[];
+
+    /** Global autotile with main window to the right. */
+    ["action-autotile-main-right"]: string[];
 
     /** Global change grid size. */
     ["action-change-tiling"]: string[];
@@ -371,8 +378,11 @@ interface RawConfigObject {
     /** Autotile 9 columns. */
     ["autotile-9"]: string[];
 
-    /** Autotile with main window. */
-    ["autotile-main"]: string[];
+    /** Autotile with main window to the right. */
+    ["autotile-main-left"]: string[];
+
+    /** Autotile with main window to the right. */
+    ["autotile-main-right"]: string[];
 
     /** Cancel tiling. */
     ["cancel-tiling"]: string[];

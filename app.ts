@@ -13,6 +13,7 @@ import { BoolSettingName, NumberSettingName, StringSettingName } from './setting
 
 type MoveResizeOp = 'contract' | 'move' | 'expand' | 'resize';
 type MoveResizeSide = 'bottom' | 'top' | 'left' | 'right' | 'up' | 'down';
+type TileDirection = 'left' | 'right';
 
 /*****************************************************************
 
@@ -219,7 +220,8 @@ const key_bindings_tiling: Bindings = new Map([
 ]);
 
 const key_bindings_auto_tiling: Bindings = new Map([
-    ['autotile-main', () => { AutoTileMain(); }],
+    ['autotile-main-left', () => { AutoTileMain('left'); }],
+    ['autotile-main-right', () => { AutoTileMain('right'); }],
     ['autotile-1', () => { autoTileNCols(1); }],
     ['autotile-2', () => { autoTileNCols(2); }],
     ['autotile-3', () => { autoTileNCols(3); }],
@@ -280,7 +282,8 @@ const keyBindingGlobalResizes: Bindings = new Map([
     ['action-move-right', () => { keyMoveResizeEvent('move', 'right', true); }],
     ['action-move-up', () => { keyMoveResizeEvent('move', 'up', true); }],
     ['action-move-next-monitor', () => { moveWindowToNextMonitor(); }],
-    ['action-autotile-main', () => { AutoTileMain(true); }],
+    ['action-autotile-main-left', () => { AutoTileMain('left', true); }],
+    ['action-autotile-main-right', () => { AutoTileMain('right', true); }],
 ]);
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
@@ -1632,13 +1635,13 @@ class AutoTileMainAndList extends ActionButton {
 
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
-function AutoTileMain(is_global = false) {
+function AutoTileMain(tile_direction: TileDirection = 'left', is_global = false) {
     if (is_global) {
         focusMetaWindow = getFocusApp();
     }
 
-    let preset = "AutoTileMain";
-    log("AutoTileMain");
+    let preset = "AutoTileMain-" + tile_direction;
+    log(preset);
     let window = getFocusApp();
     if (!window) {
         log("No focused window - ignoring keyboard shortcut AutoTileMain");
@@ -1687,11 +1690,27 @@ function AutoTileMain(is_global = false) {
     }
 
     let mainRatio = ps_variants[lastResizeInfo.variantIndex];
+
     let mainWidth = workArea.width * mainRatio;
     let minorWidth = workArea.width - mainWidth;
+    let mainX = 0;
+    let minorX = 0;
+
+    switch (tile_direction)
+    {
+        case 'left':
+            mainX = 0;
+            minorX = mainWidth;
+            break;
+        case 'right':
+            mainX = minorWidth;
+            minorX = 0;
+            break;
+    }
+
     moveResizeWindowWithMargins(
         focusMetaWindow,
-        workArea.x,
+        workArea.x + mainX,
         workArea.y,
         mainWidth,
         workArea.height);
@@ -1710,7 +1729,7 @@ function AutoTileMain(is_global = false) {
 
         moveResizeWindowWithMargins(
             metaWindow,
-            workArea.x + mainWidth,
+            workArea.x + minorX,
             newOffset,
             minorWidth,
             winHeight

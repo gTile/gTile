@@ -269,13 +269,21 @@
 			<default><![CDATA[['']]]></default>
 			<summary>Global move window to next monitor.</summary>
 		</key>
-		<key type="as" name="autotile-main">
+		<key type="as" name="autotile-main-left">
 			<default><![CDATA[['m']]]></default>
-			<summary>Autotile with main window.</summary>
+			<summary>Autotile with main window to the right.</summary>
 		</key>
-		<key type="as" name="action-autotile-main">
+		<key type="as" name="autotile-main-right">
 			<default><![CDATA[['']]]></default>
-			<summary>Global autotile with main window.</summary>
+			<summary>Autotile with main window to the right.</summary>
+		</key>
+		<key type="as" name="action-autotile-main-left">
+			<default><![CDATA[['']]]></default>
+			<summary>Global autotile with main window to the right.</summary>
+		</key>
+		<key type="as" name="action-autotile-main-right">
+			<default><![CDATA[['']]]></default>
+			<summary>Global autotile with main window to the right.</summary>
 		</key>
 		<key type="as" name="autotile-1">
 			<default><![CDATA[['1']]]></default>
