@@ -110,7 +110,8 @@ const pretty_names = {
     'resize-left-vi'          : 'Vi-style resize narrower',
     'resize-right-vi'         : 'Vi-style resize wider',
     'resize-up-vi'            : 'Vi-style resize taller',
-    'resize-down-vi'          : 'Vi-style resize shorter'
+    'resize-down-vi'          : 'Vi-style resize shorter',
+    'action-autotile-main'    : 'Global Autotile Main'
 }
 
 function set_child(widget, child) {

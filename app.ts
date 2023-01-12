@@ -280,6 +280,7 @@ const keyBindingGlobalResizes: Bindings = new Map([
     ['action-move-right', () => { keyMoveResizeEvent('move', 'right', true); }],
     ['action-move-up', () => { keyMoveResizeEvent('move', 'up', true); }],
     ['action-move-next-monitor', () => { moveWindowToNextMonitor(); }],
+    ['action-autotile-main', () => { AutoTileMain(true); }],
 ]);
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
@@ -1631,7 +1632,11 @@ class AutoTileMainAndList extends ActionButton {
 
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
-function AutoTileMain() {
+function AutoTileMain(is_global = false) {
+    if (is_global) {
+        focusMetaWindow = getFocusApp();
+    }
+
     let preset = "AutoTileMain";
     log("AutoTileMain");
     let window = getFocusApp();
