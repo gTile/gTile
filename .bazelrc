@@ -1,0 +1,2 @@
+# Enable bzlmod for this project.
+common --experimental_enable_bzlmod
