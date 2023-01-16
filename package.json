@@ -27,5 +27,5 @@
     },
     "scripts": {
     },
-    "type": "module"
+    "type": "commonjs"
 }
