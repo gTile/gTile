@@ -1,4 +1,4 @@
-/* Edited by Sergey after 
+/* Edited by Sergey after
 https://github.com/tpyl/gssnaptoneighbors
  by Timo Pylvanainen <tpyl@iki.fi>
  */
@@ -28,7 +28,7 @@ function getWindowsOnActiveWorkspace() {
     for (let i = 0; i < windowActors.length; i++) {
         let win = windowActors[i].meta_window;
         if(win.located_on_workspace(curWorkSpace) &&
-            !win.minimized && 
+            !win.minimized &&
             win.get_frame_type() == 0) {
             windows.push(win);
         }
@@ -37,20 +37,25 @@ function getWindowsOnActiveWorkspace() {
     return windows;
 }
 
+interface MinMax {
+  min: number,
+  max: number,
+};
+
 /**
  * Find the maximum horzontal expansion from x and
  * returns minx, maxx. The initial maximum x is given
- * as argument, and the expansion is never larger than 
- * that. 
+ * as argument, and the expansion is never larger than
+ * that.
  *
  * The upper and lower limits define the y coordinate
- * range to check for overlapping windows. 
+ * range to check for overlapping windows.
  */
-function expandHorizontally(x, upper, lower, minx, maxx, windows) {
+function expandHorizontally(x: number, upper: number, lower: number, minx: number, maxx: number, windows: Window[]): MinMax {
 
     for (let i = 0; i < windows.length; i++) {
         let rect = windows[i].get_frame_rect();
-        
+
         let wt = rect.y;
         let wb = rect.y + rect.height;
         let wl = rect.x;
@@ -74,17 +79,17 @@ function expandHorizontally(x, upper, lower, minx, maxx, windows) {
 /**
  * Find the maximum vertical expansion from  y, and
  * returns miny, maxy. The initial maximum y is given
- * as argument, and the expansion is never larger than 
- * that. 
+ * as argument, and the expansion is never larger than
+ * that.
  *
  * The left and right limits define the x coordinate
- * range to check for overlapping windows. 
+ * range to check for overlapping windows.
  */
-function expandVertically(y, left, right, miny, maxy, windows) {
+function expandVertically(y: number, left: number, right: number, miny: number, maxy: number, windows: Window[]) {
 
     for (let i = 0; i < windows.length; i++) {
         let rect = windows[i].get_frame_rect();
-        
+
         let wt = rect.y;
         let wb = rect.y + rect.height;
         let wl = rect.x;
@@ -106,7 +111,7 @@ function expandVertically(y, left, right, miny, maxy, windows) {
 
 /**
  * Type definition based on
- * https://gjs-docs.gnome.org/meta6~6_api/meta.window#method-get_layer and 
+ * https://gjs-docs.gnome.org/meta6~6_api/meta.window#method-get_layer and
  * https://developer.gnome.org/meta/stable/MetaWindow.html#meta-window-get-work-area-current-monitor.
  */
 interface MetaWindow {
@@ -135,12 +140,12 @@ interface MetaRectangle {
 
 /**
  * Resize & move the *window* so it touches adjacent windows or
- * screen edge top, bottom, left and right. The top-left corner 
- * of the window defines the expansion point. 
+ * screen edge top, bottom, left and right. The top-left corner
+ * of the window defines the expansion point.
  *
- * There is an L-ambiguity where the window could be expanded 
+ * There is an L-ambiguity where the window could be expanded
  * both vertically and horizontally. The expnasion that results
- * in closer to 1 aspect ratio is selected. 
+ * in closer to 1 aspect ratio is selected.
  */
 export function snapToNeighbors(window: Window) {
 	log("snapToNeighbors " + window.get_title());
@@ -153,13 +158,13 @@ export function snapToNeighbors(window: Window) {
 
     let windows = getWindowsOnActiveWorkspace();
 
-    // Scan for overlapping windows in a thin bar around the top of the 
-    // window. The vertical height of the window will be adjusted later. 
+    // Scan for overlapping windows in a thin bar around the top of the
+    // window. The vertical height of the window will be adjusted later.
     let maxHorizw = expandHorizontally(
-        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2), 
-        myrect.y + Math.min(SCAN_BOX_SIZE, myrect.height / 2), 
+        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2),
+        myrect.y + Math.min(SCAN_BOX_SIZE, myrect.height / 2),
         myrect.y + Math.min(SCAN_BOX_SIZE, myrect.height / 2) + SCAN_BOX_SIZE,
-        workArea.x, 
+        workArea.x,
         workArea.x + workArea.width,
         windows
     );
@@ -167,42 +172,42 @@ export function snapToNeighbors(window: Window) {
     let maxHorizh = expandVertically(
         myrect.y + Math.min(SCAN_BOX_SIZE, myrect.height / 2),
         maxHorizw.min + OVERLAP_TOLERANCE,
-        maxHorizw.max - OVERLAP_TOLERANCE, 
-        workArea.y, 
+        maxHorizw.max - OVERLAP_TOLERANCE,
+        workArea.y,
         workArea.y + workArea.height,
         windows)
 
     let maxVerth = expandVertically(
         myrect.y + Math.min(SCAN_BOX_SIZE, myrect.height / 2),
-        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2), 
-        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2) + SCAN_BOX_SIZE, 
-        workArea.y, 
+        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2),
+        myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2) + SCAN_BOX_SIZE,
+        workArea.y,
         workArea.y + workArea.height,
         windows)
 
     let maxVertw = expandHorizontally(
         myrect.x + Math.min(SCAN_BOX_SIZE, myrect.width / 2),
-        maxVerth.min + OVERLAP_TOLERANCE, 
-        maxVerth.max - OVERLAP_TOLERANCE, 
+        maxVerth.min + OVERLAP_TOLERANCE,
+        maxVerth.max - OVERLAP_TOLERANCE,
         workArea.x,
-        workArea.x + workArea.width, 
+        workArea.x + workArea.width,
         windows);
 
-    if ((maxHorizw.max - maxHorizw.min) * (maxHorizh.max - maxHorizh.min) > 
+    if ((maxHorizw.max - maxHorizw.min) * (maxHorizh.max - maxHorizh.min) >
         (maxVertw.max - maxVertw.min) * (maxVerth.max - maxVerth.min)) {
         window.move_resize_frame(
             true,
             maxHorizw.min,
-            maxHorizh.min, 
-            maxHorizw.max - maxHorizw.min, 
+            maxHorizh.min,
+            maxHorizw.max - maxHorizw.min,
             maxHorizh.max - maxHorizh.min
             );
     } else {
         window.move_resize_frame(
             true,
             maxVertw.min,
-            maxVerth.min, 
-            maxVertw.max - maxVertw.min, 
+            maxVerth.min,
+            maxVertw.max - maxVertw.min,
             maxVerth.max - maxVerth.min
             );
     }
