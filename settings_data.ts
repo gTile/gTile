@@ -12,10 +12,10 @@ export type BoolSettingName = (
     "global-auto-tiling" |
     "global-presets" |
     "moveresize-enabled" |
+    "show-grid-lines" |
     "show-icon" |
     "target-presets-to-monitor-of-mouse" |
-    "window-margin-fullscreen-enabled" |
-    "show-grid-lines");
+    "window-margin-fullscreen-enabled");
 
 // A setting name for a number-valued setting.
 export type NumberSettingName = (
@@ -32,6 +32,8 @@ export type NumberSettingName = (
 
 // A setting for a key binding i.e. a 'preset' in the app.ts code.
 export type KeyBindingSettingName = (
+    "action-autotile-main" |
+    "action-autotile-main-inverted" |
     "action-change-tiling" |
     "action-contract-bottom" |
     "action-contract-left" |
@@ -57,6 +59,7 @@ export type KeyBindingSettingName = (
     "autotile-8" |
     "autotile-9" |
     "autotile-main" |
+    "autotile-main-inverted" |
     "cancel-tiling" |
     "change-grid-size" |
     "move-down" |
@@ -150,6 +153,8 @@ export type StringSettingName = (
 
 // Any valid setting name.
 export type AnySettingName = (
+    "action-autotile-main" |
+    "action-autotile-main-inverted" |
     "action-change-tiling" |
     "action-contract-bottom" |
     "action-contract-left" |
@@ -178,6 +183,7 @@ export type AnySettingName = (
     "autotile-8" |
     "autotile-9" |
     "autotile-main" |
+    "autotile-main-inverted" |
     "cancel-tiling" |
     "change-grid-size" |
     "debug" |
@@ -273,6 +279,7 @@ export type AnySettingName = (
     "resize8" |
     "resize9" |
     "set-tiling" |
+    "show-grid-lines" |
     "show-icon" |
     "show-toggle-tiling" |
     "show-toggle-tiling-alt" |
@@ -284,6 +291,12 @@ export type AnySettingName = (
     "window-margin-fullscreen-enabled");
 
 interface RawConfigObject {
+    /** Global autotile with main window. */
+    ["action-autotile-main"]: string[];
+
+    /** Global autotile with main window to the other side. */
+    ["action-autotile-main-inverted"]: string[];
+
     /** Global change grid size. */
     ["action-change-tiling"]: string[];
 
@@ -367,6 +380,9 @@ interface RawConfigObject {
 
     /** Autotile with main window. */
     ["autotile-main"]: string[];
+
+    /** Autotile with main window to the other side. */
+    ["autotile-main-inverted"]: string[];
 
     /** Cancel tiling. */
     ["cancel-tiling"]: string[];
@@ -653,6 +669,9 @@ interface RawConfigObject {
     /** Tile window according to selection. */
     ["set-tiling"]: string[];
 
+    /** Show grid lines when changing grid size */
+    ["show-grid-lines"]: boolean;
+
     /** Show gTile icon on a panel. */
     ["show-icon"]: boolean;
 
@@ -680,3 +699,4 @@ interface RawConfigObject {
     /** Apply margin to fullscreen windows */
     ["window-margin-fullscreen-enabled"]: boolean;
 }
+    

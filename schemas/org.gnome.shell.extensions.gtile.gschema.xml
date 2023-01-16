@@ -273,6 +273,18 @@
 			<default><![CDATA[['m']]]></default>
 			<summary>Autotile with main window.</summary>
 		</key>
+		<key type="as" name="autotile-main-inverted">
+			<default><![CDATA[['']]]></default>
+			<summary>Autotile with main window to the other side.</summary>
+		</key>
+		<key type="as" name="action-autotile-main">
+			<default><![CDATA[['']]]></default>
+			<summary>Global autotile with main window.</summary>
+		</key>
+		<key type="as" name="action-autotile-main-inverted">
+			<default><![CDATA[['']]]></default>
+			<summary>Global autotile with main window to the other side.</summary>
+		</key>
 		<key type="as" name="autotile-1">
 			<default><![CDATA[['1']]]></default>
 			<summary>Autotile 1 column.</summary>
