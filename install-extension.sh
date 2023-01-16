@@ -8,8 +8,6 @@
 
 set -e # exit on error
 
-find .
-
 # --- begin runfiles.bash initialization v2 ---
 # Copy-pasted from the Bazel Bash runfiles library v2.
 set -uo pipefail; set +e; f=bazel_tools/tools/bash/runfiles/runfiles.bash
@@ -38,7 +36,7 @@ if [ -d "$UPDATEDIR" ]; then
 fi
 echo "Running in $BASEDIR"
 mkdir -p "$EXTDIR"
-echo tar -xzf "$TARBALL" --directory "$EXTDIR"
+tar -xzf "$TARBALL" --directory "$EXTDIR"
 
 echo "Installation complete."
 echo ""
