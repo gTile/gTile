@@ -24,7 +24,7 @@ bazel run :install-extension
 
 ### Development cycle
 
-Generally, 
+Generally,
 
 1. Code
 2. Run `glib-compile-schemas schemas` (if you modified [the schema](/schemas/org.gnome.shell.extensions.gtile.gschema.xml))
@@ -47,5 +47,11 @@ bazel run @nodejs//:yarn
 To add a new "dev" dependency:
 
 ```shell
-bazel run @nodejs//:yarn -- add --dev "@bazel/karma"
+bazel run -- @pnpm//:pnpm --dir $PWD add --dev "typescript"
+```
+
+To update all dependencies
+
+```shell
+bazel run -- @pnpm//:pnpm --dir $PWD update --latest
 ```

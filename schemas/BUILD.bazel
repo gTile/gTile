@@ -1,5 +1,5 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
-load("@npm//@bazel/typescript:index.bzl", "ts_library")
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 
 
 exports_files([
@@ -8,15 +8,17 @@ exports_files([
 ])
 
 
-ts_library(
+ts_project(
     name = "extract_settings_type_definition_lib",
     srcs = ["extract_settings_type_definition.ts"],
-    tsconfig = "//:tsconfig-tools.json",
+    tsconfig = "//:tsconfig-tools",
+    declaration = True,
     deps = [
-        "@npm//@types",
-        "@npm//yargs",
-        "@npm//jsdom",
-        #"@npm//@types:yargs",
+        "//:node_modules/@types/jsdom",
+        "//:node_modules/@types/yargs",
+        "//:node_modules/yargs",
+        "//:node_modules/jsdom",
+        #"//:node_modules/@types:yargs",
     ],
 )
 
@@ -31,12 +33,11 @@ ts_library(
 # https://bazelbuild.github.io/rules_nodejs/Built-ins.html#nodejs_binary-entry_point
 # for documentation of the nodejs_binary rule and how to make it work with
 # Typescript.
-nodejs_binary(
+js_binary(
     name = "extract_settings_type_definition",
     data = [
         ":extract_settings_type_definition_lib",
     ],
-    entry_point = "extract_settings_type_definition.ts",
-    node_modules = "@npm//:node_modules",
+    entry_point = "extract_settings_type_definition.js",
     visibility = ["//visibility:public"],
 )

@@ -342,7 +342,7 @@ export interface ClutterActor {
 
 interface ClutterContainer {
     /**
-     * 
+     *
      * @see https://gjs-docs.gnome.org/clutter7~7_api/clutter.container#method-add_actor
      * @deprecated
      */
@@ -387,7 +387,7 @@ export interface WorkspaceManager {
 }
 
 /**
- * Based on 
+ * Based on
  */
 export interface Workspace {
     //activate(timestamp)
@@ -509,7 +509,7 @@ export interface Window {
     make_fullscreen(): void;
     maximize(directions: MaximizeFlags): void;
     minimize(): void;
-    
+
     /**
      * Moves the window to the desired location on window's assigned workspace,
      * using the northwest edge of the frame as the reference, instead of the
@@ -540,7 +540,7 @@ export interface Window {
     requested_dont_bypass_compositor(): void;
     //set_compositor_private(priv): void;
     set_demands_attention(): void;
-    set_icon_geometry(rect): void;
+    set_icon_geometry(rect: Rectangle): void;
     //shade(timestamp): void;
     shove_titlebar_onscreen(): void;
     showing_on_its_workspace(): void;
@@ -653,7 +653,7 @@ export interface StLabel extends ClutterContainer, ClutterActor, StWidget, StBin
 }
 
 /**
- * 
+ *
  */
 export interface StWidget extends ClutterActor {
     // add_accessible_state(state): someTYpe;

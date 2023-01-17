@@ -3,6 +3,7 @@ import { JSDOM } from 'jsdom';
 
 import yargs from "yargs";
 
+// See https://github.com/yargs/yargs/blob/main/docs/typescript.md.
 const argv = yargs(process.argv.slice(2)).options({
     gschema_xml: {
         type: 'string',
@@ -16,7 +17,7 @@ const argv = yargs(process.argv.slice(2)).options({
         description: 'path to output .ts file',
         default: "settings_data.ts"
     },
-}).argv;
+}).parseSync();
 
 /**
  * ConfigKey corresponds to the <key> elements inside of the <schemalist><shema>
@@ -64,16 +65,16 @@ function lookupKeyType(value: string): KeyType | null {
 }
 
 function main() {
-    console.log(`Hello, world! reading from ${argv.gschema_xml}, writing to ${argv.output_ts}.`);
-    const xml = fs.readFileSync(argv.gschema_xml);
+    console.log(`Hello, world! reading from ${argv['gschema_xml']}, writing to ${argv.output_ts}.`);
+    const xml = fs.readFileSync(argv['gschema_xml']);
     const keys = parseKeys(xml).sort((a, b): number => {
         return a.name.localeCompare(b.name);
     });
     const code = generateTypeDefinition(keys);
-    fs.writeFileSync(argv.output_ts, code, {
+    fs.writeFileSync(argv['output_ts'], code, {
         encoding: 'utf-8',
     });
-    console.log("output code to %s", argv.output_ts);
+    console.log("output code to %s", argv['output_ts']);
 }
 
 function generateTypeDefinition(keys: ConfigKey[]): string {

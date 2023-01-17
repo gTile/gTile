@@ -1,12 +1,36 @@
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-#load("@build_bazel_rules_typescript//:defs.bzl", "ts_library", "ts_web_test")
-load("@npm//@bazel/typescript:index.bzl", "ts_library")
-load("@npm//@bazel/rollup:index.bzl", "rollup_bundle")
-load("@npm//@bazel/jasmine:index.bzl", "jasmine_node_test")
+load("@rules_pkg//pkg/private/tar:tar.bzl", "pkg_tar")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@aspect_rules_rollup//rollup:defs.bzl", "rollup_bundle")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load(":execute.bzl", "concat")
+load("@jasmine//:defs.bzl", "jasmine_test")
 
 package(default_visibility = ["//:__subpackages__"])
 
+# Defines all of the //:node_modules/foo/bar targets where foo/bar is the npm
+# package name.
+npm_link_all_packages(name = "node_modules")
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    visibility = [":__subpackages__"],
+)
+
+ts_config(
+    name = "tsconfig-app",
+    src = "tsconfig-app.json",
+    visibility = [":__subpackages__"],
+    deps = [
+      "tsconfig.json",
+    ]
+)
+
+ts_config(
+    name = "tsconfig-tools",
+    src = "tsconfig-tools.json",
+    visibility = [":__subpackages__"],
+)
 
 # Building the distribution.
 
@@ -15,6 +39,7 @@ sh_binary(
     name = "install-extension",
     srcs = ["install-extension.sh"],
     data = [":dist.tar.gz"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
 sh_binary(
@@ -53,20 +78,11 @@ exports_files([
     "tsconfig-tools.json",
 ])
 
-# NOTE: this will move to node_modules/BUILD in a later release
-filegroup(
-    name = "node_modules",
-    srcs = glob([
-        "node_modules/**/*.js",
-        "node_modules/**/*.d.ts",
-        "node_modules/**/*.json",
-    ]),
-)
-
-ts_library(
+ts_project(
     name = "app_lib",
     srcs = ["app.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
         ":gnometypes_lib",
         ":hotkeys_lib",
@@ -79,85 +95,96 @@ ts_library(
     ],
 )
 
-ts_library(
+ts_project(
     name = "gnometypes_lib",
     srcs = ["gnometypes.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
     ],
 )
 
-ts_library(
+ts_project(
     name = "hotkeys_lib",
     srcs = ["hotkeys.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
         ":logging_lib",
         ":settings_data_lib",
     ],
 )
 
-ts_library(
+ts_project(
     name = "logging_lib",
     srcs = ["logging.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
     ],
 )
 
-ts_library(
+ts_project(
     name = "settings_data_lib",
     srcs = ["settings_data.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [],
 )
 
 
-ts_library(
+ts_project(
     name = "shellversion_lib",
     srcs = ["shellversion.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
         ":logging_lib",
     ],
 )
 
-ts_library(
+ts_project(
     name = "snaptoneighbors_lib",
     srcs = ["snaptoneighbors.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [
         ":logging_lib",
         ":gnometypes_lib",
     ],
 )
 
-ts_library(
+ts_project(
     name = "preset_parser_lib",
     srcs = ["preset_parser.ts"],
     tsconfig = "//:tsconfig.json",
+    declaration = True,
     deps = [
         ":tilespec_lib"
     ]
 )
 
 
-ts_library(
+ts_project(
     name = "tilespec_lib",
     srcs = ["tilespec.ts"],
-    tsconfig = "//:tsconfig.json"
+    tsconfig = "//:tsconfig",
+    declaration = True,
 )
 
-ts_library(
+ts_project(
     name = "entry_lib",
     srcs = ["entry.ts"],
-    tsconfig = "//:tsconfig-app.json",
+    tsconfig = "//:tsconfig-app",
+    declaration = True,
     deps = [":app_lib"],
 )
 
-ts_library(
+ts_project(
     name = "tests",
     testonly = 1,
+    tsconfig = "//:tsconfig",
+    declaration = True,
     srcs = [
         "shellversion.spec.ts",
         "tilespec.spec.ts",
@@ -166,23 +193,50 @@ ts_library(
         ":shellversion_lib",
         ":tilespec_lib",
         ":preset_parser_lib",
-        "@npm//@types/chai",
-        "@npm//@types/jasmine",
-        "@npm//chai",
-        "@npm//jasmine",
+        ":node_modules/@types/chai",
+        ":node_modules/@types/jasmine",
+        ":node_modules/chai",
+        ":node_modules/jasmine",
     ],
 )
 
-jasmine_node_test(
-    name = "testing",
-    deps = [
-        ":tests",
+rollup_bundle(
+    name = "shellversion_test_bundle",
+    entry_point = "shellversion.spec.js",
+    format = "cjs",
+    output_dir = False,
+    deps = [":tests"],
+    testonly = 1,
+)
+
+jasmine_test(
+    name = "test_shellversion",
+    args = ["shellversion_test_bundle.js"],
+    data = [
+        ":shellversion_test_bundle",
+    ],
+)
+
+rollup_bundle(
+    name = "tilespec_test_bundle",
+    entry_point = "tilespec.spec.js",
+    format = "cjs",
+    output_dir = False,
+    deps = [":tests"],
+    testonly = 1,
+)
+
+jasmine_test(
+    name = "test_tilespec",
+    args = ["tilespec_test_bundle.js"],
+    data = [
+        ":tilespec_test_bundle",
     ],
 )
 
 rollup_bundle(
     name = "bundle",
-    entry_point = "entry.ts",
+    entry_point = "entry.js",
     deps = [":entry_lib"],
 )
 
