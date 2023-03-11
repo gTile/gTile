@@ -1636,10 +1636,6 @@ class AutoTileMainAndList extends ActionButton {
 Signals.addSignalMethods(AutoTileMainAndList.prototype);
 
 function AutoTileMain(tile_direction: TileDirection = 'left', is_global = false) {
-    if (is_global) {
-        focusMetaWindow = getFocusApp();
-    }
-
     let preset = "AutoTileMain-" + tile_direction;
     log(preset);
     let window = getFocusApp();
@@ -1647,7 +1643,7 @@ function AutoTileMain(tile_direction: TileDirection = 'left', is_global = false)
         log("No focused window - ignoring keyboard shortcut AutoTileMain");
         return;
     }
-
+    focusMetaWindow = window;
     reset_window(window);
     let mind = window.get_monitor();
     let work_area = getWorkAreaByMonitorIdx(mind);
