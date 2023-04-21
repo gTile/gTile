@@ -1,5 +1,10 @@
 CHANGE LOG
 ----------
+### 52
+
+Mantenance release, bumped up gnome-shell version
+Fix #305 - null metawindow for autotile global shortcut
+
 ### 51
 
 Maintenance release, bumped up gnome-shell version
