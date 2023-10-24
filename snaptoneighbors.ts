@@ -3,13 +3,11 @@ https://github.com/tpyl/gssnaptoneighbors
  by Timo Pylvanainen <tpyl@iki.fi>
  */
 
-import { Window } from './gnometypes';
 import {log} from './logging';
 
-declare const imports: any;
 declare const global: any;
 
-const Meta = imports.gi.Meta;
+import Meta from 'gi://Meta?version=13';
 
 const WorkspaceManager = global.screen || global.workspace_manager;
 
@@ -51,7 +49,7 @@ interface MinMax {
  * The upper and lower limits define the y coordinate
  * range to check for overlapping windows.
  */
-function expandHorizontally(x: number, upper: number, lower: number, minx: number, maxx: number, windows: Window[]): MinMax {
+function expandHorizontally(x: number, upper: number, lower: number, minx: number, maxx: number, windows: Meta.Window[]): MinMax {
 
     for (let i = 0; i < windows.length; i++) {
         let rect = windows[i].get_frame_rect();
@@ -85,7 +83,7 @@ function expandHorizontally(x: number, upper: number, lower: number, minx: numbe
  * The left and right limits define the x coordinate
  * range to check for overlapping windows.
  */
-function expandVertically(y: number, left: number, right: number, miny: number, maxy: number, windows: Window[]) {
+function expandVertically(y: number, left: number, right: number, miny: number, maxy: number, windows: Meta.Window[]) {
 
     for (let i = 0; i < windows.length; i++) {
         let rect = windows[i].get_frame_rect();
@@ -147,7 +145,7 @@ interface MetaRectangle {
  * both vertically and horizontally. The expnasion that results
  * in closer to 1 aspect ratio is selected.
  */
-export function snapToNeighbors(window: Window) {
+export function snapToNeighbors(window: Meta.Window) {
 	log("snapToNeighbors " + window.get_title());
     // Unmaximize first
     if (window.maximized_horizontally || window.maximized_vertically)

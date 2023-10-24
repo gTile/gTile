@@ -1,13 +1,12 @@
 import {log} from './logging';
 import { KeyBindingSettingName } from './settings_data';
 
-declare const imports: any;
 declare const global: any;
 
 // Library imports
-const Main = imports.ui.main;
-const Meta = imports.gi.Meta;
-const Shell = imports.gi.Shell;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Meta from 'gi://Meta?version=13'
+import Shell from 'gi://Shell?version=13';
 
 // Extension imports
 const Me = imports.misc.extensionUtils.getCurrentExtension();

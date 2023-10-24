@@ -1,5 +1,4 @@
 // GJS import system
-declare var imports: any;
 declare var global: any;
 
 import { log, setLoggingEnabled } from './logging';
@@ -8,7 +7,6 @@ import { bind as bindHotkeys, unbind as unbindHotkeys, Bindings } from './hotkey
 import { snapToNeighbors } from './snaptoneighbors';
 import * as tilespec from "./tilespec";
 import * as PresetParser from './preset_parser';
-import { StBoxLayout, ClutterActor, GridLayout, LayoutManager, MetaWindow, ShellApp, ShellWindowTracker, StBin, StButton, StLabel, StWidget, Window, WindowType, WorkspaceManager as WorkspaceManagerInterface } from "./gnometypes";
 import { BoolSettingName, NumberSettingName, StringSettingName } from './settings_data';
 
 type MoveResizeOp = 'contract' | 'move' | 'expand' | 'resize';
@@ -31,18 +29,17 @@ type TileDirection = 'left' | 'right';
   CONST & VARS
  *****************************************************************/
 // Library imports
-const St = imports.gi.St;
-const Main = imports.ui.main;
-const Shell = imports.gi.Shell;
-const GObject = imports.gi.GObject;
-const PanelMenu = imports.ui.panelMenu;
-const Meta = imports.gi.Meta;
-const Clutter = imports.gi.Clutter;
+import St from 'gi://St?version=13';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Shell from 'gi://Shell?version=13';
+import GObject from 'gi://GObject?version=2.0';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import Meta from 'gi://Meta?version=13'
+import Clutter from 'gi://Clutter?version=13';
 const Signals = imports.signals;
-const Workspace = imports.ui.workspace;
 const Mainloop = imports.mainloop;
 // Getter for accesing "get_active_workspace" on GNOME <=2.28 and >= 2.30
-const WorkspaceManager: WorkspaceManagerInterface = (
+const WorkspaceManager: Meta.WorkspaceManager = (
     global.screen || global.workspace_manager);
 
 // Extension imports
@@ -154,10 +151,10 @@ interface SettingsObject {
 };
 
 let launcher: GTileStatusButtonInterface | null;
-let tracker: ShellWindowTracker;
+let tracker: Shell.WindowTracker;
 let nbCols = 0;
 let nbRows = 0;
-let focusMetaWindow: Window | null = null;
+let focusMetaWindow: Meta.Window | null = null;
 let focusConnect: any = false;
 
 let settings: SettingsObject = Settings.get();
@@ -288,9 +285,9 @@ const keyBindingGlobalResizes: Bindings = new Map([
 class App {
     private readonly gridsByMonitorKey: Record<string, Grid> = {};
     private gridShowing: boolean = false;
-    private gridWidget: StBoxLayout | null = null;
+    private gridWidget: St.BoxLayout | null = null;
     private gridLinesTimeout: Object = null;
-    private gridTiles:Array<StBoxLayout> = [];
+    private gridTiles:Array<St.BoxLayout> = [];
 
 
     enable() {
@@ -299,7 +296,7 @@ class App {
 
         initSettings();
 
-        const gridWidget: StBoxLayout = (new St.BoxLayout({ style_class: `${theme}__preview` }));
+        const gridWidget: St.BoxLayout = (new St.BoxLayout({ style_class: `${theme}__preview` }));
         this.gridWidget = gridWidget;
         Main.uiGroup.add_actor(gridWidget);
         this.initGrids(gridWidget);
@@ -341,7 +338,7 @@ class App {
         return this.gridsByMonitorKey[getMonitorKey(monitor)];
     }
 
-    initGrids(gridWidget: StBoxLayout) {
+    initGrids(gridWidget: St.BoxLayout) {
         log("initGrids");
         log("initGrids nobCols " + nbCols + " nbRows " + nbRows);
         const monitors = activeMonitors();
@@ -513,7 +510,7 @@ class App {
             }
             const wmType = window.get_window_type();
             const layer = window.get_layer();
-            return wmType !== WindowType.DESKTOP && layer > 0;
+            return wmType !== Meta.WindowType.DESKTOP && layer > 0;
         })();
 
         if (!shouldShowTiling) {
@@ -642,14 +639,14 @@ class App {
             if(removeTimeout) {
                 Mainloop.timeout_remove(this.gridLinesTimeout);
             }
-            this.gridLinesTimeout = null;   
+            this.gridLinesTimeout = null;
             for(let tile of this.gridTiles) {
                 Main.uiGroup.remove_actor(tile);
             }
         }
         this.gridTiles = []
     }
-    
+
     _showGridLines(gridSize: tilespec.GridSize): void {
         this._hideGridLines();
         log("Started drawing grid lines...");
@@ -695,7 +692,7 @@ class App {
                 Main.uiGroup.add_actor(newGridWidget);
 
                 log(`Grid horizontal line of size ${tileWidth}:${tileHeight} is drawn at 0:${posY} (monitor offset ${monitor.x}:${monitor.y})`)
-            }            
+            }
         }
 
         this.gridLinesTimeout = Mainloop.timeout_add(1000, () => {
@@ -957,13 +954,13 @@ function resetFocusMetaWindow() {
     focusMetaWindow = null;
 }
 
-function reset_window(metaWindow: Window) {
+function reset_window(metaWindow: Meta.Window) {
     metaWindow.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
     metaWindow.unmaximize(Meta.MaximizeFlags.VERTICAL);
     metaWindow.unmaximize(Meta.MaximizeFlags.BOTH);
 }
 
-function _getInvisibleBorderPadding(metaWindow: Window) {
+function _getInvisibleBorderPadding(metaWindow: Meta.Window) {
     let outerRect = metaWindow.get_frame_rect();
     let inputRect = metaWindow.get_buffer_rect();
     let borderX = outerRect.x - inputRect.x;
@@ -972,7 +969,7 @@ function _getInvisibleBorderPadding(metaWindow: Window) {
     return [borderX, borderY];
 }
 
-function _getVisibleBorderPadding(metaWindow: Window) {
+function _getVisibleBorderPadding(metaWindow: Meta.Window) {
     let clientRect = metaWindow.get_frame_rect();
     let outerRect = metaWindow.get_frame_rect();
 
@@ -982,7 +979,7 @@ function _getVisibleBorderPadding(metaWindow: Window) {
     return [borderX, borderY];
 }
 
-function move_maximize_window(metaWindow: Window, x: number, y: number) {
+function move_maximize_window(metaWindow: Meta.Window, x: number, y: number) {
     const [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
 
     x = x - borderX;
@@ -1001,7 +998,7 @@ function move_maximize_window(metaWindow: Window, x: number, y: number) {
  * @param width
  * @param height
  */
-function moveResizeWindowWithMargins(metaWindow: Window, x: number, y: number, width: number, height: number): void {
+function moveResizeWindowWithMargins(metaWindow: Meta.Window, x: number, y: number, width: number, height: number): void {
 
     let [borderX, borderY] = _getInvisibleBorderPadding(metaWindow);
     let [vBorderX, vBorderY] = _getVisibleBorderPadding(metaWindow);
@@ -1078,7 +1075,7 @@ function contains<T>(a: Array<T>, obj: T) {
  * Get focused window by iterating though the windows on the active workspace.
  * @returns {Object} The focussed window object. False if no focussed window was found.
  */
-function getFocusApp(): Window | null {
+function getFocusApp(): Meta.Window | null {
     if (tracker.focus_app == null) {
         return null;
     }
@@ -1090,7 +1087,7 @@ function getFocusApp(): Window | null {
     }
 
     return WorkspaceManager.get_active_workspace().list_windows().find(
-        (window: Window): boolean => window.has_focus()
+        (window: Meta.Window): boolean => window.has_focus()
     ) || null;
 }
 
@@ -1452,9 +1449,9 @@ function currentGridSize() {
  *****************************************************************/
 
 class TopBar {
-    readonly actor: StBoxLayout;
-    private readonly _stlabel: StLabel;
-    private readonly _closebutton: StButton;
+    readonly actor: St.BoxLayout;
+    private readonly _stlabel: St.Label;
+    private readonly _closebutton: St.Button;
     private readonly _connect_id: number;
 
     constructor(private _title: string) {
@@ -1483,7 +1480,7 @@ class TopBar {
         this._stlabel.text = this._title;
     }
 
-    setApp(app: ShellApp, title: string) {
+    setApp(app: Shell.App, title: string) {
         this._title = app.get_name() + " - " + title;
         log("title: " + this._title);
         this._stlabel.text = this._title;
@@ -1498,7 +1495,7 @@ class TopBar {
     }
 };
 
-interface ToggleSettingsButtonListenerActor extends ClutterActor {
+interface ToggleSettingsButtonListenerActor extends Clutter.Actor {
     _update(): void;
 }
 
@@ -1583,8 +1580,8 @@ const ACTION_CLASSES = {
 }
 
 class ActionButton {
-    readonly actor: StButton;
-    readonly icon: StBoxLayout;
+    readonly actor: St.Button;
+    readonly icon: St.BoxLayout;
 
     constructor(readonly grid: Grid, classname: string) {
         this.grid = grid;
@@ -1837,7 +1834,7 @@ function snapToNeighborsBind() {
  * the main grid size used for GUI elements and some presets.
  */
 class GridSettingsButton {
-    readonly actor: StButton;
+    readonly actor: St.Button;
     readonly text: string;
     readonly cols: number;
     readonly rows: number;
@@ -1891,20 +1888,20 @@ class Grid {
     readonly tableWidth = 320;
     readonly tableHeight: number;
     readonly borderwidth = 2;
-    readonly actor: StBoxLayout;
-    readonly bottomBarTableLayout: GridLayout;
+    readonly actor: St.BoxLayout;
+    readonly bottomBarTableLayout: Clutter.GridLayout;
     readonly animation_time: number;
     readonly topbar: TopBar;
-    readonly bottombarContainer: StBin;
-    readonly bottombar: StWidget;
-    readonly veryBottomBar: StWidget;
+    readonly bottombarContainer: St.Bin;
+    readonly bottombar: St.Widget;
+    readonly veryBottomBar: St.Widget;
     readonly veryBottomBarContainer: any;
-    readonly veryBottomBarTableLayout: GridLayout;
+    readonly veryBottomBarTableLayout: Clutter.GridLayout;
     readonly gridSettingsButtons: GridSettingsButton[];
 
     readonly tableContainer: any;
-    readonly table: StWidget;
-    readonly tableLayoutManager: GridLayout;
+    readonly table: St.Widget;
+    readonly tableLayoutManager: Clutter.GridLayout;
     monitor: Monitor | null;
     readonly monitor_idx: number;
     x: number;
@@ -1922,7 +1919,7 @@ class Grid {
 
 
 
-    constructor(private readonly gridWidget: StBoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
+    constructor(private readonly gridWidget: St.BoxLayout, monitor_idx: number, monitor: Monitor, title: string, cols: number, rows: number) {
         let workArea = getWorkArea(monitor, monitor_idx);
 
         this.tableHeight = (this.tableWidth / workArea.width) * workArea.height;
@@ -2025,7 +2022,7 @@ class Grid {
             track_hover: true
         });
 
-        this.tableLayoutManager = new Clutter.GridLayout() as GridLayout;
+        this.tableLayoutManager = new Clutter.GridLayout();
         this.table = new St.Widget({
             style_class: `${theme}__tile-table`,
             can_focus: true,
@@ -2200,7 +2197,7 @@ class Grid {
         this._clearMoveResizeState();
     }
 
-    setInitialSelection(focusMetaWindow: Window) {
+    setInitialSelection(focusMetaWindow: Meta.Window) {
         // The window being focused is part of the monitor that this Grid is
         // responsible for manipulating.
         if (focusMetaWindow.get_monitor() !== this.monitor_idx) {
@@ -2253,7 +2250,7 @@ class Grid {
         log("After initial selection first fX " + fX + " fY " + fY + " current cX " + cX + " cY " + cY);
     }
 
-    moveResize(window: Window, type: MoveResizeOp, key: MoveResizeSide) {
+    moveResize(window: Meta.Window, type: MoveResizeOp, key: MoveResizeSide) {
         const delegate = this.elementsDelegate;
 
         if (!delegate) {
@@ -2518,7 +2515,7 @@ class GridElementDelegate {
     private activatedElements: GridElement[] = [];
     private activated: boolean = false;
 
-    constructor(private readonly grid: Grid, private readonly gridWidget: StBoxLayout) { }
+    constructor(private readonly grid: Grid, private readonly gridWidget: St.BoxLayout) { }
 
     private allSelected(): boolean {
         return (this.activatedElements.length === (nbCols * nbRows));
@@ -2726,7 +2723,7 @@ class GridElementDelegate {
 Signals.addSignalMethods(GridElementDelegate.prototype);
 
 class GridElement {
-    readonly actor: StButton;
+    readonly actor: St.Button;
     readonly id: string;
     readonly hoverConnect: number;
     active: boolean;

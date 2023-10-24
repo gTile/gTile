@@ -29,7 +29,7 @@ export class ShellVersion {
     readonly major: number;
     readonly minor: number;
     private readonly rawVersion: string;
-    
+
     private constructor(version: string) {
         const parts = version.split('.').map((part) => Number(part));
         if (parts.length < 2) {
