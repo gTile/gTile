@@ -1,0 +1,26 @@
+{
+  "name": "gnome-shell-extension-gtile",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "gTile Gnome extension",
+  "module": "dist/extension.js",
+  "author": "Markus Schanz <markus@schanz.id>",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@schnz/adw-1": "^1.4.0-3.2.2",
+    "@schnz/gnome-shell": "^3.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "clean": "git clean -qxf ':/dist/*.js' gtile.tgz",
+    "postclean": "find dist -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} +",
+    "prebuild": "$npm_execpath run clean",
+    "build": "tsc",
+    "postbuild": "rm -rf dist/types",
+    "prebuild:dist": "$npm_execpath run build",
+    "build:dist": "tar -czf gtile.tgz -C dist .",
+    "install:extension": "gnome-extensions install -f gtile.tgz",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "tsc --noEmit"
+  }
+}
