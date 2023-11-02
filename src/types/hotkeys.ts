@@ -44,7 +44,7 @@ export const enum Action {
 
   /**
    * Expand or contract the specified edge of a window by at most one tile such
-   * that it aligns with the grid
+   * that it aligns with the grid.
    */
   RESIZE,
 

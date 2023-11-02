@@ -11,6 +11,8 @@ import TitleBar from './overlay/TitleBar.js';
 
 const TABLE_WIDTH = 320;
 
+type TextButton = ReturnType<typeof TextButton.new_themed>;
+
 export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
   theme: Theme;
 
@@ -148,9 +150,13 @@ export default GObject.registerClass({
 
     // --- event handlers ---
     this.#titleBar.connect('closed', () => { this.visible = false; })
-    this.#grid.connect("notify::grid-size", () => this.notify("grid-size"));
+    this.#grid.connect("notify::grid-size", () => {
+      this.#onGridSizeChanged();
+      this.notify("grid-size");
+    });
     this.#grid.connect("notify::selection", () => this.notify("grid-selection"));
     this.#grid.connect("selected", () => this.emit("selected"));
+    this.connect("notify::visible", () => { this.gridSelection = null; });
   }
 
   /**
@@ -197,8 +203,9 @@ export default GObject.registerClass({
   set presets(presets: GridSize[]) {
     this.#presetButtons.removeButtons();
 
+    const { cols, rows } = this.gridSize;
     for (const preset of presets) {
-      const isPresetActive = false;
+      const isPresetActive = preset.cols === cols && preset.rows === rows;
       const button = TextButton.new_themed({
         theme: this.#theme,
         active: isPresetActive,
@@ -211,11 +218,40 @@ export default GObject.registerClass({
   }
 
   /**
+   * Rotates (by one iteration at a time) through the grid {@link presets}.
+   */
+  iteratePreset() {
+    const textButtons = this.#presetButtons.get_children() as TextButton[];
+    const { cols: currentCols, rows: currentRows } = this.gridSize;
+    let activateNext = false;
+
+    for (const button of [...textButtons, textButtons[0]]) {
+      const [cols, rows] = button.label!.split("x").map(n => Number(n));
+
+      if (activateNext) {
+        this.gridSize = { cols, rows };
+        return;
+      } else if (cols === currentCols && rows === currentRows) {
+        activateNext = true;
+      }
+    }
+  }
+
+  /**
    * Adds a new element to the action button bar.
    *
    * @param button The button to be added.
    */
   addActionButton(button: St.Button) {
     this.#actionButtons.addButton(button);
+  }
+
+  #onGridSizeChanged() {
+    const textButtons = this.#presetButtons.get_children() as TextButton[];
+    const { cols, rows } = this.gridSize;
+
+    for (const button of textButtons) {
+      button.active = button.label === `${cols}x${rows}`;
+    }
   }
 });

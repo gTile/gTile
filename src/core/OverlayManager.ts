@@ -158,13 +158,32 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }
 
   /**
-   * Overrides the tile selection in the overlay for the specified monitor.
+   * Overrides the tile selection of the overlay on the specified monitor.
    *
    * @param selection The selection to be set.
    * @param monitorIdx The targeted monitor whose overlay will be updated.
    */
-  setSelection(selection: GridSelection, monitorIdx: number) {
+  setSelection(selection: GridSelection | null, monitorIdx: number) {
     this.#overlays[monitorIdx].gridSelection = selection;
+  }
+
+  /**
+   * Returns the current tile selection of the overlay on the specified monitor.
+   *
+   * @param monitorIdx The monitor whose overlay should be queried.
+   * @returns The tile selection, if any.
+   */
+  getSelection(monitorIdx: number): GridSelection | null {
+    return this.#overlays[monitorIdx].gridSelection;
+  }
+
+  /**
+   * Rotates (by one iteration at a time) through the grid {@link presets}.
+   */
+  iteratePreset() {
+    this.#syncInProgress = true;
+    this.#overlays.forEach(overlay => overlay.iteratePreset());
+    this.#syncInProgress = false;
   }
 
   #renderOverlays() {

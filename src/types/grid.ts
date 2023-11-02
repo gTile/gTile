@@ -12,7 +12,6 @@ export interface Inset {
   left: number;
 }
 
-
 /**
  * Data structure that represents an area on a 2D plane.
  *

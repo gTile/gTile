@@ -15,7 +15,7 @@ import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
-import { parseGridSizesConfig } from "../util/grid.js";
+import { adjust, pan, parseGridSizesConfig } from "../util/grid.js";
 import DesktopManager from './DesktopManager.js';
 import HotkeyManager, { KeyBindingGroup } from './HotkeyManager.js';
 import OverlayManager from './OverlayManager.js';
@@ -83,7 +83,7 @@ export default class App implements GarbageCollector {
         this.#settings.get_boolean(key as BoolSettingKey)
           ? mask | group
           : mask,
-        0);
+        KeyBindingGroup.Overlay);
 
     this.#hotkeyManager = new HotkeyManager({
       settings: this.#settings,
@@ -152,10 +152,10 @@ export default class App implements GarbageCollector {
   }
 
   #onPresetsChanged() {
-    const s = parseGridSizesConfig(this.#settings.get_string("grid-sizes"), []);
+    const p = parseGridSizesConfig(this.#settings.get_string("grid-sizes"), []);
 
-    if (s.length > 0) {
-      this.#overlayManager.presets = s;
+    if (p.length > 0) {
+      this.#overlayManager.presets = p;
     }
   }
 
@@ -196,15 +196,47 @@ export default class App implements GarbageCollector {
   }
 
   #onUserAction(action: HotkeyAction) {
+    // trivial delegation events
     switch (action.type) {
       case Action.TOGGLE:
         this.#overlayManager.toggleOverlays();
         return;
-      case Action.CANCEL: return;
-      case Action.CONFIRM: return;
-      case Action.LOOP_GRID_SIZE: return;
-      case Action.PAN: return;
-      case Action.ADJUST: return;
+      case Action.CANCEL:
+        this.#overlayManager.toggleOverlays(true);
+        return;
+      case Action.LOOP_GRID_SIZE:
+        this.#overlayManager.iteratePreset();
+        return;
+    }
+
+    const om = this.#overlayManager;
+    const dm = this.#desktopManager;
+    const window = dm.focusedWindow; if (!window) return;
+    const monitorIdx = window.get_monitor();
+    const selection = om.getSelection(monitorIdx);
+
+    // events that require a window target
+    switch (action.type) {
+      case Action.CONFIRM:
+        if (selection) {
+          dm.applySelection(window, monitorIdx, om.gridSize, selection);
+          om.setSelection(null, monitorIdx);
+        }
+        return;
+      case Action.PAN:
+        if (!selection) {
+          const newSelection = dm.windowToSelection(window, om.gridSize);
+          om.setSelection(newSelection, window.get_monitor());
+        } else {
+          const newSelection = pan(selection, om.gridSize, action.dir);
+          om.setSelection(newSelection, monitorIdx);
+        }
+        return;
+      case Action.ADJUST:
+        const curSel = selection ?? dm.windowToSelection(window, om.gridSize);
+        const adaptedSel = adjust(curSel, om.gridSize, action.dir, action.mode);
+        om.setSelection(adaptedSel, monitorIdx);
+        return;
       case Action.RESIZE: return;
       case Action.GROW: return;
       case Action.LOOP_PRESET: return;
