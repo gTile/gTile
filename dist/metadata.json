@@ -1,0 +1,8 @@
+{
+  "uuid": "gTileTs@vibou",
+  "name": "gTile",
+  "description": "Tile windows on a grid",
+  "shell-version": ["45"],
+  "url": "https://github.com/gTile",
+  "settings-schema": "org.gnome.shell.extensions.gtile"
+}
