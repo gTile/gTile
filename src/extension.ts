@@ -1,9 +1,9 @@
-import GLib from 'gi://GLib?version=2.0';
+import GLib from "gi://GLib?version=2.0";
 
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
-import App from './core/App.js';
-import { ExtensionSettings, ExtensionSettingsProvider } from './types/settings.js';
+import App from "./core/App.js";
+import { ExtensionSettings, ExtensionSettingsProvider } from "./types/settings.js";
 
 export default class extends Extension implements ExtensionSettingsProvider {
   #app?: ReturnType<typeof App.run>;

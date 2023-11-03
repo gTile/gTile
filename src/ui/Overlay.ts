@@ -1,13 +1,13 @@
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { GridSelection, GridSize } from '../types/grid.js';
-import { Theme } from '../types/theme.js';
-import ButtonBar from './overlay/ButtonBar.js';
-import Container from './overlay/Container.js';
-import Grid from './overlay/Grid.js';
-import TextButton from './overlay/TextButton.js';
-import TitleBar from './overlay/TitleBar.js';
+import { GridSelection, GridSize } from "../types/grid.js";
+import { Theme } from "../types/theme.js";
+import ButtonBar from "./overlay/ButtonBar.js";
+import Container from "./overlay/Container.js";
+import Grid from "./overlay/Grid.js";
+import TextButton from "./overlay/TextButton.js";
+import TitleBar from "./overlay/TitleBar.js";
 
 const TABLE_WIDTH = 320;
 
@@ -149,7 +149,7 @@ export default GObject.registerClass({
     }));
 
     // --- event handlers ---
-    this.#titleBar.connect('closed', () => { this.visible = false; })
+    this.#titleBar.connect("closed", () => { this.visible = false; })
     this.#grid.connect("notify::grid-size", () => {
       this.#onGridSizeChanged();
       this.notify("grid-size");
@@ -213,7 +213,7 @@ export default GObject.registerClass({
       });
 
       this.#presetButtons.addButton(button);
-      button.connect('clicked', () => { this.#grid.gridSize = preset; });
+      button.connect("clicked", () => { this.#grid.gridSize = preset; });
     }
   }
 

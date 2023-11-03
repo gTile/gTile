@@ -1,7 +1,7 @@
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { Theme } from '../../types/theme.js';
+import { Theme } from "../../types/theme.js";
 
 export interface ThemedContainerParams extends St.Bin.ConstructorProperties {
   theme: Theme;

@@ -1,10 +1,10 @@
-import Clutter from 'gi://Clutter?version=13';
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import Clutter from "gi://Clutter?version=13";
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { GridOffset, GridSize, GridSelection } from '../../types/grid.js';
-import { Theme } from '../../types/theme.js';
-import TextButton from './TextButton.js';
+import { GridOffset, GridSize, GridSelection } from "../../types/grid.js";
+import { Theme } from "../../types/theme.js";
+import TextButton from "./TextButton.js";
 
 type TextButton = ReturnType<typeof TextButton.new_styled>;
 
@@ -137,8 +137,8 @@ export default GObject.registerClass({
           height: tileHeight,
         });
 
-        tile.connect('clicked', this.#onTileClick.bind(this, col, row));
-        tile.connect('notify::hover', this.#onTileHover.bind(this, col, row));
+        tile.connect("clicked", this.#onTileClick.bind(this, col, row));
+        tile.connect("notify::hover", this.#onTileHover.bind(this, col, row));
 
         this.#layoutManager.attach(tile, col, row, 1, 1);
       }
@@ -178,7 +178,7 @@ export default GObject.registerClass({
 
     // end selection
     this.selection = { anchor: this.selection.anchor, target: at };
-    this.emit('selected');
+    this.emit("selected");
     this.selection = null;
   }
 

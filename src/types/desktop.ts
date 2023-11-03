@@ -1,4 +1,4 @@
-import Meta from 'gi://Meta?version=13';
+import Meta from "gi://Meta?version=13";
 
 /**
  * Represents an event that is related to the desktop environment of the user.

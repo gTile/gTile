@@ -1,8 +1,8 @@
-import Clutter from 'gi://Clutter?version=13';
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import Clutter from "gi://Clutter?version=13";
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { Theme } from '../../types/theme.js'
+import { Theme } from "../../types/theme.js"
 
 export interface TitleBarParams extends St.Widget.ConstructorProperties {
   theme: Theme;
@@ -37,7 +37,7 @@ export default GObject.registerClass({
       style_class: [
         `${theme}__close-container`,
         `${theme}__close`,
-      ].join(' '),
+      ].join(" "),
     });
 
     this.#label = new St.Label({
@@ -50,7 +50,7 @@ export default GObject.registerClass({
     this.add_child(this.#label);
 
     // --- event handlers ---
-    closeBtn.connect('clicked', () => { this.emit('closed');  });
+    closeBtn.connect("clicked", () => { this.emit("closed");  });
   }
 
   set title(title: string) {

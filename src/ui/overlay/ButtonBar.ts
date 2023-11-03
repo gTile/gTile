@@ -1,8 +1,8 @@
-import Clutter from 'gi://Clutter?version=13';
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import Clutter from "gi://Clutter?version=13";
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { Theme } from '../../types/theme.js';
+import { Theme } from "../../types/theme.js";
 
 const ROW_HEIGHT = 36;
 const MAX_BUTTONS_PER_ROW = 4;

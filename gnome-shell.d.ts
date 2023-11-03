@@ -25,10 +25,10 @@ declare module "resource:///org/gnome/shell/ui/popupMenu.js" {
 }
 
 declare module "resource:///org/gnome/shell/ui/windowManager.js" {
-  import type Clutter from 'gi://Clutter?version=13';
-  import type Gio from 'gi://Gio?version=2.0';
-  import type Meta from 'gi://Meta?version=13';
-  import type Shell from 'gi://Shell?version=13';
+  import type Clutter from "gi://Clutter?version=13";
+  import type Gio from "gi://Gio?version=2.0";
+  import type Meta from "gi://Meta?version=13";
+  import type Shell from "gi://Shell?version=13";
 
   export declare class WindowManager {
     insertWorkspace(pos: number): void;
@@ -290,7 +290,7 @@ declare module "resource:///org/gnome/shell/extensions/extension.js" {
 }
 
 declare module "resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js" {
-  import type Adw from 'gi://Adw?version=1';
+  import type Adw from "gi://Adw?version=1";
   import type {
     GettextWrapper,
     Extension,

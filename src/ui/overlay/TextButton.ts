@@ -1,7 +1,7 @@
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { Theme } from '../../types/theme.js';
+import { Theme } from "../../types/theme.js";
 
 export interface ButtonParams extends St.Button.ConstructorProperties {
   active?: boolean;
@@ -75,9 +75,9 @@ export default GObject.registerClass({
 
   #updateState() {
     if (this.#active) {
-      this.add_style_pseudo_class('activate');
+      this.add_style_pseudo_class("activate");
     } else {
-      this.remove_style_pseudo_class('activate');
+      this.remove_style_pseudo_class("activate");
     }
   }
 });

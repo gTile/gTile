@@ -1,7 +1,7 @@
-import Gio from 'gi://Gio?version=2.0';
-import GObject from 'gi://GObject?version=2.0';
+import Gio from "gi://Gio?version=2.0";
+import GObject from "gi://GObject?version=2.0";
 
-import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 /**
  * Key names in the GSettings schema that reference a boolean value.

@@ -1,12 +1,12 @@
-import { LayoutManager, Monitor } from '@schnz/gnome-shell/src/ui/layout.js';
+import { LayoutManager, Monitor } from "@schnz/gnome-shell/src/ui/layout.js";
 
-import Meta from 'gi://Meta?version=13';
+import Meta from "gi://Meta?version=13";
 
-import { DesktopEvent, Event } from '../types/desktop.js';
-import { GridSelection, GridSize, Rectangle } from '../types/grid.js';
-import { DispatchFn, Publisher } from '../types/observable.js';
-import { GarbageCollection, GarbageCollector } from '../util/gc.js';
-import { UserPreferencesProvider } from './UserPreferences.js';
+import { DesktopEvent, Event } from "../types/desktop.js";
+import { GridSelection, GridSize, Rectangle } from "../types/grid.js";
+import { DispatchFn, Publisher } from "../types/observable.js";
+import { GarbageCollection, GarbageCollector } from "../util/gc.js";
+import { UserPreferencesProvider } from "./UserPreferences.js";
 
 export interface DesktopManagerParams {
   display: Meta.Display;

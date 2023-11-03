@@ -1,10 +1,10 @@
-import Meta from 'gi://Meta?version=13';
-import Shell from 'gi://Shell?version=13';
+import Meta from "gi://Meta?version=13";
+import Shell from "gi://Shell?version=13";
 
 import { WindowManager } from "resource:///org/gnome/shell/ui/windowManager.js";
 
-import { Action, HotkeyAction, ResizeAction } from '../types/hotkeys.js';
-import { DispatchFn, Publisher } from '../types/observable.js';
+import { Action, HotkeyAction, ResizeAction } from "../types/hotkeys.js";
+import { DispatchFn, Publisher } from "../types/observable.js";
 import {
   ExtensionSettings,
   KeyBindingGlobalSettingKey,
@@ -12,8 +12,8 @@ import {
   KeyBindingGroupAutotileSettingKey,
   KeyBindingGroupDefaultSettingKey,
   KeyBindingGroupPresetSettingKey,
-} from '../types/settings.js';
-import { GarbageCollector } from '../util/gc.js';
+} from "../types/settings.js";
+import { GarbageCollector } from "../util/gc.js";
 
 type KeyBindingGroupSettingKeys<G extends number> =
   G extends KeyBindingGroup.Global ? KeyBindingGlobalSettingKey :

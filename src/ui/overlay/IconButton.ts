@@ -1,8 +1,8 @@
-import GObject from 'gi://GObject?version=2.0';
-import St from 'gi://St?version=13';
+import GObject from "gi://GObject?version=2.0";
+import St from "gi://St?version=13";
 
-import { Theme } from '../../types/theme.js';
-import TextButton, { ButtonParams } from './TextButton.js';
+import { Theme } from "../../types/theme.js";
+import TextButton, { ButtonParams } from "./TextButton.js";
 
 export interface IconButtonParams extends Omit<
   ButtonParams,

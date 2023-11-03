@@ -1,14 +1,12 @@
 // @ts-nocheck
-import Adw from 'gi://Adw?version=1';
-import GObject from 'gi://GObject';
-import Gio from 'gi://Gio?version=2.0';
-import Gtk from 'gi://Gtk?version=4.0';
+import Adw from "gi://Adw?version=1";
+import GObject from "gi://GObject";
+import Gio from "gi://Gio?version=2.0";
+import Gtk from "gi://Gtk?version=4.0";
 
 import { ExtensionPreferences } from "resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js";
 
-import { ExtensionSettings, KeyBindingSettingKey } from './types/settings.js';
-
-
+import { ExtensionSettings, KeyBindingSettingKey } from "./types/settings.js";
 
 function append_hotkey(model, settings, name, pretty_name) {
     let _ok, key, mods;

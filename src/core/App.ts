@@ -1,25 +1,25 @@
-import Gio from 'gi://Gio?version=2.0';
-import Shell from 'gi://Shell?version=13';
+import Gio from "gi://Gio?version=2.0";
+import Shell from "gi://Shell?version=13";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-import { Event as DesktopEventType, DesktopEvent } from '../types/desktop.js';
-import { Action, HotkeyAction } from '../types/hotkeys.js';
+import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
+import { Action, HotkeyAction } from "../types/hotkeys.js";
 import {
   BoolSettingKey,
   ExtensionSettings,
   ExtensionSettingsProvider,
   SettingKey
-} from '../types/settings.js';
+} from "../types/settings.js";
 import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import { adjust, pan, parseGridSizesConfig } from "../util/grid.js";
-import DesktopManager from './DesktopManager.js';
-import HotkeyManager, { KeyBindingGroup } from './HotkeyManager.js';
-import OverlayManager from './OverlayManager.js';
-import UserPreferences from './UserPreferences.js';
+import DesktopManager from "./DesktopManager.js";
+import HotkeyManager, { KeyBindingGroup } from "./HotkeyManager.js";
+import OverlayManager from "./OverlayManager.js";
+import UserPreferences from "./UserPreferences.js";
 
 type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 
@@ -72,7 +72,7 @@ export default class App implements GarbageCollector {
     const mangledThemeName = extension.settings.
       get_string("theme")!.
       toLowerCase().
-      replace(/[^a-z0-9]/g, '-') as StripPrefix<Theme>;
+      replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
 
     this.#theme = `gtile-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
@@ -118,7 +118,7 @@ export default class App implements GarbageCollector {
     // --- event handlers ---
     this.#settings.bind("show-icon", this.#panelIcon, "visible",
       Gio.SettingsBindFlags.GET);
-    this.#panelIcon.connect('button-press-event',
+    this.#panelIcon.connect("button-press-event",
       () => this.#onUserAction({ type: Action.TOGGLE }));
     const chid = this.#settings.connect("changed",
       (_, key: SettingKey) => this.#onSettingsChanged(key));

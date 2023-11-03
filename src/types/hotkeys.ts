@@ -97,13 +97,13 @@ export interface PanAction {
 
 export interface AdjustAction {
   type: Action.ADJUST;
-  mode: 'extend' | 'shrink';
+  mode: "extend" | "shrink";
   dir: CardinalDirection;
 }
 
 export interface ResizeAction {
   type: Action.RESIZE;
-  mode: 'extend' | 'shrink';
+  mode: "extend" | "shrink";
   dir: CardinalDirection;
 }
 

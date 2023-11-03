@@ -1,18 +1,18 @@
-import { LayoutManager } from '@schnz/gnome-shell/src/ui/layout.js';
+import { LayoutManager } from "@schnz/gnome-shell/src/ui/layout.js";
 
-import Gio from 'gi://Gio?version=2.0';
-import Meta from 'gi://Meta?version=13';
+import Gio from "gi://Gio?version=2.0";
+import Meta from "gi://Meta?version=13";
 
-import { Event as DesktopEventType, DesktopEvent } from '../types/desktop.js';
-import { GridSelection, GridSize } from '../types/grid.js';
-import { DispatchFn, Publisher } from '../types/observable.js';
-import { Event, OverlayEvent } from '../types/overlay.js';
-import { BoolSettingKey, ExtensionSettings } from '../types/settings.js';
-import { Theme } from '../types/theme.js';
-import Overlay from '../ui/Overlay.js';
-import IconButton, { IconButtonParams } from '../ui/overlay/IconButton.js';
-import { GarbageCollector } from '../util/gc.js';
-import DesktopManager from './DesktopManager.js';
+import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
+import { GridSelection, GridSize } from "../types/grid.js";
+import { DispatchFn, Publisher } from "../types/observable.js";
+import { Event, OverlayEvent } from "../types/overlay.js";
+import { BoolSettingKey, ExtensionSettings } from "../types/settings.js";
+import { Theme } from "../types/theme.js";
+import Overlay from "../ui/Overlay.js";
+import IconButton, { IconButtonParams } from "../ui/overlay/IconButton.js";
+import { GarbageCollector } from "../util/gc.js";
+import DesktopManager from "./DesktopManager.js";
 
 export interface OverlayManagerParams {
   theme: Theme;
@@ -207,7 +207,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         });
 
         this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.DEFAULT);
-        btn.connect('clicked', () => { btn.active = !btn.active; });
+        btn.connect("clicked", () => { btn.active = !btn.active; });
         overlay.addActionButton(btn);
       }
 

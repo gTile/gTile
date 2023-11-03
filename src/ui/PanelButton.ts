@@ -1,4 +1,4 @@
-import GObject from 'gi://GObject?version=2.0'
+import GObject from "gi://GObject?version=2.0"
 import St from "gi://St?version=13";
 
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
@@ -15,7 +15,7 @@ interface PanelButtonParams extends GObject.Object.ConstructorProperties {
  * `button-press-event` has to be listened on.
  */
 export default GObject.registerClass({
-  GTypeName: 'GTilePanelButton',
+  GTypeName: "GTilePanelButton",
 }, class extends PanelMenu.Button {
   // @ts-ignore
   constructor(params: PanelButtonParams);
@@ -30,7 +30,7 @@ export default GObject.registerClass({
     // hopefully be deprecated soon in favor of the regular constructor.
     const { theme } = arguments[0] as PanelButtonParams;
 
-    const icon = new St.Icon({ style_class: 'system-status-icon' });
+    const icon = new St.Icon({ style_class: "system-status-icon" });
     this.add_child(icon);
     this.add_style_class_name(`${theme}__icon`);
   }
