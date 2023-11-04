@@ -463,10 +463,6 @@
 			<default>false</default>
 			<summary>Close gTile after window has been resized using a keyboard shortcut.</summary>
 		</key>
-		<key type = "b" name="animation">
-			<default>true</default>
-			<summary>Make background slection highlight to move more smooth.</summary>
-		</key>
 		<key type = "b" name="show-icon">
 			<default>true</default>
 			<summary>Show gTile icon on a panel.</summary>

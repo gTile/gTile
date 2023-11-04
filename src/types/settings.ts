@@ -7,7 +7,6 @@ import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
  * Key names in the GSettings schema that reference a boolean value.
  */
 export type BoolSettingKey =
-  | "animation"
   | "auto-close"
   | "auto-close-keyboard-shortcut"
   | "debug"

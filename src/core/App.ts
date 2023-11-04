@@ -96,18 +96,20 @@ export default class App implements GarbageCollector {
       layoutManager: Main.layoutManager,
       monitorManager: Shell.Global.get().backend.get_monitor_manager(),
       workspaceManager: Shell.Global.get().workspace_manager,
-      userPreferences: new UserPreferences({ settings: this.#settings}),
+      userPreferences: new UserPreferences({ settings: this.#settings }),
     });
     this.#gc.defer(() => this.#desktopManager.release());
 
     this.#overlayManager = new OverlayManager({
       theme: this.#theme,
       settings: this.#settings,
+      gnomeSettings: extension.getSettings('org.gnome.desktop.interface'),
       presets: parseGridSizesConfig(this.#settings.get_string("grid-sizes")),
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
     });
     this.#gc.defer(() => this.#overlayManager.release());
+
 
     this.#panelIcon = new PanelButton({ theme: this.#theme });
     this.#gc.defer(() => this.#panelIcon.destroy());
@@ -116,10 +118,10 @@ export default class App implements GarbageCollector {
     Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
 
     // --- event handlers ---
-    this.#settings.bind("show-icon", this.#panelIcon, "visible",
-      Gio.SettingsBindFlags.GET);
     this.#panelIcon.connect("button-press-event",
       () => this.#onUserAction({ type: Action.TOGGLE }));
+    this.#settings.bind("show-icon", this.#panelIcon, "visible",
+      Gio.SettingsBindFlags.GET);
     const chid = this.#settings.connect("changed",
       (_, key: SettingKey) => this.#onSettingsChanged(key));
     this.#gc.defer(() => this.#settings.disconnect(chid));
@@ -161,11 +163,7 @@ export default class App implements GarbageCollector {
 
   #onDesktopEvent(action: DesktopEvent) {
     switch (action.type) {
-      case DesktopEventType.FOCUS:
-        if (!action.target) {
-          this.#overlayManager.toggleOverlays(true);
-        }
-        return;
+      case DesktopEventType.FOCUS: return;
       case DesktopEventType.MONITORS_CHANGED: return;
     }
 
@@ -175,16 +173,10 @@ export default class App implements GarbageCollector {
 
   #onOverlayEvent(action: OverlayEvent) {
     switch (action.type) {
-      case OverlayEventType.Selection: {
-        const target = this.#desktopManager.focusedWindow;
-        if (!target) {
-          return;
-        }
-
-        const { monitorIdx, selection, gridSize: grid } = action;
-        this.#desktopManager.applySelection(target, monitorIdx, grid, selection);
+      case OverlayEventType.Selection:
+        // confirming a selection by mouse is handled the same as with <Enter>
+        this.#onUserAction({ type: Action.CONFIRM });
         return;
-      }
       case OverlayEventType.Visibility:
         this.#hotkeyManager.setListeningGroups(
           action.visible ? this.#enabledKeyBindingGroups : 0);
@@ -221,6 +213,7 @@ export default class App implements GarbageCollector {
         if (selection) {
           dm.applySelection(window, monitorIdx, om.gridSize, selection);
           om.setSelection(null, monitorIdx);
+          this.#settings.get_boolean("auto-close") && om.toggleOverlays(true);
         }
         return;
       case Action.PAN:

@@ -7,7 +7,10 @@ import { Theme } from "../../types/theme.js";
 const ROW_HEIGHT = 36;
 const MAX_BUTTONS_PER_ROW = 4;
 
-export interface ButtonBarParams extends Omit<St.Widget.ConstructorProperties, "height"> {
+export interface ButtonBarParams extends Omit<
+  St.Widget.ConstructorProperties,
+  "height"
+> {
   /**
    * The container width. Should be a multiple of {@link MAX_BUTTONS_PER_ROW}.
    */

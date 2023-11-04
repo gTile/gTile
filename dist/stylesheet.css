@@ -110,13 +110,6 @@
  * Actions container
  */
 
-.gtile-default__action-button--animation {
-    background-image: url("images/icons/light/32/animation.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
-}
-
 .gtile-default__action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
     background-size: 24px 24px;
@@ -315,13 +308,6 @@
 /**
   * Actions container
   */
-
-.gtile-classic__action-button--animation {
-    background-image: url("images/icons/light/32/animation.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
-}
 
 .gtile-classic__action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
@@ -528,17 +514,12 @@
 /**
 * Actions container
 */
-.gtile-minimal-dark__action-button--animation,
 .gtile-minimal-dark__action-button--auto-close,
 .gtile-minimal-dark__action-button--main-and-list,
 .gtile-minimal-dark__action-button--two-list{
     background-size: 32px 32px;
     height:34px;
     width:34px;
-}
-
-.gtile-minimal-dark__action-button--animation {
-    background-image: url("images/icons/light/32/animation.png");
 }
 
 .gtile-minimal-dark__action-button--auto-close {
@@ -739,17 +720,12 @@
 /**
 * Actions container
 */
-.gtile-minimal-light__action-button--animation,
 .gtile-minimal-light__action-button--auto-close,
 .gtile-minimal-light__action-button--main-and-list,
 .gtile-minimal-light__action-button--two-list{
     background-size: 32px 32px;
     height:34px;
     width:34px;
-}
-
-.gtile-minimal-light__action-button--animation {
-    background-image: url("images/icons/dark/32/animation.png");
 }
 
 .gtile-minimal-light__action-button--auto-close {

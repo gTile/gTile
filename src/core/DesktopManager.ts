@@ -65,11 +65,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     this.#gc.release();
   }
 
-  /**
-   * The list of monitors that comprise the desktop.
-   */
-  get monitors(): Monitor[] {
-    return this.#layoutManager.monitors;
+  subscribe(fn: DispatchFn<DesktopEvent>) {
+    this.#dispatchCallbacks.push(fn);
   }
 
   /**
@@ -81,8 +78,11 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     return this.#display.focus_window ?? null;
   }
 
-  subscribe(fn: DispatchFn<DesktopEvent>) {
-    this.#dispatchCallbacks.push(fn);
+  /**
+   * The list of monitors that comprise the desktop.
+   */
+  get monitors(): Monitor[] {
+    return this.#layoutManager.monitors;
   }
 
   /**
@@ -170,6 +170,38 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       anchor: { col: gridAnchorX, row: gridAnchorY },
       target: { col: gridTargetX, row: gridTargetY },
     };
+  }
+
+  /**
+   * Projects a {@link selection} to an area on the {@link monitorIdx|monitor}.
+   *
+   * @param selection The selection to be mapped/projected.
+   * @param gridSize The reference grid used to divide the monitor’s work area.
+   * @param monitorIdx The monitor for which the selection is being mapped.
+   * @returns The mapped selection.
+   */
+  selectionToArea(
+    selection: GridSelection,
+    gridSize: GridSize,
+    monitorIdx: number
+  ): Rectangle {
+    const
+      { cols, rows } = gridSize,
+      relX = Math.min(selection.anchor.col, selection.target.col) / cols,
+      relY = Math.min(selection.anchor.row, selection.target.row) / rows,
+      relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
+      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows;
+
+    const workArea = this.#workspaceManager
+      .get_active_workspace()
+      .get_work_area_for_monitor(monitorIdx);
+
+    return {
+      x: workArea.x + workArea.width * relX,
+      y: workArea.y + workArea.height * relY,
+      width: workArea.width * relW,
+      height: workArea.height * relH,
+    }
   }
 
   #dispatch(event: DesktopEvent) {
