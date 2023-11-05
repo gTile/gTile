@@ -128,7 +128,7 @@
 		</key>
 		<key type="as" name="preset-resize-10">
 			<default><![CDATA[['']]]></default>
-			<summary>Preset resize 1.</summary>
+			<summary>Preset resize 10.</summary>
 		</key>
 		<key type="as" name="preset-resize-11">
 			<default><![CDATA[['<Super><Control>KP_1']]]></default>

@@ -365,10 +365,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     }
 
     const monitorIdx = this.#desktopManager.focusedWindow.get_monitor();
-    const area = this.#desktopManager
+    this.#preview.previewArea = this.#desktopManager
       .selectionToArea(source.gridSelection, this.gridSize, monitorIdx);
-
-    this.#preview.previewArea = area;
   }
 
   #onDesktopEvent(event: DesktopEvent) {
