@@ -2,19 +2,14 @@ export class LexicalError extends Error {}
 
 export const enum Literal {
   /**
-   * The literal "0".
-   */
-  Zero = 1,
-
-  /**
    * A number literal with one or more digits. Never starts with "0".
    */
-  Number,
+  Number = 1,
 
   /**
-   * The literal "x" or "X".
+   * A string consisting of only lower case letters.
    */
-  X,
+  Keyword,
 
   /**
    * The literal ",".
@@ -27,9 +22,19 @@ export const enum Literal {
   Colon,
 
   /**
+   * The literal "(".
+   */
+  LParen,
+
+  /**
+   * The literal ")".
+   */
+  RParen,
+
+  /**
    * Represents the end of the input string.
    */
-  EOS,
+  $,
 };
 
 /**
@@ -44,16 +49,18 @@ export interface Token {
 /**
  * A simple scanner able to tokenize the lexemes of this lexical grammar:
  *
- * Token     := { Zero | Number | X | Separator | Colon | EOS } .
- * Zero      := 0 .
- * Number    := 1 … 9 [ Number ] .
- * X         := "x" | "X" .
+ * Token     := ( Number | Keyword | Separator | Colon | LParen | RParen | $ ) .
+ * Number    := 1 … 9 { ( "0" | Number ) } .
+ * Keyword   := a … z { Keyword } .
  * Separator := "," .
  * Colon     := ":" .
+ * LParen    := "(" .
+ * RParen    := ")" .
  * EOS       := $ .
  */
 export class Scanner {
   static DigitRegex = /[0-9]/;
+  static CharRegex = /[a-z]/;
 
   #input: string;
   #position: number;
@@ -97,9 +104,6 @@ export class Scanner {
     const char = this.#input[this.#position];
 
     switch (char) {
-      case "0":
-        this.#take();
-        return Literal.Zero;
       case "1": case "2": case "3": case "4": case "5":
       case "6": case "7": case "8": case "9":
         do {
@@ -107,17 +111,28 @@ export class Scanner {
         } while (Scanner.DigitRegex.test(this.#input[this.#position]));
 
         return Literal.Number;
-      case "x": case "X":
-        this.#take();
-        return Literal.X;
+      case "a": case "b": case "c": case "d": case "e": case "f": case "g":
+      case "h": case "i": case "j": case "k": case "l": case "m": case "n":
+      case "o": case "p": case "q": case "r": case "s": case "t": case "u":
+      case "v": case "w": case "x": case "y": case "z":
+        do {
+          this.#take();
+        } while (Scanner.CharRegex.test(this.#input[this.#position]));
+        return Literal.Keyword;
       case ",":
         this.#take();
         return Literal.Separator;
       case ":":
         this.#take();
         return Literal.Colon;
+      case "(":
+        this.#take();
+        return Literal.LParen;
+      case ")":
+        this.#take();
+        return Literal.RParen;
       case undefined:
-        return Literal.EOS;
+        return Literal.$;
     }
 
     throw new LexicalError(

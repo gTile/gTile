@@ -6,7 +6,11 @@ import { DesktopEvent, Event } from "../types/desktop.js";
 import { GridSelection, GridSize, Rectangle } from "../types/grid.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
+import { GridSpec } from "../util/parser.js";
 import { UserPreferencesProvider } from "./UserPreferences.js";
+
+// splits computed gridspec cell areas between non-dynamic and dynamic cells
+type GridSpecAreas = [dedicated: Rectangle[], dynamic: Rectangle[]];
 
 export interface DesktopManagerParams {
   display: Meta.Display;
@@ -99,42 +103,41 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     gridSize: GridSize,
     selection: GridSelection
   ) {
-    const monitor = this.#layoutManager.monitors[monitorIdx];
-    console.assert(!!monitor, "gTile: undefined monitor index", monitorIdx);
+    const projectedArea = this.selectionToArea(selection, gridSize, monitorIdx);
+
+    this.#moveResize(target, projectedArea);
+  }
+
+  /**
+   * Projects a {@link selection} to an area on the {@link monitorIdx|monitor}.
+   *
+   * @param selection The selection to be mapped/projected.
+   * @param gridSize The reference grid used to divide the monitor’s work area.
+   * @param monitorIdx The monitor for which the selection is being mapped.
+   * @returns The mapped selection.
+   */
+  selectionToArea(
+    selection: GridSelection,
+    gridSize: GridSize,
+    monitorIdx: number
+  ): Rectangle {
+    const
+      { cols, rows } = gridSize,
+      relX = Math.min(selection.anchor.col, selection.target.col) / cols,
+      relY = Math.min(selection.anchor.row, selection.target.row) / rows,
+      relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
+      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows;
+
     const workArea = this.#workspaceManager
       .get_active_workspace()
       .get_work_area_for_monitor(monitorIdx);
-    const inset = this.#userPreferences
-      .getInset(this.#isPrimaryMonitor(monitorIdx));
 
-    // Revise work area by applying the user specified inset
-    const targetArea: Rectangle = {
-      x: workArea.x + inset.left,
-      y: workArea.y + inset.top,
-      width: workArea.width - inset.right,
-      height: workArea.height - inset.bottom,
+    return {
+      x: workArea.x + workArea.width * relX,
+      y: workArea.y + workArea.height * relY,
+      width: workArea.width * relW,
+      height: workArea.height * relH,
     }
-
-    // map relative selection to absolute workArea
-    const noCols = Math.abs(selection.anchor.col - selection.target.col) + 1;
-    const noRows = Math.abs(selection.anchor.row - selection.target.row) + 1;
-    const relativeOffsetX =
-      Math.min(selection.anchor.col, selection.target.col) / gridSize.cols;
-    const relativeOffsetY =
-      Math.min(selection.anchor.row, selection.target.row) / gridSize.rows;
-    const relativeW = noCols / gridSize.cols;
-    const relativeH = noRows / gridSize.rows;
-
-    const targetWidth = targetArea.width * relativeW;
-    const targetHeight = targetArea.height * relativeH;
-    const targetOffsetX = targetArea.x + targetArea.width * relativeOffsetX;
-    const targetOffsetY = targetArea.y + targetArea.height * relativeOffsetY;
-
-    target.move_resize_frame(true,
-      targetOffsetX,
-      targetOffsetY,
-      targetWidth,
-      targetHeight);
   }
 
   /**
@@ -173,34 +176,67 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   /**
-   * Projects a {@link selection} to an area on the {@link monitorIdx|monitor}.
+   * Applies a {@link GridSpec} to the targeted {@link Monitor.index}.
    *
-   * @param selection The selection to be mapped/projected.
-   * @param gridSize The reference grid used to divide the monitor’s work area.
-   * @param monitorIdx The monitor for which the selection is being mapped.
-   * @returns The mapped selection.
+   * The relative-sized cells of the GridSpec are mapped to the work area of the
+   * monitor and are then populated with the windows that are located on that
+   * monitor. The currently focused window gets placed into the cell with the
+   * largest area. Afterwards, the remaining non-dynamic cells are populated
+   * (randomly) with the remaining windows until either (1) no windows are left
+   * to be placed or (2) no more cells are available to place them in. In the
+   * latter case, the remaining windows are then placed in the dynamic cells of
+   * the grid, if any. Dynamic cells share their space between the windows that
+   * occupy them.
+   *
+   * @param spec The {@link GridSpec} to be applied.
+   * @param monitorIdx The {@link Monitor.index} to apply the grid spec to.
    */
-  selectionToArea(
-    selection: GridSelection,
-    gridSize: GridSize,
-    monitorIdx: number
-  ): Rectangle {
-    const
-      { cols, rows } = gridSize,
-      relX = Math.min(selection.anchor.col, selection.target.col) / cols,
-      relY = Math.min(selection.anchor.row, selection.target.row) / rows,
-      relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
-      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows;
+  autotile(spec: GridSpec, monitorIdx: number) {
+    const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
+    const workspace = this.#workspaceManager.get_active_workspace();
+    const workArea = workspace.get_work_area_for_monitor(monitorIdx);
+    const windows = workspace.list_windows();
 
-    const workArea = this.#workspaceManager
-      .get_active_workspace()
-      .get_work_area_for_monitor(monitorIdx);
+    const project = (relRect: Rectangle, targetRect: Rectangle): Rectangle => ({
+      x: targetRect.x + targetRect.width * relRect.x,
+      y: targetRect.y + targetRect.height * relRect.y,
+      width: targetRect.width * relRect.width,
+      height: targetRect.height * relRect.height,
+    });
 
-    return {
-      x: workArea.x + workArea.width * relX,
-      y: workArea.y + workArea.height * relY,
-      width: workArea.width * relW,
-      height: workArea.height * relH,
+    // Place focused window in the largest dedicated area
+    const focusedIdx = windows.findIndex(w => w.has_focus());
+    if (focusedIdx && dedicated.length > 0) {
+      const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
+        rect.width * rect.height > accuArea
+          ? [idx, rect.width * rect.height]
+          : [accuIdx, accuArea],
+        [-1, 0]);
+
+      const projectedArea = project(dedicated[largestIdx], workArea);
+      this.#moveResize(windows[focusedIdx], projectedArea);
+
+      windows.splice(focusedIdx, 1);
+      dedicated.splice(largestIdx, 1);
+    }
+
+    // Place windows in regular cells
+    for (let i = 0; i < dedicated.length && i < windows.length; ++i) {
+      this.#moveResize(windows[i], project(dedicated[i], workArea));
+    }
+
+    // Fit remaining windows in dynamic cells
+    windows.splice(0, dedicated.length);
+    for (let i = 0; i < dynamic.length; i++) {
+      const mustFitAtLeastN = Math.floor(windows.length / dynamic.length);
+      const mustTakeOverflowWindow = i < (windows.length % dynamic.length);
+      const n = mustFitAtLeastN + (mustTakeOverflowWindow ? 1 : 0);
+
+      let j = i;
+      for (const area of this.#subdivideN(dynamic[i], n)) {
+        this.#moveResize(windows[j], project(area, workArea));
+        j += dynamic.length;
+      }
     }
   }
 
@@ -212,5 +248,58 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
   #isPrimaryMonitor(index: number): boolean {
     return this.#layoutManager.primaryIndex === index;
+  }
+
+  #moveResize(target: Meta.Window, { x, y, width, height }: Rectangle) {
+    target.move_resize_frame(true, x, y, width, height);
+  }
+
+  #gridSpecToAreas(spec: GridSpec, x = 0, y = 0, w = 1, h = 1): GridSpecAreas {
+    const regularCells: Rectangle[] = [];
+    const dynamicCells: Rectangle[] = [];
+    const totalWeight = spec.cells.reduce((sum, c) => sum + c.weight, 0);
+
+    for (const cell of spec.cells) {
+      const ratio = cell.weight / totalWeight;
+      const width = spec.mode === "cols" ? w * ratio : w;
+      const height = spec.mode === "rows" ? h * ratio : h;
+
+      if (cell.child) {
+        const [dedicated, dynamic] =
+          this.#gridSpecToAreas(cell.child, x, y, width, height);
+
+        regularCells.push(...dedicated);
+        dynamicCells.push(...dynamic);
+      } else if (cell.dynamic) {
+        dynamicCells.push({ x, y, width, height });
+      } else {
+        regularCells.push({ x, y, width, height });
+      }
+
+      if (spec.mode === "cols") x += width;
+      if (spec.mode === "rows") y += height;
+    }
+
+    return [regularCells, dynamicCells];
+  }
+
+  #subdivideN(rect: Rectangle, n: number, axis?: "x" | "y"): Rectangle[] {
+    const result: Rectangle[] = [];
+    const { width, height } = rect;
+    axis = axis ?? width > height ? "x" : "y";
+
+    let i = n, { x, y } = rect;
+    while (i--) {
+      result.push({
+        x, y,
+        width: axis === "x" ? width / n : width,
+        height: axis === "y" ? height / n : height,
+      });
+
+      if(axis === "x") x += width / n;
+      if(axis === "y") y += height / n;
+    }
+
+    return result;
   }
 }

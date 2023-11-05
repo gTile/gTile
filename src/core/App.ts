@@ -4,7 +4,12 @@ import Shell from "gi://Shell?version=13";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
 import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
-import { Action, HotkeyAction, LoopPresetAction } from "../types/hotkeys.js";
+import {
+  Action,
+  AutoTileAction,
+  HotkeyAction,
+  LoopPresetAction
+} from "../types/hotkeys.js";
 import {
   BoolSettingKey,
   ExtensionSettings,
@@ -18,6 +23,7 @@ import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import { DefaultGridSizes, adjust, pan } from "../util/grid.js";
 import {
   GridSizeListParser,
+  GridSpecParser,
   Preset,
   ResizePresetListParser
 } from "../util/parser.js";
@@ -30,11 +36,33 @@ import UserPreferences from "./UserPreferences.js";
 type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type ResizePresetAddr = [index: number, subindex: number];
 
-const settingKeyToKeyBindingGroup = {
+// Active keybinding group(s) when overlay is shown
+const DefaultKeyBindingGroups =
+  KeyBindingGroup.Overlay | KeyBindingGroup.Autotile | KeyBindingGroup.Preset;
+
+// Setting keys that enable a keybinding group even when the overlay is hidden
+const SettingKeyToKeyBindingGroupLUT = {
   "global-auto-tiling": KeyBindingGroup.Autotile,
   "global-presets": KeyBindingGroup.Preset,
   "moveresize-enabled": KeyBindingGroup.Action,
 } as const satisfies Partial<Record<BoolSettingKey, KeyBindingGroup>>;
+
+const AutoTileSpecLUT = {
+  "main": new GridSpecParser("cols(2, 2d)").parse()!,
+  "main-inverted": new GridSpecParser("cols(2d, 2)").parse()!,
+  "cols": {
+    1: new GridSpecParser(`cols(1d)`).parse()!,
+    2: new GridSpecParser(`cols(2d,2d)`).parse()!,
+    3: new GridSpecParser(`cols(3d,3d,3d)`).parse()!,
+    4: new GridSpecParser(`cols(4d,4d,4d,4d)`).parse()!,
+    5: new GridSpecParser(`cols(5d,5d,5d,5d,5d)`).parse()!,
+    6: new GridSpecParser(`cols(6d,6d,6d,6d,6d,6d)`).parse()!,
+    7: new GridSpecParser(`cols(7d,7d,7d,7d,7d,7d,7d)`).parse()!,
+    8: new GridSpecParser(`cols(8d,8d,8d,8d,8d,8d,8d,8d)`).parse()!,
+    9: new GridSpecParser(`cols(9d,9d,9d,9d,9d,9d,9d,9d,9d)`).parse()!,
+    10: new GridSpecParser(`cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)`).parse()!,
+  },
+} as const satisfies Record<AutoTileAction["layout"], any>;
 
 /**
  * Represents the gTile extension.
@@ -50,7 +78,7 @@ export default class App implements GarbageCollector {
   #gc: GarbageCollection;
   #lastResizePreset: VolatileStorage<ResizePresetAddr>;
   #settings: ExtensionSettings;
-  #enabledKeyBindingGroups: number;
+  #globalKeyBindingGroups: number;
   #hotkeyManager: HotkeyManager;
   #desktopManager: DesktopManager;
   #overlayManager: OverlayManager;
@@ -86,13 +114,13 @@ export default class App implements GarbageCollector {
     this.#gc = new GarbageCollection();
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
-    this.#enabledKeyBindingGroups = Object
-      .entries(settingKeyToKeyBindingGroup)
+    this.#globalKeyBindingGroups = Object
+      .entries(SettingKeyToKeyBindingGroupLUT)
       .reduce((mask, [key, group]) =>
         this.#settings.get_boolean(key as BoolSettingKey)
           ? mask | group
           : mask,
-        KeyBindingGroup.Overlay);
+        0);
 
     this.#hotkeyManager = new HotkeyManager({
       settings: this.#settings,
@@ -166,19 +194,19 @@ export default class App implements GarbageCollector {
 
   #onSettingsChanged(key: SettingKey) {
     const isHotkeyRelated =
-      (key: string): key is keyof typeof settingKeyToKeyBindingGroup =>
-        key in settingKeyToKeyBindingGroup;
+      (key: string): key is keyof typeof SettingKeyToKeyBindingGroupLUT =>
+        key in SettingKeyToKeyBindingGroupLUT;
 
     isHotkeyRelated(key) && this.#onHotkeyGroupToggle(key);
     key === "grid-sizes" && this.#onPresetsChanged();
   }
 
-  #onHotkeyGroupToggle(key: keyof typeof settingKeyToKeyBindingGroup) {
-    // new bindings apply when the gTile overlay is opened the next time
+  #onHotkeyGroupToggle(key: keyof typeof SettingKeyToKeyBindingGroupLUT) {
+    // new bindings apply when the gTile overlay is toggled the next time
     if (this.#settings.get_boolean(key)) {
-      this.#enabledKeyBindingGroups |= settingKeyToKeyBindingGroup[key];
+      this.#globalKeyBindingGroups |= SettingKeyToKeyBindingGroupLUT[key];
     } else {
-      this.#enabledKeyBindingGroups &= ~settingKeyToKeyBindingGroup[key];
+      this.#globalKeyBindingGroups &= ~SettingKeyToKeyBindingGroupLUT[key];
     }
   }
 
@@ -209,7 +237,9 @@ export default class App implements GarbageCollector {
         return;
       case OverlayEventType.Visibility:
         this.#hotkeyManager.setListeningGroups(
-          action.visible ? this.#enabledKeyBindingGroups : 0);
+          action.visible
+            ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
+            : this.#globalKeyBindingGroups);
         return;
     }
 
@@ -266,12 +296,18 @@ export default class App implements GarbageCollector {
         const preset = this.#getResizePreset(action.preset);
         if (preset) {
           const { gridSize, selection } = preset;
-          this.#desktopManager.applySelection(window, monitorIdx, gridSize, selection);
+          dm.applySelection(window, monitorIdx, gridSize, selection);
         }
         return;
       }
       case Action.RELOCATE: return;
-      case Action.AUTOTILE: return;
+      case Action.AUTOTILE:
+        if (action.layout === "main" || action.layout === "main-inverted") {
+          dm.autotile(AutoTileSpecLUT[action.layout], monitorIdx);
+        } else if (action.cols) {
+          dm.autotile(AutoTileSpecLUT[action.layout][action.cols], monitorIdx);
+        }
+        return;
     }
 
     // exhaustive switch-case guard
