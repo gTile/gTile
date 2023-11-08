@@ -60,6 +60,12 @@ export default GObject.registerClass({
       "A rectangular tile selection within the grid",
       GObject.ParamFlags.READWRITE,
     ),
+    "hover-tile": GObject.ParamSpec.jsobject(
+      "hover-tile",
+      "Hover tile",
+      "The currently hovered tile in the grid, if any",
+      GObject.ParamFlags.READABLE,
+    ),
   },
   Signals: {
     selected: {},
@@ -68,6 +74,7 @@ export default GObject.registerClass({
   #theme: Theme;
   #gridSize!: GridSize;
   #selection!: GridSelection | null;
+  #hoverTile: GridOffset | null;
 
   constructor({ theme, gridSize, selection = null, ...params }: GridParams) {
     super({
@@ -85,6 +92,7 @@ export default GObject.registerClass({
     this.#theme = theme;
     this.gridSize = gridSize;
     this.selection = selection;
+    this.#hoverTile = null;
   }
 
   /**
@@ -119,6 +127,13 @@ export default GObject.registerClass({
 
   get selection() {
     return this.#selection;
+  }
+
+  /**
+   * The 1x1 selection of the current hovered tile, if any.
+   */
+  get hoverTile(): GridOffset | null {
+    return this.#hoverTile;
   }
 
   get #layoutManager() {
@@ -186,10 +201,29 @@ export default GObject.registerClass({
     // no ongoing selection
     if (!this.selection) {
       tile.active = tile.hover;
+
+      const isStale =
+        this.#hoverTile?.col !== col ||
+        this.#hoverTile?.row !== row;
+
+      if (tile.hover && isStale) {
+        this.#hoverTile = { col, row };
+        this.notify("hover-tile");
+      } else if (!tile.hover && !isStale) {
+        this.#hoverTile = null;
+        this.notify("hover-tile");
+      }
+
       return;
     }
 
     // selection has changed
+    // update internal state but to not notify about the change since there
+    // is already a selection in progress which supersedes the hover.
+    if (this.#hoverTile) {
+      this.#hoverTile = null;
+    }
+
     if (
       this.selection.target.col !== col ||
       this.selection.target.row !== row

@@ -2,6 +2,7 @@ import { LayoutManager } from "@schnz/gnome-shell/src/ui/layout.js";
 
 import Gio from "gi://Gio?version=2.0";
 import Meta from "gi://Meta?version=13";
+import Shell from "gi://Shell?version=13";
 import St from "gi://St?version=13";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
@@ -27,11 +28,12 @@ export type GnomeInterfaceSettings =
 
 export interface OverlayManagerParams {
   theme: Theme;
+  shell: Shell.Global;
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
   layoutManager: LayoutManager;
-  desktopManager: DesktopManager
+  desktopManager: DesktopManager;
 }
 
 /**
@@ -44,6 +46,7 @@ export interface OverlayManagerParams {
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #gc: GarbageCollection;
   #theme: Theme;
+  #shell: Shell.Global;
   #settings: ExtensionSettings;
   #presets: GridSize[];
   #layoutManager: LayoutManager;
@@ -51,10 +54,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
   #overlays: InstanceType<typeof Overlay>[];
   #preview: InstanceType<typeof Preview>;
+  #activeIdx: number | null;
   #syncInProgress: boolean;
 
   constructor({
     theme,
+    shell,
     settings,
     gnomeSettings,
     presets,
@@ -63,6 +68,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }: OverlayManagerParams) {
     this.#gc = new GarbageCollection();
     this.#theme = theme;
+    this.#shell = shell;
     this.#settings = settings;
     this.#presets = presets;
     this.#layoutManager = layoutManager;
@@ -70,6 +76,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#dispatchCallbacks = [];
     this.#overlays = [];
     this.#preview = new Preview({ theme: this.#theme });
+    this.#activeIdx = null;
     this.#syncInProgress = false;
 
     Main.layoutManager.addTopChrome(this.#preview);
@@ -118,6 +125,15 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     return this.#overlays[0].gridSize;
   }
 
+  /**
+   * Tracks the index of the monitor whose overlay had most recently fired a
+   * grid selection event. It can be assumed that this is the overlay that the
+   * user interacted with most recently.
+   */
+  get activeMonitor(): number | null {
+    return this.#activeIdx;
+  }
+
   subscribe(fn: DispatchFn<OverlayEvent>) {
     this.#dispatchCallbacks.push(fn);
   }
@@ -161,13 +177,19 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       `No̱ of overlays do not match no̱ of monitors (${this.#overlays.length})`,
       monitors.map(({ index }) => index));
 
+    const [mouseX, mouseY] = this.#shell.get_pointer();
     for (const monitor of monitors) {
       const overlay = this.#overlays[monitor.index];
 
-      if (window.get_monitor() === monitor.index) {
-        const rect = window.get_frame_rect();
-        overlay.x = rect.x + rect.width / 2 - overlay.width / 2;
-        overlay.y = rect.y + rect.height / 2 - overlay.height / 2;
+      if (
+        monitor.x <= mouseX && mouseX <= (monitor.x + monitor.width) &&
+        monitor.y <= mouseY && mouseY <= (monitor.y + monitor.height)
+      ) {
+        const xMax = monitor.x + monitor.width - overlay.width;
+        const yMax = monitor.y + monitor.height - overlay.height;
+
+        overlay.x = Math.clamp(mouseX + overlay.popupOffsetX, monitor.x, xMax);
+        overlay.y = Math.clamp(mouseY + overlay.popupOffsetY, monitor.y, yMax);
       } else {
         overlay.x = monitor.x + monitor.width / 2 - overlay.width / 2;
         overlay.y = monitor.y + monitor.height / 2 - overlay.height / 2;
@@ -244,17 +266,24 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       type IBP = IconButtonParams["symbol"];
       for (const symbol of ["main-and-list", "two-list"] satisfies IBP[]) {
-        overlay.addActionButton(new IconButton({
-          theme: this.#theme,
-          symbol,
-        }));
+        const button = new IconButton({ theme: this.#theme, symbol });
+        overlay.addActionButton(button);
+
+        const layout = symbol === "two-list" ? "main-inverted" : "main";
+        button.connect("clicked", () => {
+          this.#dispatch({ type: Event.Autotile, layout });
+        });
       }
 
       // register event handlers
+      this.#settings.bind("selection-timeout",
+        overlay, "selection-timeout", Gio.SettingsBindFlags.GET);
       overlay.connect("notify::visible", this.#onGridVisibleChanged.bind(this));
       overlay.connect("notify::grid-size", this.#onGridSizeChanged.bind(this));
       overlay.connect("notify::grid-selection",
         this.#onGridSelectionChanged.bind(this));
+      overlay.connect("notify::grid-hover-tile",
+        this.#onGridHoverTileChanged.bind(this));
       overlay.connect("selected", () => this.#dispatch({
         type: Event.Selection,
         monitorIdx: monitor.index,
@@ -355,18 +384,27 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }
 
   #onGridSelectionChanged(source: InstanceType<typeof Overlay>) {
-    if (!this.#desktopManager.focusedWindow) {
-      return;
-    }
-
     if (!source.gridSelection) {
+      this.#activeIdx = null;
       this.#preview.previewArea = null;
       return;
     }
 
-    const monitorIdx = this.#desktopManager.focusedWindow.get_monitor();
+    this.#activeIdx = this.#overlays.findIndex(o => o === source);
     this.#preview.previewArea = this.#desktopManager
-      .selectionToArea(source.gridSelection, this.gridSize, monitorIdx);
+      .selectionToArea(source.gridSelection, this.gridSize, this.#activeIdx);
+  }
+
+  #onGridHoverTileChanged(source: InstanceType<typeof Overlay>) {
+    if (!source.gridHoverTile) {
+      this.#preview.previewArea = null;
+      return;
+    }
+
+    const at = source.gridHoverTile;
+    const monitorIdx = this.#overlays.findIndex(overlay => overlay === source);
+    this.#preview.previewArea = this.#desktopManager
+      .selectionToArea({ anchor: at, target: at }, source.gridSize, monitorIdx);
   }
 
   #onDesktopEvent(event: DesktopEvent) {

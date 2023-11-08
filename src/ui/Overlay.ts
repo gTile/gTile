@@ -1,7 +1,8 @@
+import GLib from "gi://GLib?version=2.0";
 import GObject from "gi://GObject?version=2.0";
 import St from "gi://St?version=13";
 
-import { GridSelection, GridSize } from "../types/grid.js";
+import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
 import { Theme } from "../types/theme.js";
 import ButtonBar from "./overlay/ButtonBar.js";
 import Container from "./overlay/Container.js";
@@ -36,6 +37,12 @@ export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
    * Optional. The initial area of highlighted tiles in the grid.
    */
   gridSelection?: GridSelection | null;
+
+  /**
+   * Optional. The time in milliseconds that a selection remains after the
+   * cursor left the overlay.
+   */
+  selectionTimeout?: number;
 }
 
 /**
@@ -78,6 +85,22 @@ export default GObject.registerClass({
       "A rectangular tile selection within the grid",
       GObject.ParamFlags.READWRITE,
     ),
+    /**
+     * Forwarded from {@link Grid}.
+     */
+    "grid-hover-tile": GObject.ParamSpec.jsobject(
+      "grid-hover-tile",
+      "Grid hover tile",
+      "The currently hovered tile in the grid, if any",
+      GObject.ParamFlags.READABLE,
+    ),
+    "selection-timeout": GObject.ParamSpec.int(
+      "selection-timeout",
+      "Selection timeout",
+      "Grace period before a selection is unset when the cursor loses focus.",
+      GObject.ParamFlags.READWRITE,
+      0, 5000, 200
+    )
   },
   Signals: {
     /**
@@ -91,6 +114,8 @@ export default GObject.registerClass({
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
   #actionButtons: ReturnType<typeof ButtonBar.new_styled>;
+  #selectionTimeout: number;
+  #delayTimeoutID: GLib.Source | null = null;
 
   constructor({
     theme,
@@ -98,6 +123,7 @@ export default GObject.registerClass({
     presets,
     gridAspectRatio,
     gridSelection = null,
+    selectionTimeout = 200,
     ...params
   }: OverlayParams) {
     super({
@@ -127,6 +153,8 @@ export default GObject.registerClass({
       style_class: `${theme}__action`,
       width: TABLE_WIDTH - 20,
     });
+    this.#selectionTimeout = selectionTimeout;
+    this.#delayTimeoutID = null;
 
     this.presets = presets;
 
@@ -154,9 +182,13 @@ export default GObject.registerClass({
       this.#onGridSizeChanged();
       this.notify("grid-size");
     });
-    this.#grid.connect("notify::selection", () => this.notify("grid-selection"));
+    this.#grid.connect("notify::selection", () =>
+      this.notify("grid-selection"));
+    this.#grid.connect("notify::hover-tile", () =>
+      this.notify("grid-hover-tile"));
     this.#grid.connect("selected", () => this.emit("selected"));
     this.connect("notify::visible", () => { this.gridSelection = null; });
+    this.connect("notify::hover", this.#onHoverChanged.bind(this));
   }
 
   /**
@@ -190,6 +222,45 @@ export default GObject.registerClass({
 
   get gridSelection() {
     return this.#grid.selection;
+  }
+
+  /**
+   * The time in milliseconds that a selection remains after the cursor left the
+   * overlay.
+   */
+  set selectionTimeout(timeout: number) {
+    this.#selectionTimeout = timeout;
+    this.notify("selection-timeout");
+  }
+
+  get selectionTimeout() {
+    return this.#selectionTimeout;
+  }
+
+  /**
+   * The offset of the current hovered tile in the grid, if any.
+   */
+  get gridHoverTile(): GridOffset | null {
+    return this.#grid.hoverTile;
+  }
+
+  /**
+   * Can be applied to the X-coordinate of the anchor point at which the overlay
+   * should be displayed. This centers the overlay on the X axis.
+   */
+  get popupOffsetX(): number {
+    return -(this.width / 2);
+  }
+
+  /**
+   * Can be applied to the Y-coordinate of the anchor point at which the overlay
+   * should be displayed. This places the anchor in the center of the grid.
+   */
+  get popupOffsetY(): number {
+    return -(
+      this.#titleBar.get_parent()!.height +
+      this.#grid.get_parent()!.height / 2
+    );
   }
 
   /**
@@ -252,6 +323,19 @@ export default GObject.registerClass({
 
     for (const button of textButtons) {
       button.active = button.label === `${cols}x${rows}`;
+    }
+  }
+
+  #onHoverChanged() {
+    if (this.#delayTimeoutID) {
+      clearTimeout(this.#delayTimeoutID);
+      this.#delayTimeoutID = null;
+    }
+
+    if (!this.hover && this.#grid.selection) {
+      this.#delayTimeoutID = setTimeout(() => {
+        this.#grid.selection = null;
+      }, this.#selectionTimeout);
     }
   }
 });

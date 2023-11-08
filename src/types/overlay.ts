@@ -10,6 +10,11 @@ export const enum Event {
   Selection = 1,
 
   /**
+   * User pressed the autotiling action button.
+   */
+  Autotile,
+
+  /**
    * Visibility state of the gTile user interface has changed.
    */
   Visibility,
@@ -20,6 +25,11 @@ export interface UserSelectionEvent {
   monitorIdx: number;
   gridSize: GridSize;
   selection: GridSelection;
+}
+
+export interface AutotileEvent {
+  type: Event.Autotile,
+  layout: "main" | "main-inverted";
 }
 
 export interface VisibilityEvent {
@@ -33,4 +43,5 @@ export interface VisibilityEvent {
  */
 export type OverlayEvent =
   | UserSelectionEvent
+  | AutotileEvent
   | VisibilityEvent;

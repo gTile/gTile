@@ -3,13 +3,7 @@ import Shell from "gi://Shell?version=13";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
-import {
-  Action,
-  AutoTileAction,
-  HotkeyAction,
-  LoopPresetAction
-} from "../types/hotkeys.js";
+import { Action, HotkeyAction, LoopPresetAction } from "../types/hotkeys.js";
 import {
   BoolSettingKey,
   ExtensionSettings,
@@ -20,49 +14,23 @@ import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
-import { DefaultGridSizes, adjust, pan } from "../util/grid.js";
+import { AutoTileLayouts, DefaultGridSizes, adjust, pan } from "../util/grid.js";
 import {
   GridSizeListParser,
-  GridSpecParser,
   Preset,
   ResizePresetListParser
 } from "../util/parser.js";
 import { VolatileStorage } from "../util/volatile.js";
 import DesktopManager from "./DesktopManager.js";
-import HotkeyManager, { KeyBindingGroup } from "./HotkeyManager.js";
+import HotkeyManager, {
+  DefaultKeyBindingGroups,
+  SettingKeyToKeyBindingGroupLUT
+} from "./HotkeyManager.js";
 import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
 
 type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type ResizePresetAddr = [index: number, subindex: number];
-
-// Active keybinding group(s) when overlay is shown
-const DefaultKeyBindingGroups =
-  KeyBindingGroup.Overlay | KeyBindingGroup.Autotile | KeyBindingGroup.Preset;
-
-// Setting keys that enable a keybinding group even when the overlay is hidden
-const SettingKeyToKeyBindingGroupLUT = {
-  "global-auto-tiling": KeyBindingGroup.Autotile,
-  "global-presets": KeyBindingGroup.Preset,
-  "moveresize-enabled": KeyBindingGroup.Action,
-} as const satisfies Partial<Record<BoolSettingKey, KeyBindingGroup>>;
-
-const AutoTileSpecLUT = {
-  "main": new GridSpecParser("cols(2, 2d)").parse()!,
-  "main-inverted": new GridSpecParser("cols(2d, 2)").parse()!,
-  "cols": {
-    1: new GridSpecParser(`cols(1d)`).parse()!,
-    2: new GridSpecParser(`cols(2d,2d)`).parse()!,
-    3: new GridSpecParser(`cols(3d,3d,3d)`).parse()!,
-    4: new GridSpecParser(`cols(4d,4d,4d,4d)`).parse()!,
-    5: new GridSpecParser(`cols(5d,5d,5d,5d,5d)`).parse()!,
-    6: new GridSpecParser(`cols(6d,6d,6d,6d,6d,6d)`).parse()!,
-    7: new GridSpecParser(`cols(7d,7d,7d,7d,7d,7d,7d)`).parse()!,
-    8: new GridSpecParser(`cols(8d,8d,8d,8d,8d,8d,8d,8d)`).parse()!,
-    9: new GridSpecParser(`cols(9d,9d,9d,9d,9d,9d,9d,9d,9d)`).parse()!,
-    10: new GridSpecParser(`cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)`).parse()!,
-  },
-} as const satisfies Record<AutoTileAction["layout"], any>;
 
 /**
  * Represents the gTile extension.
@@ -140,8 +108,9 @@ export default class App implements GarbageCollector {
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
       theme: this.#theme,
+      shell: Shell.Global.get(),
       settings: this.#settings,
-      gnomeSettings: extension.getSettings('org.gnome.desktop.interface'),
+      gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
@@ -162,7 +131,6 @@ export default class App implements GarbageCollector {
     const chid = this.#settings.connect("changed",
       (_, key: SettingKey) => this.#onSettingsChanged(key));
     this.#gc.defer(() => this.#settings.disconnect(chid));
-    this.#desktopManager.subscribe(this.#onDesktopEvent.bind(this));
     this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
   }
@@ -219,27 +187,18 @@ export default class App implements GarbageCollector {
     }
   }
 
-  #onDesktopEvent(action: DesktopEvent) {
-    switch (action.type) {
-      case DesktopEventType.FOCUS: return;
-      case DesktopEventType.MONITORS_CHANGED: return;
-    }
-
-    // exhaustive switch-case guard
-    return ((): never => { })();
-  }
-
   #onOverlayEvent(action: OverlayEvent) {
     switch (action.type) {
       case OverlayEventType.Selection:
-        // confirming a selection by mouse is handled the same as with <Enter>
         this.#onUserAction({ type: Action.CONFIRM });
         return;
+      case OverlayEventType.Autotile:
+        this.#onUserAction({ type: Action.AUTOTILE, layout: action.layout });
+        return;
       case OverlayEventType.Visibility:
-        this.#hotkeyManager.setListeningGroups(
-          action.visible
-            ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
-            : this.#globalKeyBindingGroups);
+        this.#hotkeyManager.setListeningGroups(action.visible
+          ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
+          : this.#globalKeyBindingGroups);
         return;
     }
 
@@ -264,7 +223,7 @@ export default class App implements GarbageCollector {
     const om = this.#overlayManager;
     const dm = this.#desktopManager;
     const window = dm.focusedWindow; if (!window) return;
-    const monitorIdx = window.get_monitor();
+    const monitorIdx = om.activeMonitor ?? window.get_monitor();
     const selection = om.getSelection(monitorIdx);
 
     // events that require a window target
@@ -285,13 +244,23 @@ export default class App implements GarbageCollector {
           om.setSelection(newSelection, monitorIdx);
         }
         return;
-      case Action.ADJUST:
+      case Action.ADJUST: {
         const curSel = selection ?? dm.windowToSelection(window, om.gridSize);
-        const adaptedSel = adjust(curSel, om.gridSize, action.dir, action.mode);
-        om.setSelection(adaptedSel, monitorIdx);
+        const newSel = adjust(curSel, om.gridSize, action.dir, action.mode);
+        om.setSelection(newSel, monitorIdx);
         return;
-      case Action.RESIZE: return;
-      case Action.GROW: return;
+      }
+      case Action.MOVE: {
+        dm.moveWindow(window, om.gridSize, action.dir);
+        return;
+      }
+      case Action.RESIZE: {
+        dm.resizeWindow(window, om.gridSize, action.dir, action.mode);
+        return;
+      }
+      case Action.GROW:
+        dm.autogrow(window);
+        return;
       case Action.LOOP_PRESET: {
         const preset = this.#getResizePreset(action.preset);
         if (preset) {
@@ -300,12 +269,14 @@ export default class App implements GarbageCollector {
         }
         return;
       }
-      case Action.RELOCATE: return;
+      case Action.RELOCATE:
+        dm.moveToMonitor(window);
+        return;
       case Action.AUTOTILE:
         if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(AutoTileSpecLUT[action.layout], monitorIdx);
+          dm.autotile(AutoTileLayouts[action.layout], monitorIdx);
         } else if (action.cols) {
-          dm.autotile(AutoTileSpecLUT[action.layout][action.cols], monitorIdx);
+          dm.autotile(AutoTileLayouts[action.layout][action.cols], monitorIdx);
         }
         return;
     }

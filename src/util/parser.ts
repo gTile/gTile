@@ -318,7 +318,7 @@ export class ResizePresetListParser extends Parser {
   }
 
   #isPreset(o: Preset | GridSelection): o is Preset {
-    return 'gridSize' satisfies keyof Preset in o;
+    return "gridSize" satisfies keyof Preset in o;
   }
 }
 
@@ -336,7 +336,7 @@ export class ResizePresetListParser extends Parser {
  * Examples:
  * - ""            - describes a single-cell grid with 100% width and height
  * - "rows(3, 1)"  - describes a grid with 2 rows that take 75% and 25% height.
- * - "cols(2, 2d)" - described a grid with 2 cells (one dynamic) each 50% width.
+ * - "cols(2, 2d)" - describes a grid with 2 cells (one dynamic) each 50% width.
  * - "cols(2:rows(1,2d,1), 2:rows(1,2:rows(1,1),1))"
  */
 export class GridSpecParser extends Parser {
@@ -363,10 +363,10 @@ export class GridSpecParser extends Parser {
     }
   }
 
-  #parseGridSpec(): GridSpec | null {
+  #parseGridSpec(): GridSpec {
     switch (this.token.kind) {
       case Literal.$:
-        return null;
+        return { mode: "cols", cells: [] };
       case Literal.Keyword:
         return this.#parseColRowSpec();
     }

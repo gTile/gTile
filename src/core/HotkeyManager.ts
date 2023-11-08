@@ -6,6 +6,7 @@ import { WindowManager } from "resource:///org/gnome/shell/ui/windowManager.js";
 import { Action, HotkeyAction, ResizeAction } from "../types/hotkeys.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
 import {
+  BoolSettingKey,
   ExtensionSettings,
   KeyBindingGlobalSettingKey,
   KeyBindingGroupActionSettingKey,
@@ -35,6 +36,22 @@ export const enum KeyBindingGroup {
   Action   = 1 << 3,
   Preset   = 1 << 4,
 }
+
+/**
+ * The default keybinding groups that are active when overlay is shown.
+ */
+export const DefaultKeyBindingGroups =
+  KeyBindingGroup.Overlay | KeyBindingGroup.Autotile | KeyBindingGroup.Preset;
+
+/**
+ * Setting keys that control whether specific keybinding groups are always
+ * active, even when the overlay is hidden.
+ */
+export const SettingKeyToKeyBindingGroupLUT = {
+  "global-auto-tiling": KeyBindingGroup.Autotile,
+  "global-presets": KeyBindingGroup.Preset,
+  "moveresize-enabled": KeyBindingGroup.Action,
+} as const satisfies Partial<Record<BoolSettingKey, KeyBindingGroup>>;
 
 export interface HotkeyManagerParams {
   settings: ExtensionSettings
@@ -216,10 +233,10 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
       kb("action-expand-bottom", { type: Action.RESIZE, mode, dir: "south" });
       kb("action-expand-left", { type: Action.RESIZE, mode, dir: "west" });
     }
-    kb("action-move-up", { type: Action.PAN, dir: "north" });
-    kb("action-move-right", { type: Action.PAN, dir: "east" });
-    kb("action-move-down", { type: Action.PAN, dir: "south" });
-    kb("action-move-left", { type: Action.PAN, dir: "west" });
+    kb("action-move-up", { type: Action.MOVE, dir: "north" });
+    kb("action-move-right", { type: Action.MOVE, dir: "east" });
+    kb("action-move-down", { type: Action.MOVE, dir: "south" });
+    kb("action-move-left", { type: Action.MOVE, dir: "west" });
     kb("action-move-next-monitor", { type: Action.RELOCATE });
   }
 

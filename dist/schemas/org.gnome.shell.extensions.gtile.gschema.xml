@@ -499,6 +499,10 @@
 			<default>2000</default>
 			<summary>Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling.</summary>
 		</key>
+		<key type = "i" name="selection-timeout">
+			<default>200</default>
+			<summary>Grace period in milliseconds that a selection remains after the cursor left the overlay.</summary>
+		</key>
 		<key type = "i" name="insets-primary-left">
 			<default>0</default>
 			<summary>Left gap around border of screen for primary monitor</summary>

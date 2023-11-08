@@ -166,9 +166,9 @@ export default class extends ExtensionPreferences {
     this.#settings.bind("auto-close-keyboard-shortcut", sr2, "active", Gio.SettingsBindFlags.DEFAULT);
     group.add(sr2);
 
-    const sr3 = new Adw.SwitchRow({ title: "Animation" });
-    this.#settings.bind("animation", sr3, "active", Gio.SettingsBindFlags.DEFAULT);
-    group.add(sr3);
+    // const sr3 = new Adw.SwitchRow({ title: "Animation" });
+    // this.#settings.bind("animation", sr3, "active", Gio.SettingsBindFlags.DEFAULT);
+    // group.add(sr3);
 
     const sr4 = new Adw.SwitchRow({ title: "Show icon" });
     this.#settings.bind("show-icon", sr4, "active", Gio.SettingsBindFlags.DEFAULT);
@@ -270,12 +270,10 @@ export default class extends ExtensionPreferences {
     });
     // TODO: How/When to disconnect?
     // this.#settings.connect("changed::theme", () => {
-    //   console.log("Theme changed");
     //   const newTheme = this.#settings.get_string("theme");
 
     //   for (let i = 0; i < entries.get_n_items(); ++i) {
     //     if (newTheme === entries.get_string(i)) {
-    //       console.log("for real");
     //       cr.selected = i;
     //     }
     //   }

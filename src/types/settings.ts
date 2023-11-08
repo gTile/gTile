@@ -31,6 +31,7 @@ export type NumberSettingKey =
   | "insets-secondary-bottom"
   | "insets-secondary-left"
   | "max-timeout"
+  | "selection-timeout"
   | "window-margin";
 
 /**

@@ -43,6 +43,12 @@ export const enum Action {
   ADJUST,
 
   /**
+   * Moves a window by at most one tile in the desired direction such that the
+   * edge of the window aligns with the grid.
+   */
+  MOVE,
+
+  /**
    * Expand or contract the specified edge of a window by at most one tile such
    * that it aligns with the grid.
    */
@@ -101,6 +107,11 @@ export interface AdjustAction {
   dir: CardinalDirection;
 }
 
+export interface MoveAction {
+  type: Action.MOVE;
+  dir: CardinalDirection;
+}
+
 export interface ResizeAction {
   type: Action.RESIZE;
   mode: "extend" | "shrink";
@@ -137,6 +148,7 @@ export type HotkeyAction =
   | LoopGridSizeAction
   | PanAction
   | AdjustAction
+  | MoveAction
   | ResizeAction
   | GrowAction
   | LoopPresetAction
