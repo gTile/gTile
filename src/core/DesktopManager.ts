@@ -429,6 +429,15 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
   #moveResize(target: Meta.Window, { x, y, width, height }: Rectangle) {
     target.unmaximize(Meta.MaximizeFlags.BOTH);
+
+    // As of Nov '23 the `move_resize_frame` works for almost all application
+    // windows. A user report pointed out however, that for gVim, the window
+    // is not moved and only resized. The call to `move_frame` fixes that.
+    // There doesn't seem to be any other discriminative variable (e.g. window
+    // type or frame type) that could serve as an indicator for whether or not
+    // this (usually redundant) call is required.
+    // https://github.com/gTile/gTile/issues/336#issuecomment-1803025082
+    target.move_frame(true, x, y);
     target.move_resize_frame(true, x, y, width, height);
   }
 
