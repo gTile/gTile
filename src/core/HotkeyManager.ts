@@ -168,14 +168,14 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     kb("move-left", { type: Action.PAN, dir: "west" });
     kb("move-left-vi", { type: Action.PAN, dir: "west" });
     kb("move-next-monitor", { type: Action.RELOCATE });
-    kb("resize-up", { type: Action.ADJUST, mode: "extend", dir: "north" });
-    kb("resize-up-vi", { type: Action.ADJUST, mode: "extend", dir: "north" });
+    kb("resize-up", { type: Action.ADJUST, mode: "shrink", dir: "south" });
+    kb("resize-up-vi", { type: Action.ADJUST, mode: "shrink", dir: "south" });
     kb("resize-right", { type: Action.ADJUST, mode: "extend", dir: "east" });
     kb("resize-right-vi", { type: Action.ADJUST, mode: "extend", dir: "east" });
     kb("resize-down", { type: Action.ADJUST, mode: "extend", dir: "south" });
     kb("resize-down-vi", { type: Action.ADJUST, mode: "extend", dir: "south" });
-    kb("resize-left", { type: Action.ADJUST, mode: "extend", dir: "west" });
-    kb("resize-left-vi", { type: Action.ADJUST, mode: "extend", dir: "west" });
+    kb("resize-left", { type: Action.ADJUST, mode: "shrink", dir: "east" });
+    kb("resize-left-vi", { type: Action.ADJUST, mode: "shrink", dir: "east" });
     kb("set-tiling", { type: Action.CONFIRM });
     kb("snap-to-neighbors", { type: Action.GROW });
   }
