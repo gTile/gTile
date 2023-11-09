@@ -257,10 +257,7 @@ export default GObject.registerClass({
    * should be displayed. This places the anchor in the center of the grid.
    */
   get popupOffsetY(): number {
-    return -(
-      this.#titleBar.get_parent()!.height +
-      this.#grid.get_parent()!.height / 2
-    );
+    return -(this.#titleBar.get_parent()!.height / 2);
   }
 
   /**
