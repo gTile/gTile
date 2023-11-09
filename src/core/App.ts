@@ -133,6 +133,7 @@ export default class App implements GarbageCollector {
     this.#gc.defer(() => this.#settings.disconnect(chid));
     this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
+    this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
   }
 
   release() {
