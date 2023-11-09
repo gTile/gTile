@@ -295,7 +295,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workspace = this.#workspaceManager.get_active_workspace();
     const workArea = workspace.get_work_area_for_monitor(monitorIdx);
-    const windows = workspace.list_windows();
+    const windows = workspace.list_windows()
+      .filter(window => window.get_monitor() === monitorIdx);
 
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
       x: canvas.x + canvas.width * rect.x,
@@ -304,7 +305,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       height: canvas.height * rect.height,
     });
 
-    // Place focused window in the largest dedicated area
+    // Place focused window (if any) in the largest dedicated area
     const focusedIdx = windows.findIndex(w => w.has_focus());
     if (focusedIdx && dedicated.length > 0) {
       const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
