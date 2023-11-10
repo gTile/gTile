@@ -62,10 +62,7 @@ export default GObject.registerClass({
       can_focus: true,
       track_hover: true,
       height,
-      layout_manager: new Clutter.GridLayout({
-        column_homogeneous: true,
-        row_homogeneous: true,
-      }),
+      layout_manager: new Clutter.GridLayout({ column_homogeneous: true }),
       ...params,
     });
 
@@ -80,7 +77,7 @@ export default GObject.registerClass({
     this.#rowHeight = height;
     const rows = Math.ceil(this.get_n_children() / MAX_BUTTONS_PER_ROW);
 
-    super.height = Math.min(rows, 1) * height;
+    super.height = Math.max(rows, 1) * height;
   }
 
   /**

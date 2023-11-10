@@ -95,7 +95,9 @@
     margin: 0 0 0 5px;
     font-size: 12px;
     line-height: 12px;
+    height: 34px;
 }
+
 .gtile-default__preset-button:first-child {
     margin-left: 0;
 }
@@ -295,6 +297,7 @@
     color: rgba(255, 255, 255, 0.4);
     border-radius: 0px;
     border: 1px rgba(0, 200, 255, 0.4);
+    height: 34px;
 }
 
 .gtile-classic__preset-button:hover,
@@ -500,7 +503,9 @@
     border-radius: 8px;
     padding: 0 4px;
     margin: 0 0 0 4px;
+    height: 34px;
 }
+
 .gtile-minimal-dark__preset-button:first-child {
     margin-left: 0;
 }
@@ -706,7 +711,9 @@
     border-color: #c9c3bd;
     padding: 0 4px;
     margin: 0 0 0 4px;
+    height: 34px;
 }
+
 .gtile-minimal-light__preset-button:first-child {
     margin-left: 0;
 }

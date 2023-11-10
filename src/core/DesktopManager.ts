@@ -288,9 +288,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   autotile(spec: GridSpec, monitorIdx: number) {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
-    const workspace = this.#workspaceManager.get_active_workspace();
-    const workArea = workspace.get_work_area_for_monitor(monitorIdx);
-    const windows = workspace.list_windows()
+    const workArea = this.#workArea(monitorIdx);
+    const windows = this.#workspaceManager.get_active_workspace().list_windows()
       .filter(window => window.get_monitor() === monitorIdx);
 
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({

@@ -42,13 +42,14 @@ export interface OverlayManagerParams {
  * manipulate the overlay appearance.
  */
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
-  #gc: GarbageCollection;
   #theme: Theme;
   #settings: ExtensionSettings;
   #presets: GridSize[];
   #shell: Shell.Global;
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
+  #gridLineOverlayGc: GarbageCollection;
+  #windowSubscriptionGc: GarbageCollection;
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
   #overlays: InstanceType<typeof Overlay>[];
   #preview: InstanceType<typeof Preview>;
@@ -64,13 +65,14 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     layoutManager,
     desktopManager,
   }: OverlayManagerParams) {
-    this.#gc = new GarbageCollection();
     this.#theme = theme;
     this.#shell = shell;
     this.#settings = settings;
     this.#presets = presets;
     this.#layoutManager = layoutManager;
     this.#desktopManager = desktopManager;
+    this.#gridLineOverlayGc = new GarbageCollection();
+    this.#windowSubscriptionGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
     this.#preview = new Preview({ theme: this.#theme });
@@ -90,7 +92,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * overlays (hidden and visible). The instance must not be used thereafter.
    */
   release() {
-    this.#gc.release();
+    this.#gridLineOverlayGc.release();
+    this.#windowSubscriptionGc.release();
     this.#preview.destroy();
     this.#destroyOverlays();
     this.#dispatchCallbacks = [];
@@ -314,7 +317,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     }
 
     // destroys previous grid in case it wasn't cleaned up by the timeout yet
-    this.#gc.release();
+    this.#gridLineOverlayGc.release();
 
     for (const monitor of this.#desktopManager.monitors) {
       const tileWidth = monitor.width / gridSize.cols;
@@ -328,7 +331,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           width: 1,
           height: monitor.height,
         });
-        this.#gc.defer(() => gridLine.destroy());
+        this.#gridLineOverlayGc.defer(() => gridLine.destroy());
 
         this.#layoutManager.addChrome(gridLine);
       }
@@ -341,15 +344,36 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           width: monitor.width,
           height: 1,
         });
-        this.#gc.defer(() => gridLine.destroy());
+        this.#gridLineOverlayGc.defer(() => gridLine.destroy());
 
         this.#layoutManager.addChrome(gridLine);
       }
     }
 
-    const id = setTimeout(() => this.#gc.release(), timeout);
+    const id = setTimeout(() => this.#gridLineOverlayGc.release(), timeout);
     // prevents out of band execution when queued quickly in succession
-    this.#gc.defer(() => clearTimeout(id));
+    this.#gridLineOverlayGc.defer(() => clearTimeout(id));
+  }
+
+  #updateTitle(title: string) {
+    for (const overlay of this.#overlays) {
+      overlay.title = title;
+    };
+  }
+
+  #syncTitleWithWindow(window: Meta.Window | null) {
+    this.#windowSubscriptionGc.release();
+
+    if (window) {
+      this.#updateTitle(window.title ?? "gTile");
+      const chid = window.connect("notify::title", () => {
+        this.#updateTitle(window.title ?? "gTile");
+      });
+
+      this.#windowSubscriptionGc.defer(() => {
+        window.disconnect(chid);
+      });
+    }
   }
 
   #onGridVisibleChanged(source: InstanceType<typeof Overlay>) {
@@ -408,13 +432,11 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #onDesktopEvent(event: DesktopEvent) {
     switch (event.type) {
       case DesktopEventType.FOCUS:
+        this.#syncTitleWithWindow(event.target);
         if (!event.target) {
           this.toggleOverlays(true);
-          return;
         }
-        for (const overlay of this.#overlays) {
-          overlay.title = event.target.title ?? "gTile";
-        }
+
         return;
       case DesktopEventType.MONITORS_CHANGED:
         this.#destroyOverlays();
