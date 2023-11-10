@@ -288,16 +288,18 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param monitorIdx The {@link Monitor.index} to apply the grid spec to.
    */
   autotile(spec: GridSpec, monitorIdx: number) {
-    const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
-    const workArea = this.#workArea(monitorIdx);
-    const windows = this.#workspaceManager.get_active_workspace().list_windows()
-      .filter(window => window.get_monitor() === monitorIdx);
+    const
+      [dedicated, dynamic] = this.#gridSpecToAreas(spec),
+      windowMargin = this.#userPreferences.getWindowMargin(),
+      workArea = this.#workArea(monitorIdx),
+      windows = this.#workspaceManager.get_active_workspace().list_windows()
+        .filter(window => window.get_monitor() === monitorIdx);
 
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
-      x: canvas.x + canvas.width * rect.x,
-      y: canvas.y + canvas.height * rect.y,
-      width: canvas.width * rect.width,
-      height: canvas.height * rect.height,
+      x: canvas.x + canvas.width * rect.x + windowMargin,
+      y: canvas.y + canvas.height * rect.y + windowMargin,
+      width: canvas.width * rect.width - 2 * windowMargin,
+      height: canvas.height * rect.height - 2 * windowMargin,
     });
 
     // Place focused window (if any) in the largest dedicated area
