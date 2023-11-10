@@ -5,8 +5,6 @@ import Meta from "gi://Meta?version=13";
 import Shell from "gi://Shell?version=13";
 import St from "gi://St?version=13";
 
-import * as Main from "resource:///org/gnome/shell/ui/main.js";
-
 import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
 import { GridSelection, GridSize } from "../types/grid.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
@@ -28,10 +26,10 @@ export type GnomeInterfaceSettings =
 
 export interface OverlayManagerParams {
   theme: Theme;
-  shell: Shell.Global;
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
+  shell: Shell.Global;
   layoutManager: LayoutManager;
   desktopManager: DesktopManager;
 }
@@ -46,9 +44,9 @@ export interface OverlayManagerParams {
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #gc: GarbageCollection;
   #theme: Theme;
-  #shell: Shell.Global;
   #settings: ExtensionSettings;
   #presets: GridSize[];
+  #shell: Shell.Global;
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
@@ -59,12 +57,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
   constructor({
     theme,
-    shell,
     settings,
     gnomeSettings,
     presets,
+    shell,
     layoutManager,
-    desktopManager
+    desktopManager,
   }: OverlayManagerParams) {
     this.#gc = new GarbageCollection();
     this.#theme = theme;
@@ -79,7 +77,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
-    Main.layoutManager.addTopChrome(this.#preview);
+    layoutManager.addTopChrome(this.#preview);
     this.#renderOverlays();
 
     this.#desktopManager.subscribe(this.#onDesktopEvent.bind(this));

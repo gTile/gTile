@@ -82,6 +82,7 @@ export default class App implements GarbageCollector {
     this.#gc = new GarbageCollection();
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
+
     this.#globalKeyBindingGroups = Object
       .entries(SettingKeyToKeyBindingGroupLUT)
       .reduce((mask, [key, group]) =>
@@ -108,10 +109,10 @@ export default class App implements GarbageCollector {
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
       theme: this.#theme,
-      shell: Shell.Global.get(),
       settings: this.#settings,
       gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
+      shell: Shell.Global.get(),
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
     });
@@ -237,13 +238,9 @@ export default class App implements GarbageCollector {
         }
         return;
       case Action.PAN:
-        if (!selection) {
-          const newSelection = dm.windowToSelection(window, om.gridSize);
-          om.setSelection(newSelection, window.get_monitor());
-        } else {
-          const newSelection = pan(selection, om.gridSize, action.dir);
-          om.setSelection(newSelection, monitorIdx);
-        }
+        const curSel = selection ?? dm.windowToSelection(window, om.gridSize);
+        const newSel = pan(curSel, om.gridSize, action.dir);
+        om.setSelection(newSel, monitorIdx);
         return;
       case Action.ADJUST: {
         const curSel = selection ?? dm.windowToSelection(window, om.gridSize);

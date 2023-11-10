@@ -150,11 +150,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       relX = Math.min(selection.anchor.col, selection.target.col) / cols,
       relY = Math.min(selection.anchor.row, selection.target.row) / rows,
       relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
-      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows;
-
-    const workArea = this.#workspaceManager
-      .get_active_workspace()
-      .get_work_area_for_monitor(monitorIdx);
+      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows,
+      workArea = this.#workArea(monitorIdx);
 
     return {
       x: workArea.x + workArea.width * relX,
@@ -180,9 +177,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     snap: "closest" | "shrink" | "grow" = "closest",
   ): GridSelection {
     const frame = window.get_frame_rect();
-    const workArea = this.#workspaceManager
-      .get_active_workspace()
-      .get_work_area_for_monitor(window.get_monitor());
+    const workArea = this.#workArea(window.get_monitor());
     const relativeRect: Rectangle = {
       x: (frame.x - workArea.x) / workArea.width,
       y: (frame.y - workArea.y) / workArea.height,
@@ -219,9 +214,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   autogrow(target: Meta.Window) {
     const monitorIdx = target.get_monitor();
-    const workspace = target.get_workspace()
-    const workArea = workspace.get_work_area_for_monitor(monitorIdx);
+    const workArea = this.#workArea(monitorIdx);
     const [_, frame] = workArea.intersect(target.get_frame_rect());
+    const workspace = target.get_workspace();
     const collisionWindows = workspace.list_windows().filter(win => !(
       win === target ||
       win.minimized ||
@@ -424,10 +419,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     }
   }
 
-  #isPrimaryMonitor(index: number): boolean {
-    return this.#layoutManager.primaryIndex === index;
-  }
-
   #moveResize(target: Meta.Window, { x, y, width, height }: Rectangle) {
     target.unmaximize(Meta.MaximizeFlags.BOTH);
 
@@ -440,6 +431,26 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     // https://github.com/gTile/gTile/issues/336#issuecomment-1803025082
     target.move_frame(true, x, y);
     target.move_resize_frame(true, x, y, width, height);
+  }
+
+  #workArea(monitorIdx: number): Mtk.Rectangle {
+    const
+      isPrimaryMonitor = this.#layoutManager.primaryIndex === monitorIdx,
+      inset = this.#userPreferences.getInset(isPrimaryMonitor),
+      workArea = this.#workspaceManager
+        .get_active_workspace()
+        .get_work_area_for_monitor(monitorIdx),
+      top = Math.clamp(inset.top, 0, Math.floor(workArea.height / 2)),
+      bottom = Math.clamp(inset.bottom, 0, Math.floor(workArea.height / 2)),
+      left = Math.clamp(inset.left, 0, Math.floor(workArea.width / 2)),
+      right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2));
+
+    workArea.x += left;
+    workArea.y += top;
+    workArea.width -= left + right;
+    workArea.height -= top + bottom;
+
+    return workArea;
   }
 
   #rectToSelection(
@@ -572,7 +583,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     return self;
   }
 
-  #findBest(tree: Node<MRect>): MRect {
+  #findBest(tree: Node<Mtk.Rectangle>): Mtk.Rectangle {
     let left, right;
 
     if (tree.left) {

@@ -1,9 +1,5 @@
 /**
- * Represents a margin with the specified relative thickness.
- *
- * For instance, the following inset represents a margin of width 10 on a screen
- * with a resolution of 100x100 (pixel).
- * - `{ top: .1, right: .1, bottom: .1, left: .1 }`
+ * Represents a margin with the a specified thickness in pixels.
  */
 export interface Inset {
   top: number;
