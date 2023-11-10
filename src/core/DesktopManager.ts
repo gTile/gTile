@@ -147,17 +147,26 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   ): Rectangle {
     const
       { cols, rows } = gridSize,
-      relX = Math.min(selection.anchor.col, selection.target.col) / cols,
-      relY = Math.min(selection.anchor.row, selection.target.row) / rows,
-      relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
-      relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows,
+      windowMargin = this.#userPreferences.getWindowMargin(),
+      gridX = Math.min(selection.anchor.col, selection.target.col),
+      gridY = Math.min(selection.anchor.row, selection.target.row),
+      gridW = Math.abs(selection.anchor.col - selection.target.col) + 1,
+      gridH = Math.abs(selection.anchor.row - selection.target.row) + 1,
+      relX = gridX / cols,
+      relY = gridY / rows,
+      relW = gridW / cols,
+      relH = gridH / rows,
+      extraX = (gridX == 0) ? 0 : windowMargin / 2,
+      extraY = (gridY == 0) ? 0 : windowMargin / 2,
+      extraW = -extraX - (gridX + gridW == cols ? 0 : windowMargin / 2),
+      extraH = -extraY - (gridY + gridH == cols ? 0 : windowMargin / 2),
       workArea = this.#workArea(monitorIdx);
 
     return {
-      x: workArea.x + workArea.width * relX,
-      y: workArea.y + workArea.height * relY,
-      width: workArea.width * relW,
-      height: workArea.height * relH,
+      x: workArea.x + workArea.width * relX + extraX,
+      y: workArea.y + workArea.height * relY + extraY,
+      width: workArea.width * relW + extraW,
+      height: workArea.height * relH + extraH,
     }
   }
 
