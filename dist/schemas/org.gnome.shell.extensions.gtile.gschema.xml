@@ -491,10 +491,6 @@
 			<default>0</default>
 			<summary>Gaps between windows in the middle of screen</summary>
 		</key>
-		<key type = "b" name="window-margin-fullscreen-enabled">
-			<default>false</default>
-			<summary>Apply margin to fullscreen windows</summary>
-		</key>
 		<key type = "i" name="max-timeout">
 			<default>2000</default>
 			<summary>Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling.</summary>

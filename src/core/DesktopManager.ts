@@ -21,6 +21,8 @@ import { UserPreferencesProvider } from "./UserPreferences.js";
 // splits computed gridspec cell areas in non-dynamic and dynamic cells
 type GridSpecAreas = [dedicated: Rectangle[], dynamic: Rectangle[]];
 
+type FrameSize = { width: number; height: number };
+
 type MRect = Mtk.Rectangle;
 
 export interface DesktopManagerParams {
@@ -129,7 +131,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   ) {
     const projectedArea = this.selectionToArea(selection, gridSize, monitorIdx);
 
-    this.#moveResize(target, projectedArea);
+    this.#fit(target, projectedArea);
   }
 
   /**
@@ -138,12 +140,15 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param selection The selection to be mapped/projected.
    * @param gridSize The reference grid used to divide the monitor’s work area.
    * @param monitorIdx The monitor for which the selection is being mapped.
+   * @param preview Optional. Deducts the user-configured margin ahead of time.
+   *   The margin is usually deducted during the window resize operation.
    * @returns The mapped selection.
    */
   selectionToArea(
     selection: GridSelection,
     gridSize: GridSize,
-    monitorIdx: number
+    monitorIdx: number,
+    preview = false,
   ): Rectangle {
     const
       { cols, rows } = gridSize,
@@ -151,13 +156,14 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       relY = Math.min(selection.anchor.row, selection.target.row) / rows,
       relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
       relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows,
-      workArea = this.#workArea(monitorIdx);
+      workArea = this.#workArea(monitorIdx),
+      margin = preview ? this.#userPreferences.getMargin() : 0;
 
     return {
-      x: workArea.x + workArea.width * relX,
-      y: workArea.y + workArea.height * relY,
-      width: workArea.width * relW,
-      height: workArea.height * relH,
+      x: workArea.x + workArea.width * relX + margin,
+      y: workArea.y + workArea.height * relY + margin,
+      width: workArea.width * relW - margin * 2,
+      height: workArea.height * relH - margin * 2,
     }
   }
 
@@ -176,7 +182,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     gridSize: GridSize,
     snap: "closest" | "shrink" | "grow" = "closest",
   ): GridSelection {
-    const frame = window.get_frame_rect();
+    const frame = this.#frameRect(window);
     const workArea = this.#workArea(window.get_monitor());
     const relativeRect: Rectangle = {
       x: (frame.x - workArea.x) / workArea.width,
@@ -215,16 +221,16 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   autogrow(target: Meta.Window) {
     const monitorIdx = target.get_monitor();
     const workArea = this.#workArea(monitorIdx);
-    const [_, frame] = workArea.intersect(target.get_frame_rect());
+    const [_, frame] = workArea.intersect(this.#frameRect(target));
     const workspace = target.get_workspace();
     const collisionWindows = workspace.list_windows().filter(win => !(
       win === target ||
       win.minimized ||
       win.get_frame_type() !== Meta.FrameType.NORMAL ||
       win.get_monitor() !== monitorIdx ||
-      frame.contains_rect(win.get_frame_rect()) ||
-      frame.intersect(win.get_frame_rect())[0]
-    )).map(win => win.get_frame_rect());
+      frame.contains_rect(this.#frameRect(win)) ||
+      frame.intersect(this.#frameRect(win))[0]
+    )).map(win => this.#frameRect(win));
 
     // Step 1: Calculate maximum possible boundary by finding windows directly
     // adjacent to the north, east, south or west. The work area of the monitor
@@ -267,7 +273,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       optimalFrame.intersect(win)[0] || optimalFrame.contains_rect(win));
     const root = this.#tree(frame, optimalFrame, remainingColliders);
 
-    this.#moveResize(target, this.#findBest(root));
+    this.#fit(target, this.#findBest(root));
   }
 
   /**
@@ -309,7 +315,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         [-1, 0]);
 
       const projectedArea = project(dedicated[largestIdx], workArea);
-      this.#moveResize(windows[focusedIdx], projectedArea);
+      this.#fit(windows[focusedIdx], projectedArea);
 
       windows.splice(focusedIdx, 1);
       dedicated.splice(largestIdx, 1);
@@ -317,7 +323,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     // Place windows in regular cells
     for (let i = 0; i < dedicated.length && i < windows.length; ++i) {
-      this.#moveResize(windows[i], project(dedicated[i], workArea));
+      this.#fit(windows[i], project(dedicated[i], workArea));
     }
 
     // Fit remaining windows in dynamic cells
@@ -329,7 +335,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
       let j = i;
       for (const area of this.#splitN(dynamic[i], n)) {
-        this.#moveResize(windows[j], project(area, workArea));
+        this.#fit(windows[j], project(area, workArea));
         j += dynamic.length;
       }
     }
@@ -355,11 +361,11 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       asSelection: GridSelection = { anchor: nwTile, target: nwTile },
       monitorIdx = target.get_monitor(),
       targetArea = this.selectionToArea(asSelection, gridSize, monitorIdx),
-      frame = target.get_frame_rect(),
+      frame = this.#frameRect(target),
       newX = (dir === "north" || dir === "south") ? frame.x : targetArea.x,
       newY = (dir === "east"  || dir === "west")  ? frame.y : targetArea.y;
 
-    target.move_frame(true, newX, newY);
+    this.#moveResize(target, newX, newY);
   }
 
   /**
@@ -383,7 +389,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       targetSelection = adjust(frameFit, gridSize, dir, mode),
       monitorIdx = target.get_monitor(),
       targetArea = this.selectionToArea(targetSelection, gridSize, monitorIdx),
-      frame = target.get_frame_rect();
+      frame = this.#frameRect(target);
 
     let rect: Rectangle;
     switch (dir) {
@@ -409,7 +415,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       }
     }
 
-    this.#moveResize(target, rect);
+    this.#fit(target, rect);
   }
 
   #dispatch(event: DesktopEvent) {
@@ -418,18 +424,44 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     }
   }
 
-  #moveResize(target: Meta.Window, { x, y, width, height }: Rectangle) {
+  #moveResize(target: Meta.Window, x: number, y: number, size?: FrameSize) {
     target.unmaximize(Meta.MaximizeFlags.BOTH);
 
+    // All internal calculations fictively operate as if the actual window frame
+    // size would also incorporate the user-defined window margin. Only when a
+    // window is actually moved this margin gets deducted.
+    const margin = this.#userPreferences.getMargin();
+    x += margin;
+    y += margin;
+
     // As of Nov '23 the `move_resize_frame` works for almost all application
-    // windows. A user report pointed out however, that for gVim, the window
-    // is not moved and only resized. The call to `move_frame` fixes that.
-    // There doesn't seem to be any other discriminative variable (e.g. window
-    // type or frame type) that could serve as an indicator for whether or not
-    // this (usually redundant) call is required.
+    // windows. However, a user report pointed out that for gVim, the window is
+    // not moved but only resized. The call to `move_frame` fixes that. There
+    // doesn't seem to be any other discriminative variable (e.g. window type or
+    // frame type) that could serve as an indicator for whether or not this
+    // (usually redundant) call is required.
     // https://github.com/gTile/gTile/issues/336#issuecomment-1803025082
     target.move_frame(true, x, y);
-    target.move_resize_frame(true, x, y, width, height);
+    if (size) {
+      const { width: w, height: h } = size;
+      target.move_resize_frame(true, x, y, w - margin * 2, h - margin * 2);
+    }
+  }
+
+  #fit(target: Meta.Window, { x, y, width, height }: Rectangle) {
+    this.#moveResize(target, x, y, { width, height });
+  }
+
+  #frameRect(target: Meta.Window): Mtk.Rectangle {
+    const frame = target.get_frame_rect();
+    const margin = this.#userPreferences.getMargin();
+
+    frame.x -= margin;
+    frame.y -= margin;
+    frame.width += margin * 2;
+    frame.height += margin * 2;
+
+    return frame;
   }
 
   #workArea(monitorIdx: number): Mtk.Rectangle {
@@ -442,12 +474,16 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       top = Math.clamp(inset.top, 0, Math.floor(workArea.height / 2)),
       bottom = Math.clamp(inset.bottom, 0, Math.floor(workArea.height / 2)),
       left = Math.clamp(inset.left, 0, Math.floor(workArea.width / 2)),
-      right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2));
+      right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2)),
+      margin = this.#userPreferences.getMargin();
 
-    workArea.x += left;
-    workArea.y += top;
-    workArea.width -= left + right;
-    workArea.height -= top + bottom;
+    // The fictitious expansion of the workarea by the user-configured margin
+    // effectively acts as a countermeasure so that windows do always align with
+    // the screen edge, i.e., unless the user explicitly configured an inset.
+    workArea.x += left - margin;
+    workArea.y += top - margin;
+    workArea.width -= left + right - margin * 2;
+    workArea.height -= top + bottom - margin * 2;
 
     return workArea;
   }

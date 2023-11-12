@@ -15,8 +15,7 @@ export type BoolSettingKey =
   | "moveresize-enabled"
   | "show-grid-lines"
   | "show-icon"
-  | "target-presets-to-monitor-of-mouse"
-  | "window-margin-fullscreen-enabled";
+  | "target-presets-to-monitor-of-mouse";
 
 /**
  * Key names in the GSettings schema that reference a numeric value.

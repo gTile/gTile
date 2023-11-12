@@ -413,8 +413,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     }
 
     this.#activeIdx = this.#overlays.findIndex(o => o === source);
-    this.#preview.previewArea = this.#desktopManager
-      .selectionToArea(source.gridSelection, this.gridSize, this.#activeIdx);
+    this.#preview.previewArea = this.#desktopManager.selectionToArea(
+      source.gridSelection, this.gridSize, this.#activeIdx, true);
   }
 
   #onGridHoverTileChanged(source: InstanceType<typeof Overlay>) {
@@ -423,10 +423,11 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       return;
     }
 
-    const at = source.gridHoverTile;
     const monitorIdx = this.#overlays.findIndex(overlay => overlay === source);
-    this.#preview.previewArea = this.#desktopManager
-      .selectionToArea({ anchor: at, target: at }, source.gridSize, monitorIdx);
+    this.#preview.previewArea = this.#desktopManager.selectionToArea({
+      anchor: source.gridHoverTile,
+      target: source.gridHoverTile,
+    }, source.gridSize, monitorIdx, true);
   }
 
   #onDesktopEvent(event: DesktopEvent) {

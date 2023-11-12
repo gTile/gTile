@@ -6,6 +6,7 @@ import { ExtensionSettings } from "../types/settings.js";
  */
 export interface UserPreferencesProvider {
   getInset(primary: boolean): Inset;
+  getMargin(): number;
 }
 
 export interface UserPreferencesParams {
@@ -37,5 +38,15 @@ export default class implements UserPreferencesProvider {
       left: this.#settings.get_int(`insets-${setting}-left`),
       right: this.#settings.get_int(`insets-${setting}-right`),
     };
+  }
+
+  /**
+   * The margin that is expected to be applied to windows when moved and/or
+   * resized.
+   *
+   * @returns The window margin in pixel.
+   */
+  getMargin(): number {
+    return this.#settings.get_int("window-margin");
   }
 }

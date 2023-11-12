@@ -312,7 +312,6 @@ function  buildPrefsWidget() {
 
 // Redefining globals from extension.js - do not know how to do it better :-(
 const SETTINGS_WINDOW_MARGIN = 'window-margin';
-const SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED = 'window-margin-fullscreen-enabled';
 const SETTINGS_PRESET_RESIZE = 'resize';
 
 const SETTINGS_INSETS_PRIMARY_LEFT = 'insets-primary-left';
@@ -546,7 +545,6 @@ function margins_tab(notebook, settings) {
         use_markup: false,
         wrap: true,
     }), null, Gtk.PositionType.BOTTOM, 1, 1)
-    add_check("Apply margin to fullscreen windows", SETTINGS_WINDOW_MARGIN_FULLSCREEN_ENABLED, mg_grid, settings);
     add_int ("Window margin"            , SETTINGS_WINDOW_MARGIN           , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Left margin on primary screen"      , SETTINGS_INSETS_PRIMARY_LEFT     , mg_grid, settings, 0, 240, 1, 10);
     add_int ("Right margin on primary screen"     , SETTINGS_INSETS_PRIMARY_RIGHT    , mg_grid, settings, 0, 240, 1, 10);
