@@ -7,7 +7,7 @@
 - It can be used with either the mouse, or keyboard, including customizable keyboard presets for immediate window placement.
 - This extension is particularly useful for window management on (multiple) large monitors.
 
-**Acknowledgement**: The original idea and the first implementation of gTile was developed by [vibou](https://github.com/vibou) with the help from multiple contributors. gTile is now a community supported project and licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html)
+**Acknowledgement**: The original idea and the first implementation of gTile was developed by [vibou](https://github.com/vibou) with the help from multiple contributors. gTile is now a community supported project and licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html).
 
 # Table of Contents
 
@@ -203,7 +203,7 @@ npm ci
 
 ## Workflow
 
-Testing changes can be tedious at times because an extension cannot be updated in-place. The Gnome shell session must be restarted in order for changes to take effect. In Wayland it is usually much easier to start a nested session instead. Check the [GJS documentation](https://gjs.guide/extensions/development/debugging.html#reloading-extensions) on how to best debug extensions. Note that nested gnome sessions can take time to load and do not allow to test multi-screen setups. I personally found it most productive to have a second remote system which I can use to continuously test the extension on. For this purpose I added a simple new script to `package.json`:
+Testing changes can be tedious at times because an extension cannot be updated in-place. The Gnome shell session must be restarted in order for changes to take effect. In Wayland it is usually much easier to start a nested session instead. Check the [GJS documentation](https://gjs.guide/extensions/development/debugging.html#reloading-extensions) on how to best debug extensions. Note that nested gnome sessions can take time to load and do not allow to test multi-screen setups. I personally found it most productive to have a second remote system which I used to continuously test the extension on. For this purpose I added a simple new script to `package.json`:
 
 ```json
 {
@@ -259,7 +259,7 @@ The extension makes use of the GJS mechanisms were possible. In particular, the 
 The project does intentionally avoid the use of linters such as prettier or eslint. Quick comprehension is more important than following strict code formatting rules. That being said, please try to comply with the implicit code style used throughout the code base. In particular:
 
 - Respect the `.editorconfig` file - best with a plugin that automatically applies the rules.
-- Code lines should not exceed 80 characters
+- Code lines should not exceed 80 characters in length
 - Public members (methods and fields) of exported classes should be documented in JSDoc style.
   - This also applies to exported types, interfaces and functions unless they are really self-explanatory.
 - In general, private members of classes or non-exported types/functions should not require to be documented as the complexity of the inner-workings of a class (or similar) should remain comprehensible. In case the complexity gets out of hand consider to refactor the class or document the functions where necessary.
@@ -282,10 +282,10 @@ Some examples of valid `GridSpec` definitions:
 - `cols(1, 3, 1)`
   - Describes a grid consisting of three columns (and a single row). The first and last column have a relative width of 20% each (i.e. 1/5) and the center column has a size (relative to the row width) of 3/5, i.e., 60%.
 - `rows(1, 1:col(3,3,3), 1d)`
-  - Describes a grid consisting of three rows. The first and last row both consist of a single column with 100% width. The center row consists of three columns, each with 33% width. The last row is defined as a `dynamic` row, which affects how autotiling does place windows in it. Usually, autotiling assigns at most 1 window to each cell. Cells declared as `dynamic` may hold as many windows necessary. Windows placed into a dynamic cell all get the same share of this cell. For instance, if 2 windows were to be placed in the dynamic cell above, they would take 50% of the rows width each.
+  - Describes a grid consisting of three rows. The first and last row both consist of a single column with 100% width. The center row consists of three columns, each with 33% width. The last row is defined as a `dynamic` row, which affects how autotiling does place windows in it. Usually, autotiling assigns at most 1 window to each cell. Cells declared as `dynamic` may hold as many windows as necessary. Windows placed into a dynamic cell all get the same share of this cell. For instance, if 2 windows were to be placed in the dynamic cell above, they would each take 50% of the rows width.
 
 In general, the autotiling algorithm works as follows:
-1. Given a `GridSpec`, find the largest non-dynamic cell (-> take the first found if there are multiple largest cells).
+1. Given a `GridSpec`, find the largest non-dynamic cell (if there are multiple largest cells, the first one is used).
     - Place the focused window inside it, if any.
 2. For all (remaining) windows on the currently active monitor: Place each window in one of the (remaining) non-dynamic cells and make it take the full width and height of that cell.
 3. If there are still more windows remaining that couldn't yet be placed in a cell: Find all dynamic cells in the grid and place the remaining windows inside them.
@@ -293,8 +293,8 @@ In general, the autotiling algorithm works as follows:
 
 ## Resources
 
-When developing in the Gnome ecosystem, these are the go-to resources that you should refer to primarily.
+When developing in the Gnome ecosystem, these are the primary go-to resources to refer to.
 
 - https://gjs.guide/ for a written documentation and explanation of core concepts.
-- https://gjs-docs.gnome.org/ for an API reference of the GJS ecosystem.
-- https://gitlab.gnome.org/GNOME/gnome-shell for checking the source code of the (otherwise officially undocumented) API of the Gnome-shell.
+- https://gjs-docs.gnome.org/ for an API reference of the GJS libraries.
+- https://gitlab.gnome.org/GNOME/gnome-shell to lookup the source code of the (otherwise officially undocumented) Gnome-shell API.
