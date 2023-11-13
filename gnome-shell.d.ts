@@ -1,4 +1,4 @@
-/// <reference path="./node_modules/@schnz/gjs/dom.d.ts" />
+/// <reference path="./node_modules/@gtile/gjs/dom.d.ts" />
 
 interface ImportMeta {
   url: string;
@@ -17,15 +17,18 @@ interface Math {
 }
 
 declare module "resource:///org/gnome/shell/ui/panelMenu.js" {
-  export type * from "@schnz/gnome-shell/src/ui/panelMenu.d.ts";
+  export type * from "@gtile/gnome-shell/src/ui/panelMenu.d.ts";
 }
 
 declare module "resource:///org/gnome/shell/ui/popupMenu.js" {
-  export type * from "@schnz/gnome-shell/src/ui/popupMenu.js";
+  export type * from "@gtile/gnome-shell/src/ui/popupMenu.js";
+}
+
+declare module "resource:///org/gnome/shell/ui/layout.js" {
+  export type * from "@gtile/gnome-shell/src/ui/layout.js";
 }
 
 declare module "resource:///org/gnome/shell/ui/windowManager.js" {
-  import type Clutter from "gi://Clutter?version=13";
   import type Gio from "gi://Gio?version=2.0";
   import type Meta from "gi://Meta?version=13";
   import type Shell from "gi://Shell?version=13";
@@ -58,12 +61,12 @@ declare module "resource:///org/gnome/shell/ui/main.js" {
   import type { WindowManager } from "resource:///org/gnome/shell/ui/windowManager.js";
 
   export declare const wm: WindowManager;
-  export type * from "@schnz/gnome-shell/src/ui/main.d.ts";
+  export type * from "@gtile/gnome-shell/src/ui/main.d.ts";
 }
 
 declare module "resource:///org/gnome/shell/extensions/extension.js" {
   import type Gio from "gi://Gio";
-  import type { ExtensionMetadata } from "@schnz/gnome-shell";
+  import type { ExtensionMetadata } from "@gtile/gnome-shell";
 
   export declare abstract class ExtensionBase {
     #private;

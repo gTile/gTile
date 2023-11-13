@@ -1,9 +1,9 @@
-import { LayoutManager } from "@schnz/gnome-shell/src/ui/layout.js";
-
 import Gio from "gi://Gio?version=2.0";
 import Meta from "gi://Meta?version=13";
 import Shell from "gi://Shell?version=13";
 import St from "gi://St?version=13";
+
+import type { LayoutManager } from "resource:///org/gnome/shell/ui/layout.js";
 
 import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
 import { GridSelection, GridSize } from "../types/grid.js";

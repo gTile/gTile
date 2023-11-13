@@ -1,7 +1,7 @@
-import { LayoutManager, Monitor } from "@schnz/gnome-shell/src/ui/layout.js";
-
 import Meta from "gi://Meta?version=13";
 import Mtk from "gi://Mtk?version=13";
+
+import type { LayoutManager, Monitor } from "resource:///org/gnome/shell/ui/layout.js";
 
 import { DesktopEvent, Event } from "../types/desktop.js";
 import {
