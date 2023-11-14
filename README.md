@@ -23,6 +23,7 @@
     - [Hotkeys](#hotkeys)
     - [AutoTiling](#autotiling)
     - [Autogrow](#autogrow)
+    - [Window Spacing and Insets](#window-spacing-and-insets)
     - [Stock Gnome-shell shortcuts](#stock-gnome-shell-shortcuts)
 - [Developer Documentation](#developer-documentation)
   - [Prerequisites](#prerequisites)
@@ -174,6 +175,11 @@ Autogrow works only when gTile window is activated
 3. Press `<Alt><Ctrl>s`. Your windows will snap to neighbors.
 4. Close gTile window `Escape`
 
+### Window Spacing and Insets
+
+By default, windows snap seamlessly to one another. You can optionally configure an inset and window spacing to apply a margin between windows (aka spacing) or the screen edges (aka insets). The illustration below depicts how insets and margins are applied to the windows.
+
+![insets-and-spacing](https://github.com/gTile/gTile/assets/3457747/b2ea5e69-9a0a-481c-ba03-307d562a34d7)
 
 ### Stock Gnome-shell shortcuts
 

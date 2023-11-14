@@ -12,14 +12,14 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "clean": "git clean -qxf ':/dist/*.js' gtile.tgz",
+    "clean": "git clean -qxf ':/dist/*.js' gtile.dist.tgz",
     "postclean": "find dist -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} +",
     "prebuild": "$npm_execpath run clean",
     "build": "tsc",
     "postbuild": "rm -rf dist/types",
     "prebuild:dist": "$npm_execpath run build",
-    "build:dist": "tar -czf gtile.tgz -C dist .",
-    "install:extension": "gnome-extensions install -f gtile.tgz",
+    "build:dist": "tar -czf gtile.dist.tgz -C dist .",
+    "install:extension": "gnome-extensions install -f gtile.dist.tgz",
     "test": "echo \"Error: no test specified\" && exit 1",
     "check": "tsc --noEmit"
   }

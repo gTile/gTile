@@ -6,7 +6,7 @@ import { ExtensionSettings } from "../types/settings.js";
  */
 export interface UserPreferencesProvider {
   getInset(primary: boolean): Inset;
-  getMargin(): number;
+  getSpacing(): number;
 }
 
 export interface UserPreferencesParams {
@@ -41,12 +41,13 @@ export default class implements UserPreferencesProvider {
   }
 
   /**
-   * The margin that is expected to be applied to windows when moved and/or
-   * resized.
+   * The spacing that is expected to be applied to windows when moved and/or
+   * resized. Windows frames are shrunk by the specified spacing unless they are
+   * placed at the edge of the screen, in which case spacing has no effect.
    *
-   * @returns The window margin in pixel.
+   * @returns The window spacing in pixel.
    */
-  getMargin(): number {
-    return this.#settings.get_int("window-margin");
+  getSpacing(): number {
+    return this.#settings.get_int("window-spacing");
   }
 }

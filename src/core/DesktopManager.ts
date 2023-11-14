@@ -164,13 +164,13 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
       relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows,
       workArea = this.#workArea(monitorIdx),
-      margin = preview ? this.#userPreferences.getMargin() : 0;
+      spacing = preview ? this.#userPreferences.getSpacing() : 0;
 
     return {
-      x: workArea.x + workArea.width * relX + margin,
-      y: workArea.y + workArea.height * relY + margin,
-      width: workArea.width * relW - margin * 2,
-      height: workArea.height * relH - margin * 2,
+      x: workArea.x + workArea.width * relX + spacing,
+      y: workArea.y + workArea.height * relY + spacing,
+      width: workArea.width * relW - spacing * 2,
+      height: workArea.height * relH - spacing * 2,
     }
   }
 
@@ -439,9 +439,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     // All internal calculations fictively operate as if the actual window frame
     // size would also incorporate the user-defined window margin. Only when a
     // window is actually moved this margin gets deducted.
-    const margin = this.#userPreferences.getMargin();
-    x += margin;
-    y += margin;
+    const spacing = this.#userPreferences.getSpacing();
+    x += spacing;
+    y += spacing;
 
     // As of Nov '23 the `move_resize_frame` works for almost all application
     // windows. However, a user report pointed out that for gVim, the window is
@@ -453,7 +453,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     target.move_frame(true, x, y);
     if (size) {
       const { width: w, height: h } = size;
-      target.move_resize_frame(true, x, y, w - margin * 2, h - margin * 2);
+      target.move_resize_frame(true, x, y, w - spacing * 2, h - spacing * 2);
     }
   }
 
@@ -463,12 +463,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
   #frameRect(target: Meta.Window): Mtk.Rectangle {
     const frame = target.get_frame_rect();
-    const margin = this.#userPreferences.getMargin();
+    const spacing = this.#userPreferences.getSpacing();
 
-    frame.x -= margin;
-    frame.y -= margin;
-    frame.width += margin * 2;
-    frame.height += margin * 2;
+    frame.x -= spacing;
+    frame.y -= spacing;
+    frame.width += spacing * 2;
+    frame.height += spacing * 2;
 
     return frame;
   }
@@ -484,15 +484,15 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       bottom = Math.clamp(inset.bottom, 0, Math.floor(workArea.height / 2)),
       left = Math.clamp(inset.left, 0, Math.floor(workArea.width / 2)),
       right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2)),
-      margin = this.#userPreferences.getMargin();
+      spacing = this.#userPreferences.getSpacing();
 
     // The fictitious expansion of the workarea by the user-configured margin
     // effectively acts as a countermeasure so that windows do always align with
     // the screen edge, i.e., unless the user explicitly configured an inset.
-    workArea.x += left - margin;
-    workArea.y += top - margin;
-    workArea.width -= left + right - margin * 2;
-    workArea.height -= top + bottom - margin * 2;
+    workArea.x += left - spacing;
+    workArea.y += top - spacing;
+    workArea.width -= left + right - spacing * 2;
+    workArea.height -= top + bottom - spacing * 2;
 
     return workArea;
   }

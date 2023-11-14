@@ -31,7 +31,7 @@ export type NumberSettingKey =
   | "insets-secondary-left"
   | "max-timeout"
   | "selection-timeout"
-  | "window-margin";
+  | "window-spacing";
 
 /**
  * Key names in the GSettings schema that reference a string value.

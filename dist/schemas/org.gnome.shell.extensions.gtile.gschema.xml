@@ -526,7 +526,7 @@
 			<default>true</default>
 			<summary>Enables shortcuts for moving and resizing the current window.</summary>
 		</key>
-		<key type = "i" name="window-margin">
+		<key type = "i" name="window-spacing">
 			<default>0</default>
 			<summary>Gaps between windows in the middle of screen</summary>
 		</key>
