@@ -1,0 +1,21 @@
+run-name: Create release ({{ github.ref_name }})
+on:
+  push:
+    tags:
+      - "V*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 21
+      - run: npm ci
+      - run: npm build:dist
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: Release {{ github.ref_name }}
+          files: gtile.dist.tgz
+          fail_on_unmatched_files: true

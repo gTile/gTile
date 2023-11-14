@@ -1,5 +1,10 @@
 CHANGE LOG
 ----------
+### 53
+
+- Complete rewrite. Check [PR #341](https://github.com/gTile/gTile/pull/341) for more information and breaking changes.
+- Support for Gnome 45
+
 ### 52
 
 Mantenance release, bumped up gnome-shell version
@@ -88,7 +93,7 @@ Changes enforced by gnome-shell policies and upgrades:
 ### V15
 
 -   Compatibility Gnome Shell 3.6.1
-	
+
 ### V14
 
 -   Compatibility Gnome Shell 3.4.1 + small bug correction
@@ -104,12 +109,12 @@ Changes enforced by gnome-shell policies and upgrades:
 ### V11
 
 -   AutoTile function : 2 new auto tile features + Replace Animation and auto close text by icons
-    
+
 ### V10
- 
+
 -   Now gTile follows your focus window !! Thanks to Claus Beerta he implements it in a branch.
 -   I change the implementation so that it works with  multi-screen and I also added animations.
-    
+
 ### V9
 
 -   Not validated
@@ -126,5 +131,5 @@ Changes enforced by gnome-shell policies and upgrades:
 
 -   Add Auto-close once resize
 -   Add Smooth animation when toggle extension
--   New icon  
+-   New icon
     (/!\ auto-close may cause some bugs so let me know if you had any thanks).

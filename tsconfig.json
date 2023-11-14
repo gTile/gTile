@@ -1,14 +1,61 @@
 {
   "compilerOptions": {
-    /* Basic Options */
-    "target": "es6",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
-    "module": "es6",
-    "lib": [
-      "es2019"
-    ],                           /* Specify library files to be included in the compilation:  */
+    /*
+     * Set the JavaScript language version for emitted JavaScript and include compatible library declarations.
+     *
+     * This extension only supports Gnome versions >= 45 which implies that the
+     * GJS runtime is at least v1.78 which in turn is based on SpiderMonkey-115
+     * which features support for ECMAScript 2022 aka ES13.
+     */
+    "target": "ES2022",
 
-    "strict": true,                            /* Enable all strict type-checking options. */
-    "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
-    "declaration": true,
-  }
+    /**
+     * Specify a set of bundled library declaration files that describe the target runtime environment.
+     *
+     * Restrict types to what is offered by the JS runtime environment. When not
+     * defined explicitly, DOM related APIs (e.g. window, etc.) will wrongfully
+     * be available in the project.
+     *
+     * Additional declarations and globals are specified in gnome-shell.d.ts.
+     */
+    "lib": ["ES2022"],
+
+    /**
+     * Specify what module code is generated.
+     *
+     * Checks package.json "type" field to determine module output format.
+     */
+    "module": "Node16",
+
+    /**
+     * Specify the root folder within your source files.
+     */
+    "rootDir": "./src",
+
+    /**
+     * Specify how TypeScript looks up a file from a given module specifier.
+     */
+    "moduleResolution": "Node16",
+
+    /**
+     * Specify multiple folders that act like './node_modules/@types'.
+     */
+    "typeRoots": [
+      "./node_modules/@gtile",
+    ],
+
+    /* Emit */
+    "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
+    "removeComments": true,                              /* Disable emitting comments. */
+
+    /* Interop Constraints */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+
+    /* Type Checking */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
+
+    /* Completeness */
+    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+  },
 }
