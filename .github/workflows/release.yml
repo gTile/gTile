@@ -1,4 +1,4 @@
-run-name: Create release ({{ github.ref_name }})
+run-name: Create release (${{ github.ref_name }})
 on:
   push:
     tags:
@@ -16,6 +16,6 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          body: Release {{ github.ref_name }}
+          body: Release ${{ github.ref_name }}
           files: gtile.dist.tgz
           fail_on_unmatched_files: true
