@@ -25,6 +25,13 @@ type FrameSize = { width: number; height: number };
 
 type MRect = Mtk.Rectangle;
 
+const TitleBlacklist: RegExp[] = [
+  // Desktop Icons NG (see https://github.com/gTile/gTile/issues/336#issuecomment-1804267328)
+  // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopManager.js#L396
+  // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopGrid.js#L160
+  /;BDHF$/,
+];
+
 export interface DesktopManagerParams {
   display: Meta.Display;
   layoutManager: LayoutManager;
@@ -227,6 +234,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       win === target ||
       win.minimized ||
       win.get_frame_type() !== Meta.FrameType.NORMAL ||
+      TitleBlacklist.some(p => p.test(win.title ?? "")) ||
       win.get_monitor() !== monitorIdx ||
       frame.contains_rect(this.#frameRect(win)) ||
       frame.intersect(this.#frameRect(win))[0]
@@ -296,7 +304,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
-      .filter(window => window.get_monitor() === monitorIdx);
+      .filter(window => window.get_monitor() === monitorIdx)
+      .filter(window => TitleBlacklist.every(p => !p.test(window.title ?? "")));
 
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
       x: canvas.x + canvas.width * rect.x,

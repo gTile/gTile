@@ -37,6 +37,16 @@ export type NumberSettingKey =
  * Key names in the GSettings schema that reference a string value.
  */
 export type StringSettingKey =
+  | "autotile-gridspec-1"
+  | "autotile-gridspec-2"
+  | "autotile-gridspec-3"
+  | "autotile-gridspec-4"
+  | "autotile-gridspec-5"
+  | "autotile-gridspec-6"
+  | "autotile-gridspec-7"
+  | "autotile-gridspec-8"
+  | "autotile-gridspec-9"
+  | "autotile-gridspec-10"
   | "grid-sizes"
   | "main-window-sizes"
   | "resize1"

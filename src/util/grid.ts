@@ -1,5 +1,6 @@
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
 import { AutoTileAction, CardinalDirection } from "../types/hotkeys.js";
+import { ExtensionSettings } from "../types/settings.js";
 import { GridSpecParser } from "./parser.js";
 
 export const DefaultGridSizes: GridSize[] = [
@@ -8,22 +9,22 @@ export const DefaultGridSizes: GridSize[] = [
   { cols: 4, rows: 4 },
 ];
 
-export const AutoTileLayouts = {
+export const AutoTileLayouts = (settings: ExtensionSettings) => ({
   "main": new GridSpecParser("cols(2, 2d)").parse()!,
   "main-inverted": new GridSpecParser("cols(2d, 2)").parse()!,
   "cols": {
-    1: new GridSpecParser(`cols(1d)`).parse()!,
-    2: new GridSpecParser(`cols(2d,2d)`).parse()!,
-    3: new GridSpecParser(`cols(3d,3d,3d)`).parse()!,
-    4: new GridSpecParser(`cols(4d,4d,4d,4d)`).parse()!,
-    5: new GridSpecParser(`cols(5d,5d,5d,5d,5d)`).parse()!,
-    6: new GridSpecParser(`cols(6d,6d,6d,6d,6d,6d)`).parse()!,
-    7: new GridSpecParser(`cols(7d,7d,7d,7d,7d,7d,7d)`).parse()!,
-    8: new GridSpecParser(`cols(8d,8d,8d,8d,8d,8d,8d,8d)`).parse()!,
-    9: new GridSpecParser(`cols(9d,9d,9d,9d,9d,9d,9d,9d,9d)`).parse()!,
-    10: new GridSpecParser(`cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)`).parse()!,
-  },
-} as const satisfies Record<AutoTileAction["layout"], any>;
+    1: new GridSpecParser(settings.get_string("autotile-gridspec-1")!).parse(),
+    2: new GridSpecParser(settings.get_string("autotile-gridspec-2")!).parse(),
+    3: new GridSpecParser(settings.get_string("autotile-gridspec-3")!).parse(),
+    4: new GridSpecParser(settings.get_string("autotile-gridspec-4")!).parse(),
+    5: new GridSpecParser(settings.get_string("autotile-gridspec-5")!).parse(),
+    6: new GridSpecParser(settings.get_string("autotile-gridspec-6")!).parse(),
+    7: new GridSpecParser(settings.get_string("autotile-gridspec-7")!).parse(),
+    8: new GridSpecParser(settings.get_string("autotile-gridspec-8")!).parse(),
+    9: new GridSpecParser(settings.get_string("autotile-gridspec-9")!).parse(),
+    10: new GridSpecParser(settings.get_string("autotile-gridspec-10")!).parse(),
+  }
+} satisfies Record<AutoTileAction["layout"], any>);
 
 /**
  * Moves a {@link selection} towards a {@link dir|direction} within the

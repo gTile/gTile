@@ -13,8 +13,8 @@ export interface PreviewParams extends Omit<
 }
 
 /**
- * A simple overlay that is used to visualize the area on the screen which is
- * currently selected in the grid.
+ * A simple overlay that is used to visualize the window placement preview on
+ * the screen which corresponds to the currently selected tiles of the grid.
  */
 export default GObject.registerClass({
   GTypeName: "GTilePreview",

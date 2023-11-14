@@ -8,7 +8,7 @@ import {
   BoolSettingKey,
   ExtensionSettings,
   ExtensionSettingsProvider,
-  SettingKey
+  SettingKey,
 } from "../types/settings.js";
 import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
@@ -17,6 +17,7 @@ import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import { AutoTileLayouts, DefaultGridSizes, adjust, pan } from "../util/grid.js";
 import {
   GridSizeListParser,
+  GridSpecParser,
   Preset,
   ResizePresetListParser
 } from "../util/parser.js";
@@ -29,8 +30,11 @@ import HotkeyManager, {
 import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
 
-type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type ResizePresetAddr = [index: number, subindex: number];
+type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
+type StartsWith<S extends string, Prefix extends string> =
+  S extends `${Prefix}${string}` ? S : never;
+type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
 
 /**
  * Represents the gTile extension.
@@ -46,6 +50,7 @@ export default class App implements GarbageCollector {
   #gc: GarbageCollection;
   #lastResizePreset: VolatileStorage<ResizePresetAddr>;
   #settings: ExtensionSettings;
+  #gridSpecs: ReturnType<typeof AutoTileLayouts>;
   #globalKeyBindingGroups: number;
   #hotkeyManager: HotkeyManager;
   #desktopManager: DesktopManager;
@@ -82,6 +87,7 @@ export default class App implements GarbageCollector {
     this.#gc = new GarbageCollection();
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
+    this.#gridSpecs = AutoTileLayouts(this.#settings);
 
     this.#globalKeyBindingGroups = Object
       .entries(SettingKeyToKeyBindingGroupLUT)
@@ -166,8 +172,12 @@ export default class App implements GarbageCollector {
     const isHotkeyRelated =
       (key: string): key is keyof typeof SettingKeyToKeyBindingGroupLUT =>
         key in SettingKeyToKeyBindingGroupLUT;
+    const isAutotileRelated =
+      (key: string): key is GridSpecSettingKey =>
+        key.startsWith("autotile-gridspec-");
 
     isHotkeyRelated(key) && this.#onHotkeyGroupToggle(key);
+    isAutotileRelated(key) && this.#onAutotileGridSpecChanged(key);
     key === "grid-sizes" && this.#onPresetsChanged();
   }
 
@@ -177,6 +187,18 @@ export default class App implements GarbageCollector {
       this.#globalKeyBindingGroups |= SettingKeyToKeyBindingGroupLUT[key];
     } else {
       this.#globalKeyBindingGroups &= ~SettingKeyToKeyBindingGroupLUT[key];
+    }
+  }
+
+  #onAutotileGridSpecChanged(key: GridSpecSettingKey) {
+    type SuffixOf<T extends string> =
+      T extends `${string}-${string}-${infer U extends number}` ? U : never;
+
+    const col = Number(key.split("-").pop()) as SuffixOf<GridSpecSettingKey>;
+    const value = this.#settings.get_string(key);
+    const gridSpec = new GridSpecParser(value!).parse();
+    if (gridSpec) {
+      this.#gridSpecs["cols"][col] = gridSpec;
     }
   }
 
@@ -272,9 +294,13 @@ export default class App implements GarbageCollector {
         return;
       case Action.AUTOTILE:
         if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(AutoTileLayouts[action.layout], monitorIdx);
-        } else if (action.cols) {
-          dm.autotile(AutoTileLayouts[action.layout][action.cols], monitorIdx);
+          dm.autotile(this.#gridSpecs[action.layout], monitorIdx);
+        } else if (action.layout === "cols" && action.cols) {
+          const gridSpec = this.#gridSpecs[action.layout][action.cols];
+
+          if (gridSpec) {
+            dm.autotile(gridSpec, monitorIdx);
+          }
         }
         return;
     }

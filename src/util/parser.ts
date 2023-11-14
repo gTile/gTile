@@ -26,8 +26,8 @@ export interface GridSpec {
  * A cell can be declared as dynamic which means it can be the target for
  * multiple windows that are to be placed in the cell. Each window then claims
  * the same fraction of the available cell space.
- * A cell also act as a container for a {@link GridSpec|sub-grid}. In this case
- * it cannot be dynamic.
+ * A cell can alternatively act as a container for a {@link GridSpec|sub-grid}.
+ * In that case it cannot be dynamic.
  */
 export interface GridCellSpec {
   weight: number;
@@ -91,7 +91,7 @@ abstract class Parser {
  * inputs that are coherent with the following grammar. The grammer uses the
  * lexemes defined by {@link Literal}:
  *
- * List     := [ GridSize { Separator GridSize } ] .
+ * List     := [ GridSize { "," GridSize } ] .
  * GridSize := Number "x" Number .
  *
  * Examples:
@@ -119,7 +119,7 @@ export class GridSizeListParser extends Parser {
     } catch (e) {
       if (e instanceof LexicalError || e instanceof ParseError) {
         console.warn(
-          `Failed to parse preset list. Input: "${this.scanner.input}".`,
+          `Failed to parse grid-size list. Input: "${this.scanner.input}".`,
           `Error: ${e.message}`,
         );
         return null;
@@ -171,11 +171,11 @@ export class GridSizeListParser extends Parser {
  * It parses inputs that are coherent with the following grammar. The grammer
  * uses the lexemes defined by {@link Literal}:
  *
- * S         := [ Preset { Separator ( Preset | Selection ) } ] .
+ * S         := [ Preset { "," ( Preset | Selection ) } ] .
  * Preset    := GridSize Selection .
  * Selection := Offset Offset .
  * GridSize  := Number "x" Number .
- * Offset    := Number Colon Number .
+ * Offset    := Number ":" Number .
  *
  * Implementation detail:
  * The grammar above is not parsable by the LL(1) parser used in this
@@ -184,11 +184,11 @@ export class GridSizeListParser extends Parser {
  * For reference, this is the grammar used in the implementation below. It
  * produces the same expressions as the one above.
  *
- * S                 := [ GridSize Selection { Separator PresetOrSelection } ] .
- * PresetOrSelection := Number ( "x" Number Selection | Colon Number Offset ) .
+ * S                 := [ GridSize Selection { "," PresetOrSelection } ] .
+ * PresetOrSelection := Number ( "x" Number Selection | ":" Number Offset ) .
  * Selection         := Offset Offset .
  * GridSize          := Number "x" Number .
- * Offset            := Number Colon Number .
+ * Offset            := Number ":" Number .
  *
  * Examples
  * - ""
@@ -353,7 +353,7 @@ export class GridSpecParser extends Parser {
     } catch (e) {
       if (e instanceof LexicalError || e instanceof ParseError) {
         console.warn(
-          `Failed to parse preset list. Input: "${this.scanner.input}".`,
+          `Failed to parse GridSpec. Input: "${this.scanner.input}".`,
           `Error: ${e.message}`,
         );
         return null;
