@@ -147,8 +147,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param selection The selection to be mapped/projected.
    * @param gridSize The reference grid used to divide the monitor’s work area.
    * @param monitorIdx The monitor for which the selection is being mapped.
-   * @param preview Optional. Deducts the user-configured margin ahead of time.
-   *   The margin is usually deducted during the window resize operation.
+   * @param preview Optional. Deducts the user-configured spacing ahead of time.
+   *   The spacing is usually deducted during the window resize operation.
    * @returns The mapped selection.
    */
   selectionToArea(
@@ -437,8 +437,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     target.unmaximize(Meta.MaximizeFlags.BOTH);
 
     // All internal calculations fictively operate as if the actual window frame
-    // size would also incorporate the user-defined window margin. Only when a
-    // window is actually moved this margin gets deducted.
+    // size would also incorporate the user-defined window spacing. Only when a
+    // window is actually moved this spacing gets deducted.
     const spacing = this.#userPreferences.getSpacing();
     x += spacing;
     y += spacing;
@@ -486,7 +486,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2)),
       spacing = this.#userPreferences.getSpacing();
 
-    // The fictitious expansion of the workarea by the user-configured margin
+    // The fictitious expansion of the workarea by the user-configured spacing
     // effectively acts as a countermeasure so that windows do always align with
     // the screen edge, i.e., unless the user explicitly configured an inset.
     workArea.x += left - spacing;
