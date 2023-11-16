@@ -13,7 +13,8 @@
 
 - [User Documentation](#user-documentation)
   - [Installation](#installation)
-    - [Install from Gnome Extensions](#install-from-gnome-extensions)
+    - [Install via Gnome Extensions](#install-via-gnome-extensions)
+    - [Install Latest Build](#install-latest-build)
     - [Install from Source](#install-from-source)
   - [Configuration](#configuration)
     - [Dconf Editor](#dconf-editor)
@@ -39,8 +40,23 @@
 
 ## Installation
 
-### Install from Gnome Extensions
+### Install via Gnome Extensions
 The preferred installation is through [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
+
+### Install Latest Build
+Alternatively, the most recent stable version may also be downloaded as a distributable archive (`gtile.dist.tgz`) through the [GitHub releases page](https://github.com/gTile/gTile/releases).
+
+```shell
+# Replace `VERSION` with the most recent release.
+wget https://github.com/gTile/gTile/releases/download/VERSION/gtile.dist.tgz
+
+# The `-f` flag will perform an upgrade, if necessary.
+gnome-extensions install -f ~/Downloads/gtile.dist.tgz
+
+# The changes only become effective once the shell session was restarted.
+# In case the extension was installed for the first time it must be enabled afterwards.
+gnome-extensions enable gTile@vibou
+```
 
 ### Install from Source
 Alternatively, you can build and install the latest version from GitHub. Make sure to have a working `git` and `npm` installation.
@@ -76,7 +92,7 @@ cp ~/.local/share/gnome-shell/extensions/gTile@vibou/schemas/org.gnome.shell.ext
 glib-compile-schemas .
 ```
 
-You should now see a list of all settings in the Dconf editor and can edit them to your need.
+You should now see a list of all settings in the Dconf editor and can edit them according to your need.
 
 ### dconf CLI
 If you prefer the CLI, you can use the dconf CLI tool to set specific settings. Note that it is less convenient in usage and requires you to take care of providing the settings in the proper format You may find a full list of available settings in `dist/schemas/org.gnome.shell.extensions.gtile.gschema.xml`.
@@ -233,7 +249,7 @@ Term   | Meaning
 `(Grid) selection` | A rectangular selection of multiple tiles within a grid. It is defined in term of two offsets which specify the position of two opposite corner tiles of the selection.
 `Preset` | Ambiguously used. Can refer to the user-specified grid size (presets), i.e. the list of grid sizes available for the user to choose in the overlay. Alternatively, this refers to the user-defined presets that auto-move & auto-resize the focused window according the configured preset.
 `(Monitor) Inset` | A user-configurable screen margin respected by all gTile features (window placement, autogrow, autotiling, …). It causes windows to keep a fixed distance (in pixel) to the monitor edge(s).
-`(Window) Margin` | A user-configurable window margin that causes windows to have an invisible border to them. The margin does not(!) apply towards the screen edges. Windows with a margin are still able to align with the screen edge, i.e., unless an inset is configured.
+`(Window) Spacing` | A user-configurable window spacing that causes windows to have an invisible border to them. The spacing does not(!) apply towards the screen edges. Windows with a spacing are still able to align with the screen edge, i.e., unless an inset is configured.
 
 ## Code Structure
 
@@ -246,7 +262,7 @@ dist                - Contents will be distributed 1:1 whenever the extension is
 
 src                 - The TypeScript root directory
 ├── core            - Contains the main orchestration classes that are instantiated as singleton
-├── types           - Contains _only_ TypeScript types that to NOT(!) emit code
+├── types           - Contains _only_ TypeScript types that do NOT(!) emit code
 ├── ui              - Contains reusable UI building blocks utilized by the core classes
 │                     They do not contain any logic other than strictly related to rendering
 ├── util            - Reusable helper classes or functions
@@ -259,7 +275,7 @@ Note that `src/types/` must not contain any files that emit actual JS runtime co
 ## Design Principles
 The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extend__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to make [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103) more easy.
 
-The extension makes use of the GJS mechanisms were possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrator.
+The extension make use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class of function.
 
 ## Code Style Guide
 The project does intentionally avoid the use of linters such as prettier or eslint. Quick comprehension is more important than following strict code formatting rules. That being said, please try to comply with the implicit code style used throughout the code base. In particular:
