@@ -7,8 +7,19 @@
   "author": "Markus Schanz <markus@schanz.id>",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@gtile/adw-1": "^1.4.0-3.2.3",
-    "@gtile/gnome-shell": "^3.0.0",
+    "@girs/adw-1": "^1.4.0-3.2.5",
+    "@girs/clutter-13": "^13.0.0-3.2.5",
+    "@girs/gdk-4.0": "^4.0.0-3.2.5",
+    "@girs/gio-2.0": "^2.78.0-3.2.5",
+    "@girs/glib-2.0": "^2.78.0-3.2.5",
+    "@girs/gnome-shell": "^45.0.0-beta2",
+    "@girs/gobject-2.0": "^2.78.0-3.2.5",
+    "@girs/gtk-4.0": "^4.12.3-3.2.5",
+    "@girs/meta-13": "^13.0.0-3.2.5",
+    "@girs/mtk-13": "^13.0.0-3.2.5",
+    "@girs/pango-1.0": "^1.51.0-3.2.5",
+    "@girs/shell-13": "^13.0.0-3.2.5",
+    "@girs/st-13": "^13.0.0-3.2.5",
     "typescript": "^5.2.2"
   },
   "scripts": {
