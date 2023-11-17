@@ -1,6 +1,5 @@
 import Gio from "gi://Gio?version=2.0";
 import Meta from "gi://Meta?version=13";
-import Shell from "gi://Shell?version=13";
 import St from "gi://St?version=13";
 
 import type { LayoutManager } from "resource:///org/gnome/shell/ui/layout.js";
@@ -29,7 +28,6 @@ export interface OverlayManagerParams {
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
-  shell: Shell.Global;
   layoutManager: LayoutManager;
   desktopManager: DesktopManager;
 }
@@ -45,7 +43,6 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #theme: Theme;
   #settings: ExtensionSettings;
   #presets: GridSize[];
-  #shell: Shell.Global;
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
   #gridLineOverlayGc: GarbageCollection;
@@ -61,12 +58,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     settings,
     gnomeSettings,
     presets,
-    shell,
     layoutManager,
     desktopManager,
   }: OverlayManagerParams) {
     this.#theme = theme;
-    this.#shell = shell;
     this.#settings = settings;
     this.#presets = presets;
     this.#layoutManager = layoutManager;
@@ -178,7 +173,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       `No̱ of overlays do not match no̱ of monitors (${this.#overlays.length})`,
       monitors.map(({ index }) => index));
 
-    const [mouseX, mouseY] = this.#shell.get_pointer();
+    const [mouseX, mouseY] = this.#desktopManager.pointer;
     for (const monitor of monitors) {
       const overlay = this.#overlays[monitor.index];
 

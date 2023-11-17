@@ -45,7 +45,12 @@ export default class extends ExtensionPreferences {
 
   #release() {
     this.#gc.release();
-    this.#gc = this.#settings = this.#window = undefined as any;
+    // do NOT set #settings or other instance variables to undefined! This would
+    // cause the GC to dereference and cleanup resources before GJS expects them
+    // to be gone (even long after the preference window was closed). Would
+    // cause errors like these:
+    // - instance with invalid (NULL) class pointer
+    // - g_signal_handlers_disconnect_matched: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
   }
 
   #buildGeneralPage() {
@@ -55,7 +60,12 @@ export default class extends ExtensionPreferences {
     });
 
     {
-      const group = new Adw.PreferencesGroup({ title: "Global Options" });
+      const group = new Adw.PreferencesGroup({
+        title: "Global Options",
+        description: "Unless stated otherwise, most settings become " +
+          "effective after toggling the gTile UI. This is also the case for " +
+          "all other sections and tabs.",
+      });
       page.add(group);
 
       group.add(this.#shortcutRow("show-toggle-tiling"));
@@ -65,6 +75,7 @@ export default class extends ExtensionPreferences {
       group.add(this.#switchRow("show-grid-lines"));
       group.add(this.#spinRow("max-timeout", 500, 10000, 100));
       group.add(this.#spinRow("selection-timeout", 0, 5000, 50));
+      group.add(this.#themeComboRow());
     }
 
     {
@@ -109,14 +120,14 @@ export default class extends ExtensionPreferences {
       group.add(this.#shortcutRow("change-grid-size"));
       group.add(this.#shortcutRow("snap-to-neighbors"));
       group.add(this.#shortcutRow("move-next-monitor"));
-      group.add(this.#shortcutRow("move-up"));
-      group.add(this.#shortcutRow("move-right"));
-      group.add(this.#shortcutRow("move-down"));
       group.add(this.#shortcutRow("move-left"));
-      group.add(this.#shortcutRow("resize-up"));
-      group.add(this.#shortcutRow("resize-right"));
-      group.add(this.#shortcutRow("resize-down"));
+      group.add(this.#shortcutRow("move-right"));
+      group.add(this.#shortcutRow("move-up"));
+      group.add(this.#shortcutRow("move-down"));
       group.add(this.#shortcutRow("resize-left"));
+      group.add(this.#shortcutRow("resize-right"));
+      group.add(this.#shortcutRow("resize-up"));
+      group.add(this.#shortcutRow("resize-down"));
     }
 
     return page;
@@ -129,19 +140,11 @@ export default class extends ExtensionPreferences {
     });
 
     {
-      const group = new Adw.PreferencesGroup({
-        title: "General",
-        description:
-          "Checkout the README file linked below to learn more about resize " +
-          "presets.",
-      });
+      const group = new Adw.PreferencesGroup({ title: "General" });
       page.add(group);
 
       group.add(this.#switchRow("global-presets"));
       group.add(this.#switchRow("target-presets-to-monitor-of-mouse"));
-      const url =
-        "https://github.com/gTile/gTile/blob/master/README.md#resize-presets";
-      group.add(Gtk.LinkButton.new_with_label(url, "README"));
     }
 
     {
@@ -181,7 +184,14 @@ export default class extends ExtensionPreferences {
     }
 
     {
-      const group = new Adw.PreferencesGroup({ title: "Presets" });
+      const url =
+        "https://github.com/gTile/gTile/blob/master/README.md#resize-presets";
+      const group = new Adw.PreferencesGroup({
+        title: "Presets",
+        description:
+          `Checkout the <a href="${url}">README</a> to learn more about ` +
+          "resize presets.",
+      });
       page.add(group);
 
       group.add(this.#entryRow("resize1"));
@@ -229,26 +239,28 @@ export default class extends ExtensionPreferences {
       const group = new Adw.PreferencesGroup({ title: "General" });
       page.add(group);
 
-      group.add(this.#switchRow("moveresize-enabled"));
+      const subtitle = "The shortcuts below can only be enabled/disabled " +
+        "globally, i.e., independent of the gTile UI visibility state.";
+      group.add(this.#switchRow("moveresize-enabled", { subtitle }));
     }
 
     {
       const group = new Adw.PreferencesGroup({ title: "Shortcuts" });
       page.add(group);
 
-      group.add(this.#shortcutRow("action-change-tiling"));
-      group.add(this.#shortcutRow("action-contract-bottom"));
       group.add(this.#shortcutRow("action-contract-left"));
       group.add(this.#shortcutRow("action-contract-right"));
       group.add(this.#shortcutRow("action-contract-top"));
-      group.add(this.#shortcutRow("action-expand-bottom"));
+      group.add(this.#shortcutRow("action-contract-bottom"));
       group.add(this.#shortcutRow("action-expand-left"));
       group.add(this.#shortcutRow("action-expand-right"));
       group.add(this.#shortcutRow("action-expand-top"));
+      group.add(this.#shortcutRow("action-expand-bottom"));
       group.add(this.#shortcutRow("action-move-left"));
       group.add(this.#shortcutRow("action-move-right"));
       group.add(this.#shortcutRow("action-move-up"));
       group.add(this.#shortcutRow("action-move-down"));
+      group.add(this.#shortcutRow("action-change-tiling"));
       group.add(this.#shortcutRow("action-move-next-monitor"));
       group.add(this.#shortcutRow("action-autotile-main"));
       group.add(this.#shortcutRow("action-autotile-main-inverted"));
@@ -265,12 +277,7 @@ export default class extends ExtensionPreferences {
 
 
     {
-      const group = new Adw.PreferencesGroup({
-        title: "General",
-        description:
-          "Checkout the README file linked below to learn more about " +
-          "autotiling &amp; layouts."
-      });
+      const group = new Adw.PreferencesGroup({ title: "General" });
       page.add(group);
 
       const subtitle =
@@ -278,11 +285,7 @@ export default class extends ExtensionPreferences {
         "activating this setting as the default shortcuts use 0-9 and M. " +
         "This option will bind these shortcuts globally, making them " +
         "unusable for other functions!";
-
       group.add(this.#switchRow("global-auto-tiling", { subtitle }));
-      const url =
-        "https://github.com/gTile/gTile/blob/master/README.md#autotiling";
-      group.add(Gtk.LinkButton.new_with_label(url, "README"));
     }
 
     {
@@ -304,7 +307,14 @@ export default class extends ExtensionPreferences {
     }
 
     {
-      const group = new Adw.PreferencesGroup({ title: "Layouts" });
+      const url =
+        "https://github.com/gTile/gTile/blob/master/README.md#autotiling";
+      const group = new Adw.PreferencesGroup({
+        title: "Layouts",
+        description:
+          `Checkout the <a href="${url}">README</a> file to learn more about ` +
+          "autotiling &amp; layouts."
+      });
       page.add(group);
 
       group.add(this.#entryRow("autotile-gridspec-1"));
@@ -357,6 +367,7 @@ export default class extends ExtensionPreferences {
     const row = new Adw.EntryRow({
       title: this.#settings.settings_schema.get_key(schemaKey).get_summary(),
       editable: true,
+      show_apply_button: true,
     });
     this.#settings.bind(schemaKey, row, "text", Gio.SettingsBindFlags.DEFAULT);
 
@@ -373,6 +384,43 @@ export default class extends ExtensionPreferences {
 
     return row;
   }
+
+  #themeComboRow() {
+    const entries = Gtk.StringList.new(
+      this.#settings.get_default_value("themes")!.get_strv());
+    const row = new Adw.ComboRow({
+      title: "Theme",
+      subtitle: "The extension requires a restart in order for the new theme " +
+        "to take effect.",
+      model: entries,
+    });
+
+    for (let i = 0; i < entries.get_n_items(); ++i) {
+      const ut = this.#settings.get_string("theme");
+      if (entries.get_string(i) === ut) {
+        row.selected = i;
+        break;
+      }
+    }
+
+    row.connect("notify::selected", () => {
+      this.#settings.set_string("theme", entries.get_string(row.selected));
+    });
+
+    const chid = this.#settings.connect("changed::theme", () => {
+      const newTheme = this.#settings.get_string("theme");
+
+      for (let i = 0; i < entries.get_n_items(); ++i) {
+        if (newTheme === entries.get_string(i)) {
+          row.selected = i;
+          break;
+        }
+      }
+    });
+    this.#gc.defer(() => this.#settings.disconnect(chid));
+
+    return row;
+  }
 }
 
 interface ShortcutParams extends Adw.ActionRow.ConstructorProperties {
@@ -385,8 +433,8 @@ const ShortcutRow = GObject.registerClass({
   GTypeName: "GTileShortcutActionRow",
 }, class extends Adw.ActionRow implements GarbageCollector {
   static helpText =
-    "Note: This dialog only detects shortcuts that are not already bound by " +
-    "Gnome shell, e.g., natively or through an extension.\n\n" +
+    "Note: This dialog only detects shortcuts that are not actively " +
+    "intercepted by Gnome shell, e.g., natively or through an extension.\n\n" +
     "Press <b>ESC</b> to close the dialog.\n" +
     "Press <b>BackSpace</b> to unset the keybinding.";
 
@@ -509,7 +557,10 @@ const ShortcutRow = GObject.registerClass({
     });
 
     eventController.connect("key-pressed", (event, keyval, code, modifier) => {
-      if (!Gtk.accelerator_valid(keyval, modifier)) {
+      if (
+        !Gtk.accelerator_valid(keyval, modifier) &&
+        !this.#whitelisted(keyval)
+      ) {
         return Gdk.EVENT_STOP;
       }
 
@@ -522,10 +573,17 @@ const ShortcutRow = GObject.registerClass({
           break;
         case Gdk.KEY_Return:
           if (modifier === 0) {
-            if (acceleratorName === null) {
+            // <Enter> may confirm a shortcut, if one was recognized already.
+            // But <Enter> may also serve as legitimate shortcut on its own.
+            // To differentiate between the two cases, it is checked whether
+            // another shortcut had already been provided.
+            if (acceleratorName === undefined) {
+              acceleratorName = Gtk.accelerator_name(keyval, modifier);
+              break;
+            } else if (acceleratorName === null) {
               this.#unsetKeybinding();
               dialog.close();
-            } else if (acceleratorName !== undefined) {
+            } else {
               this.#replaceKeybinding(acceleratorName);
               dialog.close();
             }
@@ -545,5 +603,21 @@ const ShortcutRow = GObject.registerClass({
     });
 
     dialog.present();
+  }
+
+  // While Gtk.accelerator_valid stops most modifier keys from being recognized
+  // as valid shortcuts, it also blocks some legit keys.
+  // https://github.com/GNOME/gtk/blob/ec6c52680e6f44638b0ae84710affcec94116ffe/gtk/gtkaccelgroup.c#L51
+  #whitelisted(keyval: number) {
+    return [
+      Gdk.KEY_Up,
+      Gdk.KEY_Down,
+      Gdk.KEY_Left,
+      Gdk.KEY_Right,
+      Gdk.KEY_KP_Up,
+      Gdk.KEY_KP_Down,
+      Gdk.KEY_KP_Left,
+      Gdk.KEY_KP_Right,
+    ].includes(keyval);
   }
 });

@@ -47,7 +47,6 @@ export type StringSettingKey =
   | "autotile-gridspec-9"
   | "autotile-gridspec-10"
   | "grid-sizes"
-  | "main-window-sizes"
   | "resize1"
   | "resize10"
   | "resize11"

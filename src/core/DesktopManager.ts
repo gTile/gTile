@@ -1,5 +1,6 @@
 import Meta from "gi://Meta?version=13";
 import Mtk from "gi://Mtk?version=13";
+import Shell from "gi://Shell?version=13";
 
 import type { LayoutManager, Monitor } from "resource:///org/gnome/shell/ui/layout.js";
 
@@ -33,6 +34,7 @@ const TitleBlacklist: RegExp[] = [
 ];
 
 export interface DesktopManagerParams {
+  shell: Shell.Global;
   display: Meta.Display;
   layoutManager: LayoutManager;
   monitorManager: Meta.MonitorManager;
@@ -46,6 +48,7 @@ export interface DesktopManagerParams {
  */
 export default class implements Publisher<DesktopEvent>, GarbageCollector {
   #gc: GarbageCollection;
+  #shell: Shell.Global;
   #display: Meta.Display;
   #layoutManager: LayoutManager;
   #workspaceManager: Meta.WorkspaceManager;
@@ -53,6 +56,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   #dispatchCallbacks: DispatchFn<DesktopEvent>[];
 
   constructor({
+    shell,
     display,
     layoutManager,
     monitorManager,
@@ -60,6 +64,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     userPreferences,
   }: DesktopManagerParams) {
     this.#gc = new GarbageCollection();
+    this.#shell = shell;
     this.#display = display;
     this.#layoutManager = layoutManager;
     this.#workspaceManager = workspaceManager;
@@ -107,6 +112,33 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   get monitors(): Monitor[] {
     return this.#layoutManager.monitors;
+  }
+
+  /**
+   * The current pointer location as X/Y coordinates.
+   */
+  get pointer(): [x: number, y: number] {
+    const [x, y] = this.#shell.get_pointer();
+
+    return [x, y];
+  }
+
+  /**
+   * The monitor index that the pointer resides on.
+   */
+  get pointerMonitorIdx(): number {
+    const [mouseX, mouseY] = this.#shell.get_pointer();
+
+    for (const monitor of this.#layoutManager.monitors) {
+      if (
+        monitor.x <= mouseX && mouseX <= (monitor.x + monitor.width) &&
+        monitor.y <= mouseY && mouseY <= (monitor.y + monitor.height)
+      ) {
+        return monitor.index;
+      }
+    }
+
+    return 0;
   }
 
   /**
