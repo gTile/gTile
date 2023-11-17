@@ -17,8 +17,6 @@
     - [Install Latest Build](#install-latest-build)
     - [Install from Source](#install-from-source)
   - [Configuration](#configuration)
-    - [Dconf Editor](#dconf-editor)
-    - [dconf CLI](#dconf-cli)
   - [Usage](#usage)
     - [Overlay](#overlay)
     - [Shortcuts](#shortcuts)
@@ -77,37 +75,13 @@ $ gnome-extensions enable gTile@vibou
 
 ## Configuration
 
-*PREFERENCE DIALOG IS A WORK IN PROGRESS*
-
-gTile was recently rewritten for Gnome 45. There is no dedicated preference dialog yet. All configuration from a previous version of gTile should continue to work out of the box. For the time being if you want to change the extension configuration, you can use either the Dconf Editor (recommended) or the `dconf` command line tool. In either case, settings are stored the directory `/org/gnome/shell/extensions/gtile/`. Note that settings are applied immediately with the exception of the `theme` setting.
-
-### Dconf Editor
-
-If you have installed the [Dconf Editor](https://wiki.gnome.org/Apps/DconfEditor) you can simply use it to modify the extension settings by browsing the the corresponding section `/org/gnome/shell/extensions/gtile/`. If you do not see all of the extension settings you need to compile and install the GSettings schema first.
+The extension can be configured through a dedicated preferences dialog. You can open the extension settings either through the [Gnome Extensions](https://apps.gnome.org/Extensions/) app, or by executing the following command in your terminal:
 
 ```shell
-mkdir -p ~/.local/share/glib-2.0/schemas
-cd ~/.local/share/glib-2.0/schemas
-cp ~/.local/share/gnome-shell/extensions/gTile@vibou/schemas/org.gnome.shell.extensions.gtile.gschema.xml .
-glib-compile-schemas .
+gnome-extensions prefs gTile@vibou
 ```
 
-You should now see a list of all settings in the Dconf editor and can edit them according to your need.
-
-### dconf CLI
-If you prefer the CLI, you can use the dconf CLI tool to set specific settings. Note that it is less convenient in usage and requires you to take care of providing the settings in the proper format You may find a full list of available settings in `dist/schemas/org.gnome.shell.extensions.gtile.gschema.xml`.
-
-CLI example:
-```shell
-# Show current setting overrides
-dconf dump /org/gnome/shell/extensions/gtile/
-
-# Disable the auto-close setting
-dconf write /org/gnome/shell/extensions/gtile/auto-close false
-
-# Change the available grid-sizes
-dconf write /org/gnome/shell/extensions/gtile/grid-sizes "'8x6,6x4,4x4,3x1'"
-```
+Note that most settings are applied either immediately or after toggling the gTile overlay. There is one exception though. When the theme is changed, the extension needs to be disabled and then enabled again for the new theme to become effective.
 
 ## Usage
 
