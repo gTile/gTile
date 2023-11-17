@@ -87,10 +87,14 @@ abstract class Parser {
 }
 
 /**
- * A simple parser for parsing a list of user-specified grid sizes. It parses
- * inputs that are coherent with the following grammar. The grammer uses the
- * lexemes defined by {@link Literal}:
+ * A simple parser for parsing a list of user-specified grid sizes.
  *
+ * Attention: The parsed grid size is clamped to the interval [1, 64].
+ * For instance, `600x800` will be parsed as `64x64`.
+ *
+ * It parses inputs that are coherent with the following grammar. The grammer
+ * uses the lexemes defined by {@link Literal}:
+
  * List     := [ GridSize { "," GridSize } ] .
  * GridSize := Number "x" Number .
  *
@@ -148,9 +152,9 @@ export class GridSizeListParser extends Parser {
   }
 
   #parseGridSize(): GridSize {
-    const cols = this.#parseNumber();
+    const cols = Math.clamp(this.#parseNumber(), 1, 64);
     this.accept({ kind: Literal.Keyword, raw: "x" });
-    const rows = this.#parseNumber();
+    const rows = Math.clamp(this.#parseNumber(), 1, 64);
 
     return { cols, rows };
   }
