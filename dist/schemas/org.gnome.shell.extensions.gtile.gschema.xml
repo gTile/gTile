@@ -1,586 +1,542 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schemalist>
-	<schema path="/org/gnome/shell/extensions/gtile/" id="org.gnome.shell.extensions.gtile" >
-		<key type="as" name="show-toggle-tiling">
-			<default><![CDATA[['<Super>KP_Enter']]]></default>
-			<summary>The key you want to activate gTile.</summary>
-		</key>
-		<key type="as" name="show-toggle-tiling-alt">
-			<default><![CDATA[['<Super>Return']]]></default>
-			<summary>AlternativegTile activation key.</summary>
-		</key>
-		<key type="as" name="move-left">
-			<default><![CDATA[['Left']]]></default>
-			<summary>Move window left.</summary>
-		</key>
-		<key type="as" name="move-right">
-			<default><![CDATA[['Right']]]></default>
-			<summary>Move window right.</summary>
-		</key>
-		<key type="as" name="move-up">
-			<default><![CDATA[['Up']]]></default>
-			<summary>Move window up.</summary>
-		</key>
-		<key type="as" name="move-down">
-			<default><![CDATA[['Down']]]></default>
-			<summary>Move window down.</summary>
-		</key>
-		<key type="as" name="move-next-monitor">
-			<default><![CDATA[['']]]></default>
-			<summary>Move window to next monitor.</summary>
-		</key>
-		<key type="as" name="resize-left">
-			<default><![CDATA[['<Shift>Left']]]></default>
-			<summary>Resize window - increase width.</summary>
-		</key>
-		<key type="as" name="resize-right">
-			<default><![CDATA[['<Shift>Right']]]></default>
-			<summary>Resize window - decrease width.</summary>
-		</key>
-		<key type="as" name="resize-up">
-			<default><![CDATA[['<Shift>Up']]]></default>
-			<summary>Resize window - increase height.</summary>
-		</key>
-		<key type="as" name="resize-down">
-			<default><![CDATA[['<Shift>Down']]]></default>
-			<summary>Resize window - decrease height.</summary>
-		</key>
-		<key type="as" name="move-left-vi">
-			<default><![CDATA[['h']]]></default>
-			<summary>Move window left.</summary>
-		</key>
-		<key type="as" name="move-right-vi">
-			<default><![CDATA[['l']]]></default>
-			<summary>Move window right.</summary>
-		</key>
-		<key type="as" name="move-up-vi">
-			<default><![CDATA[['k']]]></default>
-			<summary>Move window up.</summary>
-		</key>
-		<key type="as" name="move-down-vi">
-			<default><![CDATA[['j']]]></default>
-			<summary>Move window down.</summary>
-		</key>
-		<key type="as" name="resize-left-vi">
-			<default><![CDATA[['<Shift>h']]]></default>
-			<summary>Resize window - increase width.</summary>
-		</key>
-		<key type="as" name="resize-right-vi">
-			<default><![CDATA[['<Shift>l']]]></default>
-			<summary>Resize window - decrease width.</summary>
-		</key>
-		<key type="as" name="resize-up-vi">
-			<default><![CDATA[['<Shift>k']]]></default>
-			<summary>Resize window - increase height.</summary>
-		</key>
-		<key type="as" name="resize-down-vi">
-			<default><![CDATA[['<Shift>j']]]></default>
-			<summary>Resize window - decrease height.</summary>
-		</key>
-		<key type="as" name="set-tiling">
-			<default><![CDATA[['Return']]]></default>
-			<summary>Tile window according to selection.</summary>
-		</key>
-		<key type="as" name="cancel-tiling">
-			<default><![CDATA[['Escape']]]></default>
-			<summary>Cancel tiling.</summary>
-		</key>
-		<key type="as" name="change-grid-size">
-			<default><![CDATA[['Space']]]></default>
-			<summary>Loop through grid sizes.</summary>
-		</key>
-		<key type="as" name="snap-to-neighbors">
-			<default><![CDATA[['<Alt><Control>s']]]></default>
-			<summary>Snap window size to neighbors</summary>
-		</key>
-		<key type="as" name="preset-resize-1">
-			<default><![CDATA[['<Super><Alt>KP_1']]]></default>
-			<summary>Preset resize 1.</summary>
-		</key>
-		<key type="as" name="preset-resize-2">
-			<default><![CDATA[['<Super><Alt>KP_2']]]></default>
-			<summary>Preset resize 2.</summary>
-		</key>
-		<key type="as" name="preset-resize-3">
-			<default><![CDATA[['<Super><Alt>KP_3']]]></default>
-			<summary>Preset resize 3.</summary>
-		</key>
-		<key type="as" name="preset-resize-4">
-			<default><![CDATA[['<Super><Alt>KP_4']]]></default>
-			<summary>Preset resize 4.</summary>
-		</key>
-		<key type="as" name="preset-resize-5">
-			<default><![CDATA[['<Super><Alt>KP_5']]]></default>
-			<summary>Preset resize 5.</summary>
-		</key>
-		<key type="as" name="preset-resize-6">
-			<default><![CDATA[['<Super><Alt>KP_6']]]></default>
-			<summary>Preset resize 6.</summary>
-		</key>
-		<key type="as" name="preset-resize-7">
-			<default><![CDATA[['<Super><Alt>KP_7']]]></default>
-			<summary>Preset resize 7.</summary>
-		</key>
-		<key type="as" name="preset-resize-8">
-			<default><![CDATA[['<Super><Alt>KP_8']]]></default>
-			<summary>Preset resize 8.</summary>
-		</key>
-		<key type="as" name="preset-resize-9">
-			<default><![CDATA[['<Super><Alt>KP_9']]]></default>
-			<summary>Preset resize 9.</summary>
-		</key>
-		<key type="as" name="preset-resize-10">
-			<default><![CDATA[['']]]></default>
-			<summary>Preset resize 10.</summary>
-		</key>
-		<key type="as" name="preset-resize-11">
-			<default><![CDATA[['<Super><Control>KP_1']]]></default>
-			<summary>Preset resize 11.</summary>
-		</key>
-		<key type="as" name="preset-resize-12">
-			<default><![CDATA[['<Super><Control>KP_2']]]></default>
-			<summary>Preset resize 12.</summary>
-		</key>
-		<key type="as" name="preset-resize-13">
-			<default><![CDATA[['<Super><Control>KP_3']]]></default>
-			<summary>Preset resize 13.</summary>
-		</key>
-		<key type="as" name="preset-resize-14">
-			<default><![CDATA[['<Super><Control>KP_4']]]></default>
-			<summary>Preset resize 14.</summary>
-		</key>
-		<key type="as" name="preset-resize-15">
-			<default><![CDATA[['<Super><Control>KP_5']]]></default>
-			<summary>Preset resize 15.</summary>
-		</key>
-		<key type="as" name="preset-resize-16">
-			<default><![CDATA[['<Super><Control>KP_6']]]></default>
-			<summary>Preset resize 16.</summary>
-		</key>
-		<key type="as" name="preset-resize-17">
-			<default><![CDATA[['<Super><Control>KP_7']]]></default>
-			<summary>Preset resize 17.</summary>
-		</key>
-		<key type="as" name="preset-resize-18">
-			<default><![CDATA[['<Super><Control>KP_8']]]></default>
-			<summary>Preset resize 18.</summary>
-		</key>
-		<key type="as" name="preset-resize-19">
-			<default><![CDATA[['<Super><Control>KP_9']]]></default>
-			<summary>Preset resize 19.</summary>
-		</key>
-		<key type="as" name="preset-resize-20">
-			<default><![CDATA[['']]]></default>
-			<summary>Preset resize 20.</summary>
-		</key>
-		<key type="as" name="preset-resize-21">
-			<default><![CDATA[['<Super><Shift>KP_1']]]></default>
-			<summary>Preset resize 21.</summary>
-		</key>
-		<key type="as" name="preset-resize-22">
-			<default><![CDATA[['<Super><Shift>KP_2']]]></default>
-			<summary>Preset resize 22.</summary>
-		</key>
-		<key type="as" name="preset-resize-23">
-			<default><![CDATA[['<Super><Shift>KP_3']]]></default>
-			<summary>Preset resize 23.</summary>
-		</key>
-		<key type="as" name="preset-resize-24">
-			<default><![CDATA[['<Super><Shift>KP_4']]]></default>
-			<summary>Preset resize 24.</summary>
-		</key>
-		<key type="as" name="preset-resize-25">
-			<default><![CDATA[['<Super><Shift>KP_5']]]></default>
-			<summary>Preset resize 25.</summary>
-		</key>
-		<key type="as" name="preset-resize-26">
-			<default><![CDATA[['<Super><Shift>KP_6']]]></default>
-			<summary>Preset resize 26.</summary>
-		</key>
-		<key type="as" name="preset-resize-27">
-			<default><![CDATA[['<Super><Shift>KP_7']]]></default>
-			<summary>Preset resize 27.</summary>
-		</key>
-		<key type="as" name="preset-resize-28">
-			<default><![CDATA[['<Super><Shift>KP_8']]]></default>
-			<summary>Preset resize 28.</summary>
-		</key>
-		<key type="as" name="preset-resize-29">
-			<default><![CDATA[['<Super><Shift>KP_9']]]></default>
-			<summary>Preset resize 29.</summary>
-		</key>
-		<key type="as" name="preset-resize-30">
-			<default><![CDATA[['']]]></default>
-			<summary>Preset resize 30.</summary>
-		</key>
-		<key type="as" name="action-change-tiling">
-			<default><![CDATA[['']]]></default>
-			<summary>Global change grid size.</summary>
-		</key>
-		<key type="as" name="action-contract-bottom">
-			<default><![CDATA[['']]]></default>
-			<summary>Global contract bottom edge.</summary>
-		</key>
-		<key type="as" name="action-contract-left">
-			<default><![CDATA[['']]]></default>
-			<summary>Global contract left edge.</summary>
-		</key>
-		<key type="as" name="action-contract-right">
-			<default><![CDATA[['']]]></default>
-			<summary>Global contract right edge.</summary>
-		</key>
-		<key type="as" name="action-contract-top">
-			<default><![CDATA[['']]]></default>
-			<summary>Global contract top edge.</summary>
-		</key>
+  <schema path="/org/gnome/shell/extensions/gtile/" id="org.gnome.shell.extensions.gtile" >
+    <key type="as" name="show-toggle-tiling">
+      <default><![CDATA[['<Super>Return', '<Super>KP_Enter']]]></default>
+      <summary>Shortcut to toggle gTile</summary>
+    </key>
+    <key type="as" name="set-tiling">
+      <default><![CDATA[['Return']]]></default>
+      <summary>Tile window according to selection</summary>
+    </key>
+    <key type="as" name="cancel-tiling">
+      <default><![CDATA[['Escape']]]></default>
+      <summary>Cancel tiling</summary>
+    </key>
+    <key type="as" name="change-grid-size">
+      <default><![CDATA[['Space']]]></default>
+      <summary>Loop through grid sizes</summary>
+    </key>
+    <key type="as" name="snap-to-neighbors">
+      <default><![CDATA[['<Alt><Control>s']]]></default>
+      <summary>Snap window to neighbors</summary>
+    </key>
+    <key type="as" name="move-next-monitor">
+      <default><![CDATA[['<Super><Shift>n']]]></default>
+      <summary>Move window to next monitor</summary>
+    </key>
+    <key type="as" name="move-left">
+      <default><![CDATA[['Left', 'h']]]></default>
+      <summary>Move window left</summary>
+    </key>
+    <key type="as" name="move-right">
+      <default><![CDATA[['Right', 'l']]]></default>
+      <summary>Move window right</summary>
+    </key>
+    <key type="as" name="move-up">
+      <default><![CDATA[['Up', 'k']]]></default>
+      <summary>Move window up</summary>
+    </key>
+    <key type="as" name="move-down">
+      <default><![CDATA[['Down', 'j']]]></default>
+      <summary>Move window down</summary>
+    </key>
+    <key type="as" name="resize-left">
+      <default><![CDATA[['<Shift>Left', '<Shift>h']]]></default>
+      <summary>Resize window - decrease width</summary>
+    </key>
+    <key type="as" name="resize-right">
+      <default><![CDATA[['<Shift>Right', '<Shift>l']]]></default>
+      <summary>Resize window - increase width</summary>
+    </key>
+    <key type="as" name="resize-up">
+      <default><![CDATA[['<Shift>Up', '<Shift>k']]]></default>
+      <summary>Resize window - decrease height</summary>
+    </key>
+    <key type="as" name="resize-down">
+      <default><![CDATA[['<Shift>Down', '<Shift>j']]]></default>
+      <summary>Resize window - increase height</summary>
+    </key>
+    <key type="as" name="preset-resize-1">
+      <default><![CDATA[['<Super><Alt>KP_1']]]></default>
+      <summary>Preset resize 1</summary>
+    </key>
+    <key type="as" name="preset-resize-2">
+      <default><![CDATA[['<Super><Alt>KP_2']]]></default>
+      <summary>Preset resize 2</summary>
+    </key>
+    <key type="as" name="preset-resize-3">
+      <default><![CDATA[['<Super><Alt>KP_3']]]></default>
+      <summary>Preset resize 3</summary>
+    </key>
+    <key type="as" name="preset-resize-4">
+      <default><![CDATA[['<Super><Alt>KP_4']]]></default>
+      <summary>Preset resize 4</summary>
+    </key>
+    <key type="as" name="preset-resize-5">
+      <default><![CDATA[['<Super><Alt>KP_5']]]></default>
+      <summary>Preset resize 5</summary>
+    </key>
+    <key type="as" name="preset-resize-6">
+      <default><![CDATA[['<Super><Alt>KP_6']]]></default>
+      <summary>Preset resize 6</summary>
+    </key>
+    <key type="as" name="preset-resize-7">
+      <default><![CDATA[['<Super><Alt>KP_7']]]></default>
+      <summary>Preset resize 7</summary>
+    </key>
+    <key type="as" name="preset-resize-8">
+      <default><![CDATA[['<Super><Alt>KP_8']]]></default>
+      <summary>Preset resize 8</summary>
+    </key>
+    <key type="as" name="preset-resize-9">
+      <default><![CDATA[['<Super><Alt>KP_9']]]></default>
+      <summary>Preset resize 9</summary>
+    </key>
+    <key type="as" name="preset-resize-10">
+      <default><![CDATA[['']]]></default>
+      <summary>Preset resize 10</summary>
+    </key>
+    <key type="as" name="preset-resize-11">
+      <default><![CDATA[['<Super><Control>KP_1']]]></default>
+      <summary>Preset resize 11</summary>
+    </key>
+    <key type="as" name="preset-resize-12">
+      <default><![CDATA[['<Super><Control>KP_2']]]></default>
+      <summary>Preset resize 12</summary>
+    </key>
+    <key type="as" name="preset-resize-13">
+      <default><![CDATA[['<Super><Control>KP_3']]]></default>
+      <summary>Preset resize 13</summary>
+    </key>
+    <key type="as" name="preset-resize-14">
+      <default><![CDATA[['<Super><Control>KP_4']]]></default>
+      <summary>Preset resize 14</summary>
+    </key>
+    <key type="as" name="preset-resize-15">
+      <default><![CDATA[['<Super><Control>KP_5']]]></default>
+      <summary>Preset resize 15</summary>
+    </key>
+    <key type="as" name="preset-resize-16">
+      <default><![CDATA[['<Super><Control>KP_6']]]></default>
+      <summary>Preset resize 16</summary>
+    </key>
+    <key type="as" name="preset-resize-17">
+      <default><![CDATA[['<Super><Control>KP_7']]]></default>
+      <summary>Preset resize 17</summary>
+    </key>
+    <key type="as" name="preset-resize-18">
+      <default><![CDATA[['<Super><Control>KP_8']]]></default>
+      <summary>Preset resize 18</summary>
+    </key>
+    <key type="as" name="preset-resize-19">
+      <default><![CDATA[['<Super><Control>KP_9']]]></default>
+      <summary>Preset resize 19</summary>
+    </key>
+    <key type="as" name="preset-resize-20">
+      <default><![CDATA[['']]]></default>
+      <summary>Preset resize 20</summary>
+    </key>
+    <key type="as" name="preset-resize-21">
+      <default><![CDATA[['<Super><Shift>KP_1']]]></default>
+      <summary>Preset resize 21</summary>
+    </key>
+    <key type="as" name="preset-resize-22">
+      <default><![CDATA[['<Super><Shift>KP_2']]]></default>
+      <summary>Preset resize 22</summary>
+    </key>
+    <key type="as" name="preset-resize-23">
+      <default><![CDATA[['<Super><Shift>KP_3']]]></default>
+      <summary>Preset resize 23</summary>
+    </key>
+    <key type="as" name="preset-resize-24">
+      <default><![CDATA[['<Super><Shift>KP_4']]]></default>
+      <summary>Preset resize 24</summary>
+    </key>
+    <key type="as" name="preset-resize-25">
+      <default><![CDATA[['<Super><Shift>KP_5']]]></default>
+      <summary>Preset resize 25</summary>
+    </key>
+    <key type="as" name="preset-resize-26">
+      <default><![CDATA[['<Super><Shift>KP_6']]]></default>
+      <summary>Preset resize 26</summary>
+    </key>
+    <key type="as" name="preset-resize-27">
+      <default><![CDATA[['<Super><Shift>KP_7']]]></default>
+      <summary>Preset resize 27</summary>
+    </key>
+    <key type="as" name="preset-resize-28">
+      <default><![CDATA[['<Super><Shift>KP_8']]]></default>
+      <summary>Preset resize 28</summary>
+    </key>
+    <key type="as" name="preset-resize-29">
+      <default><![CDATA[['<Super><Shift>KP_9']]]></default>
+      <summary>Preset resize 29</summary>
+    </key>
+    <key type="as" name="preset-resize-30">
+      <default><![CDATA[['']]]></default>
+      <summary>Preset resize 30</summary>
+    </key>
+    <key type="as" name="action-change-tiling">
+      <default><![CDATA[['']]]></default>
+      <summary>Global change grid size</summary>
+    </key>
+    <key type="as" name="action-contract-bottom">
+      <default><![CDATA[['<Ctrl><Alt>j']]]></default>
+      <summary>Global contract bottom edge</summary>
+    </key>
+    <key type="as" name="action-contract-left">
+      <default><![CDATA[['<Ctrl><Alt>h']]]></default>
+      <summary>Global contract left edge</summary>
+    </key>
+    <key type="as" name="action-contract-right">
+      <default><![CDATA[['<Ctrl><Alt>l']]]></default>
+      <summary>Global contract right edge</summary>
+    </key>
+    <key type="as" name="action-contract-top">
+      <default><![CDATA[['<Ctrl><Alt>k']]]></default>
+      <summary>Global contract top edge</summary>
+    </key>
+    <key type="as" name="action-expand-bottom">
+      <default><![CDATA[['']]]></default>
+      <summary>Global expand bottom edge</summary>
+    </key>
+    <key type="as" name="action-expand-left">
+      <default><![CDATA[['']]]></default>
+      <summary>Global expand left edge</summary>
+    </key>
+    <key type="as" name="action-expand-right">
+      <default><![CDATA[['']]]></default>
+      <summary>Global expand right edge</summary>
+    </key>
+    <key type="as" name="action-expand-top">
+      <default><![CDATA[['']]]></default>
+      <summary>Global expand top edge</summary>
+    </key>
+    <key type="as" name="action-move-left">
+      <default><![CDATA[['']]]></default>
+      <summary>Global move window left</summary>
+    </key>
+    <key type="as" name="action-move-right">
+      <default><![CDATA[['']]]></default>
+      <summary>Global move window right</summary>
+    </key>
+    <key type="as" name="action-move-up">
+      <default><![CDATA[['']]]></default>
+      <summary>Global move window up</summary>
+    </key>
+    <key type="as" name="action-move-down">
+      <default><![CDATA[['']]]></default>
+      <summary>Global move window down</summary>
+    </key>
+    <key type="as" name="action-move-next-monitor">
+      <default><![CDATA[['']]]></default>
+      <summary>Global move window to next monitor</summary>
+    </key>
+    <key type="as" name="action-autotile-main">
+      <default><![CDATA[['']]]></default>
+      <summary>Global autotile with main window</summary>
+    </key>
+    <key type="as" name="action-autotile-main-inverted">
+      <default><![CDATA[['']]]></default>
+      <summary>Global autotile with main window to the other side</summary>
+    </key>
+    <key type="as" name="autotile-main">
+      <default><![CDATA[['m']]]></default>
+      <summary>Autotile with main window</summary>
+    </key>
+    <key type="as" name="autotile-main-inverted">
+      <default><![CDATA[['']]]></default>
+      <summary>Autotile with main window to the other side</summary>
+    </key>
+    <key type="as" name="autotile-1">
+      <default><![CDATA[['1']]]></default>
+      <summary>Autotile 1 column</summary>
+    </key>
+    <key type="as" name="autotile-2">
+      <default><![CDATA[['2']]]></default>
+      <summary>Autotile 2 columns</summary>
+    </key>
+    <key type="as" name="autotile-3">
+      <default><![CDATA[['3']]]></default>
+      <summary>Autotile 3 columns</summary>
+    </key>
+    <key type="as" name="autotile-4">
+      <default><![CDATA[['4']]]></default>
+      <summary>Autotile 4 columns</summary>
+    </key>
+    <key type="as" name="autotile-5">
+      <default><![CDATA[['5']]]></default>
+      <summary>Autotile 5 columns</summary>
+    </key>
+    <key type="as" name="autotile-6">
+      <default><![CDATA[['6']]]></default>
+      <summary>Autotile 6 columns</summary>
+    </key>
+    <key type="as" name="autotile-7">
+      <default><![CDATA[['7']]]></default>
+      <summary>Autotile 7 columns</summary>
+    </key>
+    <key type="as" name="autotile-8">
+      <default><![CDATA[['8']]]></default>
+      <summary>Autotile 8 columns</summary>
+    </key>
+    <key type="as" name="autotile-9">
+      <default><![CDATA[['9']]]></default>
+      <summary>Autotile 9 columns</summary>
+    </key>
+    <key type="as" name="autotile-10">
+      <default><![CDATA[['0']]]></default>
+      <summary>Autotile 10 columns</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-1">
+      <default>'cols(1d)'</default>
+      <summary>The autotiling1 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-2">
+      <default>'cols(2d,2d)'</default>
+      <summary>The autotiling2 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-3">
+      <default>'cols(3d,3d,3d)'</default>
+      <summary>The autotiling3 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-4">
+      <default>'cols(4d,4d,4d,4d)'</default>
+      <summary>The autotiling4 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-5">
+      <default>'cols(5d,5d,5d,5d,5d)'</default>
+      <summary>The autotiling5 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-6">
+      <default>'cols(6d,6d,6d,6d,6d,6d)'</default>
+      <summary>The autotiling6 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-7">
+      <default>'cols(7d,7d,7d,7d,7d,7d,7d)'</default>
+      <summary>The autotiling7 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-8">
+      <default>'cols(8d,8d,8d,8d,8d,8d,8d,8d)'</default>
+      <summary>The autotiling8 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-9">
+      <default>'cols(9d,9d,9d,9d,9d,9d,9d,9d,9d)'</default>
+      <summary>The autotiling9 gridspec</summary>
+    </key>
+    <key type="s" name="autotile-gridspec-10">
+      <default>'cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)'</default>
+      <summary>The autotiling10 gridspec</summary>
+    </key>
+    <key type="s" name="resize1">
+      <default>'4x4 1:3 2:4, 1:2 3:4, 1:1 4:4, 1:4 1:4'</default>
+      <summary>Preset resize1 settings (example 6x4 1:2 3:3)</summary>
+    </key>
+    <key type="s" name="resize2">
+      <default>'4x4 1:3 4:4,1:2 4:4,1:1 4:4,1:4 4:4'</default>
+      <summary>Preset resize2 settings</summary>
+    </key>
+    <key type="s" name="resize3">
+      <default>'4x4 3:3 4:4,2:2 4:4,1:1 4:4,4:4 4:4'</default>
+      <summary>Preset resize3 settings</summary>
+    </key>
+    <key type="s" name="resize4">
+      <default>'4x4 1:1 2:4,1:1 3:4,1:1 4:4,1:1 1:4'</default>
+      <summary>Preset resize4 settings</summary>
+    </key>
+    <key type="s" name="resize5">
+      <default>'8x8 3:3 6:6, 2:2 7:7,1:1 8:8,16x16 6:6 10:10'</default>
+      <summary>Preset resize5 settings</summary>
+    </key>
+    <key type="s" name="resize6">
+      <default>'4x4 3:1 4:4,2:1 4:4,1:1 4:4,4:1 4:4'</default>
+      <summary>Preset resize6 settings</summary>
+    </key>
+    <key type="s" name="resize7">
+      <default>'4x4 1:1 2:2,1:1 3:3,1:1 4:4,1:1 1:1'</default>
+      <summary>Preset resize7 settings</summary>
+    </key>
+    <key type="s" name="resize8">
+      <default>'4x4 1:1 4:2,1:1 4:3,1:1 4:4,1:1 4:1'</default>
+      <summary>Preset resize8 settings</summary>
+    </key>
+    <key type="s" name="resize9">
+      <default>'4x4 3:1 4:2,2:1 4:3,1:1 4:4,4:1 4:1'</default>
+      <summary>Preset resize9 settings</summary>
+    </key>
+    <key type="s" name="resize10">
+      <default>'11x17 4:6 8:10'</default>
+      <summary>Preset resize10 settings</summary>
+    </key>
 
-		<key type="as" name="action-expand-bottom">
-			<default><![CDATA[['']]]></default>
-			<summary>Global expand bottom edge.</summary>
-		</key>
-		<key type="as" name="action-expand-left">
-			<default><![CDATA[['']]]></default>
-			<summary>Global expand left edge.</summary>
-		</key>
-		<key type="as" name="action-expand-right">
-			<default><![CDATA[['']]]></default>
-			<summary>Global expand right edge.</summary>
-		</key>
-		<key type="as" name="action-expand-top">
-			<default><![CDATA[['']]]></default>
-			<summary>Global expand top edge.</summary>
-		</key>
-
-
-		<key type="as" name="action-move-left">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move window left.</summary>
-		</key>
-		<key type="as" name="action-move-right">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move window right.</summary>
-		</key>
-		<key type="as" name="action-move-up">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move window up.</summary>
-		</key>
-		<key type="as" name="action-move-down">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move window down.</summary>
-		</key>
-		<key type="as" name="action-move-next-monitor">
-			<default><![CDATA[['']]]></default>
-			<summary>Global move window to next monitor.</summary>
-		</key>
-		<key type="as" name="autotile-main">
-			<default><![CDATA[['m']]]></default>
-			<summary>Autotile with main window.</summary>
-		</key>
-		<key type="as" name="autotile-main-inverted">
-			<default><![CDATA[['']]]></default>
-			<summary>Autotile with main window to the other side.</summary>
-		</key>
-		<key type="as" name="action-autotile-main">
-			<default><![CDATA[['']]]></default>
-			<summary>Global autotile with main window.</summary>
-		</key>
-		<key type="as" name="action-autotile-main-inverted">
-			<default><![CDATA[['']]]></default>
-			<summary>Global autotile with main window to the other side.</summary>
-		</key>
-		<key type="as" name="autotile-1">
-			<default><![CDATA[['1']]]></default>
-			<summary>Autotile 1 column.</summary>
-		</key>
-		<key type="as" name="autotile-2">
-			<default><![CDATA[['2']]]></default>
-			<summary>Autotile 2 columns.</summary>
-		</key>
-		<key type="as" name="autotile-3">
-			<default><![CDATA[['3']]]></default>
-			<summary>Autotile 3 columns.</summary>
-		</key>
-		<key type="as" name="autotile-4">
-			<default><![CDATA[['4']]]></default>
-			<summary>Autotile 4 columns.</summary>
-		</key>
-		<key type="as" name="autotile-5">
-			<default><![CDATA[['5']]]></default>
-			<summary>Autotile 5 columns.</summary>
-		</key>
-		<key type="as" name="autotile-6">
-			<default><![CDATA[['6']]]></default>
-			<summary>Autotile 6 columns.</summary>
-		</key>
-		<key type="as" name="autotile-7">
-			<default><![CDATA[['7']]]></default>
-			<summary>Autotile 7 columns.</summary>
-		</key>
-		<key type="as" name="autotile-8">
-			<default><![CDATA[['8']]]></default>
-			<summary>Autotile 8 columns.</summary>
-		</key>
-		<key type="as" name="autotile-9">
-			<default><![CDATA[['9']]]></default>
-			<summary>Autotile 9 columns.</summary>
-		</key>
-		<key type="as" name="autotile-10">
-			<default><![CDATA[['0']]]></default>
-			<summary>Autotile 10 columns.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-1">
-			<default>'cols(1d)'</default>
-			<summary>The autotiling1 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-2">
-			<default>'cols(2d,2d)'</default>
-			<summary>The autotiling2 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-3">
-			<default>'cols(3d,3d,3d)'</default>
-			<summary>The autotiling3 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-4">
-			<default>'cols(4d,4d,4d,4d)'</default>
-			<summary>The autotiling4 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-5">
-			<default>'cols(5d,5d,5d,5d,5d)'</default>
-			<summary>The autotiling5 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-6">
-			<default>'cols(6d,6d,6d,6d,6d,6d)'</default>
-			<summary>The autotiling6 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-7">
-			<default>'cols(7d,7d,7d,7d,7d,7d,7d)'</default>
-			<summary>The autotiling7 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-8">
-			<default>'cols(8d,8d,8d,8d,8d,8d,8d,8d)'</default>
-			<summary>The autotiling8 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-9">
-			<default>'cols(9d,9d,9d,9d,9d,9d,9d,9d,9d)'</default>
-			<summary>The autotiling9 gridspec.</summary>
-		</key>
-		<key type="s" name="autotile-gridspec-10">
-			<default>'cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)'</default>
-			<summary>The autotiling10 gridspec.</summary>
-		</key>
-		<key type = "s" name="resize1">
-			<default>'4x4 1:3 2:4, 1:2 3:4, 1:1 4:4, 1:4 1:4'</default>
-			<summary>Preset resize1 settings (example 6x4 1:2 3:3).</summary>
-		</key>
-		<key type = "s" name="resize2">
-			<default>'4x4 1:3 4:4,1:2 4:4,1:1 4:4,1:4 4:4'</default>
-			<summary>Preset resize2 settings.</summary>
-		</key>
-		<key type = "s" name="resize3">
-			<default>'4x4 3:3 4:4,2:2 4:4,1:1 4:4,4:4 4:4'</default>
-			<summary>Preset resize3 settings.</summary>
-		</key>
-		<key type = "s" name="resize4">
-			<default>'4x4 1:1 2:4,1:1 3:4,1:1 4:4,1:1 1:4'</default>
-			<summary>Preset resize4 settings.</summary>
-		</key>
-		<key type = "s" name="resize5">
-			<default>'8x8 3:3 6:6, 2:2 7:7,1:1 8:8,16x16 6:6 10:10'</default>
-			<summary>Preset resize5 settings.</summary>
-		</key>
-		<key type = "s" name="resize6">
-			<default>'4x4 3:1 4:4,2:1 4:4,1:1 4:4,4:1 4:4'</default>
-			<summary>Preset resize6 settings.</summary>
-		</key>
-		<key type = "s" name="resize7">
-			<default>'4x4 1:1 2:2,1:1 3:3,1:1 4:4,1:1 1:1'</default>
-			<summary>Preset resize7 settings.</summary>
-		</key>
-		<key type = "s" name="resize8">
-			<default>'4x4 1:1 4:2,1:1 4:3,1:1 4:4,1:1 4:1'</default>
-			<summary>Preset resize8 settings.</summary>
-		</key>
-		<key type = "s" name="resize9">
-			<default>'4x4 3:1 4:2,2:1 4:3,1:1 4:4,4:1 4:1'</default>
-			<summary>Preset resize9 settings.</summary>
-		</key>
-		<key type = "s" name="resize10">
-			<default>'11x17 4:6 8:10'</default>
-			<summary>Preset resize10 settings.</summary>
-		</key>
-
-		<key type = "s" name="resize11">
-			<default>'2x3 1:3 1:3'</default>
-			<summary>Preset resize11 settings.</summary>
-		</key>
-		<key type = "s" name="resize12">
-			<default>'2x3 1:3 2:3'</default>
-			<summary>Preset resize12 settings.</summary>
-		</key>
-		<key type = "s" name="resize13">
-			<default>'2x3 2:3 2:3'</default>
-			<summary>Preset resize13 settings.</summary>
-		</key>
-		<key type = "s" name="resize14">
-			<default>'2x3 1:2 1:2'</default>
-			<summary>Preset resize14 settings.</summary>
-		</key>
-		<key type = "s" name="resize15">
-			<default>'2x3 2:1 2:2'</default>
-			<summary>Preset resize15 settings.</summary>
-		</key>
-		<key type = "s" name="resize16">
-			<default>'2x3 2:2 2:2'</default>
-			<summary>Preset resize16 settings.</summary>
-		</key>
-		<key type = "s" name="resize17">
-			<default>'2x3 1:1 1:1'</default>
-			<summary>Preset resize17 settings.</summary>
-		</key>
-		<key type = "s" name="resize18">
-			<default>'2x3 1:1 1:2'</default>
-			<summary>Preset resize18 settings.</summary>
-		</key>
-		<key type = "s" name="resize19">
-			<default>'2x3 2:1 2:1'</default>
-			<summary>Preset resize19 settings.</summary>
-		</key>
-		<key type = "s" name="resize20">
-			<default>'3x3 2:2 3:3'</default>
-			<summary>Preset resize20 settings.</summary>
-		</key>
-		<key type = "s" name="resize21">
-			<default>'3x3 1:3 1:3'</default>
-			<summary>Preset resize21 settings.</summary>
-		</key>
-		<key type = "s" name="resize22">
-			<default>'3x3 2:3 2:3'</default>
-			<summary>Preset resize22 settings.</summary>
-		</key>
-		<key type = "s" name="resize23">
-			<default>'3x3 3:3 3:3'</default>
-			<summary>Preset resize23 settings.</summary>
-		</key>
-		<key type = "s" name="resize24">
-			<default>'3x3 1:2 1:2'</default>
-			<summary>Preset resize24 settings.</summary>
-		</key>
-		<key type = "s" name="resize25">
-			<default>'3x3 2:2 2:2'</default>
-			<summary>Preset resize25 settings.</summary>
-		</key>
-		<key type = "s" name="resize26">
-			<default>'3x3 3:2 3:2'</default>
-			<summary>Preset resize26 settings.</summary>
-		</key>
-		<key type = "s" name="resize27">
-			<default>'3x3 1:1 1:1'</default>
-			<summary>Preset resize27 settings.</summary>
-		</key>
-		<key type = "s" name="resize28">
-			<default>'3x3 2:1 2:1'</default>
-			<summary>Preset resize28 settings.</summary>
-		</key>
-		<key type = "s" name="resize29">
-			<default>'3x3 3:1 3:1'</default>
-			<summary>Preset resize29 settings.</summary>
-		</key>
-		<key type = "s" name="resize30">
-			<default>'3x3 2:2 3:3'</default>
-			<summary>Preset resize30 settings.</summary>
-		</key>
-
-		<key type = "s" name="grid-sizes">
-			<default>'8x6,6x4,4x4'</default>
-			<summary>Comma-separated list of grid sizes (like 8x6,4x4,6x4,17x11).</summary>
-		</key>
-		<key type = "b" name="auto-close">
-			<default>true</default>
-			<summary>Close gTile after window have been resized.</summary>
-		</key>
-		<key type = "b" name="auto-close-keyboard-shortcut">
-			<default>false</default>
-			<summary>Close gTile after window has been resized using a keyboard shortcut.</summary>
-		</key>
-		<key type = "b" name="show-icon">
-			<default>true</default>
-			<summary>Show gTile icon on a panel.</summary>
-		</key>
-		<key type = "b" name="show-grid-lines">
-			<default>false</default>
-			<summary>Show grid lines when changing grid size</summary>
-		</key>
-		<key type = "b" name="global-auto-tiling">
-			<default>false</default>
-			<summary>Auto tiling keyboard hotkeys are always active (as opposed active only when tiling window is visible).</summary>
-		</key>
-		<key type = "b" name="global-presets">
-			<default>true</default>
-			<summary>Keyboard presets are always active (as opposed active only when tiling window is visible).</summary>
-		</key>
-		<key type = "b" name="target-presets-to-monitor-of-mouse">
-			<default>false</default>
-			<summary>Keyboard shortcuts will target the monitor where the mouse curser is.</summary>
-		</key>
-		<key type = "b" name="moveresize-enabled">
-			<default>true</default>
-			<summary>Enables shortcuts for moving and resizing the current window.</summary>
-		</key>
-		<key type = "i" name="window-spacing">
-			<default>0</default>
-			<summary>Gaps between windows in the middle of screen</summary>
-		</key>
-		<key type = "i" name="max-timeout">
-			<default>2000</default>
-			<summary>Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling.</summary>
-		</key>
-		<key type = "i" name="selection-timeout">
-			<default>200</default>
-			<summary>Grace period in milliseconds that a selection remains after the cursor left the overlay.</summary>
-		</key>
-		<key type = "i" name="insets-primary-left">
-			<default>0</default>
-			<summary>Left gap around border of screen for primary monitor</summary>
-		</key>
-		<key type = "i" name="insets-primary-right">
-			<default>0</default>
-			<summary>Right gap around border of screen for primary monitor</summary>
-		</key>
-		<key type = "i" name="insets-primary-top">
-			<default>0</default>
-			<summary>Top gap around border of screen for primary monitor</summary>
-		</key>
-		<key type = "i" name="insets-primary-bottom">
-			<default>0</default>
-			<summary>Bottom gap around border of screen for primary monitor</summary>
-		</key>
-		<key type = "i" name="insets-secondary-left">
-			<default>0</default>
-			<summary>Left gap around border of screen for secondary monitor</summary>
-		</key>
-		<key type = "i" name="insets-secondary-right">
-			<default>0</default>
-			<summary>Right gap around border of screen for secondary monitor</summary>
-		</key>
-		<key type = "i" name="insets-secondary-top">
-			<default>0</default>
-			<summary>Top gap around border of screen for secondary monitor</summary>
-		</key>
-		<key type = "i" name="insets-secondary-bottom">
-			<default>0</default>
-			<summary>Bottom gap around border of screen for secondary monitor</summary>
-		</key>
-		<key type = "s" name="main-window-sizes">
-			<default>'.5, .625, 3/4'</default>
-			<summary>"Autotile Main window sizes. (Ratio of the screen to take up. Can be a decimal or a ratio).</summary>
-		</key>
-		<key type = "s" name="theme">
-			<default>'Default'</default>
-			<summary>Active theme.</summary>
-		</key>
-		<key type="as" name="themes">
-			<default><![CDATA[['Default', 'Classic', 'Minimal Dark', 'Minimal Light']]]></default>
-			<summary>You can add or remove themes. Element classes are automatically changed by theme name.</summary>
-		</key>
-	</schema>
+    <key type="s" name="resize11">
+      <default>'2x3 1:3 1:3'</default>
+      <summary>Preset resize11 settings</summary>
+    </key>
+    <key type="s" name="resize12">
+      <default>'2x3 1:3 2:3'</default>
+      <summary>Preset resize12 settings</summary>
+    </key>
+    <key type="s" name="resize13">
+      <default>'2x3 2:3 2:3'</default>
+      <summary>Preset resize13 settings</summary>
+    </key>
+    <key type="s" name="resize14">
+      <default>'2x3 1:2 1:2'</default>
+      <summary>Preset resize14 settings</summary>
+    </key>
+    <key type="s" name="resize15">
+      <default>'2x3 2:1 2:2'</default>
+      <summary>Preset resize15 settings</summary>
+    </key>
+    <key type="s" name="resize16">
+      <default>'2x3 2:2 2:2'</default>
+      <summary>Preset resize16 settings</summary>
+    </key>
+    <key type="s" name="resize17">
+      <default>'2x3 1:1 1:1'</default>
+      <summary>Preset resize17 settings</summary>
+    </key>
+    <key type="s" name="resize18">
+      <default>'2x3 1:1 1:2'</default>
+      <summary>Preset resize18 settings</summary>
+    </key>
+    <key type="s" name="resize19">
+      <default>'2x3 2:1 2:1'</default>
+      <summary>Preset resize19 settings</summary>
+    </key>
+    <key type="s" name="resize20">
+      <default>'3x3 2:2 3:3'</default>
+      <summary>Preset resize20 settings</summary>
+    </key>
+    <key type="s" name="resize21">
+      <default>'3x3 1:3 1:3'</default>
+      <summary>Preset resize21 settings</summary>
+    </key>
+    <key type="s" name="resize22">
+      <default>'3x3 2:3 2:3'</default>
+      <summary>Preset resize22 settings</summary>
+    </key>
+    <key type="s" name="resize23">
+      <default>'3x3 3:3 3:3'</default>
+      <summary>Preset resize23 settings</summary>
+    </key>
+    <key type="s" name="resize24">
+      <default>'3x3 1:2 1:2'</default>
+      <summary>Preset resize24 settings</summary>
+    </key>
+    <key type="s" name="resize25">
+      <default>'3x3 2:2 2:2'</default>
+      <summary>Preset resize25 settings</summary>
+    </key>
+    <key type="s" name="resize26">
+      <default>'3x3 3:2 3:2'</default>
+      <summary>Preset resize26 settings</summary>
+    </key>
+    <key type="s" name="resize27">
+      <default>'3x3 1:1 1:1'</default>
+      <summary>Preset resize27 settings</summary>
+    </key>
+    <key type="s" name="resize28">
+      <default>'3x3 2:1 2:1'</default>
+      <summary>Preset resize28 settings</summary>
+    </key>
+    <key type="s" name="resize29">
+      <default>'3x3 3:1 3:1'</default>
+      <summary>Preset resize29 settings</summary>
+    </key>
+    <key type="s" name="resize30">
+      <default>'3x3 2:2 3:3'</default>
+      <summary>Preset resize30 settings</summary>
+    </key>
+    <key type="s" name="grid-sizes">
+      <default>'8x6,6x4,4x4'</default>
+      <summary>Comma-separated list of grid sizes (like 8x6,4x4,6x4,17x11)</summary>
+    </key>
+    <key type="b" name="auto-close">
+      <default>true</default>
+      <summary>Close gTile after confirming an operation</summary>
+    </key>
+    <key type="b" name="show-icon">
+      <default>true</default>
+      <summary>Show gTile panel icon</summary>
+    </key>
+    <key type="b" name="show-grid-lines">
+      <default>false</default>
+      <summary>Show grid lines when changing grid size</summary>
+    </key>
+    <key type="b" name="global-auto-tiling">
+      <default>false</default>
+      <summary>Allow auto tiling shortcut usage when the gTile UI is not visible</summary>
+    </key>
+    <key type="b" name="global-presets">
+      <default>true</default>
+      <summary>Allow preset shortcut usage when the gTile UI is not visible</summary>
+    </key>
+    <key type="b" name="target-presets-to-monitor-of-mouse">
+      <default>false</default>
+      <summary>Preset shortcuts will target the monitor of the mouse curser</summary>
+    </key>
+    <key type="b" name="moveresize-enabled">
+      <default>true</default>
+      <summary>Enable action shortcuts</summary>
+    </key>
+    <key type="i" name="window-spacing">
+      <default>0</default>
+      <summary>Spacing between windows</summary>
+    </key>
+    <key type="i" name="max-timeout">
+      <default>2000</default>
+      <summary>Maximum timeout in milliseconds between consecutive preset calls to trigger preset cycling</summary>
+    </key>
+    <key type="i" name="selection-timeout">
+      <default>200</default>
+      <summary>Grace period in milliseconds before a selection resets after the cursor leaves the overlay</summary>
+    </key>
+    <key type="i" name="insets-primary-left">
+      <default>0</default>
+      <summary>Left gap around border of screen for primary monitor</summary>
+    </key>
+    <key type="i" name="insets-primary-right">
+      <default>0</default>
+      <summary>Right gap around border of screen for primary monitor</summary>
+    </key>
+    <key type="i" name="insets-primary-top">
+      <default>0</default>
+      <summary>Top gap around border of screen for primary monitor</summary>
+    </key>
+    <key type="i" name="insets-primary-bottom">
+      <default>0</default>
+      <summary>Bottom gap around border of screen for primary monitor</summary>
+    </key>
+    <key type="i" name="insets-secondary-left">
+      <default>0</default>
+      <summary>Left gap around border of screen for secondary monitor</summary>
+    </key>
+    <key type="i" name="insets-secondary-right">
+      <default>0</default>
+      <summary>Right gap around border of screen for secondary monitor</summary>
+    </key>
+    <key type="i" name="insets-secondary-top">
+      <default>0</default>
+      <summary>Top gap around border of screen for secondary monitor</summary>
+    </key>
+    <key type="i" name="insets-secondary-bottom">
+      <default>0</default>
+      <summary>Bottom gap around border of screen for secondary monitor</summary>
+    </key>
+    <key type="s" name="main-window-sizes">
+      <default>'.5, .625, 3/4'</default>
+      <summary>"Autotile Main window sizes. (Ratio of the screen to take up. Can be a decimal or a ratio)</summary>
+    </key>
+    <key type="s" name="theme">
+      <default>'Default'</default>
+      <summary>Active theme</summary>
+    </key>
+    <key type="as" name="themes">
+      <default><![CDATA[['Default', 'Classic', 'Minimal Dark', 'Minimal Light']]]></default>
+      <summary>You can add or remove themes. Element classes are automatically changed by theme name</summary>
+    </key>
+  </schema>
 </schemalist>

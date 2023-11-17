@@ -146,7 +146,6 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     });
 
     kb("show-toggle-tiling", { type: Action.TOGGLE });
-    kb("show-toggle-tiling-alt", { type: Action.TOGGLE });
   }
 
   #registerOverlayHotkeys() {
@@ -160,22 +159,14 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     kb("cancel-tiling", { type: Action.CANCEL });
     kb("change-grid-size", { type: Action.LOOP_GRID_SIZE });
     kb("move-up", { type: Action.PAN, dir: "north" });
-    kb("move-up-vi", { type: Action.PAN, dir: "north" });
     kb("move-right", { type: Action.PAN, dir: "east" });
-    kb("move-right-vi", { type: Action.PAN, dir: "east" });
     kb("move-down", { type: Action.PAN, dir: "south" });
-    kb("move-down-vi", { type: Action.PAN, dir: "south" });
     kb("move-left", { type: Action.PAN, dir: "west" });
-    kb("move-left-vi", { type: Action.PAN, dir: "west" });
     kb("move-next-monitor", { type: Action.RELOCATE });
     kb("resize-up", { type: Action.ADJUST, mode: "shrink", dir: "south" });
-    kb("resize-up-vi", { type: Action.ADJUST, mode: "shrink", dir: "south" });
     kb("resize-right", { type: Action.ADJUST, mode: "extend", dir: "east" });
-    kb("resize-right-vi", { type: Action.ADJUST, mode: "extend", dir: "east" });
     kb("resize-down", { type: Action.ADJUST, mode: "extend", dir: "south" });
-    kb("resize-down-vi", { type: Action.ADJUST, mode: "extend", dir: "south" });
     kb("resize-left", { type: Action.ADJUST, mode: "shrink", dir: "east" });
-    kb("resize-left-vi", { type: Action.ADJUST, mode: "shrink", dir: "east" });
     kb("set-tiling", { type: Action.CONFIRM });
     kb("snap-to-neighbors", { type: Action.GROW });
   }
