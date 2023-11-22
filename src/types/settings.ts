@@ -8,7 +8,6 @@ import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
  */
 export type BoolSettingKey =
   | "auto-close"
-  | "auto-close-keyboard-shortcut"
   | "debug"
   | "global-auto-tiling"
   | "global-presets"
@@ -48,7 +47,6 @@ export type StringSettingKey =
   | "autotile-gridspec-9"
   | "autotile-gridspec-10"
   | "grid-sizes"
-  | "main-window-sizes"
   | "resize1"
   | "resize10"
   | "resize11"
@@ -85,9 +83,7 @@ export type StringSettingKey =
  * Key names in the GSettings schema that reference keyboard shortcuts which are
  * always intercepted for as long as the extension is enabled.
  */
-export type KeyBindingGlobalSettingKey =
-  | "show-toggle-tiling"
-  | "show-toggle-tiling-alt";
+export type KeyBindingGlobalSettingKey = "show-toggle-tiling"
 
 /**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
@@ -97,22 +93,14 @@ export type KeyBindingGroupDefaultSettingKey =
   | "cancel-tiling"
   | "change-grid-size"
   | "move-up"
-  | "move-up-vi"
   | "move-right"
-  | "move-right-vi"
   | "move-down"
-  | "move-down-vi"
   | "move-left"
-  | "move-left-vi"
   | "move-next-monitor"
   | "resize-up"
-  | "resize-up-vi"
   | "resize-right"
-  | "resize-right-vi"
   | "resize-down"
-  | "resize-down-vi"
   | "resize-left"
-  | "resize-left-vi"
   | "set-tiling"
   | "snap-to-neighbors";
 

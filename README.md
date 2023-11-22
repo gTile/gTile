@@ -13,14 +13,14 @@
 
 - [User Documentation](#user-documentation)
   - [Installation](#installation)
-    - [Install from Gnome Extensions](#install-from-gnome-extensions)
+    - [Install via Gnome Extensions](#install-via-gnome-extensions)
+    - [Install Latest Build](#install-latest-build)
     - [Install from Source](#install-from-source)
   - [Configuration](#configuration)
-    - [Dconf Editor](#dconf-editor)
-    - [dconf CLI](#dconf-cli)
   - [Usage](#usage)
     - [Overlay](#overlay)
-    - [Hotkeys](#hotkeys)
+    - [Shortcuts](#shortcuts)
+    - [Resize Presets](#resize-presets)
     - [AutoTiling](#autotiling)
     - [Autogrow](#autogrow)
     - [Window Spacing and Insets](#window-spacing-and-insets)
@@ -32,15 +32,29 @@
   - [Code Structure](#code-structure)
   - [Design Principles](#design-principles)
   - [Code Style Guide](#code-style-guide)
-  - [GridSpec DSL](#gridspec-dsl)
   - [Resources](#resources)
 
 # User Documentation
 
 ## Installation
 
-### Install from Gnome Extensions
+### Install via Gnome Extensions
 The preferred installation is through [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
+
+### Install Latest Build
+Alternatively, the most recent stable version may also be downloaded as a distributable archive (`gtile.dist.tgz`) through the [GitHub releases page](https://github.com/gTile/gTile/releases).
+
+```shell
+# Replace `VERSION` with the most recent release.
+wget https://github.com/gTile/gTile/releases/download/VERSION/gtile.dist.tgz
+
+# The `-f` flag will perform an upgrade, if necessary.
+gnome-extensions install -f ~/Downloads/gtile.dist.tgz
+
+# The changes only become effective once the shell session was restarted.
+# In case the extension was installed for the first time it must be enabled afterwards.
+gnome-extensions enable gTile@vibou
+```
 
 ### Install from Source
 Alternatively, you can build and install the latest version from GitHub. Make sure to have a working `git` and `npm` installation.
@@ -61,41 +75,17 @@ $ gnome-extensions enable gTile@vibou
 
 ## Configuration
 
-*PREFERENCE DIALOG IS A WORK IN PROGRESS*
-
-gTile was recently rewritten for Gnome 45. There is no dedicated preference dialog yet. All configuration from a previous version of gTile should continue to work out of the box. For the time being if you want to change the extension configuration, you can use either the Dconf Editor (recommended) or the `dconf` command line tool. In either case, settings are stored the directory `/org/gnome/shell/extensions/gtile/`. Note that settings are applied immediately with the exception of the `theme` setting.
-
-### Dconf Editor
-
-If you have installed the [Dconf Editor](https://wiki.gnome.org/Apps/DconfEditor) you can simply use it to modify the extension settings by browsing the the corresponding section `/org/gnome/shell/extensions/gtile/`. If you do not see all of the extension settings you need to compile and install the GSettings schema first.
+The extension can be configured through a dedicated preferences dialog. You can open the extension settings either through the [Gnome Extensions](https://apps.gnome.org/Extensions/) app, or by executing the following command in your terminal:
 
 ```shell
-mkdir -p ~/.local/share/glib-2.0/schemas
-cd ~/.local/share/glib-2.0/schemas
-cp ~/.local/share/gnome-shell/extensions/gTile@vibou/schemas/org.gnome.shell.extensions.gtile.gschema.xml .
-glib-compile-schemas .
+gnome-extensions prefs gTile@vibou
 ```
 
-You should now see a list of all settings in the Dconf editor and can edit them to your need.
-
-### dconf CLI
-If you prefer the CLI, you can use the dconf CLI tool to set specific settings. Note that it is less convenient in usage and requires you to take care of providing the settings in the proper format You may find a full list of available settings in `dist/schemas/org.gnome.shell.extensions.gtile.gschema.xml`.
-
-CLI example:
-```shell
-# Show current setting overrides
-dconf dump /org/gnome/shell/extensions/gtile/
-
-# Disable the auto-close setting
-dconf write /org/gnome/shell/extensions/gtile/auto-close false
-
-# Change the available grid-sizes
-dconf write /org/gnome/shell/extensions/gtile/grid-sizes "'8x6,6x4,4x4,3x1'"
-```
+Note that most settings are applied either immediately or after toggling the gTile overlay. There is one exception though. When the theme is changed, the extension needs to be disabled and then enabled again for the new theme to become effective.
 
 ## Usage
 
-gTile can be used either through its graphical user interface ("overlay") or exclusively with the keyboard via hotkeys.
+gTile can be used either through its graphical user interface ("overlay") or exclusively with the keyboard via shortcuts.
 
 ### Overlay
 
@@ -121,7 +111,20 @@ gTile can be used either through its graphical user interface ("overlay") or exc
 4. Press the accelerator key binding configured for the desired preset
 5. Window will resize, GUI stays open allowing for additional window resizing. Alternatively, enable Basic setting "Auto close on keyboard shortcut" to automatically exit after a single command.
 
-### Hotkeys
+### Resize Presets
+
+Resize presets are defined in the preferences window (*Resize Presets* tab).
+
+* Presets can be cycled. One keyboard shortcut can have several presets attached, which will change on subsequent presses of the shortcut. E.g. `3x3 1:1 1:1, 2:2 2:2` on the first press will put the window on the top left corner, on the second press - in the middle of the screen.
+
+Presets have a format of "[grid size] [top left coordinate]:[bottom right coordinate]".
+
+* Grid size is specified as "XxY", where X represents a number of columns and Y represents a number of rows. E.g. 3x3 divides the screen into 3 columns and 3 rows, the same way as in grid schemes under *General*.
+* Grid size can be omitted. In that case preset will use the current grid set by the user in the UI or through the keyboard shortcut.
+* If grid size is specified in the first place, it can be omitted in the subsequent places. gTile will use the grid size specified in the first place. E.g. `3x3 1:1 1:1, 2:2 2:2` (when `2:2 2:2` is triggered, gTile will use 3x3 grid size).
+* Grids defined in the presets can differ from the grid sizes defined in the *General* tab.
+
+### Shortcuts
 
 You can also resize windows using keyboard shortcuts directly.
 
@@ -163,6 +166,29 @@ You can do auto tiling for all windows on screen
 
 [![Main Variants](https://user-images.githubusercontent.com/4830810/109255942-93123b00-77ba-11eb-8976-0069ab6e8f55.jpg
 )](https://user-images.githubusercontent.com/4830810/109256250-4418d580-77bb-11eb-8e50-4764a861cd85.mp4 "Main Variants")
+
+The autotiling layouts can be customized through `GridSpec`, a tiny DSL used to describe complex grids. The following [Wirth notation](https://en.wikipedia.org/wiki/Wirth_syntax_notation) describes the syntax of `GridSpec`.
+
+```
+gridspec = [ ( colspec | rowspec ) ] .
+colspec  = "cols" "(" cellspec { "," cellspec } ")" .
+rowspec  = "rows" "(" cellspec { "," cellspec } ")" .
+cellspec = <number> [ ( "d" | ":" ( colspec | rowspec ) ) ] .
+```
+
+Some examples of valid `GridSpec` definitions:
+
+- `cols(1, 3, 1)`
+  - Describes a grid consisting of three columns (and a single row). The first and last column have a relative width of 20% each (i.e. 1/5) and the center column has a size (relative to the row width) of 3/5, i.e., 60%.
+- `rows(1, 1:col(3,3,3), 1d)`
+  - Describes a grid consisting of three rows. The first and last row both consist of a single column with 100% width. The center row consists of three columns, each with 33% width. The last row is defined as a `dynamic` row, which affects how autotiling does place windows in it. Usually, autotiling assigns at most 1 window to each cell. Cells declared as `dynamic` may hold as many windows as necessary. Windows placed into a dynamic cell all get the same share of this cell. For instance, if 2 windows were to be placed in the dynamic cell above, they would each take 50% of the rows width.
+
+In general, the autotiling algorithm works as follows:
+1. Given a `GridSpec`, find the largest non-dynamic cell (if there are multiple largest cells, the first one is used).
+    - Place the focused window inside it, if any.
+2. For all (remaining) windows on the currently active monitor: Place each window in one of the (remaining) non-dynamic cells and make it take the full width and height of that cell.
+3. If there are still more windows remaining that couldn't yet be placed in a cell: Find all dynamic cells in the grid and place the remaining windows inside them.
+    - Each window gets the same share of a dynamic cell (or its full size for a single window).
 
 ### Autogrow
 
@@ -214,7 +240,7 @@ Testing changes can be tedious at times because an extension cannot be updated i
 ```json
 {
   "scripts": {
-    "install:remote": "scp gtile.tgz remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/gtile.tgz",
+    "install:remote": "scp gtile.dist.tgz remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/gtile.dist.tgz",
   }
 }
 ```
@@ -233,7 +259,7 @@ Term   | Meaning
 `(Grid) selection` | A rectangular selection of multiple tiles within a grid. It is defined in term of two offsets which specify the position of two opposite corner tiles of the selection.
 `Preset` | Ambiguously used. Can refer to the user-specified grid size (presets), i.e. the list of grid sizes available for the user to choose in the overlay. Alternatively, this refers to the user-defined presets that auto-move & auto-resize the focused window according the configured preset.
 `(Monitor) Inset` | A user-configurable screen margin respected by all gTile features (window placement, autogrow, autotiling, …). It causes windows to keep a fixed distance (in pixel) to the monitor edge(s).
-`(Window) Margin` | A user-configurable window margin that causes windows to have an invisible border to them. The margin does not(!) apply towards the screen edges. Windows with a margin are still able to align with the screen edge, i.e., unless an inset is configured.
+`(Window) Spacing` | A user-configurable window spacing that causes windows to have an invisible border to them. The spacing does not(!) apply towards the screen edges. Windows with a spacing are still able to align with the screen edge, i.e., unless an inset is configured.
 
 ## Code Structure
 
@@ -246,7 +272,7 @@ dist                - Contents will be distributed 1:1 whenever the extension is
 
 src                 - The TypeScript root directory
 ├── core            - Contains the main orchestration classes that are instantiated as singleton
-├── types           - Contains _only_ TypeScript types that to NOT(!) emit code
+├── types           - Contains _only_ TypeScript types that do NOT(!) emit code
 ├── ui              - Contains reusable UI building blocks utilized by the core classes
 │                     They do not contain any logic other than strictly related to rendering
 ├── util            - Reusable helper classes or functions
@@ -259,7 +285,7 @@ Note that `src/types/` must not contain any files that emit actual JS runtime co
 ## Design Principles
 The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extend__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to make [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103) more easy.
 
-The extension makes use of the GJS mechanisms were possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrator.
+The extension make use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class of function.
 
 ## Code Style Guide
 The project does intentionally avoid the use of linters such as prettier or eslint. Quick comprehension is more important than following strict code formatting rules. That being said, please try to comply with the implicit code style used throughout the code base. In particular:
@@ -272,30 +298,6 @@ The project does intentionally avoid the use of linters such as prettier or esli
 - Prefer [native ECMAScript private properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_properties) over [TypeScript’s `private` visibility specifier](https://www.typescriptlang.org/docs/handbook/2/classes.html#private).
 
 At the time of its release, this extension was quite possibly the most TypeScript conform extension in the Gnome ecosystem. It is in the interest of the author to honor that by utilizing the capabilities of TypeScript where possible to achieve maximum type-safety during compile time.
-
-## GridSpec DSL
-`GridSpec` is a tiny DSL used to describe complex grids. It is described by the following grammar, whose syntax is using a [variant](https://en.wikipedia.org/wiki/Wirth_syntax_notation) of the Extended Backus-Naur Form ([EBNF](https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form)).
-
-```
-gridspec = [ ( colspec | rowspec ) ] .
-colspec  = "cols" "(" cellspec { "," cellspec } ")" .
-rowspec  = "rows" "(" cellspec { "," cellspec } ")" .
-cellspec = <number> [ ( "d" | ":" ( colspec | rowspec ) ) ] .
-```
-
-Some examples of valid `GridSpec` definitions:
-
-- `cols(1, 3, 1)`
-  - Describes a grid consisting of three columns (and a single row). The first and last column have a relative width of 20% each (i.e. 1/5) and the center column has a size (relative to the row width) of 3/5, i.e., 60%.
-- `rows(1, 1:col(3,3,3), 1d)`
-  - Describes a grid consisting of three rows. The first and last row both consist of a single column with 100% width. The center row consists of three columns, each with 33% width. The last row is defined as a `dynamic` row, which affects how autotiling does place windows in it. Usually, autotiling assigns at most 1 window to each cell. Cells declared as `dynamic` may hold as many windows as necessary. Windows placed into a dynamic cell all get the same share of this cell. For instance, if 2 windows were to be placed in the dynamic cell above, they would each take 50% of the rows width.
-
-In general, the autotiling algorithm works as follows:
-1. Given a `GridSpec`, find the largest non-dynamic cell (if there are multiple largest cells, the first one is used).
-    - Place the focused window inside it, if any.
-2. For all (remaining) windows on the currently active monitor: Place each window in one of the (remaining) non-dynamic cells and make it take the full width and height of that cell.
-3. If there are still more windows remaining that couldn't yet be placed in a cell: Find all dynamic cells in the grid and place the remaining windows inside them.
-    - Each window gets the same share of a dynamic cell (or its full size for a single window).
 
 ## Resources
 

@@ -1,5 +1,8 @@
 CHANGE LOG
 ----------
+### 54
+- Add preferences dialog
+
 ### 53
 
 - Complete rewrite. Check [PR #341](https://github.com/gTile/gTile/pull/341) for more information and breaking changes.

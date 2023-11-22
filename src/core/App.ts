@@ -104,6 +104,7 @@ export default class App implements GarbageCollector {
     this.#gc.defer(() => this.#hotkeyManager.release());
 
     this.#desktopManager = new DesktopManager({
+      shell: Shell.Global.get(),
       display: Shell.Global.get().display,
       layoutManager: Main.layoutManager,
       monitorManager: Shell.Global.get().backend.get_monitor_manager(),
@@ -118,7 +119,6 @@ export default class App implements GarbageCollector {
       settings: this.#settings,
       gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
-      shell: Shell.Global.get(),
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
     });
@@ -285,7 +285,10 @@ export default class App implements GarbageCollector {
         const preset = this.#getResizePreset(action.preset);
         if (preset) {
           const { gridSize, selection } = preset;
-          dm.applySelection(window, monitorIdx, gridSize, selection);
+          const targetCursorMonitor =
+            this.#settings.get_boolean("target-presets-to-monitor-of-mouse");
+          const mIdx = targetCursorMonitor ? dm.pointerMonitorIdx : monitorIdx;
+          dm.applySelection(window, mIdx, gridSize, selection);
         }
         return;
       }
