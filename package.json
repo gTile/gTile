@@ -7,6 +7,7 @@
   "author": "Markus Schanz <markus@schanz.id>",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
+    "@ava/typescript": "^4.1.0",
     "@girs/adw-1": "^1.4.0-3.2.6",
     "@girs/clutter-13": "^13.0.0-3.2.7",
     "@girs/gdk-4.0": "^4.0.0-3.2.7",
@@ -20,18 +21,28 @@
     "@girs/pango-1.0": "^1.51.0-3.2.7",
     "@girs/shell-13": "^13.0.0-3.2.7",
     "@girs/st-13": "^13.0.0-3.2.7",
+    "ava": "^5.3.1",
     "typescript": "^5.3.3"
   },
+  "ava": {
+    "typescript": {
+      "rewritePaths": {
+        "src/": "out/src/",
+        "test/": "out/test/"
+      },
+      "compile": false
+    }
+  },
   "scripts": {
-    "clean": "git clean -qxf ':/dist/*.js' gtile.dist.tgz",
-    "postclean": "find dist -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} +",
+    "clean": "git clean -qxf ':/dist' ':/out' gtile.dist.tgz",
     "prebuild": "$npm_execpath run clean",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.prod.json",
     "postbuild": "rm -rf dist/types",
     "prebuild:dist": "$npm_execpath run build",
     "build:dist": "tar -czf gtile.dist.tgz -C dist .",
     "install:extension": "gnome-extensions install -f gtile.dist.tgz",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "pretest": "tsc",
+    "test": "ava",
     "check": "tsc --noEmit"
   }
 }
