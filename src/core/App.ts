@@ -145,6 +145,7 @@ export default class App implements GarbageCollector {
 
   release() {
     this.#gc.release();
+    this.#lastResizePreset.release();
     App.#instance = undefined as any;
   }
 

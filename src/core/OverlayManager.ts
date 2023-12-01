@@ -298,6 +298,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     let overlay: InstanceType<typeof Overlay>, wasVisible = false;
     while (overlay = this.#overlays.pop()!) {
       wasVisible ||= overlay.visible;
+      overlay.release();
       overlay.destroy();
     }
 

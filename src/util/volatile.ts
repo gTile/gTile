@@ -1,4 +1,4 @@
-import { GarbageCollection } from "./gc.js";
+import { GarbageCollection, GarbageCollector } from "./gc.js";
 
 /**
  * Provides a volatile storage for values of type {@link T}. The store
@@ -8,7 +8,7 @@ export interface VolatileStore<T> {
   store: T | null;
 }
 
-export class VolatileStorage<T> implements VolatileStore<T> {
+export class VolatileStorage<T> implements VolatileStore<T>, GarbageCollector {
   #gc: GarbageCollection
   #timeout: number;
   #stored: T | null;
@@ -22,6 +22,10 @@ export class VolatileStorage<T> implements VolatileStore<T> {
     this.#gc = new GarbageCollection();
     this.#timeout = lifetime;
     this.#stored = null;
+  }
+
+  release(): void {
+    this.#gc.release();
   }
 
   /**
