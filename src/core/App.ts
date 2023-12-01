@@ -1,5 +1,5 @@
-import Gio from "gi://Gio?version=2.0";
-import Shell from "gi://Shell?version=13";
+import Gio from "gi://Gio";
+import Shell from "gi://Shell";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 

@@ -1,6 +1,6 @@
-import GLib from "gi://GLib?version=2.0";
-import GObject from "gi://GObject?version=2.0";
-import St from "gi://St?version=13";
+import GLib from "gi://GLib";
+import GObject from "gi://GObject";
+import St from "gi://St";
 
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
 import { Theme } from "../types/theme.js";

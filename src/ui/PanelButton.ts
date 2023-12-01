@@ -1,5 +1,5 @@
-import GObject from "gi://GObject?version=2.0"
-import St from "gi://St?version=13";
+import GObject from "gi://GObject"
+import St from "gi://St";
 
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 

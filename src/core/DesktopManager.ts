@@ -1,6 +1,6 @@
-import Meta from "gi://Meta?version=13";
-import Mtk from "gi://Mtk?version=13";
-import Shell from "gi://Shell?version=13";
+import Meta from "gi://Meta";
+import Mtk from "gi://Mtk";
+import Shell from "gi://Shell";
 
 import type { LayoutManager, Monitor } from "resource:///org/gnome/shell/ui/layout.js";
 
