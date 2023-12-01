@@ -214,6 +214,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    *
    * @param window The window whose position & size should be mapped.
    * @param gridSize Reference grid size for which the selection is calculated.
+   * @param snap Optional. The strategy to be used when the window edges do not
+   *   perfectly align with the grid.
    * @returns The mapped selection.
    */
   windowToSelection(
