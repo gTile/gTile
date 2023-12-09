@@ -22,7 +22,7 @@ export class GarbageCollection implements GarbageCollector {
   }
 
   /**
-   * Executes all deferred cleanup routines in reverse order, i.e. LIFO.
+   * Executes all deferred cleanup routines in reverse order, i.e., LIFO.
    */
   release() {
     while (this.#routines.length > 0) {

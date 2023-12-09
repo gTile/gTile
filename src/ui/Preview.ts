@@ -1,5 +1,5 @@
-import GObject from "gi://GObject?version=2.0";
-import St from "gi://St?version=13";
+import GObject from "gi://GObject";
+import St from "gi://St";
 
 import { Rectangle } from "../types/grid.js";
 import { Theme } from "../types/theme.js";

@@ -1,9 +1,9 @@
-import Adw from "gi://Adw?version=1";
-import Gdk from "gi://Gdk?version=4.0";
-import GObject from "gi://GObject?version=2.0";
-import Gio from "gi://Gio?version=2.0";
-import Gtk from "gi://Gtk?version=4.0";
-import Pango from "gi://Pango?version=1.0";
+import Adw from "gi://Adw";
+import Gdk from "gi://Gdk";
+import GObject from "gi://GObject";
+import Gio from "gi://Gio";
+import Gtk from "gi://Gtk";
+import Pango from "gi://Pango";
 
 import {
   ExtensionPreferences
@@ -45,10 +45,11 @@ export default class extends ExtensionPreferences {
 
   #release() {
     this.#gc.release();
-    // do NOT set #settings or other instance variables to undefined! This would
-    // cause the GC to dereference and cleanup resources before GJS expects them
-    // to be gone (even long after the preference window was closed). Would
-    // cause errors like these:
+    this.#gc = undefined!;
+    this.#settings = undefined!;
+    // do NOT set #window to undefined! This would cause the GC to dereference
+    // and cleanup resources before GJS expects them to be gone (even long after
+    // the preference window was closed). Would cause errors like these:
     // - instance with invalid (NULL) class pointer
     // - g_signal_handlers_disconnect_matched: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
   }
@@ -566,6 +567,7 @@ const ShortcutRow = GObject.registerClass({
 
       switch (keyval) {
         case Gdk.KEY_Escape:
+          // triggers "response" callback
           dialog.close();
           return Gdk.EVENT_STOP;
         case Gdk.KEY_BackSpace:

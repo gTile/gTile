@@ -1,5 +1,8 @@
 CHANGE LOG
 ----------
+### 55
+- Satisfy non-functional requirements to be publishable on extensions.gnome.org.
+
 ### 54
 - Add preferences dialog
 

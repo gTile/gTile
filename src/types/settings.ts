@@ -1,5 +1,5 @@
-import Gio from "gi://Gio?version=2.0";
-import GObject from "gi://GObject?version=2.0";
+import Gio from "gi://Gio";
+import GObject from "gi://GObject";
 
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 

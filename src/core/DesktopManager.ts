@@ -1,6 +1,6 @@
-import Meta from "gi://Meta?version=13";
-import Mtk from "gi://Mtk?version=13";
-import Shell from "gi://Shell?version=13";
+import Meta from "gi://Meta";
+import Mtk from "gi://Mtk";
+import Shell from "gi://Shell";
 
 import type { LayoutManager, Monitor } from "resource:///org/gnome/shell/ui/layout.js";
 
@@ -214,6 +214,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    *
    * @param window The window whose position & size should be mapped.
    * @param gridSize Reference grid size for which the selection is calculated.
+   * @param snap Optional. The strategy to be used when the window edges do not
+   *   perfectly align with the grid.
    * @returns The mapped selection.
    */
   windowToSelection(

@@ -1,6 +1,6 @@
-import Gio from "gi://Gio?version=2.0";
-import Meta from "gi://Meta?version=13";
-import St from "gi://St?version=13";
+import Gio from "gi://Gio";
+import Meta from "gi://Meta";
+import St from "gi://St";
 
 import type { LayoutManager } from "resource:///org/gnome/shell/ui/layout.js";
 
@@ -298,6 +298,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     let overlay: InstanceType<typeof Overlay>, wasVisible = false;
     while (overlay = this.#overlays.pop()!) {
       wasVisible ||= overlay.visible;
+      overlay.release();
       overlay.destroy();
     }
 

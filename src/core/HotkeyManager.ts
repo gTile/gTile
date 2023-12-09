@@ -1,5 +1,5 @@
-import Meta from "gi://Meta?version=13";
-import Shell from "gi://Shell?version=13";
+import Meta from "gi://Meta";
+import Shell from "gi://Shell";
 
 import { WindowManager } from "resource:///org/gnome/shell/ui/windowManager.js";
 

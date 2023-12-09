@@ -70,7 +70,7 @@ npm run install:extension
 After restarting your Gnome shell session you can enable the extension via:
 
 ```shell
-$ gnome-extensions enable gTile@vibou
+gnome-extensions enable gTile@vibou
 ```
 
 ## Configuration
@@ -235,7 +235,7 @@ npm ci
 
 ## Workflow
 
-Testing changes can be tedious at times because an extension cannot be updated in-place. The Gnome shell session must be restarted in order for changes to take effect. In Wayland it is usually much easier to start a nested session instead. Check the [GJS documentation](https://gjs.guide/extensions/development/debugging.html#reloading-extensions) on how to best debug extensions. Note that nested gnome sessions can take time to load and do not allow to test multi-screen setups. I personally found it most productive to have a second remote system which I used to continuously test the extension on. For this purpose I added a simple new script to `package.json`:
+Testing changes can be tedious at times because an extension cannot be updated in-place. The Gnome shell session must be restarted in order for changes to take effect. In Wayland it is usually much easier to start a nested session instead. Check the [GJS documentation](https://gjs.guide/extensions/development/debugging.html#reloading-extensions) on how to best debug extensions. Note that nested gnome sessions can take time to load and does not allow to test multi-screen setups. I personally found it most productive to have a second remote system which I used to continuously test the extension on. For this purpose I added a simple new script to `package.json`:
 
 ```json
 {
@@ -280,12 +280,12 @@ src                 - The TypeScript root directory
 └── prefs.ts        - The entry point for the preferences dialog
 ```
 
-Note that `src/types/` must not contain any files that emit actual JS runtime code. Any files emited by `tsc` during transpilation are deleted by the `postbuild` script in `package.json`.
+Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `dist/types/` (as emited by `tsc` during transpilation) are deleted by the `postbuild` script in `package.json`.
 
 ## Design Principles
-The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extend__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to make [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103) more easy.
+The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extend__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103).
 
-The extension make use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class of function.
+The extension makes use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class or function.
 
 ## Code Style Guide
 The project does intentionally avoid the use of linters such as prettier or eslint. Quick comprehension is more important than following strict code formatting rules. That being said, please try to comply with the implicit code style used throughout the code base. In particular:
