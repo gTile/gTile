@@ -1,5 +1,8 @@
 CHANGE LOG
 ----------
+### 56
+- Fix #361: gnome-shell process froze due to an allocation size overflow when changing the grid size list in the extension preferences.
+
 ### 55
 - Satisfy non-functional requirements to be publishable on extensions.gnome.org.
 
