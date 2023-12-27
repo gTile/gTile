@@ -59,8 +59,8 @@ export interface Token {
  * EOS       := $ .
  */
 export class Scanner {
-  static DigitRegex = /[0-9]/;
-  static CharRegex = /[a-z]/;
+  static DigitRegex = /^[0-9]$/;
+  static CharRegex = /^[a-z]$/;
 
   #input: string;
   #position: number;
