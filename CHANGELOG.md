@@ -1,5 +1,8 @@
 CHANGE LOG
 ----------
+### 57
+- Fix #363: The keybinding dialog now also works on X11
+
 ### 56
 - Fix #361: gnome-shell process froze due to an allocation size overflow when changing the grid size list in the extension preferences.
 
