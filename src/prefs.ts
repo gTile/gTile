@@ -621,27 +621,53 @@ const ShortcutRow = GObject.registerClass({
     mask: Gdk.ModifierType,
     keyGroup: number
   ): KeyPressEvent {
+    // Note that GDK may add internal values to events which include values
+    // outside of the Gdk.ModifierType enumeration. Usually the code should
+    // preserve and ignore them.
+    // That being said, the `Gdk.Display.translate_key` method throws an error
+    // when these internal values are preserved. Thus, for the purpose of
+    // normalization it is vital to ignore these bits beforehand.
+    // https://gitlab.gnome.org/GNOME/gtk/-/blob/69500f356e61e437853f44c992c9bbca2ae5f8f7/gdk/gdkenums.h#L111-113
+    mask &= Gdk.MODIFIER_MASK;
+
     let explicitModifiers = Gtk.accelerator_get_default_mod_mask();
+
+    // We want shift to always be included as explicit modifier for gnome-shell
+    // shortcuts.That's because users usually think of shortcuts as including
+    // the shift key rather than being defined for the shifted keyval.
+    // This helps with num - row keys which have different keyvals on different
+    // layouts for example, but also with keys that have explicit key codes at
+    // shift level 0, that gnome-shell would prefer over shifted ones, such the
+    // DOLLAR key.
     explicitModifiers |= Gdk.ModifierType.SHIFT_MASK;
+
+    // CapsLock isn't supported as a keybinding modifier, so keep it from
+    // confusing us.
+    // https://gitlab.gnome.org/GNOME/gnome-control-center/-/blob/a936ac6bc9d5a01dd2c3fcb905189570ecd72753/panels/keyboard/cc-keyboard-shortcut-editor.c#L713
     explicitModifiers &= ~Gdk.ModifierType.LOCK_MASK;
 
     const usedModifiers = mask & explicitModifiers;
 
-    let [, normalizedKeyval] = display.translate_key(code, mask & ~explicitModifiers, keyGroup);
-    const [, shiftedKeyval] = display.translate_key(code, Gdk.ModifierType.SHIFT_MASK | (mask & ~explicitModifiers), keyGroup);
+    let [, unmodifiedKeyval] = display.translate_key(
+      code, mask & ~explicitModifiers, keyGroup);
+    const [, shiftedKeyval] = display.translate_key(
+      code, Gdk.ModifierType.SHIFT_MASK | (mask & ~explicitModifiers), keyGroup);
 
     if (Gdk.KEY_0 <= shiftedKeyval && shiftedKeyval <= Gdk.KEY_9) {
-      normalizedKeyval = shiftedKeyval;
+      unmodifiedKeyval = shiftedKeyval;
     }
 
-    if (normalizedKeyval === Gdk.KEY_ISO_Left_Tab) {
-      normalizedKeyval = Gdk.KEY_Tab;
+    if (unmodifiedKeyval === Gdk.KEY_ISO_Left_Tab) {
+      unmodifiedKeyval = Gdk.KEY_Tab;
     }
 
-    if (normalizedKeyval === Gdk.KEY_Sys_Req && (usedModifiers & Gdk.ModifierType.ALT_MASK) != 0) {
-      normalizedKeyval = Gdk.KEY_Print;
+    if (
+      unmodifiedKeyval === Gdk.KEY_Sys_Req &&
+      (usedModifiers & Gdk.ModifierType.ALT_MASK) != 0
+    ) {
+      unmodifiedKeyval = Gdk.KEY_Print;
     }
 
-    return { keyval: normalizedKeyval, modifier: usedModifiers };
+    return { keyval: unmodifiedKeyval, modifier: usedModifiers };
   }
 });
