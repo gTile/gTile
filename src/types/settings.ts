@@ -97,10 +97,14 @@ export type KeyBindingGroupDefaultSettingKey =
   | "move-down"
   | "move-left"
   | "move-next-monitor"
-  | "resize-up"
-  | "resize-right"
-  | "resize-down"
-  | "resize-left"
+  | "contract-left"
+  | "contract-right"
+  | "contract-up"
+  | "contract-down"
+  | "expand-left"
+  | "expand-right"
+  | "expand-up"
+  | "expand-down"
   | "set-tiling"
   | "snap-to-neighbors";
 

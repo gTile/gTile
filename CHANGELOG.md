@@ -1,7 +1,15 @@
 CHANGE LOG
 ----------
 ### 57
-- Fix #363: The keybinding dialog now also works on X11
+Breaking change:
+
+- Permanently removed/renamed `dconf` setting keys `resize-left`, `resize-up`, `resize-right`, `resize-down`.
+- Users that assigned custom shortcuts for interactively resizing windows must re-assign these shortcuts in the preference dialog.
+
+New and changed functionality:
+
+- Allow interactive window resizing in all directions via keybindings (#369, see breaking changes!).
+- The keybinding dialog now also works on X11 (#363)
 - Builds no longer requires the `compilerOptions.skipLibCheck` build option.
 
 ### 56
