@@ -424,6 +424,11 @@ export default class extends ExtensionPreferences {
   }
 }
 
+interface KeyPressEvent {
+  keyval: number;
+  modifier: Gdk.ModifierType;
+}
+
 interface ShortcutParams extends Adw.ActionRow.ConstructorProperties {
   settings: ExtensionSettings;
   schemaKey: SettingKey;
@@ -557,11 +562,13 @@ const ShortcutRow = GObject.registerClass({
       dialog.close();
     });
 
-    eventController.connect("key-pressed", (event, keyval, code, modifier) => {
-      if (
-        !Gtk.accelerator_valid(keyval, modifier) &&
-        !this.#whitelisted(keyval)
-      ) {
+    eventController.connect("key-pressed", (ctrl, _, code, state) => {
+      const event = ctrl.get_current_event() as Gdk.KeyEvent;
+      const display = event.get_display()!;
+      const { keyval, modifier } =
+        this.#normalizeKeyvalAndMask(display, code, state, ctrl.get_group());
+
+      if (event.is_modifier()) {
         return Gdk.EVENT_STOP;
       }
 
@@ -607,19 +614,60 @@ const ShortcutRow = GObject.registerClass({
     dialog.present();
   }
 
-  // While Gtk.accelerator_valid stops most modifier keys from being recognized
-  // as valid shortcuts, it also blocks some legit keys.
-  // https://github.com/GNOME/gtk/blob/ec6c52680e6f44638b0ae84710affcec94116ffe/gtk/gtkaccelgroup.c#L51
-  #whitelisted(keyval: number) {
-    return [
-      Gdk.KEY_Up,
-      Gdk.KEY_Down,
-      Gdk.KEY_Left,
-      Gdk.KEY_Right,
-      Gdk.KEY_KP_Up,
-      Gdk.KEY_KP_Down,
-      Gdk.KEY_KP_Left,
-      Gdk.KEY_KP_Right,
-    ].includes(keyval);
+  // https://gitlab.gnome.org/GNOME/gnome-control-center/-/blob/a936ac6bc9d5a01dd2c3fcb905189570ecd72753/panels/keyboard/keyboard-shortcuts.c#L388
+  #normalizeKeyvalAndMask(
+    display: Gdk.Display,
+    code: number,
+    mask: Gdk.ModifierType,
+    keyGroup: number
+  ): KeyPressEvent {
+    // Note that GDK may add internal values to events which include values
+    // outside of the Gdk.ModifierType enumeration. Usually the code should
+    // preserve and ignore them.
+    // That being said, the `Gdk.Display.translate_key` method throws an error
+    // when these internal values are preserved. Thus, for the purpose of
+    // normalization it is vital to ignore these bits beforehand.
+    // https://gitlab.gnome.org/GNOME/gtk/-/blob/69500f356e61e437853f44c992c9bbca2ae5f8f7/gdk/gdkenums.h#L111-113
+    mask &= Gdk.MODIFIER_MASK;
+
+    let explicitModifiers = Gtk.accelerator_get_default_mod_mask();
+
+    // We want shift to always be included as explicit modifier for gnome-shell
+    // shortcuts.That's because users usually think of shortcuts as including
+    // the shift key rather than being defined for the shifted keyval.
+    // This helps with num - row keys which have different keyvals on different
+    // layouts for example, but also with keys that have explicit key codes at
+    // shift level 0, that gnome-shell would prefer over shifted ones, such the
+    // DOLLAR key.
+    explicitModifiers |= Gdk.ModifierType.SHIFT_MASK;
+
+    // CapsLock isn't supported as a keybinding modifier, so keep it from
+    // confusing us.
+    // https://gitlab.gnome.org/GNOME/gnome-control-center/-/blob/a936ac6bc9d5a01dd2c3fcb905189570ecd72753/panels/keyboard/cc-keyboard-shortcut-editor.c#L713
+    explicitModifiers &= ~Gdk.ModifierType.LOCK_MASK;
+
+    const usedModifiers = mask & explicitModifiers;
+
+    let [, unmodifiedKeyval] = display.translate_key(
+      code, mask & ~explicitModifiers, keyGroup);
+    const [, shiftedKeyval] = display.translate_key(
+      code, Gdk.ModifierType.SHIFT_MASK | (mask & ~explicitModifiers), keyGroup);
+
+    if (Gdk.KEY_0 <= shiftedKeyval && shiftedKeyval <= Gdk.KEY_9) {
+      unmodifiedKeyval = shiftedKeyval;
+    }
+
+    if (unmodifiedKeyval === Gdk.KEY_ISO_Left_Tab) {
+      unmodifiedKeyval = Gdk.KEY_Tab;
+    }
+
+    if (
+      unmodifiedKeyval === Gdk.KEY_Sys_Req &&
+      (usedModifiers & Gdk.ModifierType.ALT_MASK) != 0
+    ) {
+      unmodifiedKeyval = Gdk.KEY_Print;
+    }
+
+    return { keyval: unmodifiedKeyval, modifier: usedModifiers };
   }
 });
