@@ -125,10 +125,14 @@ export default class extends ExtensionPreferences {
       group.add(this.#shortcutRow("move-right"));
       group.add(this.#shortcutRow("move-up"));
       group.add(this.#shortcutRow("move-down"));
-      group.add(this.#shortcutRow("resize-left"));
-      group.add(this.#shortcutRow("resize-right"));
-      group.add(this.#shortcutRow("resize-up"));
-      group.add(this.#shortcutRow("resize-down"));
+      group.add(this.#shortcutRow("contract-left"));
+      group.add(this.#shortcutRow("contract-right"));
+      group.add(this.#shortcutRow("contract-up"));
+      group.add(this.#shortcutRow("contract-down"));
+      group.add(this.#shortcutRow("expand-left"));
+      group.add(this.#shortcutRow("expand-right"));
+      group.add(this.#shortcutRow("expand-up"));
+      group.add(this.#shortcutRow("expand-down"));
     }
 
     return page;

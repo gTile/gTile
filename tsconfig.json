@@ -47,8 +47,5 @@
     /* Type Checking */
     "strict": true,                                      /* Enable all strict type-checking options. */
     // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
-
-    /* Completeness */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
 }

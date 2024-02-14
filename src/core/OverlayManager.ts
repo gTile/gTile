@@ -284,7 +284,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         type: Event.Selection,
         monitorIdx: monitor.index,
         gridSize: overlay.gridSize,
-        // Non-null assertion is safe - selection is set until handlers complete
+        // Non-null assertion is safe - selection is set while handlers run
         selection: overlay.gridSelection!,
       }));
 

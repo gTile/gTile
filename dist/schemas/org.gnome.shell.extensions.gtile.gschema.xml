@@ -41,21 +41,37 @@
       <default><![CDATA[['Down', 'j']]]></default>
       <summary>Move window down</summary>
     </key>
-    <key type="as" name="resize-left">
+    <key type="as" name="contract-left">
+      <default><![CDATA[[]]]></default>
+      <summary>Contract left window edge inwards</summary>
+    </key>
+    <key type="as" name="contract-right">
       <default><![CDATA[['<Shift>Left', '<Shift>h']]]></default>
-      <summary>Resize window - decrease width</summary>
+      <summary>Contract right window edge inwards</summary>
     </key>
-    <key type="as" name="resize-right">
-      <default><![CDATA[['<Shift>Right', '<Shift>l']]]></default>
-      <summary>Resize window - increase width</summary>
+    <key type="as" name="contract-up">
+      <default><![CDATA[[]]]></default>
+      <summary>Contract top window edge downwards</summary>
     </key>
-    <key type="as" name="resize-up">
+    <key type="as" name="contract-down">
       <default><![CDATA[['<Shift>Up', '<Shift>k']]]></default>
-      <summary>Resize window - decrease height</summary>
+      <summary>Contract top window edge upwards</summary>
     </key>
-    <key type="as" name="resize-down">
+    <key type="as" name="expand-left">
+      <default><![CDATA[[]]]></default>
+      <summary>Expand left window edge outwards</summary>
+    </key>
+    <key type="as" name="expand-right">
+      <default><![CDATA[['<Shift>Right', '<Shift>l']]]></default>
+      <summary>Expand right window edge outwards</summary>
+    </key>
+    <key type="as" name="expand-up">
+      <default><![CDATA[[]]]></default>
+      <summary>Expand top window edge upwards</summary>
+    </key>
+    <key type="as" name="expand-down">
       <default><![CDATA[['<Shift>Down', '<Shift>j']]]></default>
-      <summary>Resize window - increase height</summary>
+      <summary>Expand bottom window edge downwards</summary>
     </key>
     <key type="as" name="preset-resize-1">
       <default><![CDATA[['<Super><Alt>KP_1']]]></default>
@@ -94,7 +110,7 @@
       <summary>Resize preset 9</summary>
     </key>
     <key type="as" name="preset-resize-10">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Resize preset 10</summary>
     </key>
     <key type="as" name="preset-resize-11">
@@ -134,7 +150,7 @@
       <summary>Resize preset 19</summary>
     </key>
     <key type="as" name="preset-resize-20">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Resize preset 20</summary>
     </key>
     <key type="as" name="preset-resize-21">
@@ -174,7 +190,7 @@
       <summary>Resize preset 29</summary>
     </key>
     <key type="as" name="preset-resize-30">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Resize preset 30</summary>
     </key>
     <key type="as" name="action-contract-left">
@@ -194,51 +210,51 @@
       <summary>Global contract top window edge upwards</summary>
     </key>
     <key type="as" name="action-expand-left">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global expand left window edge outwards</summary>
     </key>
     <key type="as" name="action-expand-right">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global expand right window edge outwards</summary>
     </key>
     <key type="as" name="action-expand-top">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global expand top window edge upwards</summary>
     </key>
     <key type="as" name="action-expand-bottom">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global expand bottom window edge downwards</summary>
     </key>
     <key type="as" name="action-move-left">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global move window left</summary>
     </key>
     <key type="as" name="action-move-right">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global move window right</summary>
     </key>
     <key type="as" name="action-move-up">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global move window up</summary>
     </key>
     <key type="as" name="action-move-down">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global move window down</summary>
     </key>
     <key type="as" name="action-change-tiling">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global loop through grid sizes</summary>
     </key>
     <key type="as" name="action-move-next-monitor">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global move window to next monitor</summary>
     </key>
     <key type="as" name="action-autotile-main">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global autotile with main window</summary>
     </key>
     <key type="as" name="action-autotile-main-inverted">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Global autotile with main window to the other side</summary>
     </key>
     <key type="as" name="autotile-main">
@@ -246,7 +262,7 @@
       <summary>Autotile with main window on the lefthand side</summary>
     </key>
     <key type="as" name="autotile-main-inverted">
-      <default><![CDATA[['']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Autotile with main window to the righthand side</summary>
     </key>
     <key type="as" name="autotile-1">

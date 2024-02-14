@@ -163,10 +163,14 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     kb("move-down", { type: Action.PAN, dir: "south" });
     kb("move-left", { type: Action.PAN, dir: "west" });
     kb("move-next-monitor", { type: Action.RELOCATE });
-    kb("resize-up", { type: Action.ADJUST, mode: "shrink", dir: "south" });
-    kb("resize-right", { type: Action.ADJUST, mode: "extend", dir: "east" });
-    kb("resize-down", { type: Action.ADJUST, mode: "extend", dir: "south" });
-    kb("resize-left", { type: Action.ADJUST, mode: "shrink", dir: "east" });
+    kb("contract-left", { type: Action.ADJUST, mode: "shrink", dir: "west" });
+    kb("contract-right", { type: Action.ADJUST, mode: "shrink", dir: "east" });
+    kb("contract-up", { type: Action.ADJUST, mode: "shrink", dir: "north" });
+    kb("contract-down", { type: Action.ADJUST, mode: "shrink", dir: "south" });
+    kb("expand-left", { type: Action.ADJUST, mode: "extend", dir: "west" });
+    kb("expand-right", { type: Action.ADJUST, mode: "extend", dir: "east" });
+    kb("expand-up", { type: Action.ADJUST, mode: "extend", dir: "north" });
+    kb("expand-down", { type: Action.ADJUST, mode: "extend", dir: "south" });
     kb("set-tiling", { type: Action.CONFIRM });
     kb("snap-to-neighbors", { type: Action.GROW });
   }

@@ -305,7 +305,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       height: Math.min(maxSouthBound, workArea.y + workArea.height) - y,
     });
 
-    // Step 2: Further reduce the set of windows which could possible collide
+    // Step 2: Further reduce the set of windows which could possibly collide
     // with the target window. Keep only those windows which are located either
     // partly or entirely within the calculated boundary. Note that at this
     // point, this can only affect windows that are located to the NE, NW, SE or
@@ -338,9 +338,13 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
-      .filter(window => window.get_monitor() === monitorIdx)
-      .filter(window => TitleBlacklist.every(p => !p.test(window.title ?? "")));
 
+      .filter(win => !(
+        win.minimized ||
+        win.get_monitor() !== monitorIdx ||
+        win.get_frame_type() !== Meta.FrameType.NORMAL ||
+        TitleBlacklist.some(p => p.test(win.title ?? ""))
+      ));
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
       x: canvas.x + canvas.width * rect.x,
       y: canvas.y + canvas.height * rect.y,
