@@ -10,6 +10,7 @@ New and changed functionality:
 
 - Allow interactive window resizing in all directions via keybindings (#369, see breaking changes!).
 - The keybinding dialog now also works on X11 (#363)
+- Minimized windows are now properly ignored when using the autotile feature.
 - Builds no longer requires the `compilerOptions.skipLibCheck` build option.
 
 ### 56
