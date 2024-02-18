@@ -9,7 +9,7 @@ export interface IconButtonParams extends Omit<
   "style_class" | "child"
 > {
   theme: Theme;
-  symbol: "auto-close" | "main-and-list" | "two-list";
+  symbol: "auto-close" | "follow-cursor" | "main-and-list" | "two-list";
 }
 
 /**

@@ -473,6 +473,10 @@
       <default>true</default>
       <summary>Close gTile after confirming an operation</summary>
     </key>
+    <key type="b" name="follow-cursor">
+      <default>false</default>
+      <summary>Place the gTile overlay near the mouse cursor</summary>
+    </key>
     <key type="b" name="show-icon">
       <default>true</default>
       <summary>Show gTile panel icon</summary>
