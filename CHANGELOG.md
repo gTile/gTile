@@ -1,5 +1,12 @@
 CHANGE LOG
 ----------
+### 58
+- Overhauled gTile overlay placement logic
+  - Restored old placement behavior.
+  - The gTile overlay is now placed in the center of the currently focused window by default.
+  - The gTile overlay is now hidden/closed when the Gnome workspace overview (<kbd>Super</kbd>-key) is activated.
+  - A new setting allows to toggle between new and old placement modes, i.e., "at cursor" or "within the focused window".
+
 ### 57
 Breaking change:
 
