@@ -72,6 +72,7 @@ export default class extends ExtensionPreferences {
       group.add(this.#shortcutRow("show-toggle-tiling"));
       group.add(this.#entryRow("grid-sizes"));
       group.add(this.#switchRow("auto-close"));
+      group.add(this.#switchRow("follow-cursor"));
       group.add(this.#switchRow("show-icon"));
       group.add(this.#switchRow("show-grid-lines"));
       group.add(this.#spinRow("max-timeout", 500, 10000, 100));

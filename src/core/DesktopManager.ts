@@ -2,9 +2,12 @@ import Meta from "gi://Meta";
 import Mtk from "gi://Mtk";
 import Shell from "gi://Shell";
 
-import type { LayoutManager, Monitor } from "resource:///org/gnome/shell/ui/layout.js";
+import type {
+  LayoutManager,
+  Monitor
+} from "resource:///org/gnome/shell/ui/layout.js";
 
-import { DesktopEvent, Event } from "../types/desktop.js";
+import { DesktopEvent, Event, Screen } from "../types/desktop.js";
 import {
   GridOffset,
   GridSelection,
@@ -75,13 +78,19 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       const chid = monitorManager.connect("monitors-changed", () => {
         this.#dispatch({ type: Event.MONITORS_CHANGED });
       });
-      this.#gc.defer(() => layoutManager.disconnect(chid));
+      this.#gc.defer(() => monitorManager.disconnect(chid));
     }
     {
       const chid = display.connect("notify::focus-window", () => {
         this.#dispatch({ type: Event.FOCUS, target: display.focus_window });
       });
       this.#gc.defer(() => display.disconnect(chid));
+    }
+    {
+      const chid = layoutManager.overviewGroup.connect("notify::visible", g => {
+        this.#dispatch({ type: Event.OVERVIEW, visible: g.visible });
+      });
+      this.#gc.defer(() => layoutManager.disconnect(chid));
     }
   }
 
@@ -110,8 +119,23 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   /**
    * The list of monitors that comprise the desktop.
    */
-  get monitors(): Monitor[] {
-    return this.#layoutManager.monitors;
+  get monitors(): Screen[] {
+    const monitors = this.#layoutManager.monitors;
+    const workAreas = monitors.map(m => this.#workspaceManager
+      .get_active_workspace()
+      .get_work_area_for_monitor(m.index));
+
+    return this.#layoutManager.monitors.map((m, index) => ({
+      index: m.index,
+      scale: m.geometryScale,
+      resolution: { x: m.x, y: m.y, width: m.width, height: m.height },
+      workArea: {
+        x: workAreas[index].x,
+        y: workAreas[index].y,
+        width: workAreas[index].width,
+        height: workAreas[index].height,
+      }
+    }));
   }
 
   /**

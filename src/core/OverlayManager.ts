@@ -42,6 +42,7 @@ export interface OverlayManagerParams {
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #theme: Theme;
   #settings: ExtensionSettings;
+  #gnomeSettings: GnomeInterfaceSettings;
   #presets: GridSize[];
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
@@ -63,6 +64,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }: OverlayManagerParams) {
     this.#theme = theme;
     this.#settings = settings;
+    this.#gnomeSettings = gnomeSettings;
     this.#presets = presets;
     this.#layoutManager = layoutManager;
     this.#desktopManager = desktopManager;
@@ -74,12 +76,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
-    layoutManager.addTopChrome(this.#preview);
-    this.#renderOverlays();
-
-    this.#desktopManager.subscribe(this.#onDesktopEvent.bind(this));
+    desktopManager.subscribe(this.#onDesktopEvent.bind(this));
     gnomeSettings.bind(
       "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
+
+    layoutManager.addTopChrome(this.#preview);
+    this.#renderOverlays();
   }
 
   /**
@@ -164,32 +166,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       return;
     }
 
-    const monitors = this.#desktopManager.monitors;
-    console.assert(monitors.length === this.#overlays.length,
-      `gTile: number of overlays (${this.#overlays.length}) do not match the` +
-      `number of monitors(${ monitors.length })`);
-    console.assert(
-      Math.max(...monitors.map(m => m.index)) === this.#overlays.length - 1,
-      `No̱ of overlays do not match no̱ of monitors (${this.#overlays.length})`,
-      monitors.map(({ index }) => index));
-
-    const [mouseX, mouseY] = this.#desktopManager.pointer;
-    for (const monitor of monitors) {
-      const overlay = this.#overlays[monitor.index];
-
-      if (
-        monitor.x <= mouseX && mouseX <= (monitor.x + monitor.width) &&
-        monitor.y <= mouseY && mouseY <= (monitor.y + monitor.height)
-      ) {
-        const xMax = monitor.x + monitor.width - overlay.width;
-        const yMax = monitor.y + monitor.height - overlay.height;
-
-        overlay.x = Math.clamp(mouseX + overlay.popupOffsetX, monitor.x, xMax);
-        overlay.y = Math.clamp(mouseY + overlay.popupOffsetY, monitor.y, yMax);
-      } else {
-        overlay.x = monitor.x + monitor.width / 2 - overlay.width / 2;
-        overlay.y = monitor.y + monitor.height / 2 - overlay.height / 2;
-      }
+    if (this.#settings.get_boolean("follow-cursor")) {
+      this.#placeOverlays();
+    } else {
+      this.#placeOverlays(window);
     }
 
     this.#syncInProgress = true;
@@ -241,12 +221,14 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         theme: this.#theme,
         title: "gTile",
         presets: this.#presets,
-        gridAspectRatio: monitor.width / monitor.height,
+        gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
         visible: false,
       });
+      this.#gnomeSettings.bind(
+        "enable-animations", overlay, "animate", Gio.SettingsBindFlags.GET);
 
       type BSK = BoolSettingKey;
-      for (const key of ["auto-close"] satisfies BSK[]) {
+      for (const key of ["auto-close", "follow-cursor"] satisfies BSK[]) {
         const btn = new IconButton({
           theme: this.#theme,
           symbol: key,
@@ -315,17 +297,17 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     // destroys previous grid in case it wasn't cleaned up by the timeout yet
     this.#gridLineOverlayGc.release();
 
-    for (const monitor of this.#desktopManager.monitors) {
-      const tileWidth = monitor.width / gridSize.cols;
-      const tileHeight = monitor.height / gridSize.rows;
+    for (const { workArea } of this.#desktopManager.monitors) {
+      const tileWidth = workArea.width / gridSize.cols;
+      const tileHeight = workArea.height / gridSize.rows;
 
       for (let i = 1; i < gridSize.cols; ++i) {
         const gridLine = new St.BoxLayout({
           style_class: `${this.#theme}__grid_lines_preview`,
-          x: monitor.x + tileWidth * i,
-          y: monitor.y,
+          x: workArea.x + tileWidth * i,
+          y: workArea.y,
           width: 1,
-          height: monitor.height,
+          height: workArea.height,
         });
         this.#gridLineOverlayGc.defer(() => gridLine.destroy());
 
@@ -335,9 +317,9 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       for (let i = 1; i < gridSize.rows; ++i) {
         const gridLine = new St.BoxLayout({
           style_class: `${this.#theme}__grid_lines_preview`,
-          x: monitor.x,
-          y: monitor.y + tileHeight * i,
-          width: monitor.width,
+          x: workArea.x,
+          y: workArea.y + tileHeight * i,
+          width: workArea.width,
           height: 1,
         });
         this.#gridLineOverlayGc.defer(() => gridLine.destroy());
@@ -369,6 +351,48 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       this.#windowSubscriptionGc.defer(() => {
         window.disconnect(chid);
       });
+    }
+  }
+
+  #placeOverlays(focusedWindow?: Meta.Window) {
+    const monitors = this.#desktopManager.monitors;
+
+    console.assert(monitors.length === this.#overlays.length,
+      `gTile: number of overlays (${this.#overlays.length}) do not match the` +
+      `number of monitors(${ monitors.length })`);
+    console.assert(
+      Math.max(...monitors.map(m => m.index)) === this.#overlays.length - 1,
+      `No̱ of overlays do not match no̱ of monitors (${this.#overlays.length})`,
+      monitors.map(({ index }) => index));
+
+    const [mouseX, mouseY] = this.#desktopManager.pointer;
+    for (const { index, workArea } of monitors) {
+      const
+        overlay = this.#overlays[index],
+        xMax = workArea.x + workArea.width - overlay.width,
+        yMax = workArea.y + workArea.height - overlay.height;
+
+      if (focusedWindow?.get_monitor() === index) {
+        const
+          frame = focusedWindow.get_frame_rect(),
+          anchorX = Math.clamp(frame.x + frame.width / 2 - overlay.width / 2,
+            workArea.x, xMax),
+          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.width / 2,
+            workArea.y, yMax);
+
+        overlay.placeAt(anchorX, anchorY);
+      } else if (
+        workArea.x <= mouseX && mouseX <= (workArea.x + workArea.width) &&
+        workArea.y <= mouseY && mouseY <= (workArea.y + workArea.height)
+      ) {
+        overlay.placeAt(
+          Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax),
+          Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax));
+      } else {
+        // never animate overlays when placed in the center of the screen
+        overlay.x = workArea.x + workArea.width / 2 - overlay.width / 2;
+        overlay.y = workArea.y + workArea.height / 2 - overlay.height / 2;
+      }
     }
   }
 
@@ -432,12 +456,22 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         this.#syncTitleWithWindow(event.target);
         if (!event.target) {
           this.toggleOverlays(true);
+        } else if (!this.#settings.get_boolean("follow-cursor")) {
+          this.#placeOverlays(event.target);
+        } else {
+          this.#placeOverlays();
         }
-
         return;
+
       case DesktopEventType.MONITORS_CHANGED:
         this.#destroyOverlays();
         this.#renderOverlays();
+        return;
+
+      case DesktopEventType.OVERVIEW:
+        if (event.visible) {
+          this.toggleOverlays(true);
+        }
         return;
     }
 

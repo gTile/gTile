@@ -8,7 +8,7 @@ import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
  */
 export type BoolSettingKey =
   | "auto-close"
-  | "debug"
+  | "follow-cursor"
   | "global-auto-tiling"
   | "global-presets"
   | "moveresize-enabled"

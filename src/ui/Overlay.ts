@@ -40,6 +40,11 @@ export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
   gridSelection?: GridSelection | null;
 
   /**
+   * Optional. Whether to animate the repositioning of the overlay.
+   */
+  animate?: boolean;
+
+  /**
    * Optional. The time in milliseconds that a selection remains after the
    * cursor left the overlay.
    */
@@ -68,6 +73,13 @@ export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
 export default GObject.registerClass({
   GTypeName: "GTileOverlay",
   Properties: {
+    animate: GObject.ParamSpec.boolean(
+      "animate",
+      "Animate",
+      "Whether to anmiate UI position changes",
+      GObject.ParamFlags.READWRITE,
+      true,
+    ),
     /**
      * Forwarded from {@link Grid}.
      */
@@ -115,6 +127,7 @@ export default GObject.registerClass({
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
   #actionButtons: ReturnType<typeof ButtonBar.new_styled>;
+  #animate: boolean;
   #selectionTimeout: number;
   #delayTimeoutID: GLib.Source | null = null;
 
@@ -124,6 +137,7 @@ export default GObject.registerClass({
     presets,
     gridAspectRatio,
     gridSelection = null,
+    animate = true,
     selectionTimeout = 200,
     ...params
   }: OverlayParams) {
@@ -154,6 +168,7 @@ export default GObject.registerClass({
       style_class: `${theme}__action`,
       width: TABLE_WIDTH - 20,
     });
+    this.#animate = animate;
     this.#selectionTimeout = selectionTimeout;
     this.#delayTimeoutID = null;
 
@@ -233,6 +248,17 @@ export default GObject.registerClass({
   }
 
   /**
+   * Whether to animate changes in position of the the overlay.
+   */
+  set animate(animate: boolean) {
+    this.#animate = animate;
+  }
+
+  get animate() {
+    return this.#animate;
+  }
+
+  /**
    * The time in milliseconds that a selection remains after the cursor left the
    * overlay.
    */
@@ -291,6 +317,20 @@ export default GObject.registerClass({
       this.#presetButtons.addButton(button);
       button.connect("clicked", () => { this.#grid.gridSize = preset; });
     }
+  }
+
+  /**
+   * Animated repositioning of the overlay to the given anchor.
+   *
+   * @param x The x coordinate of the actor in pixels.
+   * @param y The y coordinate of the actor in pixels.
+   */
+  placeAt(x: number, y: number) {
+    // Use default easing (AnimationMode.EASE_OUT_QUAD with 250ms duration)
+    this.animate && this.save_easing_state();
+    this.x = x;
+    this.y = y;
+    this.animate && this.restore_easing_state();
   }
 
   /**
