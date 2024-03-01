@@ -165,7 +165,8 @@ You can do auto tiling for all windows on screen
     * Main variables are configurable.
 
 [![Main Variants](https://user-images.githubusercontent.com/4830810/109255942-93123b00-77ba-11eb-8976-0069ab6e8f55.jpg
-)](https://user-images.githubusercontent.com/4830810/109256250-4418d580-77bb-11eb-8e50-4764a861cd85.mp4 "Main Variants")
+)](https://github.com/gTile/gTile/assets/3457747/40489511-1c5d-44da-b59f-9445cf50b86c "Main Variants")
+
 
 The autotiling layouts can be customized through `GridSpec`, a tiny DSL used to describe complex grids. The following [Wirth notation](https://en.wikipedia.org/wiki/Wirth_syntax_notation) describes the syntax of `GridSpec`.
 
