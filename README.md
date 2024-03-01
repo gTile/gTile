@@ -283,7 +283,7 @@ src                 - The TypeScript root directory
 Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `dist/types/` (as emited by `tsc` during transpilation) are deleted by the `postbuild` script in `package.json`.
 
 ## Design Principles
-The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extend__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103).
+The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extent__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103).
 
 The extension makes use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class or function.
 
@@ -297,7 +297,7 @@ The project does intentionally avoid the use of linters such as prettier or esli
 - In general, private members of classes or non-exported types/functions should not require to be documented as the complexity of the inner-workings of a class (or similar) should remain comprehensible. In case the complexity gets out of hand consider to refactor the class or document the functions where necessary.
 - Prefer [native ECMAScript private properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_properties) over [TypeScript’s `private` visibility specifier](https://www.typescriptlang.org/docs/handbook/2/classes.html#private).
 
-At the time of its release, this extension was quite possibly the most TypeScript conform extension in the Gnome ecosystem. It is in the interest of the author to honor that by utilizing the capabilities of TypeScript where possible to achieve maximum type-safety during compile time.
+At the time of its release, this extension was quite possibly the most TypeScript conformant extension in the Gnome ecosystem. It is in the interest of the author to honor that by utilizing the capabilities of TypeScript where possible to achieve maximum type-safety during compile time.
 
 ## Resources
 
