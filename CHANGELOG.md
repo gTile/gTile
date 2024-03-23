@@ -1,5 +1,8 @@
 CHANGE LOG
 ----------
+### 59
+- Add support for Gnome 46 (extension is compatible without further code changes)
+
 ### 58
 - Overhauled gTile overlay placement logic
   - Restored old placement behavior.
