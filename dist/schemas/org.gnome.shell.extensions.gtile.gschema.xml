@@ -495,7 +495,7 @@
     </key>
     <key type="b" name="target-presets-to-monitor-of-mouse">
       <default>false</default>
-      <summary>Preset shortcuts will target the monitor of the mouse curser</summary>
+      <summary>Preset shortcuts will target the monitor of the mouse cursor</summary>
     </key>
     <key type="b" name="moveresize-enabled">
       <default>true</default>
