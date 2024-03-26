@@ -28,6 +28,7 @@
 - [Developer Documentation](#developer-documentation)
   - [Prerequisites](#prerequisites)
   - [Workflow](#workflow)
+  - [Testing](#testing)
   - [Terminology](#terminology)
   - [Code Structure](#code-structure)
   - [Design Principles](#design-principles)
@@ -248,6 +249,27 @@ Testing changes can be tedious at times because an extension cannot be updated i
 
 Deploying a change is as simple as executing `npm run build:dist && npm run install:remote` and restart the Gnome session on the remote system. When developing locally use the `npm run install:extension` command instead.
 
+## Testing
+
+Functional tests are written in TypeScript and must be transpiled via `tsc` before [AVA](https://github.com/avajs/ava) can run the tests. The following command takes care of everything and is best be used to run the tests in a one-off fashion.
+
+```shell
+# For a one-off run of all tests
+npm run test
+```
+
+When actively developing tests, it is more convinient (and also faster) to let `tsc` continuously transpile the tests and have them run by AVA.
+
+```shell
+# Let the TypeScript compiler watch for changes and auto-transpile files
+npx tsc -w
+
+# In a separate terminal: Run the AVA test runner in watch mode
+npm run test -- --watch
+```
+
+**Note:** All tests are strictly kept in the `test/` directory, in isolation to the `src/` directory. Test files do _not_ have a special naming convention such as a required `.spec.ts` suffix. Thus, keeping tests in a separate directory allows them to be transpiled on-demand when needed and avoids pollution of the redistributable build.
+
 ## Terminology
 There are some domain-specific terms used throughout the entire code base. This table ought to be a glossary for these terms. Some of these may also translate 1:1 into a TypeScript interface. Check the `src/types/` directory.
 
@@ -279,6 +301,8 @@ src                 - The TypeScript root directory
 ├── util            - Reusable helper classes or functions
 ├── extension.ts    - The entry point for the extension invoked by Gnome shell
 └── prefs.ts        - The entry point for the preferences dialog
+
+test                - Tests are kept separate from src/ and are not transpiled by "npm run build"
 ```
 
 Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `dist/types/` (as emited by `tsc` during transpilation) are deleted by the `postbuild` script in `package.json`.
