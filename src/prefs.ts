@@ -340,11 +340,12 @@ export default class extends ExtensionPreferences {
 
   #switchRow(
     schemaKey: BoolSettingKey,
-    params: Adw.SwitchRow.ConstructorProperties = {},
+    params: Partial<Adw.SwitchRow.ConstructorProps> = {},
   ) {
+    const settingsSchemaKey = this.#settings.settings_schema.get_key(schemaKey);
     const row = new Adw.SwitchRow({
       ...params,
-      title: this.#settings.settings_schema.get_key(schemaKey).get_summary(),
+      title: settingsSchemaKey.get_summary() ?? undefined,
     });
 
     this.#settings.bind(schemaKey, row, "active", Gio.SettingsBindFlags.DEFAULT);
@@ -357,8 +358,9 @@ export default class extends ExtensionPreferences {
     upper: number,
     step: number,
   ) {
+    const settingsSchemaKey = this.#settings.settings_schema.get_key(schemaKey);
     const row = new Adw.SpinRow({
-      title: this.#settings.settings_schema.get_key(schemaKey).get_summary(),
+      title: settingsSchemaKey.get_summary() ?? undefined,
     });
     row.adjustment.lower = lower;
     row.adjustment.upper = upper;
@@ -370,8 +372,9 @@ export default class extends ExtensionPreferences {
   }
 
   #entryRow(schemaKey: StringSettingKey) {
+    const settingsSchemaKey = this.#settings.settings_schema.get_key(schemaKey);
     const row = new Adw.EntryRow({
-      title: this.#settings.settings_schema.get_key(schemaKey).get_summary(),
+      title: settingsSchemaKey.get_summary() ?? undefined,
       editable: true,
       show_apply_button: true,
     });
@@ -410,7 +413,7 @@ export default class extends ExtensionPreferences {
     }
 
     row.connect("notify::selected", () => {
-      this.#settings.set_string("theme", entries.get_string(row.selected));
+      this.#settings.set_string("theme", entries.get_string(row.selected)!);
     });
 
     const chid = this.#settings.connect("changed::theme", () => {
@@ -434,7 +437,7 @@ interface KeyPressEvent {
   modifier: Gdk.ModifierType;
 }
 
-interface ShortcutParams extends Adw.ActionRow.ConstructorProperties {
+interface ShortcutParams extends Partial<Adw.ActionRow.ConstructorProps> {
   settings: ExtensionSettings;
   schemaKey: SettingKey;
   window: Gtk.Window;
@@ -458,7 +461,8 @@ const ShortcutRow = GObject.registerClass({
     super({
       ...config,
       activatable: true,
-      title: settings.settings_schema.get_key(schemaKey).get_summary(),
+      title: settings.settings_schema
+        .get_key(schemaKey).get_summary() ?? undefined,
     });
 
     this.#gc = new GarbageCollection();

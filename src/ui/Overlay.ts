@@ -15,7 +15,7 @@ const TABLE_WIDTH = 320;
 
 type TextButton = ReturnType<typeof TextButton.new_themed>;
 
-export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
+export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
   theme: Theme;
 
   /**

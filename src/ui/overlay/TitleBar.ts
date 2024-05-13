@@ -4,7 +4,7 @@ import St from "gi://St";
 
 import { Theme } from "../../types/theme.js"
 
-export interface TitleBarParams extends St.Widget.ConstructorProperties {
+export interface TitleBarParams extends Partial<St.Widget.ConstructorProps> {
   theme: Theme;
   title: string;
 }

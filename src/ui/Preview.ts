@@ -5,7 +5,7 @@ import { Rectangle } from "../types/grid.js";
 import { Theme } from "../types/theme.js";
 
 export interface PreviewParams extends Omit<
-  St.BoxLayout.ConstructorProperties,
+  Partial<St.BoxLayout.ConstructorProps>,
   "visible"
 > {
   theme: Theme;

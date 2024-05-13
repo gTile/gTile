@@ -3,7 +3,7 @@ import St from "gi://St";
 
 import { Theme } from "../../types/theme.js";
 
-export interface ButtonParams extends St.Button.ConstructorProperties {
+export interface ButtonParams extends Partial<St.Button.ConstructorProps> {
   active?: boolean;
 }
 
@@ -45,19 +45,16 @@ export default GObject.registerClass({
   /**
    * @returns A generic text button with a customized style.
    */
-  static new_styled(params: StyledButtonParams) {
-    return new this(params);
-  }
-
-  protected constructor({ active = false, ...params }: ButtonParams) {
-    super({
+  static new_styled({ active = false, ...params }: StyledButtonParams) {
+    const instance = new this({
       reactive: true,
       can_focus: true,
       track_hover: true,
       ...params,
     });
+    instance.active = active;
 
-    this.active = active;
+    return instance;
   }
 
   /**

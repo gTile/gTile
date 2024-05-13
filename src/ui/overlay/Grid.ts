@@ -8,7 +8,7 @@ import TextButton from "./TextButton.js";
 
 type TextButton = ReturnType<typeof TextButton.new_styled>;
 
-export interface GridParams extends St.Widget.ConstructorProperties {
+export interface GridParams extends Partial<St.Widget.ConstructorProps> {
   theme: Theme
 
   /**

@@ -83,7 +83,7 @@ export type StringSettingKey =
  * Key names in the GSettings schema that reference keyboard shortcuts which are
  * always intercepted for as long as the extension is enabled.
  */
-export type KeyBindingGlobalSettingKey = "show-toggle-tiling"
+export type KeyBindingGlobalSettingKey = "show-toggle-tiling";
 
 /**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
@@ -125,7 +125,7 @@ export type KeyBindingGroupAutotileSettingKey =
   | "autotile-7"
   | "autotile-8"
   | "autotile-9"
-  | "autotile-10"
+  | "autotile-10";
 
 /**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
@@ -149,7 +149,6 @@ export type KeyBindingGroupActionSettingKey =
   | "action-move-down"
   | "action-move-left"
   | "action-move-next-monitor";
-
 
 /**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
@@ -213,7 +212,7 @@ type ExtendedSettings<P extends string> = Gio.Settings & {
   // not prevent the user from providing any string as sigName and thus does not
   // guarantee type safety.
   connect(sigName: `changed::${P}`, callback: (...args: any[]) => void): number;
-}
+};
 
 /**
  * An extension agnostic type-safe variant of {@link Gio.Settings}.
@@ -226,15 +225,15 @@ export interface NamedSettings<
   bind(
     key: B | N | S,
     object: GObject.Object,
-    property: string | null,
+    property: string,
     flags: Gio.SettingsBindFlags
   ): void;
   get_boolean(key: B): boolean;
-  set_boolean(key: B, value: boolean): boolean
+  set_boolean(key: B, value: boolean): boolean;
   get_int(key: N): number;
-  set_int(key: N, value: number): boolean
-  get_string(key: S): string | null;
-  set_string(key: S, value: string | null): boolean
+  set_int(key: N, value: number): boolean;
+  get_string(key: S): string;
+  set_string(key: S, value: string): boolean;
 }
 
 /**

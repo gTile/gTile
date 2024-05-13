@@ -3,11 +3,11 @@ import St from "gi://St";
 
 import { Theme } from "../../types/theme.js";
 
-export interface ThemedContainerParams extends St.Bin.ConstructorProperties {
+export interface ThemedContainerParams extends Partial<St.Bin.ConstructorProps> {
   theme: Theme;
 }
 
-export interface StyledContainerParams extends St.Bin.ConstructorProperties {
+export interface StyledContainerParams extends Partial<St.Bin.ConstructorProps> {
   style_class: string;
 }
 
@@ -31,15 +31,11 @@ export default GObject.registerClass({
    * @returns A generic container with a customized style.
    */
   static new_styled(params: StyledContainerParams) {
-    return new this(params);
-  }
-
-  private constructor(params: St.Bin.ConstructorProperties) {
-    super({
+    return new this({
       reactive: true,
       can_focus: true,
       track_hover: true,
-      ...params
+      ...params,
     });
   }
 })
