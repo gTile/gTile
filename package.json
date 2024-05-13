@@ -22,7 +22,7 @@
     "@girs/shell-13": "^13.0.0-3.2.7",
     "@girs/st-13": "^13.0.0-3.2.7",
     "ava": "^6.1.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "ava": {
     "typescript": {
