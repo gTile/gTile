@@ -224,6 +224,16 @@ export default class App implements GarbageCollector {
         this.#hotkeyManager.setListeningGroups(action.visible
           ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
           : this.#globalKeyBindingGroups);
+
+        if (!this.#settings.get_boolean("auto-snap-window")) return;
+        const focusedWindow = this.#desktopManager.focusedWindow;
+        if (action.visible && focusedWindow) {
+          const om = this.#overlayManager;
+          om.setSelection(
+            this.#desktopManager.windowToSelection(focusedWindow, om.gridSize),
+            om.activeMonitor ?? focusedWindow.get_monitor()
+          );
+        }
         return;
     }
 

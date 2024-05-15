@@ -5,5 +5,5 @@
   "shell-version": ["45", "46"],
   "url": "https://github.com/gTile",
   "settings-schema": "org.gnome.shell.extensions.gtile",
-  "version": 59
+  "version": 60
 }
