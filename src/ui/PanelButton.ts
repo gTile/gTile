@@ -3,7 +3,7 @@ import St from "gi://St";
 
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 
-interface PanelButtonParams extends GObject.Object.ConstructorProperties {
+interface PanelButtonParams extends Partial<GObject.Object.ConstructorProps> {
   theme: string;
 }
 

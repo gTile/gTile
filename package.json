@@ -7,31 +7,44 @@
   "author": "Markus Schanz <markus@schanz.id>",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@girs/adw-1": "^1.4.0-3.2.6",
-    "@girs/clutter-13": "^13.0.0-3.2.7",
-    "@girs/gdk-4.0": "^4.0.0-3.2.7",
-    "@girs/gio-2.0": "^2.78.0-3.2.7",
-    "@girs/glib-2.0": "^2.78.0-3.2.7",
-    "@girs/gnome-shell": "^45.0.0-beta9",
-    "@girs/gobject-2.0": "^2.78.0-3.2.7",
-    "@girs/gtk-4.0": "^4.12.3-3.2.6",
-    "@girs/meta-13": "^13.0.0-3.2.7",
-    "@girs/mtk-13": "^13.0.0-3.2.7",
-    "@girs/pango-1.0": "^1.51.0-3.2.7",
-    "@girs/shell-13": "^13.0.0-3.2.7",
-    "@girs/st-13": "^13.0.0-3.2.7",
-    "typescript": "^5.3.3"
+    "@ava/typescript": "^5.0.0",
+    "@girs/adw-1": "^1.5.0-4.0.0-beta.5",
+    "@girs/clutter-14": "^14.0.0-4.0.0-beta.5",
+    "@girs/gdk-4.0": "^4.0.0-4.0.0-beta.5",
+    "@girs/gio-2.0": "^2.80.0-4.0.0-beta.5",
+    "@girs/glib-2.0": "^2.80.0-4.0.0-beta.5",
+    "@girs/gnome-shell": "^46.0.0-beta9",
+    "@girs/gobject-2.0": "^2.80.0-4.0.0-beta.5",
+    "@girs/gtk-4.0": "^4.14.3-4.0.0-beta.5",
+    "@girs/meta-14": "^14.0.0-4.0.0-beta.5",
+    "@girs/mtk-14": "^14.0.0-4.0.0-beta.5",
+    "@girs/pango-1.0": "^1.52.2-4.0.0-beta.5",
+    "@girs/shell-14": "^14.0.0-4.0.0-beta.5",
+    "@girs/st-14": "^14.0.0-4.0.0-beta.5",
+    "ava": "^6.1.3",
+    "install": "^0.13.0",
+    "npm": "^10.7.0",
+    "typescript": "^5.4.5"
+  },
+  "ava": {
+    "typescript": {
+      "rewritePaths": {
+        "src/": "out/src/",
+        "test/": "out/test/"
+      },
+      "compile": false
+    }
   },
   "scripts": {
-    "clean": "git clean -qxf ':/dist/*.js' gtile.dist.tgz",
-    "postclean": "find dist -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} +",
+    "clean": "git clean -qxf ':/dist' ':/out' gtile.dist.tgz",
     "prebuild": "$npm_execpath run clean",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.prod.json",
     "postbuild": "rm -rf dist/types",
     "prebuild:dist": "$npm_execpath run build",
     "build:dist": "tar -czf gtile.dist.tgz -C dist .",
     "install:extension": "gnome-extensions install -f gtile.dist.tgz",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "pretest": "tsc",
+    "test": "ava",
     "check": "tsc --noEmit"
   }
 }

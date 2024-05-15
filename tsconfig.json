@@ -1,4 +1,9 @@
 {
+  "include": [
+    "*.d.ts",
+    "src",
+    "test"
+  ],
   "compilerOptions": {
     /*
      * Set the JavaScript language version for emitted JavaScript and include compatible library declarations.
@@ -28,17 +33,13 @@
     "module": "Node16",
 
     /**
-     * Specify the root folder within your source files.
-     */
-    "rootDir": "./src",
-
-    /**
      * Specify how TypeScript looks up a file from a given module specifier.
      */
     "moduleResolution": "Node16",
 
     /* Emit */
-    "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
+    "sourceMap": true,                                   /* Create source map files for emitted JavaScript files. */
+    "outDir": "./out",                                   /* Specify an output folder for all emitted files. */
     "removeComments": true,                              /* Disable emitting comments. */
 
     /* Interop Constraints */

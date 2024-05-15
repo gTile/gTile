@@ -8,7 +8,7 @@ const ROW_HEIGHT = 36;
 const MAX_BUTTONS_PER_ROW = 4;
 
 export interface ButtonBarParams extends Omit<
-  St.Widget.ConstructorProperties,
+  Partial<St.Widget.ConstructorProps>,
   "height"
 > {
   /**
@@ -37,7 +37,7 @@ export interface StyledButtonBarParams extends ButtonBarParams {
 export default GObject.registerClass({
   GTypeName: "GTileOverlayButtonBar"
 }, class extends St.Widget {
-  #rowHeight: number;
+  #rowHeight: number = this.height ?? ROW_HEIGHT;
 
   /**
    * @returns A generic button container with the default style.
@@ -49,15 +49,8 @@ export default GObject.registerClass({
   /**
    * @returns A button container with a customized style.
    */
-  static new_styled(params: StyledButtonBarParams) {
-    return new this(params);
-  }
-
-  private constructor({
-    height = ROW_HEIGHT,
-    ...params
-  }: St.Widget.ConstructorProperties) {
-    super({
+  static new_styled({ height = ROW_HEIGHT, ...params }: StyledButtonBarParams) {
+    return new this({
       reactive: true,
       can_focus: true,
       track_hover: true,
@@ -65,8 +58,6 @@ export default GObject.registerClass({
       layout_manager: new Clutter.GridLayout({ column_homogeneous: true }),
       ...params,
     });
-
-    this.#rowHeight = height ?? ROW_HEIGHT;
   }
 
   /**

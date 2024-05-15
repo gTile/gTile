@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "include": [
+    "*.d.ts",
+    "src"
+  ],
+  "compilerOptions": {
+    "sourceMap": false,
+    "outDir": "./dist"
+  }
+}
