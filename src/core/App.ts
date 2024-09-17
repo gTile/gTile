@@ -56,6 +56,7 @@ export default class App implements GarbageCollector {
   #desktopManager: DesktopManager;
   #overlayManager: OverlayManager;
   #panelIcon: InstanceType<typeof PanelButton>;
+  #listeners: GarbageCollection;
 
   /**
    * Creates a new singleton instance.
@@ -88,6 +89,7 @@ export default class App implements GarbageCollector {
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
     this.#gridSpecs = AutoTileLayouts(this.#settings);
+    this.#listeners = new GarbageCollection();
 
     this.#globalKeyBindingGroups = Object
       .entries(SettingKeyToKeyBindingGroupLUT)
@@ -103,9 +105,10 @@ export default class App implements GarbageCollector {
     });
     this.#gc.defer(() => this.#hotkeyManager.release());
 
+    const display = Shell.Global.get().display;
     this.#desktopManager = new DesktopManager({
       shell: Shell.Global.get(),
-      display: Shell.Global.get().display,
+      display: display,
       layoutManager: Main.layoutManager,
       monitorManager: Shell.Global.get().backend.get_monitor_manager(),
       workspaceManager: Shell.Global.get().workspace_manager,
@@ -135,6 +138,28 @@ export default class App implements GarbageCollector {
       () => this.#onUserAction({ type: Action.TOGGLE }));
     this.#settings.bind("show-icon", this.#panelIcon, "visible",
       Gio.SettingsBindFlags.GET);
+
+    const listeners = [
+      display.connect("window-entered-monitor", (display, _, window) => {
+        listeners.push(
+          window.connect("shown", (window) => {
+            this.#desktopManager.autotile(
+              this.#gridSpecs.main, 
+              display.get_current_monitor(),
+            );
+          })
+        );
+      }),
+      display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor())),
+      display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor(), window)),
+      display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor())),
+    ];
+
+    for (let index = 0; index < listeners.length; index++) {
+      const listener = listeners[index];
+      this.#listeners.defer(() => display.disconnect(listener));
+    }
+
     const chid = this.#settings.connect("changed",
       (_, key: SettingKey) => this.#onSettingsChanged(key));
     this.#gc.defer(() => this.#settings.disconnect(chid));
@@ -144,6 +169,7 @@ export default class App implements GarbageCollector {
   }
 
   release() {
+    this.#listeners.release();
     this.#gc.release();
     this.#lastResizePreset.release();
     App.#instance = undefined as any;
