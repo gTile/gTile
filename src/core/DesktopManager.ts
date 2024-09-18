@@ -359,7 +359,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param monitorIdx The {@link Monitor.index} to apply the grid spec to.
    */
   autotile(spec: GridSpec, monitorIdx: number, excludedWindow?: Meta.Window) {
-    const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
 
@@ -370,46 +369,33 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         TitleBlacklist.some(p => p.test(win.title ?? "")) ||
         win.get_id() === excludedWindow?.get_id()
       ));
-    const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
-      x: canvas.x + canvas.width * rect.x,
-      y: canvas.y + canvas.height * rect.y,
-      width: canvas.width * rect.width,
-      height: canvas.height * rect.height,
-    });
 
-    // Place focused window (if any) in the largest dedicated area
-    const focusedIdx = 0;
-    if (focusedIdx && dedicated.length > 0) {
-      const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
-        rect.width * rect.height > accuArea
-          ? [idx, rect.width * rect.height]
-          : [accuIdx, accuArea],
-        [-1, 0]);
+    let availableArea = null;
+    for (let index = 0; index < windows.length; index++) {
+      const window = windows[index];
+      const windowArea: Rectangle = availableArea === null ? {
+        x: workArea.x,
+        y: workArea.y,
+        width: workArea.width,
+        height: workArea.height,
+      } : availableArea;
 
-      const projectedArea = project(dedicated[largestIdx], workArea);
-      this.#fit(windows[focusedIdx], projectedArea);
-
-      windows.splice(focusedIdx, 1);
-      dedicated.splice(largestIdx, 1);
-    }
-
-    // Place windows in regular cells
-    for (let i = 0; i < dedicated.length && i < windows.length; ++i) {
-      this.#fit(windows[i], project(dedicated[i], workArea));
-    }
-
-    // Fit remaining windows in dynamic cells
-    windows.splice(0, dedicated.length);
-    for (let i = 0; i < dynamic.length; i++) {
-      const mustFitAtLeastN = Math.floor(windows.length / dynamic.length);
-      const mustTakeOverflowWindow = i < (windows.length % dynamic.length);
-      const n = mustFitAtLeastN + (mustTakeOverflowWindow ? 1 : 0);
-
-      let j = i;
-      for (const area of this.#splitN(dynamic[i], n)) {
-        this.#fit(windows[j], project(area, workArea));
-        j += dynamic.length;
+      if (index < windows.length - 1) {
+        availableArea = {...windowArea};
+        if (index % 2 == 0) {
+          const diff = windowArea.width / 2;
+          windowArea.width = diff;
+          availableArea.x = availableArea.x + diff;
+          availableArea.width = diff;
+        } else {
+          const diff = windowArea.height / 2;
+          windowArea.height = diff;
+          availableArea.y = availableArea.y + diff;
+          availableArea.height = diff;
+        }
       }
+      
+      this.#fit(window, windowArea)
     }
   }
 
