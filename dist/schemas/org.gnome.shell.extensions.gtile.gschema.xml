@@ -485,10 +485,6 @@
       <default>false</default>
       <summary>Show grid lines when changing grid size</summary>
     </key>
-    <key type="b" name="auto-snap-window">
-      <default>false</default>
-      <summary>Suggest "snap-to-grid" layout for focused window when opening gTile</summary>
-    </key>
     <key type="b" name="global-auto-tiling">
       <default>false</default>
       <summary>Allow auto tiling shortcut usage when the gTile UI is not visible</summary>

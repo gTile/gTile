@@ -1,10 +1,5 @@
 CHANGE LOG
 ----------
-### 60
-- New setting "auto-snap-window"
-  - When enabled, gTile automatically offers the focused window to be aligned to the current grid in a "snap-to-grid" fashion.
-- Maintenance: Fixed typo in settings (#377), add functional tests, and upgrade dependencies
-
 ### 59
 - Add support for Gnome 46 (extension is compatible without further code changes)
 
