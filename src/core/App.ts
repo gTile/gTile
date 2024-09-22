@@ -10,6 +10,7 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
+import { Node } from "../types/tree.js";
 import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
@@ -29,6 +30,7 @@ import HotkeyManager, {
 } from "./HotkeyManager.js";
 import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
+import { Container, Tile } from "../util/tile.js";
 
 type ResizePresetAddr = [index: number, subindex: number];
 type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
@@ -56,7 +58,7 @@ export default class App implements GarbageCollector {
   #desktopManager: DesktopManager;
   #overlayManager: OverlayManager;
   #panelIcon: InstanceType<typeof PanelButton>;
-  #listeners: GarbageCollection;
+  #tree: Node<Tile | Container>;
 
   /**
    * Creates a new singleton instance.
@@ -89,7 +91,7 @@ export default class App implements GarbageCollector {
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
     this.#gridSpecs = AutoTileLayouts(this.#settings);
-    this.#listeners = new GarbageCollection();
+    this.#tree = {data: new Container("Horizontal") }
 
     this.#globalKeyBindingGroups = Object
       .entries(SettingKeyToKeyBindingGroupLUT)
@@ -114,6 +116,7 @@ export default class App implements GarbageCollector {
       workspaceManager: Shell.Global.get().workspace_manager,
       userPreferences: new UserPreferences({ settings: this.#settings }),
     });
+    this.#desktopManager.autotile(this.#tree, display.get_current_monitor())
     this.#gc.defer(() => this.#desktopManager.release());
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
@@ -144,20 +147,20 @@ export default class App implements GarbageCollector {
         listeners.push(
           window.connect("shown", (window) => {
             this.#desktopManager.autotile(
-              this.#gridSpecs.main, 
+              this.#tree, 
               display.get_current_monitor(),
             );
           })
         );
       }),
-      display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor())),
-      display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor(), window)),
-      display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#gridSpecs.main, display.get_current_monitor())),
+      display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor())),
+      display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor(), window)),
+      display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor())),
     ];
 
     for (let index = 0; index < listeners.length; index++) {
       const listener = listeners[index];
-      this.#listeners.defer(() => display.disconnect(listener));
+      this.#gc.defer(() => display.disconnect(listener));
     }
 
     const chid = this.#settings.connect("changed",
@@ -169,7 +172,6 @@ export default class App implements GarbageCollector {
   }
 
   release() {
-    this.#listeners.release();
     this.#gc.release();
     this.#lastResizePreset.release();
     App.#instance = undefined as any;
@@ -334,12 +336,12 @@ export default class App implements GarbageCollector {
         return;
       case Action.AUTOTILE:
         if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(this.#gridSpecs[action.layout], monitorIdx);
+          dm.autotile(this.#tree, monitorIdx);
         } else if (action.layout === "cols" && action.cols) {
           const gridSpec = this.#gridSpecs[action.layout][action.cols];
 
           if (gridSpec) {
-            dm.autotile(gridSpec, monitorIdx);
+            dm.autotile(this.#tree, monitorIdx);
           }
         }
         return;

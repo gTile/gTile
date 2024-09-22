@@ -21,6 +21,7 @@ import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import { adjust, pan } from "../util/grid.js";
 import { GridSpec } from "../util/parser.js";
 import { UserPreferencesProvider } from "./UserPreferences.js";
+import { Container, Tile } from "../util/tile.js";
 
 // splits computed gridspec cell areas in non-dynamic and dynamic cells
 type GridSpecAreas = [dedicated: Rectangle[], dynamic: Rectangle[]];
@@ -355,13 +356,14 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * the grid, if any. Dynamic cells share their space between the windows that
    * occupy them.
    *
-   * @param spec The {@link GridSpec} to be applied.
-   * @param monitorIdx The {@link Monitor.index} to apply the grid spec to.
+   * @param tree The {@link Node<Tile | Container>} to be applied.
+   * @param monitorIdx The {@link Monitor.index} to apply the grid tree to.
    */
-  autotile(spec: GridSpec, monitorIdx: number, excludedWindow?: Meta.Window) {
+  autotile(tree: Node<Tile | Container>, monitorIdx: number, excludedWindow?: Meta.Window) {
     const workArea = this.#workArea(monitorIdx);
-    const windows = this.#workspaceManager.get_active_workspace().list_windows()
-
+    const windows = this.#workspaceManager
+      .get_active_workspace()
+      .list_windows()
       .filter(win => !(
         win.minimized ||
         win.get_monitor() !== monitorIdx ||
@@ -369,34 +371,42 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         TitleBlacklist.some(p => p.test(win.title ?? "")) ||
         win.get_id() === excludedWindow?.get_id()
       ));
+    const treeIds = this.#findIds(tree);
 
-    let availableArea = null;
-    for (let index = 0; index < windows.length; index++) {
-      const window = windows[index];
-      const windowArea: Rectangle = availableArea === null ? {
-        x: workArea.x,
-        y: workArea.y,
-        width: workArea.width,
-        height: workArea.height,
-      } : availableArea;
+    // tree not initiated
+    if (windows.length !== treeIds.length) {
+      tree = { data: new Container("Horizontal") };
+      let root = tree;
+      for (let index = 0; index < windows.length; index++) {
+        const window = windows[index];
 
-      if (index < windows.length - 1) {
-        availableArea = {...windowArea};
-        if (index % 2 == 0) {
-          const diff = windowArea.width / 2;
-          windowArea.width = diff;
-          availableArea.x = availableArea.x + diff;
-          availableArea.width = diff;
+        if (root.data instanceof Container) {
+          if (!root.right) {
+            root.data = new Tile(window.get_id());
+          } else {
+            root = root.right;
+          }
         } else {
-          const diff = windowArea.height / 2;
-          windowArea.height = diff;
-          availableArea.y = availableArea.y + diff;
-          availableArea.height = diff;
+          root.left = { data: new Tile(root.data.id) };
+          root.right = { data: new Tile(window.get_id()) };
+          root.data = new Container(index % 2 == 0 ? "Horizontal" : "Vertical");
+          root = root.right;
         }
       }
-      
-      this.#fit(window, windowArea)
     }
+
+    this.#fitTree(tree, workArea, windows);
+  }
+
+  #findIds(tree: Node<Tile | Container>): number[] {
+    const result = [];
+    if (tree.data instanceof Tile) {
+      result.push(tree.data.id);
+    } else {
+      if (tree.left) result.push(...this.#findIds(tree.left));
+      if (tree.right) result.push(...this.#findIds(tree.right));
+    }
+    return result;
   }
 
   /**
@@ -421,7 +431,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       targetArea = this.selectionToArea(asSelection, gridSize, monitorIdx),
       frame = this.#frameRect(target),
       newX = (dir === "north" || dir === "south") ? frame.x : targetArea.x,
-      newY = (dir === "east"  || dir === "west")  ? frame.y : targetArea.y;
+      newY = (dir === "east" || dir === "west") ? frame.y : targetArea.y;
 
     this.#moveResize(target, newX, newY);
   }
@@ -606,6 +616,69 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     };
   }
 
+  #fitTree(tree: Node<Tile | Container>, workArea: Rectangle, windows: Meta.Window[]) {
+    if (!tree.data && !tree.left && !tree.right) {
+      // Node has no window. Only possible on empty desktop.
+      return;
+    }
+
+    if (tree.data instanceof Tile) {
+      // Only possible on desktop with one window.
+      this.#fit(windows[0], workArea);
+      return;
+    }
+
+    if (tree.data instanceof Container && tree.left && tree.right) {
+      const leftArea: Rectangle = {
+        x: workArea.x,
+        y: workArea.y,
+        width: workArea.width,
+        height: workArea.height,
+      };
+      const rightArea: Rectangle = {
+        x: workArea.x,
+        y: workArea.y,
+        width: workArea.width,
+        height: workArea.height,
+      };
+      const dimension = tree.data.split === "Horizontal" ? "height" : "width";
+      const position = tree.data.split === "Horizontal" ? "y" : "x";
+
+      if (tree.data.constraint) {
+        const left = tree.data.constraint;
+        leftArea[dimension] = left;
+        rightArea[dimension] = workArea[dimension] - left;
+        rightArea[position] = rightArea[position] + left;
+      } else {
+        const half = workArea[dimension] / 2;
+        leftArea[dimension] = half;
+        rightArea[dimension] = half;
+        rightArea[position] = rightArea[position] + half;
+      }
+
+      if (tree.left.data instanceof Tile) {
+        const leftId = tree.left.data.id;
+        const leftWindow = windows.find(window => window.get_id() === leftId)!;
+        this.#fit(leftWindow, leftArea);
+      } else {
+        this.#fitTree(tree.left, leftArea, windows);
+      }
+
+      if (tree.right.data instanceof Tile) {
+        const rightId = tree.right.data.id;
+        const rightWindow = windows.find(window => window.get_id() === rightId)!;
+        this.#fit(rightWindow, rightArea);
+      } else {
+        this.#fitTree(tree.right, rightArea, windows);
+      }
+
+      return;
+    }
+
+    console.error(tree);
+    throw new Error("Not handled", { cause: "" });
+  }
+
   #gridSpecToAreas(spec: GridSpec, x = 0, y = 0, w = 1, h = 1): GridSpecAreas {
     const regularCells: Rectangle[] = [];
     const dynamicCells: Rectangle[] = [];
@@ -648,8 +721,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         height: axis === "y" ? height / n : height,
       });
 
-      if(axis === "x") x += width / n;
-      if(axis === "y") y += height / n;
+      if (axis === "x") x += width / n;
+      if (axis === "y") y += height / n;
     }
 
     return result;
@@ -694,10 +767,10 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     return right!;
   }
 
-  #isWestOf (r: Rectangle, o: Rectangle) { return o.x >= (r.x + r.width); }
-  #isEastOf (r: Rectangle, o: Rectangle) { return this.#isWestOf(o, r); }
-  #isNorthOf (r: Rectangle, o: Rectangle) { return o.y >= (r.y + r.height); }
-  #isSouthOf (r: Rectangle, o: Rectangle) { return this.#isNorthOf(o, r); }
+  #isWestOf(r: Rectangle, o: Rectangle) { return o.x >= (r.x + r.width); }
+  #isEastOf(r: Rectangle, o: Rectangle) { return this.#isWestOf(o, r); }
+  #isNorthOf(r: Rectangle, o: Rectangle) { return o.y >= (r.y + r.height); }
+  #isSouthOf(r: Rectangle, o: Rectangle) { return this.#isNorthOf(o, r); }
 
   #noCollide(bounds: MRect, collider: MRect, dir: CardinalDirection): MRect {
     // @ts-ignore - Mtk.Rectangle has an incorrect constructor signature
