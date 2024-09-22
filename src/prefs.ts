@@ -24,7 +24,7 @@ export default class extends ExtensionPreferences {
   #settings!: ExtensionSettings;
   #window!: Adw.PreferencesWindow;
 
-  fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+  async fillPreferencesWindow(window: Adw.PreferencesWindow): Promise<void> {
     this.#gc = new GarbageCollection();
     this.#settings = this.getSettings();
     this.#window = window;
@@ -75,7 +75,6 @@ export default class extends ExtensionPreferences {
       group.add(this.#switchRow("follow-cursor"));
       group.add(this.#switchRow("show-icon"));
       group.add(this.#switchRow("show-grid-lines"));
-      group.add(this.#switchRow("auto-snap-window"));
       group.add(this.#spinRow("max-timeout", 500, 10000, 100));
       group.add(this.#spinRow("selection-timeout", 0, 5000, 50));
       group.add(this.#themeComboRow());
