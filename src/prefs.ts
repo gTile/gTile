@@ -24,7 +24,7 @@ export default class extends ExtensionPreferences {
   #settings!: ExtensionSettings;
   #window!: Adw.PreferencesWindow;
 
-  fillPreferencesWindow(window: Adw.PreferencesWindow): void {
+  async fillPreferencesWindow(window: Adw.PreferencesWindow): Promise<void> {
     this.#gc = new GarbageCollection();
     this.#settings = this.getSettings();
     this.#window = window;
