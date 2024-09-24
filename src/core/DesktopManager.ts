@@ -16,7 +16,7 @@ import {
 } from "../types/grid.js";
 import { CardinalDirection } from "../types/hotkeys.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
-import { Node } from "../types/tree.js";
+import { Node } from "../util/tree.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import { adjust, pan } from "../util/grid.js";
 import { GridSpec } from "../util/parser.js";
@@ -356,10 +356,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * the grid, if any. Dynamic cells share their space between the windows that
    * occupy them.
    *
-   * @param tree The {@link Node<Tile | Container>} to be applied.
-   * @param monitorIdx The {@link Monitor.index} to apply the grid tree to.
+   * @param allTree The {@link Node<Tile | Container>} to be applied.
    */
-  autotile(tree: Node<Tile | Container>, monitorIdx: number, excludedWindow?: Meta.Window) {
+  autotile(allTree: Node<Tile | Container>[][], excludedWindow?: Meta.Window) {
+    const workspaceIdx = this.#workspaceManager.get_active_workspace_index();
+    const monitorIdx = this.#display.get_current_monitor();
+    let tree = allTree[workspaceIdx][monitorIdx];
     const workArea = this.#workArea(monitorIdx);
     const windows = this.#workspaceManager
       .get_active_workspace()
@@ -375,7 +377,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     // tree not initiated
     if (windows.length !== treeIds.length) {
-      tree = { data: new Container("Horizontal") };
+      tree = new Node(new Container("Horizontal"));
       let root = tree;
       for (let index = 0; index < windows.length; index++) {
         const window = windows[index];
@@ -387,8 +389,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
             root = root.right;
           }
         } else {
-          root.left = { data: new Tile(root.data.id) };
-          root.right = { data: new Tile(window.get_id()) };
+          root.left = new Node(new Tile(root.data.id));
+          root.right = new Node(new Tile(window.get_id()));
           root.data = new Container(index % 2 == 0 ? "Horizontal" : "Vertical");
           root = root.right;
         }
@@ -729,7 +731,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #tree(frame: MRect, bounds: MRect, collisionObjects: MRect[]): Node<MRect> {
-    const self: Node<MRect> = { data: bounds };
+    const self: Node<MRect> = new Node(bounds);
     if (collisionObjects.length === 0) {
       return self;
     }

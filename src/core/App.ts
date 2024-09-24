@@ -10,7 +10,7 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
-import { Node } from "../types/tree.js";
+import { Node } from "../util/tree.js";
 import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
@@ -58,7 +58,8 @@ export default class App implements GarbageCollector {
   #desktopManager: DesktopManager;
   #overlayManager: OverlayManager;
   #panelIcon: InstanceType<typeof PanelButton>;
-  #tree: Node<Tile | Container>;
+  // this.#tree[workspace][monitor]
+  #tree: Node<Tile | Container>[][];
 
   /**
    * Creates a new singleton instance.
@@ -91,7 +92,6 @@ export default class App implements GarbageCollector {
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
     this.#gridSpecs = AutoTileLayouts(this.#settings);
-    this.#tree = {data: new Container("Horizontal") }
 
     this.#globalKeyBindingGroups = Object
       .entries(SettingKeyToKeyBindingGroupLUT)
@@ -108,16 +108,20 @@ export default class App implements GarbageCollector {
     this.#gc.defer(() => this.#hotkeyManager.release());
 
     const display = Shell.Global.get().display;
+    const workspaceManager = Shell.Global.get().workspace_manager;
     this.#desktopManager = new DesktopManager({
       shell: Shell.Global.get(),
       display: display,
       layoutManager: Main.layoutManager,
       monitorManager: Shell.Global.get().backend.get_monitor_manager(),
-      workspaceManager: Shell.Global.get().workspace_manager,
+      workspaceManager: workspaceManager,
       userPreferences: new UserPreferences({ settings: this.#settings }),
     });
-    this.#desktopManager.autotile(this.#tree, display.get_current_monitor())
     this.#gc.defer(() => this.#desktopManager.release());
+    this.#tree = [...Array(workspaceManager.nWorkspaces)]
+      .map(_ => Array(display.get_n_monitors())
+        .fill(new Node<Tile | Container>(new Container("Horizontal"))));
+    this.#desktopManager.autotile(this.#tree);
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
@@ -142,29 +146,26 @@ export default class App implements GarbageCollector {
     this.#settings.bind("show-icon", this.#panelIcon, "visible",
       Gio.SettingsBindFlags.GET);
 
-    const listeners = [
-      display.connect("window-entered-monitor", (display, _, window) => {
-        listeners.push(
-          window.connect("shown", (window) => {
-            this.#desktopManager.autotile(
-              this.#tree, 
-              display.get_current_monitor(),
-            );
-          })
+    let windowShown: number;
+    const windowEntered = display.connect("window-entered-monitor",
+      (display, _, window) => {
+        windowShown = window.connect("shown",
+          (window) => {
+            this.#desktopManager.autotile(this.#tree);
+          }
         );
-      }),
-      display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor())),
-      display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor(), window)),
-      display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#tree, display.get_current_monitor())),
-    ];
+      });
+    const windowLeft = display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#tree));
+    const windowGrabbed = display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#tree, window));
+    const windowReleased = display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#tree));
 
-    for (let index = 0; index < listeners.length; index++) {
-      const listener = listeners[index];
-      this.#gc.defer(() => display.disconnect(listener));
-    }
+    this.#gc.defer(() => display.disconnect(windowShown));
+    this.#gc.defer(() => display.disconnect(windowEntered));
+    this.#gc.defer(() => display.disconnect(windowLeft));
+    this.#gc.defer(() => display.disconnect(windowGrabbed));
+    this.#gc.defer(() => display.disconnect(windowReleased));
 
-    const chid = this.#settings.connect("changed",
-      (_, key: SettingKey) => this.#onSettingsChanged(key));
+    const chid = this.#settings.connect("changed", (_, key: SettingKey) => this.#onSettingsChanged(key));
     this.#gc.defer(() => this.#settings.disconnect(chid));
     this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
@@ -336,12 +337,12 @@ export default class App implements GarbageCollector {
         return;
       case Action.AUTOTILE:
         if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(this.#tree, monitorIdx);
+          dm.autotile(this.#tree);
         } else if (action.layout === "cols" && action.cols) {
           const gridSpec = this.#gridSpecs[action.layout][action.cols];
 
           if (gridSpec) {
-            dm.autotile(this.#tree, monitorIdx);
+            dm.autotile(this.#tree);
           }
         }
         return;
