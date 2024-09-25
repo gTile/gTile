@@ -39,7 +39,7 @@ type StartsWith<S extends string, Prefix extends string> =
 type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
 
 /**
- * Represents the gTile extension.
+ * Represents the HyprWM extension.
  *
  * The class acts as top-level orchestrator. It is responsible to
  * (1) create required instances, e.g. for UI management and keyboard shortcuts
@@ -87,7 +87,7 @@ export default class App implements GarbageCollector {
       toLowerCase().
       replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
 
-    this.#theme = `gtile-${mangledThemeName}`;
+    this.#theme = `hyprwm-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
     this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
     this.#settings = extension.settings;
@@ -251,7 +251,7 @@ export default class App implements GarbageCollector {
   }
 
   #onHotkeyGroupToggle(key: keyof typeof SettingKeyToKeyBindingGroupLUT) {
-    // new bindings apply when the gTile overlay is toggled the next time
+    // new bindings apply when the HyprWM overlay is toggled the next time
     if (this.#settings.get_boolean(key)) {
       this.#globalKeyBindingGroups |= SettingKeyToKeyBindingGroupLUT[key];
     } else {

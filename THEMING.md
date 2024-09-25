@@ -1,10 +1,10 @@
-# Theming gTile
+# Theming HyprWM
 
 Before the theming, before you must the follow developing instructions.
 
 ## Adding new theme
 
-Add your theme name into [the schema](dist/schemas/org.gnome.shell.extensions.gtile.gschema.xml) under `themes`.
+Add your theme name into [the schema](dist/schemas/org.gnome.shell.extensions.hyprwm.gschema.xml) under `themes`.
 
 This name is creating your style classes. For example, the new theme name is "Gnome 40"; the plugin applies the following regular expression to the theme name and for this example `[THEME NAME]` is `gnome-40`.
 
@@ -16,7 +16,7 @@ Theme name mangling: `"Gnome 40".toLowerCase().replace(/[^a-z0-9]/g, "-")`
 
 You can use the above-mentioned class names to style your theme.
 
-You must add `gtile-[THEME NAME]__` to the beginning of classes outside the main container.
+You must add `hyprwm-[THEME NAME]__` to the beginning of classes outside the main container.
 
 ### Styling the extension
 

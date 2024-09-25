@@ -88,7 +88,7 @@ export type KeyBindingGlobalSettingKey = "show-toggle-tiling";
 
 /**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
- * intercepted while the gTile overlay is visible.
+ * intercepted while the HyprWM overlay is visible.
  */
 export type KeyBindingGroupDefaultSettingKey =
   | "cancel-tiling"

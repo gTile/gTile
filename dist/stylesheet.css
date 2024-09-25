@@ -7,7 +7,7 @@
  * Main container
  */
 
-.gtile-default {
+.hyprwm-default {
     width: 320px;
     border-radius: 10px;
     background-color: rgba(40, 40, 40, 1);
@@ -19,22 +19,22 @@
  * Title bar
  */
 
-.gtile-default__title-container {
+.hyprwm-default__title-container {
     padding: 15px 15px 15px 15px;
 }
 
-.gtile-default__title {
+.hyprwm-default__title {
     font-size: 12px;
     color: rgba(238, 238, 236, 1);
     padding: 5px;
     text-align: left;
 }
 
-.gtile-default__close-container {
+.hyprwm-default__close-container {
     margin-right: 3px;
 }
 
-.gtile-default__close {
+.hyprwm-default__close {
     width: 22px;
     height: 22px;
     background-image: url("images/icons/light/32/close.png");
@@ -42,7 +42,7 @@
     border-radius: 22px;
 }
 
-.gtile-default__close:hover {
+.hyprwm-default__close:hover {
     background-color: rgba(238, 238, 236, 0.1);
 }
 
@@ -51,23 +51,23 @@
  * Tile container
  */
 
-.gtile-default__tile-container {
+.hyprwm-default__tile-container {
     padding: 10px;
     background-color: rgba(238, 238, 236, 0.1);
 }
 
-.gtile-default__tile-table {
+.hyprwm-default__tile-table {
     spacing-rows: 2px;
     spacing-columns: 2px;
 }
 
-.gtile-default__tile-table-item {
+.hyprwm-default__tile-table-item {
     background-color: rgba(238, 238, 236, 0.3);
     margin: 1px;
     border-radius: 2px;
 }
 
-.gtile-default__tile-table-item:activate {
+.hyprwm-default__tile-table-item:activate {
     background-color: rgba(240, 240, 240, 0.5);
 }
 
@@ -76,17 +76,17 @@
  * Preset container
  */
 
-.gtile-default__preset-container {
+.hyprwm-default__preset-container {
     background-color: rgba(238, 238, 236, 0.05);
     padding: 10px;
 }
 
-.gtile-default__preset {
+.hyprwm-default__preset {
     spacing-rows: 0px;
     spacing-columns: 2px;
 }
 
-.gtile-default__preset-button {
+.hyprwm-default__preset-button {
     border: 1px solid rgba(31, 31, 31, 1);
     color: rgba(238, 238, 236, 1);
     background-color: rgba(238, 238, 236, 0.1);
@@ -98,12 +98,12 @@
     height: 34px;
 }
 
-.gtile-default__preset-button:first-child {
+.hyprwm-default__preset-button:first-child {
     margin-left: 0;
 }
 
-.gtile-default__preset-button:hover,
-.gtile-default__preset-button:activate {
+.hyprwm-default__preset-button:hover,
+.hyprwm-default__preset-button:activate {
     background-color: rgba(238, 238, 236, 0.3);
 }
 
@@ -112,66 +112,66 @@
  * Actions container
  */
 
-.gtile-default__action-button--auto-close {
+.hyprwm-default__action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
     background-size: 24px 24px;
     height: 32px;
     width: 32px;
 }
 
-.gtile-default__action-button--follow-cursor {
+.hyprwm-default__action-button--follow-cursor {
     background-image: url("images/icons/light/32/followcursor.png");
     background-size: 24px 24px;
     height: 32px;
     width: 32px;
 }
 
-.gtile-default__action-button--main-and-list {
+.hyprwm-default__action-button--main-and-list {
     background-image: url("images/icons/light/32/auto-tile-0.png");
     background-size: 24px 24px;
     height: 32px;
     width: 32px;
 }
 
-.gtile-default__action-button--two-list {
+.hyprwm-default__action-button--two-list {
     background-image: url("images/icons/light/32/auto-tile-1.png");
     background-size: 24px 24px;
     height: 32px;
     width: 32px;
 }
 
-.gtile-default__action-button--scale {
+.hyprwm-default__action-button--scale {
     background-image: url("images/icons/light/32/scale.png");
     background-size: 24px 24px;
     height: 32px;
     width: 32px;
 }
 
-.gtile-default__action {
+.hyprwm-default__action {
     spacing-rows: 0px;
     spacing-columns: 2px;
     padding: 0px 0px 15px 32px;
     margin: 15px 0 32px;
 }
 
-.gtile-default__action-button {
+.hyprwm-default__action-button {
     margin-right: 32px;
     height: 33px;
     border: 2px solid rgba(238,237,236,0);
 }
 
-.gtile-default__action-button:hover,
-.gtile-default__action-button:activate {
+.hyprwm-default__action-button:hover,
+.hyprwm-default__action-button:activate {
     border: 2px solid rgba(27, 106, 203, 1);
     background-color: rgba(27, 106, 203, 1);
     border-radius: 50px;
 }
 
-.gtile-default__action-button:hover{
+.hyprwm-default__action-button:hover{
     border: 2px solid rgba(238,237,236,0.1);
 }
 
-.gtile-default__grid_lines_preview {
+.hyprwm-default__grid_lines_preview {
     background-color: rgba(0,0,0,0);
     border: 1px solid rgba(217,108,59,0.8);
 }
@@ -180,7 +180,7 @@
  * Grid preview
  */
 
-.gtile-default__preview {
+.hyprwm-default__preview {
     background-color: rgba(238, 238, 236, 0);
     border: 2px solid rgba(238, 238, 236, 0);
     border-radius: 10px;
@@ -188,7 +188,7 @@
     z-index: 90;
 }
 
-.gtile-default__preview:activate {
+.hyprwm-default__preview:activate {
     background-color: rgba(238, 238, 236, 0.1);
     border: 2px solid rgba(238, 238, 236, 0.4);
     box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
@@ -199,17 +199,17 @@
  * Panel icon
  */
 
-.gtile-default__icon {
+.hyprwm-default__icon {
     width: 24px;
     height: 24px;
     background-image: url("images/launcher/light/16/default.png");
     background-size: 16px 16px;
 }
-.gtile-default__icon:hover {
+.hyprwm-default__icon:hover {
     background-image: url("images/launcher/light/16/hover.png");
 }
 
-.gtile-default__icon:activate {
+.hyprwm-default__icon:activate {
     background-image: url("images/launcher/light/16/active.png");
 }
 
@@ -219,7 +219,7 @@
  * Main container
  */
 
-.gtile-classic {
+.hyprwm-classic {
     background-color: rgba(10, 10, 10, 0.7);
     -webkit-filter: blur(2px);
     width: 320px;
@@ -231,11 +231,11 @@
   * Title bar
   */
 
-.gtile-classic__title-container {
+.hyprwm-classic__title-container {
     padding: 3px;
 }
 
-.gtile-classic__title {
+.hyprwm-classic__title {
     font-size: 12px;
     font-weight: bold;
     color: #ffffff;
@@ -243,11 +243,11 @@
     text-align: center;
 }
 
-.gtile-classic__close-container {
+.hyprwm-classic__close-container {
     background-color: rgba(0, 120, 255, 0);
 }
 
-.gtile-classic__close {
+.hyprwm-classic__close {
     width: 22px;
     height: 22px;
     background-image: url("images/icons/light/32/close.png");
@@ -255,7 +255,7 @@
     border-radius: 22px;
 }
 
-.gtile-classic__close:hover {
+.hyprwm-classic__close:hover {
     background-color: rgba(238, 238, 236, 0.1);
 }
 
@@ -264,19 +264,19 @@
   * Tile container
   */
 
-.gtile-classic__tile-container {}
+.hyprwm-classic__tile-container {}
 
-.gtile-classic__tile-table {
+.hyprwm-classic__tile-table {
     spacing-rows: 2px;
     spacing-columns: 2px;
 }
 
-.gtile-classic__tile-table-item {
+.hyprwm-classic__tile-table-item {
     background-color: rgba(240, 240, 240, 0.4);
     margin: 1px;
 }
 
-.gtile-classic__tile-table-item:activate {
+.hyprwm-classic__tile-table-item:activate {
     background-color: rgba(240, 240, 240, 0.8);
 }
 
@@ -285,21 +285,21 @@
   * Preset container
   */
 
-.gtile-classic__preset-container {
+.hyprwm-classic__preset-container {
     background-color: rgba(238, 238, 236, 0.05);
     padding: 10px;
 }
 
-.gtile-classic__preset {
+.hyprwm-classic__preset {
     spacing-rows: 0px;
     spacing-columns: 2px;
 }
 
-.gtile-classic__preset-container {
+.hyprwm-classic__preset-container {
     padding: 10px 0px 0px 0px;
 }
 
-.gtile-classic__preset-button {
+.hyprwm-classic__preset-button {
     background-color: rgba(0, 120, 255, 0.4);
     color: rgba(255, 255, 255, 0.4);
     border-radius: 0px;
@@ -307,8 +307,8 @@
     height: 34px;
 }
 
-.gtile-classic__preset-button:hover,
-.gtile-classic__preset-button:activate {
+.hyprwm-classic__preset-button:hover,
+.hyprwm-classic__preset-button:activate {
     background-color: rgba(0, 120, 255, 0.7);
     color: rgba(255, 255, 255, 1);
     border: 1px rgba(0, 200, 255, 0.7);
@@ -319,65 +319,65 @@
   * Actions container
   */
 
-.gtile-classic__action-button--auto-close {
+.hyprwm-classic__action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
-.gtile-classic__action-button--follow-cursor {
+.hyprwm-classic__action-button--follow-cursor {
     background-image: url("images/icons/light/32/followcursor.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
-.gtile-classic__action-button--main-and-list {
+.hyprwm-classic__action-button--main-and-list {
     background-image: url("images/icons/light/32/auto-tile-0.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
-.gtile-classic__action-button--two-list {
+.hyprwm-classic__action-button--two-list {
     background-image: url("images/icons/light/32/auto-tile-1.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
-.gtile-classic__action-button--scale {
+.hyprwm-classic__action-button--scale {
     background-image: url("images/icons/light/32/scale.png");
     background-size: 36px 36px;
     height: 36px;
     width: 36px;
 }
 
-.gtile-classic__action {
+.hyprwm-classic__action {
     spacing-rows: 0px;
     spacing-columns: 2px;
 }
 
-.gtile-classic__action-container {
+.hyprwm-classic__action-container {
     padding: 2px 0px 10px 0px;
 }
 
-.gtile-classic__action-button {
+.hyprwm-classic__action-button {
     background-color: rgba(0, 120, 255, 0.4);
     color: rgba(255, 255, 255, 0.4);
     border-radius: 0px;
     border: 1px rgba(0, 200, 255, 0.4);
 }
 
-.gtile-classic__action-button:hover,
-.gtile-classic__action-button:activate {
+.hyprwm-classic__action-button:hover,
+.hyprwm-classic__action-button:activate {
     background-color: rgba(0, 120, 255, 0.7);
     color: rgba(255, 255, 255, 1);
     border: 1px rgba(0, 200, 255, 0.7);
 }
 
-.gtile-classic__grid_lines_preview {
+.hyprwm-classic__grid_lines_preview {
     background-color: rgba(0,0,0,0);
     border: 1px solid rgba(217,108,59,0.8);
 }
@@ -387,12 +387,12 @@
   * Grid preview
   */
 
-.gtile-classic__preview {
+.hyprwm-classic__preview {
     background-color: rgba(241, 122, 73, 0.0);
     border: rgba(217, 108, 59, 0.0);
 }
 
-.gtile-classic__preview:activate {
+.hyprwm-classic__preview:activate {
     background-color: rgba(241, 122, 73, 0.4);
     border: 1px solid rgba(217, 108, 59, 0.8);
 }
@@ -402,18 +402,18 @@
   * Panel icon
   */
 
-.gtile-classic__icon {
+.hyprwm-classic__icon {
     width: 24px;
     height: 24px;
     background-image: url("images/launcher/light/16/default.png");
     background-size: 16px 16px;
 }
 
-.gtile-classic__icon:hover {
+.hyprwm-classic__icon:hover {
     background-image: url("images/launcher/light/16/hover.png");
 }
 
-.gtile-classic__icon:activate {
+.hyprwm-classic__icon:activate {
     background-image: url("images/launcher/light/16/active.png");
 }
 
@@ -424,7 +424,7 @@
  * Main container
  */
 
-.gtile-minimal-dark {
+.hyprwm-minimal-dark {
     background-color: #2c2c2c;
     -webkit-filter: blur(2px);
     width:320px;
@@ -441,22 +441,22 @@
 * Title bar
 */
 
-.gtile-minimal-dark__title-container {
+.hyprwm-minimal-dark__title-container {
   padding: 3px;
 }
 
-.gtile-minimal-dark__title {
+.hyprwm-minimal-dark__title {
     font-size: 12px;
     color: #ffffff;
     padding: .5em;
     text-align: center;
 }
 
-.gtile-minimal-dark__close-container {
+.hyprwm-minimal-dark__close-container {
     background-color: rgba(0,120,255,0);
 }
 
-.gtile-minimal-dark__close {
+.hyprwm-minimal-dark__close {
     background-size: 22px 22px;
     height: 20px;
     width: 20px;
@@ -467,7 +467,7 @@
     border-width: 1px;
 }
 
-.gtile-minimal-dark__close:hover {
+.hyprwm-minimal-dark__close:hover {
     background-color: #646464;
     border-color: #202020;
 }
@@ -477,21 +477,21 @@
 * Tile container
 */
 
-.gtile-minimal-dark__tile-container {}
+.hyprwm-minimal-dark__tile-container {}
 
-.gtile-minimal-dark__tile-table {
+.hyprwm-minimal-dark__tile-table {
     spacing-rows: 2px;
     spacing-columns: 2px;
     padding: 4px;
 }
 
-.gtile-minimal-dark__tile-table-item {
+.hyprwm-minimal-dark__tile-table-item {
     background-color: #4b4b4b;
     margin: 1px;
     border-radius: 2px;
 }
 
-.gtile-minimal-dark__tile-table-item:activate {
+.hyprwm-minimal-dark__tile-table-item:activate {
     background-color: #646464;
 }
 
@@ -500,19 +500,19 @@
 * Preset container
 */
 
-.gtile-minimal-dark__preset-container {
+.hyprwm-minimal-dark__preset-container {
 }
 
-.gtile-minimal-dark__preset {
+.hyprwm-minimal-dark__preset {
   spacing-rows: 0px;
   spacing-columns: 2px;
 }
 
-.gtile-minimal-dark__preset-container {
+.hyprwm-minimal-dark__preset-container {
   padding: 10px 5px 10px 5px;
 }
 
-.gtile-minimal-dark__preset-button {
+.hyprwm-minimal-dark__preset-button {
     background-color: #4b4b4b;
     border-radius: 8px;
     padding: 0 4px;
@@ -520,12 +520,12 @@
     height: 34px;
 }
 
-.gtile-minimal-dark__preset-button:first-child {
+.hyprwm-minimal-dark__preset-button:first-child {
     margin-left: 0;
 }
 
-.gtile-minimal-dark__preset-button:hover,
-.gtile-minimal-dark__preset-button:activate {
+.hyprwm-minimal-dark__preset-button:hover,
+.hyprwm-minimal-dark__preset-button:activate {
     background-color: #707070;
 }
 
@@ -533,57 +533,57 @@
 /**
 * Actions container
 */
-.gtile-minimal-dark__action-button--auto-close,
-.gtile-minimal-dark__action-button--follow-cursor,
-.gtile-minimal-dark__action-button--main-and-list,
-.gtile-minimal-dark__action-button--two-list{
+.hyprwm-minimal-dark__action-button--auto-close,
+.hyprwm-minimal-dark__action-button--follow-cursor,
+.hyprwm-minimal-dark__action-button--main-and-list,
+.hyprwm-minimal-dark__action-button--two-list{
     background-size: 32px 32px;
     height:34px;
     width:34px;
 }
 
-.gtile-minimal-dark__action-button--auto-close {
+.hyprwm-minimal-dark__action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
 }
 
-.gtile-minimal-dark__action-button--follow-cursor {
+.hyprwm-minimal-dark__action-button--follow-cursor {
     background-image: url("images/icons/light/32/followcursor.png");
 }
 
-.gtile-minimal-dark__action-button--main-and-list {
+.hyprwm-minimal-dark__action-button--main-and-list {
     background-image: url("images/icons/light/32/auto-tile-0.png");
 }
 
-.gtile-minimal-dark__action-button--two-list {
+.hyprwm-minimal-dark__action-button--two-list {
     background-image: url("images/icons/light/32/auto-tile-1.png");
 }
 
-.gtile-minimal-dark__action-button--scale {
+.hyprwm-minimal-dark__action-button--scale {
     background-image: url("images/icons/dark/32/scale.png");
     background-size: 36px 36px;
     height:36px;
     width:36px;
 }
 
-.gtile-minimal-dark__action {
+.hyprwm-minimal-dark__action {
   spacing-rows: 0px;
   spacing-columns: 2px;
 }
 
-.gtile-minimal-dark__action-container {
+.hyprwm-minimal-dark__action-container {
     padding: 2px 0px 10px 0px;
     margin-bottom: 20px;
 }
 
-.gtile-minimal-dark__action-button {
+.hyprwm-minimal-dark__action-button {
     background-color: #4b4b4b;
     border-radius: 8px;
     margin: 4px;
     padding: 4px;
 }
 
-.gtile-minimal-dark__action-button:hover,
-.gtile-minimal-dark__action-button:activate {
+.hyprwm-minimal-dark__action-button:hover,
+.hyprwm-minimal-dark__action-button:activate {
     background-color: #707070;
 }
 
@@ -592,17 +592,17 @@
 * Grid preview
 */
 
-.gtile-minimal-dark__preview {
+.hyprwm-minimal-dark__preview {
     background-color: rgba(241,122,73,0.0);
     border: rgba(217,108,59,0.0);
 }
 
-.gtile-minimal-dark__preview:activate {
+.hyprwm-minimal-dark__preview:activate {
     background-color: rgba(241,0,0,0.4);
     border: 1px solid rgba(217,108,59,0.8);
 }
 
-.gtile-minimal-dark__grid_lines_preview {
+.hyprwm-minimal-dark__grid_lines_preview {
     background-color: rgba(0,0,0,0);
     border: 1px solid rgba(217,108,59,0.8);
 }
@@ -612,18 +612,18 @@
 * Panel icon
 */
 
-.gtile-minimal-dark__icon {
+.hyprwm-minimal-dark__icon {
   width: 24px;
   height: 24px;
   background-image: url("images/launcher/light/16/default.png");
   background-size: 16px 16px;
 }
 
-.gtile-minimal-dark__icon:hover {
+.hyprwm-minimal-dark__icon:hover {
   background-image: url("images/launcher/light/16/hover.png");
 }
 
-.gtile-minimal-dark__icon:activate {
+.hyprwm-minimal-dark__icon:activate {
   background-image: url("images/launcher/light/16/active.png");
 }
 
@@ -634,7 +634,7 @@
  * Main container
  */
 
-.gtile-minimal-light {
+.hyprwm-minimal-light {
     background-color: #f6f5f4;
     -webkit-filter: blur(2px);
     width:320px;
@@ -651,22 +651,22 @@
 * Title bar
 */
 
-.gtile-minimal-light__title-container {
+.hyprwm-minimal-light__title-container {
     padding: 3px;
 }
 
-.gtile-minimal-light__title {
+.hyprwm-minimal-light__title {
     font-size: 12px;
     color: #111111;
     padding: .5em;
     text-align: center;
 }
 
-.gtile-minimal-light__close-container {
+.hyprwm-minimal-light__close-container {
     background-color: rgba(0,120,255,0);
 }
 
-.gtile-minimal-light__close {
+.hyprwm-minimal-light__close {
     background-size: 22px 22px;
     height: 20px;
     width: 20px;
@@ -677,7 +677,7 @@
     border-width: 1px;
 }
 
-.gtile-minimal-light__close:hover {
+.hyprwm-minimal-light__close:hover {
     background-color: #cccac7;
     border-color: #cccac7;
 }
@@ -687,21 +687,21 @@
 * Tile container
 */
 
-.gtile-minimal-light__tile-container {}
+.hyprwm-minimal-light__tile-container {}
 
-.gtile-minimal-light__tile-table {
+.hyprwm-minimal-light__tile-table {
     spacing-rows: 2px;
     spacing-columns: 2px;
     padding: 4px;
   }
 
-.gtile-minimal-light__tile-table-item {
+.hyprwm-minimal-light__tile-table-item {
     background-color: #b1aca9;
     margin: 1px;
     border-radius: 2px;
 }
 
-.gtile-minimal-light__tile-table-item:activate {
+.hyprwm-minimal-light__tile-table-item:activate {
     background-color: #928f8c;
 }
 
@@ -710,19 +710,19 @@
 * Preset container
 */
 
-.gtile-minimal-light__preset-container {
+.hyprwm-minimal-light__preset-container {
 }
 
-.gtile-minimal-light__preset {
+.hyprwm-minimal-light__preset {
     spacing-rows: 0px;
     spacing-columns: 2px;
 }
 
-.gtile-minimal-light__preset-container {
+.hyprwm-minimal-light__preset-container {
     padding: 10px 5px 10px 5px;
 }
 
-.gtile-minimal-light__preset-button {
+.hyprwm-minimal-light__preset-button {
     color: #111111;
     background-color: #f7f6f6;
     border-radius: 8px;
@@ -733,12 +733,12 @@
     height: 34px;
 }
 
-.gtile-minimal-light__preset-button:first-child {
+.hyprwm-minimal-light__preset-button:first-child {
     margin-left: 0;
 }
 
-.gtile-minimal-light__preset-button:hover,
-.gtile-minimal-light__preset-button:activate {
+.hyprwm-minimal-light__preset-button:hover,
+.hyprwm-minimal-light__preset-button:activate {
     background-color: #e8e6e3;
 }
 
@@ -746,49 +746,49 @@
 /**
 * Actions container
 */
-.gtile-minimal-light__action-button--auto-close,
-.gtile-minimal-light__action-button--follow-cursor,
-.gtile-minimal-light__action-button--main-and-list,
-.gtile-minimal-light__action-button--two-list{
+.hyprwm-minimal-light__action-button--auto-close,
+.hyprwm-minimal-light__action-button--follow-cursor,
+.hyprwm-minimal-light__action-button--main-and-list,
+.hyprwm-minimal-light__action-button--two-list{
     background-size: 32px 32px;
     height:34px;
     width:34px;
 }
 
-.gtile-minimal-light__action-button--auto-close {
+.hyprwm-minimal-light__action-button--auto-close {
     background-image: url("images/icons/dark/32/auto-close.png");
 }
 
-.gtile-minimal-light__action-button--follow-cursor {
+.hyprwm-minimal-light__action-button--follow-cursor {
     background-image: url("images/icons/dark/32/followcursor.png");
 }
 
-.gtile-minimal-light__action-button--main-and-list {
+.hyprwm-minimal-light__action-button--main-and-list {
     background-image: url("images/icons/dark/32/auto-tile-0.png");
 }
 
-.gtile-minimal-light__action-button--two-list {
+.hyprwm-minimal-light__action-button--two-list {
     background-image: url("images/icons/dark/32/auto-tile-1.png");
 }
 
-.gtile-minimal-light__action-button--scale {
+.hyprwm-minimal-light__action-button--scale {
     background-image: url("images/icons/dark/32/scale.png");
     background-size: 36px 36px;
     height:36px;
     width:36px;
 }
 
-.gtile-minimal-light__action {
+.hyprwm-minimal-light__action {
     spacing-rows: 0px;
     spacing-columns: 2px;
 }
 
-.gtile-minimal-light__action-container {
+.hyprwm-minimal-light__action-container {
     padding: 2px 0px 10px 0px;
     margin-bottom: 20px;
 }
 
-.gtile-minimal-light__action-button {
+.hyprwm-minimal-light__action-button {
     color: #111111;
     background-color: #f7f6f6;
     border-radius: 8px;
@@ -798,12 +798,12 @@
     padding: 4px;
 }
 
-.gtile-minimal-light__action-button:hover,
-.gtile-minimal-light__action-button:activate {
+.hyprwm-minimal-light__action-button:hover,
+.hyprwm-minimal-light__action-button:activate {
     background-color: #e8e6e3;
 }
 
-.gtile-minimal-light__grid_lines_preview {
+.hyprwm-minimal-light__grid_lines_preview {
     background-color: rgba(0,0,0,0);
     border: 1px solid rgba(217,108,59,0.8);
 }
@@ -813,12 +813,12 @@
 * Grid preview
 */
 
-.gtile-minimal-light__preview {
+.hyprwm-minimal-light__preview {
     background-color: rgba(241,122,73,0.0);
     border: rgba(217,108,59,0.0);
 }
 
-.gtile-minimal-light__preview:activate {
+.hyprwm-minimal-light__preview:activate {
     background-color: rgba(241,122,73,0.4);
     border: 1px solid rgba(217,108,59,0.8);
 }
@@ -828,17 +828,17 @@
 * Panel icon
 */
 
-.gtile-minimal-light__icon {
+.hyprwm-minimal-light__icon {
     width: 24px;
     height: 24px;
     background-image: url("images/launcher/dark/16/default.png");
     background-size: 16px 16px;
 }
 
-.gtile-minimal-light__icon:hover {
+.hyprwm-minimal-light__icon:hover {
     background-image: url("images/launcher/dark/16/hover.png");
 }
 
-.gtile-minimal-light__icon:activate {
+.hyprwm-minimal-light__icon:activate {
     background-image: url("images/launcher/dark/16/active.png");
 }

@@ -59,11 +59,11 @@ export interface HotkeyManagerParams {
 }
 
 /**
- * Responsible for intercepting gTile-related keyboard shortcuts.
+ * Responsible for intercepting HyprWM-related keyboard shortcuts.
  *
  * Immediately registers a few always-enabled keyboard shortcuts upon
  * instantiation. Additional shortcuts can be enabled/disabled conditionally,
- * e.g., whenever the gTile overlay is shown.
+ * e.g., whenever the HyprWM overlay is shown.
  */
 export default class implements Publisher<HotkeyAction>, GarbageCollector {
   #settings: ExtensionSettings;

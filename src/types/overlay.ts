@@ -1,7 +1,7 @@
 import { GridSelection, GridSize } from "./grid.js";
 
 /**
- * Represents an event related to the gTile user interface.
+ * Represents an event related to the HyprWM user interface.
  */
 export const enum Event {
   /**
@@ -15,7 +15,7 @@ export const enum Event {
   Autotile,
 
   /**
-   * Visibility state of the gTile user interface has changed.
+   * Visibility state of the HyprWM user interface has changed.
    */
   Visibility,
 }

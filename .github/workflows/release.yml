@@ -14,12 +14,12 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run build:dist
-      - run: cd dist && zip -r ../gtile.dist.zip . && cd ..
+      - run: cd dist && zip -r ../hyprwm.dist.zip . && cd ..
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           body: Release ${{ github.ref_name }}
           files: |
-            gtile.dist.tgz
-            gtile.dist.zip
+            hyprwm.dist.tgz
+            hyprwm.dist.zip
           fail_on_unmatched_files: true

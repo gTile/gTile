@@ -1,9 +1,9 @@
 {
-  "uuid": "gTile@vibou",
-  "name": "gTile",
+  "uuid": "HyprWM@topazrn",
+  "name": "HyprWM",
   "description": "Tile windows on a grid",
   "shell-version": ["45", "46"],
-  "url": "https://github.com/gTile",
-  "settings-schema": "org.gnome.shell.extensions.gtile",
+  "url": "https://github.com/topazrn/HyprWM",
+  "settings-schema": "org.gnome.shell.extensions.hyprwm",
   "version": 60
 }

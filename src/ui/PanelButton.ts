@@ -8,7 +8,7 @@ interface PanelButtonParams extends Partial<GObject.Object.ConstructorProps> {
 }
 
 /**
- * The button thats displayed in the Gnome panel and allows to toggle gTile.
+ * The button thats displayed in the Gnome panel and allows to toggle HyprWM.
  *
  * Note that this class extends PanelMenu.Button which has no `clicked` signal
  * because it extends St.Widget (as opposed to St.Button). Instead, the
@@ -21,7 +21,7 @@ export default GObject.registerClass({
   constructor(params: PanelButtonParams);
 
   _init() {
-    super._init(.0, "gTile", true);
+    super._init(.0, "HyprWM", true);
 
     // Workaround to avoid messing up the the method signature of _init which
     // TypeScript expects to stay compatible with those of the parent classes.

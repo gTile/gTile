@@ -52,7 +52,7 @@ export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
 }
 
 /**
- * The gTile overlay user interface.
+ * The HyprWM overlay user interface.
  *
  * The overlay consists of
  *   - a title bar with a close button and a window title

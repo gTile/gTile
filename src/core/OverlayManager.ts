@@ -33,7 +33,7 @@ export interface OverlayManagerParams {
 }
 
 /**
- * Responsible for rendering the gTile user interface(s).
+ * Responsible for rendering the HyprWM user interface(s).
  *
  * Keeps track of the connected monitors and renders one overlay per screen.
  * Also keeps the UIs in sync and provides a unified programmatic interface to
@@ -219,7 +219,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     for (const monitor of this.#desktopManager.monitors) {
       const overlay = new Overlay({
         theme: this.#theme,
-        title: "gTile",
+        title: "HyprWM",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
         visible: false,
@@ -343,9 +343,9 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#windowSubscriptionGc.release();
 
     if (window) {
-      this.#updateTitle(window.title ?? "gTile");
+      this.#updateTitle(window.title ?? "HyprWM");
       const chid = window.connect("notify::title", () => {
-        this.#updateTitle(window.title ?? "gTile");
+        this.#updateTitle(window.title ?? "HyprWM");
       });
 
       this.#windowSubscriptionGc.defer(() => {
@@ -358,7 +358,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     const monitors = this.#desktopManager.monitors;
 
     console.assert(monitors.length === this.#overlays.length,
-      `gTile: number of overlays (${this.#overlays.length}) do not match the` +
+      `HyprWM: number of overlays (${this.#overlays.length}) do not match the` +
       `number of monitors(${ monitors.length })`);
     console.assert(
       Math.max(...monitors.map(m => m.index)) === this.#overlays.length - 1,

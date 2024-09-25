@@ -1,10 +1,10 @@
 {
-  "name": "gnome-shell-extension-gtile",
+  "name": "gnome-shell-extension-hyprwm",
   "type": "module",
   "version": "1.0.0",
-  "description": "gTile Gnome extension",
+  "description": "HyprWM Gnome extension",
   "module": "dist/extension.js",
-  "author": "Markus Schanz <markus@schanz.id>",
+  "author": "Topaz Rindu Nabiyallah <topazsorowako2@gmail.com>",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
@@ -34,13 +34,13 @@
     }
   },
   "scripts": {
-    "clean": "git clean -qxf ':/dist' ':/out' gtile.dist.tgz",
+    "clean": "git clean -qxf ':/dist' ':/out' hyprwm.dist.tgz",
     "prebuild": "$npm_execpath run clean",
     "build": "tsc -p tsconfig.prod.json",
     "postbuild": "rm -rf dist/types",
     "prebuild:dist": "$npm_execpath run build",
-    "build:dist": "tar -czf gtile.dist.tgz -C dist .",
-    "install:extension": "gnome-extensions install -f gtile.dist.tgz",
+    "build:dist": "tar -czf hyprwm.dist.tgz -C dist .",
+    "install:extension": "gnome-extensions install -f hyprwm.dist.tgz",
     "pretest": "tsc",
     "test": "ava",
     "check": "tsc --noEmit"

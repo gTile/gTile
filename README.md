@@ -1,13 +1,13 @@
-# gTile
+# HyprWM
 
-### The Gnome 45 version of gTile has undergone a rewrite! If you experience any regressions please check PR #341 for a summary of breaking changes. If you experience an undocumented regression please open a new issue.
+### The Gnome 45 version of HyprWM has undergone a rewrite! If you experience any regressions please check PR #341 for a summary of breaking changes. If you experience an undocumented regression please open a new issue.
 
 - Gnome-shell extension that improves window tiling capabilities of stock gnome-shell.
-- gTile is used to move/resize windows on a configurable grid scheme.
+- HyprWM is used to move/resize windows on a configurable grid scheme.
 - It can be used with either the mouse, or keyboard, including customizable keyboard presets for immediate window placement.
 - This extension is particularly useful for window management on (multiple) large monitors.
 
-**Acknowledgement**: The original idea and the first implementation of gTile was developed by [vibou](https://github.com/vibou) with the help from multiple contributors. gTile is now a community supported project and licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html).
+**Acknowledgement**: The original idea and the first implementation of HyprWM was developed by [topazrn](https://github.com/topazrn) with the help from multiple contributors. HyprWM is now a community supported project and licensed under the [GPL v2+](https://www.gnu.org/licenses/gpl-2.0.html).
 
 # Table of Contents
 
@@ -40,29 +40,29 @@
 ## Installation
 
 ### Install via Gnome Extensions
-The preferred installation is through [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
+The preferred installation is through [Gnome Extensions](https://extensions.gnome.org/extension/28/hyprwm/).
 
 ### Install Latest Build
-Alternatively, the most recent stable version may also be downloaded as a distributable archive (`gtile.dist.tgz`) through the [GitHub releases page](https://github.com/gTile/gTile/releases).
+Alternatively, the most recent stable version may also be downloaded as a distributable archive (`hyprwm.dist.tgz`) through the [GitHub releases page](https://github.com/HyprWM/HyprWM/releases).
 
 ```shell
 # Replace `VERSION` with the most recent release.
-wget https://github.com/gTile/gTile/releases/download/VERSION/gtile.dist.tgz
+wget https://github.com/HyprWM/HyprWM/releases/download/VERSION/hyprwm.dist.tgz
 
 # The `-f` flag will perform an upgrade, if necessary.
-gnome-extensions install -f ~/Downloads/gtile.dist.tgz
+gnome-extensions install -f ~/Downloads/hyprwm.dist.tgz
 
 # The changes only become effective once the shell session was restarted.
 # In case the extension was installed for the first time it must be enabled afterwards.
-gnome-extensions enable gTile@vibou
+gnome-extensions enable HyprWM@topazrn
 ```
 
 ### Install from Source
 Alternatively, you can build and install the latest version from GitHub. Make sure to have a working `git` and `npm` installation.
 
 ```shell
-git clone https://github.com/gTile/gTile.git
-cd gTile
+git clone https://github.com/HyprWM/HyprWM.git
+cd HyprWM
 npm ci
 npm run build:dist
 npm run install:extension
@@ -71,7 +71,7 @@ npm run install:extension
 After restarting your Gnome shell session you can enable the extension via:
 
 ```shell
-gnome-extensions enable gTile@vibou
+gnome-extensions enable HyprWM@topazrn
 ```
 
 ## Configuration
@@ -79,21 +79,21 @@ gnome-extensions enable gTile@vibou
 The extension can be configured through a dedicated preferences dialog. You can open the extension settings either through the [Gnome Extensions](https://apps.gnome.org/Extensions/) app, or by executing the following command in your terminal:
 
 ```shell
-gnome-extensions prefs gTile@vibou
+gnome-extensions prefs HyprWM@topazrn
 ```
 
-Note that most settings are applied either immediately or after toggling the gTile overlay. There is one exception though. When the theme is changed, the extension needs to be disabled and then enabled again for the new theme to become effective.
+Note that most settings are applied either immediately or after toggling the HyprWM overlay. There is one exception though. When the theme is changed, the extension needs to be disabled and then enabled again for the new theme to become effective.
 
 ## Usage
 
-gTile can be used either through its graphical user interface ("overlay") or exclusively with the keyboard via shortcuts.
+HyprWM can be used either through its graphical user interface ("overlay") or exclusively with the keyboard via shortcuts.
 
 ### Overlay
 
 1. Make sure the window you want to resize has focus
-2. Click on the gTile icon on the tool bar, or press `<Super>+<Enter>` (default)
-3. The gTile dialog pop-up will show up at your cursors position
-    - The ![Toggle auto-close icon](https://raw.githubusercontent.com/gTile/gTile/master/images/icons/dark/32/auto-close.png) button toggles the auto-closing of the gTile window after applying the changes.
+2. Click on the HyprWM icon on the tool bar, or press `<Super>+<Enter>` (default)
+3. The HyprWM dialog pop-up will show up at your cursors position
+    - The ![Toggle auto-close icon](https://raw.githubusercontent.com/HyprWM/HyprWM/master/images/icons/dark/32/auto-close.png) button toggles the auto-closing of the HyprWM window after applying the changes.
 
 **Option A: Mouse usage:**
 
@@ -122,7 +122,7 @@ Presets have a format of "[grid size] [top left coordinate]:[bottom right coordi
 
 * Grid size is specified as "XxY", where X represents a number of columns and Y represents a number of rows. E.g. 3x3 divides the screen into 3 columns and 3 rows, the same way as in grid schemes under *General*.
 * Grid size can be omitted. In that case preset will use the current grid set by the user in the UI or through the keyboard shortcut.
-* If grid size is specified in the first place, it can be omitted in the subsequent places. gTile will use the grid size specified in the first place. E.g. `3x3 1:1 1:1, 2:2 2:2` (when `2:2 2:2` is triggered, gTile will use 3x3 grid size).
+* If grid size is specified in the first place, it can be omitted in the subsequent places. HyprWM will use the grid size specified in the first place. E.g. `3x3 1:1 1:1, 2:2 2:2` (when `2:2 2:2` is triggered, HyprWM will use 3x3 grid size).
 * Grids defined in the presets can differ from the grid sizes defined in the *General* tab.
 
 ### Shortcuts
@@ -159,14 +159,14 @@ Shortcut             | Description
 
 You can do auto tiling for all windows on screen
 
-1. Activate gTile by pressing `Super`+`KP_Enter` or clicking on gTile icon
+1. Activate HyprWM by pressing `Super`+`KP_Enter` or clicking on HyprWM icon
 2. Click on one of 2 autotile buttons, or
 3. Press one of `[1..9,0]` (total 10 available) for vertical columns autotiling, or `M` for "main" autotiling.
     * Press `M` multiple times to cycle through variants.
     * Main variables are configurable.
 
 [![Main Variants](https://user-images.githubusercontent.com/4830810/109255942-93123b00-77ba-11eb-8976-0069ab6e8f55.jpg
-)](https://github.com/gTile/gTile/assets/3457747/40489511-1c5d-44da-b59f-9445cf50b86c "Main Variants")
+)](https://github.com/HyprWM/HyprWM/assets/3457747/40489511-1c5d-44da-b59f-9445cf50b86c "Main Variants")
 
 
 The autotiling layouts can be customized through `GridSpec`, a tiny DSL used to describe complex grids. The following [Wirth notation](https://en.wikipedia.org/wiki/Wirth_syntax_notation) describes the syntax of `GridSpec`.
@@ -196,24 +196,24 @@ In general, the autotiling algorithm works as follows:
 
 You can expand window - it will fill all available space up to borders with neighbors.
 Default keyboard shortcut is `<Alt><Ctrl>s`
-Autogrow works only when gTile window is activated
+Autogrow works only when HyprWM window is activated
 
 1. Focus on window you want to expand to fill space up to neighbors borders
-2. Activate gTile window `<Super>+<Enter>`
+2. Activate HyprWM window `<Super>+<Enter>`
 3. Press `<Alt><Ctrl>s`. Your windows will snap to neighbors.
-4. Close gTile window `Escape`
+4. Close HyprWM window `Escape`
 
 ### Window Spacing and Insets
 
 By default, windows snap seamlessly to one another. You can optionally configure an inset and window spacing to apply a margin between windows (aka spacing) or the screen edges (aka insets). The illustration below depicts how insets and margins are applied to the windows.
 
-![insets-and-spacing](https://github.com/gTile/gTile/assets/3457747/b2ea5e69-9a0a-481c-ba03-307d562a34d7)
+![insets-and-spacing](https://github.com/HyprWM/HyprWM/assets/3457747/b2ea5e69-9a0a-481c-ba03-307d562a34d7)
 
 ### Stock Gnome-shell shortcuts
 
-gTile is intended to **supplement** existing Gnome-shell keyboard shortcuts.
+HyprWM is intended to **supplement** existing Gnome-shell keyboard shortcuts.
 
-Here are some useful Gnome built-ins to keep in mind when configuring gTile:
+Here are some useful Gnome built-ins to keep in mind when configuring HyprWM:
 
 Shortcut | Description
 ------------ | -------------
@@ -230,8 +230,8 @@ To build and develop the extension `node`, `npm`, `git` and a few standard GNU u
 To get started, checkout the repository and install the required dependencies:
 
 ```shell
-git clone https://github.com/gTile/gTile.git
-cd gTile
+git clone https://github.com/HyprWM/HyprWM.git
+cd HyprWM
 npm ci
 ```
 
@@ -242,7 +242,7 @@ Testing changes can be tedious at times because an extension cannot be updated i
 ```json
 {
   "scripts": {
-    "install:remote": "scp gtile.dist.tgz remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/gtile.dist.tgz",
+    "install:remote": "scp hyprwm.dist.tgz remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/hyprwm.dist.tgz",
   }
 }
 ```
@@ -281,7 +281,7 @@ Term   | Meaning
 `(Grid) offset` | A relative coordinate to a tile in a grid. The top-left tile in a grid is considered to have an offset of `(0, 0)`. The offset `(2, 5)` would refer to the tile in the 3rd column and the 6th row.
 `(Grid) selection` | A rectangular selection of multiple tiles within a grid. It is defined in term of two offsets which specify the position of two opposite corner tiles of the selection.
 `Preset` | Ambiguously used. Can refer to the user-specified grid size (presets), i.e. the list of grid sizes available for the user to choose in the overlay. Alternatively, this refers to the user-defined presets that auto-move & auto-resize the focused window according the configured preset.
-`(Monitor) Inset` | A user-configurable screen margin respected by all gTile features (window placement, autogrow, autotiling, …). It causes windows to keep a fixed distance (in pixel) to the monitor edge(s).
+`(Monitor) Inset` | A user-configurable screen margin respected by all HyprWM features (window placement, autogrow, autotiling, …). It causes windows to keep a fixed distance (in pixel) to the monitor edge(s).
 `(Window) Spacing` | A user-configurable window spacing that causes windows to have an invisible border to them. The spacing does not(!) apply towards the screen edges. Windows with a spacing are still able to align with the screen edge, i.e., unless an inset is configured.
 
 ## Code Structure
@@ -308,7 +308,7 @@ test                - Tests are kept separate from src/ and are not transpiled b
 Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `dist/types/` (as emited by `tsc` during transpilation) are deleted by the `postbuild` script in `package.json`.
 
 ## Design Principles
-The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extent__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103).
+The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extent__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/HyprWM/HyprWM/issues/103).
 
 The extension makes use of the GJS mechanisms where possible. In particular, the UI components make extensive use of GObject [Properties and Signals](https://gjs.guide/guides/gobject/basics.html) for synchronization purposes. UI components are modeled as general purpose, composable components. In particular, they do not contain any logic other than strictly related to rendering. Business logic is supposed to reside in an orchestrating class or function.
 

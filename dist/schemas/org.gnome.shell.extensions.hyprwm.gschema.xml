@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <schemalist>
-  <schema path="/org/gnome/shell/extensions/gtile/" id="org.gnome.shell.extensions.gtile" >
+  <schema path="/org/gnome/shell/extensions/hyprwm/" id="org.gnome.shell.extensions.hyprwm" >
     <key type="as" name="show-toggle-tiling">
       <default><![CDATA[['<Super>Return', '<Super>KP_Enter']]]></default>
-      <summary>Shortcut to toggle gTile</summary>
+      <summary>Shortcut to toggle HyprWM</summary>
     </key>
     <key type="as" name="set-tiling">
       <default><![CDATA[['Return']]]></default>
@@ -471,15 +471,15 @@
     </key>
     <key type="b" name="auto-close">
       <default>true</default>
-      <summary>Close gTile after confirming an operation</summary>
+      <summary>Close HyprWM after confirming an operation</summary>
     </key>
     <key type="b" name="follow-cursor">
       <default>false</default>
-      <summary>Place the gTile overlay near the mouse cursor</summary>
+      <summary>Place the HyprWM overlay near the mouse cursor</summary>
     </key>
     <key type="b" name="show-icon">
       <default>true</default>
-      <summary>Show gTile panel icon</summary>
+      <summary>Show HyprWM panel icon</summary>
     </key>
     <key type="b" name="show-grid-lines">
       <default>false</default>
@@ -487,15 +487,15 @@
     </key>
     <key type="b" name="auto-snap-window">
       <default>false</default>
-      <summary>Suggest "snap-to-grid" layout for focused window when opening gTile</summary>
+      <summary>Suggest "snap-to-grid" layout for focused window when opening HyprWM</summary>
     </key>
     <key type="b" name="global-auto-tiling">
       <default>false</default>
-      <summary>Allow auto tiling shortcut usage when the gTile UI is not visible</summary>
+      <summary>Allow auto tiling shortcut usage when the HyprWM UI is not visible</summary>
     </key>
     <key type="b" name="global-presets">
       <default>true</default>
-      <summary>Allow preset shortcut usage when the gTile UI is not visible</summary>
+      <summary>Allow preset shortcut usage when the HyprWM UI is not visible</summary>
     </key>
     <key type="b" name="target-presets-to-monitor-of-mouse">
       <default>false</default>

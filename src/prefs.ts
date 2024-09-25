@@ -64,7 +64,7 @@ export default class extends ExtensionPreferences {
       const group = new Adw.PreferencesGroup({
         title: "Global Options",
         description: "Unless stated otherwise, most settings become " +
-          "effective after toggling the gTile UI. This is also the case for " +
+          "effective after toggling the HyprWM UI. This is also the case for " +
           "all other sections and tabs.",
       });
       page.add(group);
@@ -114,7 +114,7 @@ export default class extends ExtensionPreferences {
       const group = new Adw.PreferencesGroup({
         title: "Overlay Shortcuts",
         description:
-          "These shortcuts are only active when the gTile overlay is visible."
+          "These shortcuts are only active when the HyprWM overlay is visible."
       });
       page.add(group);
 
@@ -192,7 +192,7 @@ export default class extends ExtensionPreferences {
 
     {
       const url =
-        "https://github.com/gTile/gTile/blob/master/README.md#resize-presets";
+        "https://github.com/HyprWM/HyprWM/blob/master/README.md#resize-presets";
       const group = new Adw.PreferencesGroup({
         title: "Presets",
         description:
@@ -247,7 +247,7 @@ export default class extends ExtensionPreferences {
       page.add(group);
 
       const subtitle = "The shortcuts below can only be enabled/disabled " +
-        "globally, i.e., independent of the gTile UI visibility state.";
+        "globally, i.e., independent of the HyprWM UI visibility state.";
       group.add(this.#switchRow("moveresize-enabled", { subtitle }));
     }
 
@@ -315,7 +315,7 @@ export default class extends ExtensionPreferences {
 
     {
       const url =
-        "https://github.com/gTile/gTile/blob/master/README.md#autotiling";
+        "https://github.com/HyprWM/HyprWM/blob/master/README.md#autotiling";
       const group = new Adw.PreferencesGroup({
         title: "Layouts",
         description:

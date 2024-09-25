@@ -27,7 +27,7 @@ export default GObject.registerClass({
 
   constructor({ theme, title, ...params }: TitleBarParams) {
     super({
-      style_class: `gtile-testtest`,
+      style_class: `hyprwm-testtest`,
       layout_manager: new Clutter.BoxLayout(),
       ...params,
     });

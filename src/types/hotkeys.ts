@@ -11,12 +11,12 @@ type AsNumber<T extends string> =
  */
 export const enum Action {
   /**
-   * Toggle gTile overlay.
+   * Toggle HyprWM overlay.
    */
   TOGGLE = 1,
 
   /**
-   * Close the gTile overlay and abort the current operation, if any.
+   * Close the HyprWM overlay and abort the current operation, if any.
    */
   CANCEL,
 
