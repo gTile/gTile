@@ -1,5 +1,6 @@
 import Gio from "gi://Gio";
 import Shell from "gi://Shell";
+import Meta from "gi://Meta";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
@@ -148,54 +149,22 @@ export default class App implements GarbageCollector {
 
     let windowShown: number;
     const windowEntered = display.connect("window-entered-monitor",
-      (display, _, window) => {
-        windowShown = window.connect("shown",
+      (display, _, windowNotShown) => {
+        windowShown = windowNotShown.connect("shown",
           (window) => {
-            const currentWorkspace = workspaceManager.get_active_workspace();
-            const [x, y, _] = Shell.Global.get().get_pointer();
-
-            this.#desktopManager.pushTree(
-              this.#tree[currentWorkspace.index()][display.get_current_monitor()],
-              { x, y },
-              new Tile(window.get_id()),
-            );
-            this.#desktopManager.autotile(this.#tree);
+            this.#pushTree(display, window)
           }
         );
       }
     );
+    const windowReleased = display.connect("grab-op-end",
+      (display, window) => this.#pushTree(display, window)
+    );
     const windowLeft = display.connect("window-left-monitor",
-      (display, _, window) => {
-        const currentWorkspace = workspaceManager.get_active_workspace();
-        this.#desktopManager.removeId(
-          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
-          window.get_id(),
-        )
-        this.#desktopManager.autotile(this.#tree)
-      }
+      (display, _, window) => this.#popTree(display, window)
     );
     const windowGrabbed = display.connect("grab-op-begin",
-      (display, window) => {
-        const currentWorkspace = workspaceManager.get_active_workspace();
-        this.#desktopManager.removeId(
-          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
-          window.get_id(),
-        )
-        this.#desktopManager.autotile(this.#tree)
-      }
-    );
-    const windowReleased = display.connect("grab-op-end",
-      (display, window) => {
-        const currentWorkspace = workspaceManager.get_active_workspace();
-        const [x, y, _] = Shell.Global.get().get_pointer();
-
-        this.#desktopManager.pushTree(
-          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
-          { x, y },
-          new Tile(window.get_id()),
-        );
-        this.#desktopManager.autotile(this.#tree);
-      }
+      (display, window) => this.#popTree(display, window)
     );
 
     this.#gc.defer(() => display.disconnect(windowShown));
@@ -215,6 +184,27 @@ export default class App implements GarbageCollector {
     this.#gc.release();
     this.#lastResizePreset.release();
     App.#instance = undefined as any;
+  }
+
+  #pushTree(display: Meta.Display, window: Meta.Window) {
+    const currentWorkspace = Shell.Global.get().workspace_manager.get_active_workspace();
+    const [x, y, _] = Shell.Global.get().get_pointer();
+
+    this.#desktopManager.pushTree(
+      this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+      { x, y },
+      new Tile(window.get_id()),
+    );
+    this.#desktopManager.autotile(this.#tree);
+  }
+
+  #popTree(display: Meta.Display, window: Meta.Window) {
+    const currentWorkspace = Shell.Global.get().workspace_manager.get_active_workspace();
+    this.#desktopManager.removeId(
+      this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+      window.get_id(),
+    )
+    this.#desktopManager.autotile(this.#tree)
   }
 
   #getResizePreset(index: LoopPresetAction["preset"]): Preset | null {
