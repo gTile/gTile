@@ -1,4 +1,4 @@
-import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
+import { GridOffset, GridSelection, GridSize, Rectangle } from "../types/grid.js";
 import { AutoTileAction, CardinalDirection } from "../types/hotkeys.js";
 import { ExtensionSettings } from "../types/settings.js";
 import { GridSpecParser } from "./parser.js";
@@ -105,4 +105,11 @@ export function adjust(
   }
 
   return { anchor, target };
+}
+
+export function pointInRectangle(x: number, y: number, rectangle: Rectangle){
+  return x >= rectangle.x &&
+    x <= rectangle.x + rectangle.width &&
+    y >= rectangle.y &&
+    y <= rectangle.y + rectangle.height
 }

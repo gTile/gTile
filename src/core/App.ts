@@ -10,7 +10,7 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
-import { Node } from "../util/tree.js";
+import { Node } from "../types/tree.js";
 import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
@@ -120,7 +120,7 @@ export default class App implements GarbageCollector {
     this.#gc.defer(() => this.#desktopManager.release());
     this.#tree = [...Array(workspaceManager.nWorkspaces)]
       .map(_ => Array(display.get_n_monitors())
-        .fill(new Node<Tile | Container>(new Container("Horizontal"))));
+        .fill({ data: new Container("Horizontal") }));
     this.#desktopManager.autotile(this.#tree);
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
@@ -151,13 +151,52 @@ export default class App implements GarbageCollector {
       (display, _, window) => {
         windowShown = window.connect("shown",
           (window) => {
+            const currentWorkspace = workspaceManager.get_active_workspace();
+            const [x, y, _] = Shell.Global.get().get_pointer();
+
+            this.#desktopManager.pushTree(
+              this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+              { x, y },
+              new Tile(window.get_id()),
+            );
             this.#desktopManager.autotile(this.#tree);
           }
         );
-      });
-    const windowLeft = display.connect("window-left-monitor", (display, _, window) => this.#desktopManager.autotile(this.#tree));
-    const windowGrabbed = display.connect("grab-op-begin", (display, window) => this.#desktopManager.autotile(this.#tree, window));
-    const windowReleased = display.connect("grab-op-end", (display, window) => this.#desktopManager.autotile(this.#tree));
+      }
+    );
+    const windowLeft = display.connect("window-left-monitor",
+      (display, _, window) => {
+        const currentWorkspace = workspaceManager.get_active_workspace();
+        this.#desktopManager.removeId(
+          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+          window.get_id(),
+        )
+        this.#desktopManager.autotile(this.#tree)
+      }
+    );
+    const windowGrabbed = display.connect("grab-op-begin",
+      (display, window) => {
+        const currentWorkspace = workspaceManager.get_active_workspace();
+        this.#desktopManager.removeId(
+          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+          window.get_id(),
+        )
+        this.#desktopManager.autotile(this.#tree)
+      }
+    );
+    const windowReleased = display.connect("grab-op-end",
+      (display, window) => {
+        const currentWorkspace = workspaceManager.get_active_workspace();
+        const [x, y, _] = Shell.Global.get().get_pointer();
+
+        this.#desktopManager.pushTree(
+          this.#tree[currentWorkspace.index()][display.get_current_monitor()],
+          { x, y },
+          new Tile(window.get_id()),
+        );
+        this.#desktopManager.autotile(this.#tree);
+      }
+    );
 
     this.#gc.defer(() => display.disconnect(windowShown));
     this.#gc.defer(() => display.disconnect(windowEntered));

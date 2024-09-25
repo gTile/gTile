@@ -16,9 +16,9 @@ import {
 } from "../types/grid.js";
 import { CardinalDirection } from "../types/hotkeys.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
-import { Node } from "../util/tree.js";
+import { Node } from "../types/tree.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
-import { adjust, pan } from "../util/grid.js";
+import { adjust, pan, pointInRectangle } from "../util/grid.js";
 import { GridSpec } from "../util/parser.js";
 import { UserPreferencesProvider } from "./UserPreferences.js";
 import { Container, Tile } from "../util/tile.js";
@@ -377,7 +377,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     // tree not initiated
     if (windows.length !== treeIds.length) {
-      tree = new Node(new Container("Horizontal"));
+      tree = { data: new Container("Horizontal") };
       let root = tree;
       for (let index = 0; index < windows.length; index++) {
         const window = windows[index];
@@ -389,14 +389,14 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
             root = root.right;
           }
         } else {
-          root.left = new Node(new Tile(root.data.id));
-          root.right = new Node(new Tile(window.get_id()));
+          root.left = { data: new Tile(root.data.id) };
+          root.right = { data: new Tile(window.get_id()) };
           root.data = new Container(index % 2 == 0 ? "Horizontal" : "Vertical");
           root = root.right;
         }
       }
     }
-
+    
     this.#fitTree(tree, workArea, windows);
   }
 
@@ -409,6 +409,29 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       if (tree.right) result.push(...this.#findIds(tree.right));
     }
     return result;
+  }
+
+  removeId(tree: Node<Tile | Container>, id: number): void {
+    if (tree.data instanceof Tile) {
+      if (tree.data.id === id) {
+        tree.data = new Container("Horizontal")
+      }
+    } else {
+      if (tree.left?.data instanceof Tile && tree.right?.data instanceof Tile) {
+        if (tree.left.data.id === id) {
+          tree.left = undefined;
+          tree.data = tree.right.data
+          tree.right = undefined;
+        } else if (tree.right.data.id === id) {
+          tree.right = undefined;
+          tree.data = tree.left.data
+          tree.left = undefined;
+        }
+      }
+
+      if (tree.left?.data instanceof Container) this.removeId(tree.left, id);
+      if (tree.right?.data instanceof Container) this.removeId(tree.right, id);
+    }
   }
 
   /**
@@ -619,7 +642,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #fitTree(tree: Node<Tile | Container>, workArea: Rectangle, windows: Meta.Window[]) {
-    if (!tree.data && !tree.left && !tree.right) {
+    if (tree.data instanceof Container && !tree.left && !tree.right) {
       // Node has no window. Only possible on empty desktop.
       return;
     }
@@ -681,6 +704,79 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     throw new Error("Not handled", { cause: "" });
   }
 
+  #growNewLeaf(leaf: Node<Tile | Container>, split: Container["split"], tile: Tile) {
+    const leftId = (leaf.data as Tile).id;
+    leaf.data = { split };
+    leaf.left = { data: new Tile(leftId) };
+    leaf.right = { data: tile };
+  }
+
+  pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, tile: Tile, workArea?: Rectangle) {
+    if (!workArea) {
+      workArea = this.#workArea(this.#display.get_current_monitor());
+    }
+
+    if (!pointInRectangle(point.x, point.y, workArea)) return;
+
+    if (tree.data instanceof Container && !tree.left && !tree.right) {
+      // Node has no window. Only possible on empty desktop.
+      tree.data = tile;
+      return;
+    }
+
+    if (tree.data instanceof Tile) {
+      // Only possible on desktop with one window.
+      this.#growNewLeaf(tree, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
+      return;
+    }
+
+    if (tree.data instanceof Container && tree.left && tree.right) {
+      const leftArea: Rectangle = {
+        x: workArea.x,
+        y: workArea.y,
+        width: workArea.width,
+        height: workArea.height,
+      };
+      const rightArea: Rectangle = {
+        x: workArea.x,
+        y: workArea.y,
+        width: workArea.width,
+        height: workArea.height,
+      };
+      const dimension = tree.data.split === "Horizontal" ? "height" : "width";
+      const position = tree.data.split === "Horizontal" ? "y" : "x";
+
+      if (tree.data.constraint) {
+        const left = tree.data.constraint;
+        leftArea[dimension] = left;
+        rightArea[dimension] = workArea[dimension] - left;
+        rightArea[position] = rightArea[position] + left;
+      } else {
+        const half = workArea[dimension] / 2;
+        leftArea[dimension] = half;
+        rightArea[dimension] = half;
+        rightArea[position] = rightArea[position] + half;
+      }
+
+      if (tree.left.data instanceof Tile) {
+        this.#growNewLeaf(tree.left, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
+      } else {
+        this.pushTree(tree.left, point, tile, leftArea);
+      }
+
+      if (tree.right.data instanceof Tile) {
+        this.#growNewLeaf(tree.right, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
+      } else {
+        this.pushTree(tree.right, point, tile, rightArea);
+      }
+
+      return;
+    }
+
+    console.error(tree);
+    throw new Error("Not handled", { cause: "" });
+  }
+
   #gridSpecToAreas(spec: GridSpec, x = 0, y = 0, w = 1, h = 1): GridSpecAreas {
     const regularCells: Rectangle[] = [];
     const dynamicCells: Rectangle[] = [];
@@ -731,7 +827,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #tree(frame: MRect, bounds: MRect, collisionObjects: MRect[]): Node<MRect> {
-    const self: Node<MRect> = new Node(bounds);
+    const self: Node<MRect> = { data: (bounds) };
     if (collisionObjects.length === 0) {
       return self;
     }
