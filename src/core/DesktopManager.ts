@@ -705,9 +705,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #growNewLeaf(leaf: Node<Tile | Container>, split: Container["split"], tile: Tile) {
-    const leftId = (leaf.data as Tile).id;
-    leaf.data = { split };
-    leaf.left = { data: new Tile(leftId) };
+    const left = leaf.data as Tile;
+    leaf.data = new Container(split);
+    leaf.left = { data: left };
     leaf.right = { data: tile };
   }
 
