@@ -443,22 +443,22 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param dir The direction in which to move the window.
    */
   moveWindow(target: Meta.Window, gridSize: GridSize, dir: CardinalDirection) {
-    const
-      strategy = dir === "west" || dir === "north" ? "shrink" : "grow",
-      frameFit = this.windowToSelection(target, gridSize, strategy),
-      targetSelection = pan(frameFit, gridSize, dir),
-      nwTile: GridOffset = {
-        col: Math.min(targetSelection.anchor.col, targetSelection.target.col),
-        row: Math.min(targetSelection.anchor.row, targetSelection.target.row),
-      },
-      asSelection: GridSelection = { anchor: nwTile, target: nwTile },
-      monitorIdx = target.get_monitor(),
-      targetArea = this.selectionToArea(asSelection, gridSize, monitorIdx),
-      frame = this.#frameRect(target),
-      newX = (dir === "north" || dir === "south") ? frame.x : targetArea.x,
-      newY = (dir === "east" || dir === "west") ? frame.y : targetArea.y;
+    // const
+    //   strategy = dir === "west" || dir === "north" ? "shrink" : "grow",
+    //   frameFit = this.windowToSelection(target, gridSize, strategy),
+    //   targetSelection = pan(frameFit, gridSize, dir),
+    //   nwTile: GridOffset = {
+    //     col: Math.min(targetSelection.anchor.col, targetSelection.target.col),
+    //     row: Math.min(targetSelection.anchor.row, targetSelection.target.row),
+    //   },
+    //   asSelection: GridSelection = { anchor: nwTile, target: nwTile },
+    //   monitorIdx = target.get_monitor(),
+    //   targetArea = this.selectionToArea(asSelection, gridSize, monitorIdx),
+    //   frame = this.#frameRect(target),
+    //   newX = (dir === "north" || dir === "south") ? frame.x : targetArea.x,
+    //   newY = (dir === "east" || dir === "west") ? frame.y : targetArea.y;
 
-    this.#moveResize(target, newX, newY);
+    // this.#moveResize(target, newX, newY);
   }
 
   /**
@@ -699,7 +699,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
       return;
     }
-
+    
     console.error(tree);
     throw new Error("Not handled", { cause: "" });
   }
@@ -711,7 +711,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     leaf.right = { data: tile };
   }
 
-  pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, tile: Tile, workArea?: Rectangle) {
+  pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, tile: Tile, workArea?: Rectangle): void {
     if (!workArea) {
       workArea = this.#workArea(this.#display.get_current_monitor());
     }
@@ -758,16 +758,21 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         rightArea[position] = rightArea[position] + half;
       }
 
-      if (tree.left.data instanceof Tile) {
-        this.#growNewLeaf(tree.left, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
-      } else {
-        this.pushTree(tree.left, point, tile, leftArea);
-      }
+      if (tree.left.data instanceof Container) return this.pushTree(tree.left, point, tile, leftArea);
+      if (tree.right.data instanceof Container) return this.pushTree(tree.right, point, tile, rightArea);
 
-      if (tree.right.data instanceof Tile) {
-        this.#growNewLeaf(tree.right, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
+      if (pointInRectangle(point.x, point.y, leftArea)) {
+        if (tree.left.data instanceof Tile) {
+          this.#growNewLeaf(tree.left, (leftArea.height > leftArea.width ? "Horizontal" : "Vertical"), tile);
+        }
       } else {
-        this.pushTree(tree.right, point, tile, rightArea);
+        // Commented out as a fallback in case the pointer is somehow outside
+        // of the workArea
+        // if (pointInRectangle(point.x, point.y, rightArea)) {
+        if (tree.right.data instanceof Tile) {
+          this.#growNewLeaf(tree.right, (rightArea.height > rightArea.width ? "Horizontal" : "Vertical"), tile);
+        }
+        // }
       }
 
       return;
