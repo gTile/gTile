@@ -30,7 +30,7 @@ type FrameSize = { width: number; height: number };
 
 type MRect = Mtk.Rectangle;
 
-const TitleBlacklist: RegExp[] = [
+export const TitleBlacklist: RegExp[] = [
   // Desktop Icons NG (see https://github.com/HyprWM/HyprWM/issues/336#issuecomment-1804267328)
   // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopManager.js#L396
   // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopGrid.js#L160
@@ -220,7 +220,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       relY = Math.min(selection.anchor.row, selection.target.row) / rows,
       relW = (Math.abs(selection.anchor.col - selection.target.col) + 1) / cols,
       relH = (Math.abs(selection.anchor.row - selection.target.row) + 1) / rows,
-      workArea = this.#workArea(monitorIdx),
+      workArea = this.workArea(monitorIdx),
       spacing = preview ? this.#userPreferences.getSpacing() : 0;
 
     return {
@@ -249,7 +249,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     snap: "closest" | "shrink" | "grow" = "closest",
   ): GridSelection {
     const frame = this.#frameRect(window);
-    const workArea = this.#workArea(window.get_monitor());
+    const workArea = this.workArea(window.get_monitor());
     const relativeRect: Rectangle = {
       x: (frame.x - workArea.x) / workArea.width,
       y: (frame.y - workArea.y) / workArea.height,
@@ -286,7 +286,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   autogrow(target: Meta.Window) {
     const monitorIdx = target.get_monitor();
-    const workArea = this.#workArea(monitorIdx);
+    const workArea = this.workArea(monitorIdx);
     const [_, frame] = workArea.intersect(this.#frameRect(target));
     const workspace = target.get_workspace();
     const collisionWindows = workspace.list_windows().filter(win => !(
@@ -358,11 +358,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    *
    * @param allTree The {@link Node<Tile | Container>} to be applied.
    */
-  autotile(allTree: Node<Tile | Container>[][], excludedWindow?: Meta.Window) {
-    const workspaceIdx = this.#workspaceManager.get_active_workspace_index();
+  autotile(tree: Node<Tile | Container>) {
     const monitorIdx = this.#display.get_current_monitor();
-    let tree = allTree[workspaceIdx][monitorIdx];
-    const workArea = this.#workArea(monitorIdx);
+    const workArea = this.workArea(monitorIdx);
     const windows = this.#workspaceManager
       .get_active_workspace()
       .list_windows()
@@ -370,33 +368,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         win.minimized ||
         win.get_monitor() !== monitorIdx ||
         win.get_frame_type() !== Meta.FrameType.NORMAL ||
-        TitleBlacklist.some(p => p.test(win.title ?? "")) ||
-        win.get_id() === excludedWindow?.get_id()
+        TitleBlacklist.some(p => p.test(win.title ?? ""))
       ));
-    const treeIds = this.#findIds(tree);
 
-    // tree not initiated
-    if (windows.length !== treeIds.length) {
-      tree = { data: new Container("Horizontal") };
-      let root = tree;
-      for (let index = 0; index < windows.length; index++) {
-        const window = windows[index];
-
-        if (root.data instanceof Container) {
-          if (!root.right) {
-            root.data = new Tile(window.get_id());
-          } else {
-            root = root.right;
-          }
-        } else {
-          root.left = { data: new Tile(root.data.id) };
-          root.right = { data: new Tile(window.get_id()) };
-          root.data = new Container(index % 2 == 0 ? "Horizontal" : "Vertical");
-          root = root.right;
-        }
-      }
-    }
-    
     this.#fitTree(tree, workArea, windows);
   }
 
@@ -557,7 +531,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     return frame;
   }
 
-  #workArea(monitorIdx: number): Mtk.Rectangle {
+  workArea(monitorIdx: number): Mtk.Rectangle {
     const
       isPrimaryMonitor = this.#layoutManager.primaryIndex === monitorIdx,
       inset = this.#userPreferences.getInset(isPrimaryMonitor),
@@ -713,7 +687,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
   pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, tile: Tile, workArea?: Rectangle): void {
     if (!workArea) {
-      workArea = this.#workArea(this.#display.get_current_monitor());
+      workArea = this.workArea(this.#display.get_current_monitor());
     }
 
     if (!pointInRectangle(point.x, point.y, workArea)) return;

@@ -24,7 +24,7 @@ import {
   ResizePresetListParser
 } from "../util/parser.js";
 import { VolatileStorage } from "../util/volatile.js";
-import DesktopManager from "./DesktopManager.js";
+import DesktopManager, { TitleBlacklist } from "./DesktopManager.js";
 import HotkeyManager, {
   DefaultKeyBindingGroups,
   SettingKeyToKeyBindingGroupLUT
@@ -119,10 +119,7 @@ export default class App implements GarbageCollector {
       userPreferences: new UserPreferences({ settings: this.#settings }),
     });
     this.#gc.defer(() => this.#desktopManager.release());
-    this.#tree = [...Array(workspaceManager.nWorkspaces)]
-      .map(_ => Array(display.get_n_monitors())
-        .fill({ data: new Container("Horizontal") }));
-    this.#desktopManager.autotile(this.#tree);
+    this.#tree = this.#initTree();
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
@@ -179,6 +176,52 @@ export default class App implements GarbageCollector {
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
     this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
   }
+  
+  #initTree() {
+    const workspaceManager = Shell.Global.get().workspace_manager;
+    const display = Shell.Global.get().display;
+    const workspaceCount = workspaceManager.nWorkspaces;
+    const monitorCount = display.get_n_monitors();
+    
+    const tree = [...Array(workspaceCount)]
+      .map(_ => Array(monitorCount)
+        .fill({ data: new Container("Horizontal") }));
+
+    for (let monitorIdx = 0; monitorIdx < monitorCount; monitorIdx++) {
+      const workArea = this.#desktopManager.workArea(monitorIdx);
+      for (let workspaceIdx = 0; workspaceIdx < workspaceCount; workspaceIdx++) {
+        const windows = workspaceManager
+        .get_workspace_by_index(workspaceIdx)!
+        .list_windows()
+        .filter(win => !(
+          win.minimized ||
+          win.get_monitor() !== monitorIdx ||
+          win.get_frame_type() !== Meta.FrameType.NORMAL ||
+          TitleBlacklist.some(p => p.test(win.title ?? ""))
+        ));
+
+        let root = tree[workspaceIdx][monitorIdx];
+        for (let index = 0; index < windows.length; index++) {
+          const window = windows[index];
+    
+          if (root.data instanceof Container) {
+            if (!root.right) {
+              root.data = new Tile(window.get_id());
+            } else {
+              root = root.right;
+            }
+          } else {
+            root.left = { data: new Tile(root.data.id) };
+            root.right = { data: new Tile(window.get_id()) };
+            root.data = new Container(index % 2 === 0 && workArea.width > workArea.height ? "Horizontal" : "Vertical");
+            root = root.right;
+          }
+        }
+        this.#desktopManager.autotile(tree[workspaceIdx][monitorIdx]);
+      }
+    }
+    return tree;
+  }
 
   release() {
     this.#gc.release();
@@ -195,7 +238,7 @@ export default class App implements GarbageCollector {
       { x, y },
       new Tile(window.get_id()),
     );
-    this.#desktopManager.autotile(this.#tree);
+    this.#desktopManager.autotile(this.#tree[currentWorkspace.index()][display.get_current_monitor()]);
   }
 
   #popTree(display: Meta.Display, window: Meta.Window) {
@@ -204,7 +247,7 @@ export default class App implements GarbageCollector {
       this.#tree[currentWorkspace.index()][display.get_current_monitor()],
       window.get_id(),
     )
-    this.#desktopManager.autotile(this.#tree)
+    this.#desktopManager.autotile(this.#tree[currentWorkspace.index()][display.get_current_monitor()])
   }
 
   #getResizePreset(index: LoopPresetAction["preset"]): Preset | null {
@@ -366,12 +409,12 @@ export default class App implements GarbageCollector {
         return;
       case Action.AUTOTILE:
         if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(this.#tree);
+          dm.autotile(this.#tree[window.get_workspace().index()][monitorIdx]);
         } else if (action.layout === "cols" && action.cols) {
           const gridSpec = this.#gridSpecs[action.layout][action.cols];
 
           if (gridSpec) {
-            dm.autotile(this.#tree);
+            dm.autotile(this.#tree[window.get_workspace().index()][monitorIdx]);
           }
         }
         return;
