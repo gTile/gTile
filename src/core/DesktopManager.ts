@@ -673,80 +673,47 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
       return;
     }
-    
+
     console.error(tree);
     throw new Error("Not handled", { cause: "" });
   }
 
-  #growNewLeaf(leaf: Node<Tile | Container>, split: Container["split"], tile: Tile) {
-    const left = leaf.data as Tile;
-    leaf.data = new Container(split);
-    leaf.left = { data: left };
-    leaf.right = { data: tile };
-  }
-
-  pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, tile: Tile, workArea?: Rectangle): void {
+  pushTree(tree: Node<Tile | Container>, point: { x: number, y: number }, newTile: Tile, workArea?: Rectangle): void {
     if (!workArea) {
       workArea = this.workArea(this.#display.get_current_monitor());
     }
 
-    if (!pointInRectangle(point.x, point.y, workArea)) return;
+    if (!pointInRectangle(point, workArea)) return;
 
     if (tree.data instanceof Container && !tree.left && !tree.right) {
       // Node has no window. Only possible on empty desktop.
-      tree.data = tile;
+      tree.data = newTile;
       return;
     }
 
     if (tree.data instanceof Tile) {
       // Only possible on desktop with one window.
-      this.#growNewLeaf(tree, (workArea.height > workArea.width ? "Horizontal" : "Vertical"), tile);
+      const {left: leftArea, container} = this.#splitArea(workArea);
+
+      const temp = tree.data;
+      tree.data = container;
+      if (pointInRectangle(point, leftArea)) {
+        tree.left = { data: newTile };
+        tree.right = { data: temp };
+      } else {
+        tree.left = { data: temp };
+        tree.right = { data: newTile };
+      }
       return;
     }
 
     if (tree.data instanceof Container && tree.left && tree.right) {
-      const leftArea: Rectangle = {
-        x: workArea.x,
-        y: workArea.y,
-        width: workArea.width,
-        height: workArea.height,
-      };
-      const rightArea: Rectangle = {
-        x: workArea.x,
-        y: workArea.y,
-        width: workArea.width,
-        height: workArea.height,
-      };
-      const dimension = tree.data.split === "Horizontal" ? "height" : "width";
-      const position = tree.data.split === "Horizontal" ? "y" : "x";
+      const {left: leftArea, right: rightArea} = this.#splitArea(workArea, tree.data);
 
-      if (tree.data.constraint) {
-        const left = tree.data.constraint;
-        leftArea[dimension] = left;
-        rightArea[dimension] = workArea[dimension] - left;
-        rightArea[position] = rightArea[position] + left;
+      if (pointInRectangle(point, leftArea)) {
+        this.pushTree(tree.left, point, newTile, leftArea);
       } else {
-        const half = workArea[dimension] / 2;
-        leftArea[dimension] = half;
-        rightArea[dimension] = half;
-        rightArea[position] = rightArea[position] + half;
-      }
-
-      if (tree.left.data instanceof Container) return this.pushTree(tree.left, point, tile, leftArea);
-      if (tree.right.data instanceof Container) return this.pushTree(tree.right, point, tile, rightArea);
-
-      if (pointInRectangle(point.x, point.y, leftArea)) {
-        if (tree.left.data instanceof Tile) {
-          this.#growNewLeaf(tree.left, (leftArea.height > leftArea.width ? "Horizontal" : "Vertical"), tile);
-        }
-      } else {
-        // Commented out as a fallback in case the pointer is somehow outside
-        // of the workArea
-        // if (pointInRectangle(point.x, point.y, rightArea)) {
-        if (tree.right.data instanceof Tile) {
-          this.#growNewLeaf(tree.right, (rightArea.height > rightArea.width ? "Horizontal" : "Vertical"), tile);
-        }
-        // }
+        this.pushTree(tree.right, point, newTile, rightArea);
       }
 
       return;
@@ -754,6 +721,42 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     console.error(tree);
     throw new Error("Not handled", { cause: "" });
+  }
+
+  #splitArea(area: Rectangle, container?: Container): { left: Rectangle, right: Rectangle, container: Container } {
+    const leftArea: Rectangle = {
+      x: area.x,
+      y: area.y,
+      width: area.width,
+      height: area.height,
+    };
+    const rightArea: Rectangle = {
+      x: area.x,
+      y: area.y,
+      width: area.width,
+      height: area.height,
+    };
+    
+    if (!container) {
+      container = new Container(area.height > area.width ? "Horizontal" : "Vertical")
+    }
+
+    const dimension = container.split === "Horizontal" ? "height" : "width";
+    const position = container.split === "Horizontal" ? "y" : "x";
+
+    if (container.constraint) {
+      const left = container.constraint;
+      leftArea[dimension] = left;
+      rightArea[dimension] = area[dimension] - left;
+      rightArea[position] = rightArea[position] + left;
+    } else {
+      const half = area[dimension] / 2;
+      leftArea[dimension] = half;
+      rightArea[dimension] = half;
+      rightArea[position] = rightArea[position] + half;
+    }
+
+    return { left: leftArea, right: rightArea, container: container }
   }
 
   #gridSpecToAreas(spec: GridSpec, x = 0, y = 0, w = 1, h = 1): GridSpecAreas {

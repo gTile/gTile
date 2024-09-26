@@ -35,13 +35,13 @@ export const AutoTileLayouts = (settings: ExtensionSettings) => ({
  * @param dir The cardinal direction in which to move the selection.
  * @returns The new selection after performing the pan operation.
  */
-export function pan (
+export function pan(
   selection: GridSelection,
   bounds: GridSize,
   dir: CardinalDirection,
 ): GridSelection {
   const
-    colOffset = dir === "east"  ? 1 : dir === "west"  ? -1 : 0,
+    colOffset = dir === "east" ? 1 : dir === "west" ? -1 : 0,
     rowOffset = dir === "south" ? 1 : dir === "north" ? -1 : 0,
     maxCol = bounds.cols - 1,
     maxRow = bounds.rows - 1,
@@ -84,10 +84,10 @@ export function adjust(
 
   const rel =
     dir === "north" && mode === "shrink" ? 1 :
-    dir === "east"  && mode === "extend" ? 1 :
-    dir === "south" && mode === "extend" ? 1 :
-    dir === "west"  && mode === "shrink" ? 1 :
-    -1;
+      dir === "east" && mode === "extend" ? 1 :
+        dir === "south" && mode === "extend" ? 1 :
+          dir === "west" && mode === "shrink" ? 1 :
+            -1;
 
   switch (dir) {
     case "north":
@@ -107,9 +107,9 @@ export function adjust(
   return { anchor, target };
 }
 
-export function pointInRectangle(x: number, y: number, rectangle: Rectangle){
-  return x >= rectangle.x &&
-    x <= rectangle.x + rectangle.width &&
-    y >= rectangle.y &&
-    y <= rectangle.y + rectangle.height
+export function pointInRectangle(point: { x: number, y: number }, rectangle: Rectangle) {
+  return point.x >= rectangle.x &&
+    point.x <= rectangle.x + rectangle.width &&
+    point.y >= rectangle.y &&
+    point.y <= rectangle.y + rectangle.height
 }
