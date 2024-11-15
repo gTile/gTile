@@ -173,9 +173,23 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param monitorIdx Optional. When not given, rotate amongst monitors.
    */
   moveToMonitor(target: Meta.Window, monitorIdx?: number) {
+    console.log(`moveToMonitor on ${target.get_title()} called; monitorIdx = ${monitorIdx}; target.get_monitor() = ${target.get_monitor()}; this.monitors.length = ${this.monitors.length}`);
     monitorIdx = monitorIdx ?? (target.get_monitor() + 1) % this.monitors.length;
     target.unmaximize(Meta.MaximizeFlags.BOTH);
-    target.move_to_monitor(monitorIdx);
+    console.log(`moveToMonitor move_to_monitor(${monitorIdx}) will be called from target with get_monitor() = ${target.get_monitor()}; window title = ${target.get_title()}`);
+    //target.move_to_monitor(monitorIdx);
+    if (monitorIdx === target.get_monitor()) {
+      return;
+    }
+    this.applySelection(
+      target,
+      monitorIdx,
+      {cols: 5, rows: 10},
+      {
+        anchor: {col: 1, row: 1},
+        target: {col: 3, row: 8},
+      }
+    )
   }
 
   /**
