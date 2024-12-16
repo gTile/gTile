@@ -345,6 +345,10 @@
       <default>'cols(1d,1d,1d,1d,1d,1d,1d,1d,1d,1d)'</default>
       <summary>Autotile layout 10 GridSpec</summary>
     </key>
+    <key type="s" name="autotile-main-window-ratios">
+      <default>'.5, .625, .75'</default>
+      <summary>Autotile main window width-ratios rotation (when pressing shortcut in succession)</summary>
+    </key>
     <key type="s" name="resize1">
       <default>'4x4 1:3 2:4, 1:2 3:4, 1:1 4:4, 1:4 1:4'</default>
       <summary>Preset resize 1 settings (example 6x4 1:2 3:3)</summary>

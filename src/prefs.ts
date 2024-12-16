@@ -292,6 +292,7 @@ export default class extends ExtensionPreferences {
         "This option will bind these shortcuts globally, making them " +
         "unusable for other functions!";
       group.add(this.#switchRow("global-auto-tiling", { subtitle }));
+      group.add(this.#entryRow('autotile-main-window-ratios'));
     }
 
     {

@@ -1,5 +1,7 @@
 CHANGE LOG
 ----------
+### 62
+- Fixed regression introduced in version 53: Autotile main layouts now support multiple workspace ratios.
 
 ### 61
 - Support for Gnome 47 (extension is compatible without further code changes)
