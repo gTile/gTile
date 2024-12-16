@@ -3,7 +3,12 @@ import Shell from "gi://Shell";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-import { Action, HotkeyAction, LoopPresetAction } from "../types/hotkeys.js";
+import {
+  Action,
+  AutoTileAction,
+  HotkeyAction,
+  LoopPresetAction,
+} from "../types/hotkeys.js";
 import {
   BoolSettingKey,
   ExtensionSettings,
@@ -14,23 +19,29 @@ import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
-import { AutoTileLayouts, DefaultGridSizes, adjust, pan } from "../util/grid.js";
+import {
+  AutoTileLayouts,
+  DefaultGridSizes,
+  adjust,
+  pan,
+} from "../util/grid.js";
 import {
   GridSizeListParser,
+  GridSpec,
   GridSpecParser,
   Preset,
-  ResizePresetListParser
+  ResizePresetListParser,
 } from "../util/parser.js";
 import { VolatileStorage } from "../util/volatile.js";
 import DesktopManager from "./DesktopManager.js";
 import HotkeyManager, {
   DefaultKeyBindingGroups,
-  SettingKeyToKeyBindingGroupLUT
+  SettingKeyToKeyBindingGroupLUT,
 } from "./HotkeyManager.js";
 import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
 
-type ResizePresetAddr = [index: number, subindex: number];
+type PresetIndex = [index: number, subindex: number];
 type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type StartsWith<S extends string, Prefix extends string> =
   S extends `${Prefix}${string}` ? S : never;
@@ -48,7 +59,7 @@ export default class App implements GarbageCollector {
 
   #theme: Theme;
   #gc: GarbageCollection;
-  #lastResizePreset: VolatileStorage<ResizePresetAddr>;
+  #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
   #gridSpecs: ReturnType<typeof AutoTileLayouts>;
   #globalKeyBindingGroups: number;
@@ -78,14 +89,14 @@ export default class App implements GarbageCollector {
 
   private constructor(extension: ExtensionSettingsProvider) {
     // --- initialize ---
-    const mangledThemeName = extension.settings.
-      get_string("theme")!.
-      toLowerCase().
-      replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
+    const mangledThemeName = extension.settings
+      .get_string("theme")!
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
 
     this.#theme = `gtile-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
-    this.#lastResizePreset = new VolatileStorage<ResizePresetAddr>(2000);
+    this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
     this.#settings = extension.settings;
     this.#gridSpecs = AutoTileLayouts(this.#settings);
 
@@ -145,7 +156,7 @@ export default class App implements GarbageCollector {
 
   release() {
     this.#gc.release();
-    this.#lastResizePreset.release();
+    this.#lastPresetIndex.release();
     App.#instance = undefined as any;
   }
 
@@ -156,17 +167,41 @@ export default class App implements GarbageCollector {
       return null;
     }
 
-    const [lastIndex, lastSubindex] = this.#lastResizePreset.store ?? [-1, -1];
+    const [lastIndex, lastSubindex] = this.#lastPresetIndex.store ?? [-1, -1];
     if (lastIndex !== index) {
-      this.#lastResizePreset.store = [index, 0];
+      this.#lastPresetIndex.store = [index, 0];
 
       return presets[0];
     }
 
     const nextSubindex = (lastSubindex + 1) % presets.length;
-    this.#lastResizePreset.store = [index, nextSubindex];
+    this.#lastPresetIndex.store = [index, nextSubindex];
 
     return presets[nextSubindex];
+  }
+
+  #getAutotilePreset(action: AutoTileAction): GridSpec | null {
+    const
+      gridSpec = action.layout !== "cols"
+        ? this.#gridSpecs[action.layout]
+        : this.#gridSpecs[action.layout][action.cols],
+      [lastIndex, lastSubindex] = this.#lastPresetIndex.store ?? [-1, -1],
+      index = ({
+        main: 100,
+        "main-inverted": 101,
+        cols: 102 + (action.layout === "cols" ? action.cols : 0),
+      } satisfies Record<AutoTileAction["layout"], number>)[action.layout];
+
+    if (lastIndex !== index) {
+      this.#lastPresetIndex.store = [index, 0];
+
+      return gridSpec[0];
+    }
+
+    const nextSubindex = (lastSubindex + 1) % gridSpec.length;
+    this.#lastPresetIndex.store = [index, nextSubindex];
+
+    return gridSpec[nextSubindex];
   }
 
   #onSettingsChanged(key: SettingKey) {
@@ -199,7 +234,7 @@ export default class App implements GarbageCollector {
     const value = this.#settings.get_string(key);
     const gridSpec = new GridSpecParser(value!).parse();
     if (gridSpec) {
-      this.#gridSpecs["cols"][col] = gridSpec;
+      this.#gridSpecs["cols"][col][0] = gridSpec;
     }
   }
 
@@ -228,7 +263,7 @@ export default class App implements GarbageCollector {
     }
 
     // exhaustive switch-case guard
-    return ((): never => { })();
+    return ((): never => {})();
   }
 
   #onUserAction(action: HotkeyAction) {
@@ -297,19 +332,15 @@ export default class App implements GarbageCollector {
         dm.moveToMonitor(window);
         return;
       case Action.AUTOTILE:
-        if (action.layout === "main" || action.layout === "main-inverted") {
-          dm.autotile(this.#gridSpecs[action.layout], monitorIdx);
-        } else if (action.layout === "cols" && action.cols) {
-          const gridSpec = this.#gridSpecs[action.layout][action.cols];
+        const gridSpec = this.#getAutotilePreset(action);
 
-          if (gridSpec) {
-            dm.autotile(gridSpec, monitorIdx);
-          }
+        if (gridSpec) {
+          dm.autotile(gridSpec, monitorIdx);
         }
         return;
     }
 
     // exhaustive switch-case guard
-    return ((): never => { })();
+    return ((): never => {})();
   }
 }

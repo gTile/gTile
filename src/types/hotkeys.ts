@@ -131,10 +131,13 @@ export interface RelocateAction {
   type: Action.RELOCATE;
 }
 
-export interface AutoTileAction {
+export type AutoTileAction = {
   type: Action.AUTOTILE;
-  layout: "main" | "main-inverted" | "cols";
-  cols?: AsNumber<StripPrefix<KeyBindingSettingKey, "autotile-">>;
+  layout: "main" | "main-inverted";
+} | {
+  type: Action.AUTOTILE;
+  layout: "cols";
+  cols: AsNumber<StripPrefix<KeyBindingSettingKey, "autotile-">>;
 }
 
 /**

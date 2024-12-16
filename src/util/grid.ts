@@ -9,22 +9,36 @@ export const DefaultGridSizes: GridSize[] = [
   { cols: 4, rows: 4 },
 ];
 
-export const AutoTileLayouts = (settings: ExtensionSettings) => ({
-  "main": new GridSpecParser("cols(2, 2d)").parse()!,
-  "main-inverted": new GridSpecParser("cols(2d, 2)").parse()!,
-  "cols": {
-    1: new GridSpecParser(settings.get_string("autotile-gridspec-1")!).parse(),
-    2: new GridSpecParser(settings.get_string("autotile-gridspec-2")!).parse(),
-    3: new GridSpecParser(settings.get_string("autotile-gridspec-3")!).parse(),
-    4: new GridSpecParser(settings.get_string("autotile-gridspec-4")!).parse(),
-    5: new GridSpecParser(settings.get_string("autotile-gridspec-5")!).parse(),
-    6: new GridSpecParser(settings.get_string("autotile-gridspec-6")!).parse(),
-    7: new GridSpecParser(settings.get_string("autotile-gridspec-7")!).parse(),
-    8: new GridSpecParser(settings.get_string("autotile-gridspec-8")!).parse(),
-    9: new GridSpecParser(settings.get_string("autotile-gridspec-9")!).parse(),
-    10: new GridSpecParser(settings.get_string("autotile-gridspec-10")!).parse(),
-  }
-} satisfies Record<AutoTileAction["layout"], any>);
+export const AutoTileLayouts = (cfg: ExtensionSettings) => {
+  const
+    fractionScaleFactor = 1024,
+    workspaceRatios = cfg
+      .get_string('autotile-main-window-ratios')
+      .split(',')
+      .map(frac => parseFloat(frac))
+      .filter(frac => !isNaN(frac))
+      .map(frac => Math.round(Math.clamp(frac, 0, 1) * fractionScaleFactor))
+      .map(n => [n, fractionScaleFactor - n] as const);
+
+  return ({
+    "main": workspaceRatios.map(([main, minor]) =>
+      new GridSpecParser(`cols(${main}, ${minor}d)`).parse()!),
+    "main-inverted": workspaceRatios.map(([main, minor]) =>
+      new GridSpecParser(`cols(${minor}d, ${main})`).parse()!),
+    "cols": {
+      1: [new GridSpecParser(cfg.get_string("autotile-gridspec-1")!).parse()],
+      2: [new GridSpecParser(cfg.get_string("autotile-gridspec-2")!).parse()],
+      3: [new GridSpecParser(cfg.get_string("autotile-gridspec-3")!).parse()],
+      4: [new GridSpecParser(cfg.get_string("autotile-gridspec-4")!).parse()],
+      5: [new GridSpecParser(cfg.get_string("autotile-gridspec-5")!).parse()],
+      6: [new GridSpecParser(cfg.get_string("autotile-gridspec-6")!).parse()],
+      7: [new GridSpecParser(cfg.get_string("autotile-gridspec-7")!).parse()],
+      8: [new GridSpecParser(cfg.get_string("autotile-gridspec-8")!).parse()],
+      9: [new GridSpecParser(cfg.get_string("autotile-gridspec-9")!).parse()],
+      10: [new GridSpecParser(cfg.get_string("autotile-gridspec-10")!).parse()],
+    }
+  } satisfies Record<AutoTileAction["layout"], any>);
+}
 
 /**
  * Moves a {@link selection} towards a {@link dir|direction} within the
