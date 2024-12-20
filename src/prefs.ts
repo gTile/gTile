@@ -41,7 +41,6 @@ export default class extends ExtensionPreferences {
     // Listening to the `destroy` signal does not work. The only viable signals
     // to perform destructive operations are `close-request` and `unrealize`.
     window.connect("close-request", this.#release.bind(this));
-    return new Promise((resolve, reject) => resolve());
   }
 
   #release() {
