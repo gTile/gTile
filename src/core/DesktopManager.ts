@@ -175,7 +175,19 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   moveToMonitor(target: Meta.Window, monitorIdx?: number) {
     monitorIdx = monitorIdx ?? (target.get_monitor() + 1) % this.monitors.length;
     target.unmaximize(Meta.MaximizeFlags.BOTH);
-    target.move_to_monitor(monitorIdx);
+    if (monitorIdx === target.get_monitor()) {
+      return;
+    }
+    // Center the window on the new monitor.
+    this.applySelection(
+      target,
+      monitorIdx,
+      {cols: 5, rows: 10},
+      {
+        anchor: {col: 1, row: 1},
+        target: {col: 3, row: 8},
+      }
+    )
   }
 
   /**
