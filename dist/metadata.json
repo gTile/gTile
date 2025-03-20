@@ -2,7 +2,7 @@
   "uuid": "gTile@vibou",
   "name": "gTile",
   "description": "Tile windows on a grid",
-  "shell-version": ["48"],
+  "shell-version": ["47","48"],
   "url": "https://github.com/gTile",
   "settings-schema": "org.gnome.shell.extensions.gtile",
   "version": 64
