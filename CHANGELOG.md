@@ -1,7 +1,12 @@
 CHANGE LOG
 ----------
+
+### 64
+- Add support for Gnome 48 (extension is compatible without further code changes)
+
 ### 63
 - Added move between monitors
+
 ### 62
 - Fixed regression introduced in version 53: Autotile main layouts now support multiple workspace ratios.
 
