@@ -182,7 +182,7 @@ Some examples of valid `GridSpec` definitions:
 
 - `cols(1, 3, 1)`
   - Describes a grid consisting of three columns (and a single row). The first and last column have a relative width of 20% each (i.e. 1/5) and the center column has a size (relative to the row width) of 3/5, i.e., 60%.
-- `rows(1, 1:col(3,3,3), 1d)`
+- `rows(1, 1:cols(3,3,3), 1d)`
   - Describes a grid consisting of three rows. The first and last row both consist of a single column with 100% width. The center row consists of three columns, each with 33% width. The last row is defined as a `dynamic` row, which affects how autotiling does place windows in it. Usually, autotiling assigns at most 1 window to each cell. Cells declared as `dynamic` may hold as many windows as necessary. Windows placed into a dynamic cell all get the same share of this cell. For instance, if 2 windows were to be placed in the dynamic cell above, they would each take 50% of the rows width.
 
 In general, the autotiling algorithm works as follows:
