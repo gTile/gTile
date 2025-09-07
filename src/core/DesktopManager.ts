@@ -373,6 +373,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   autotile(spec: GridSpec, monitorIdx: number) {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
+    // windows array below: This needs to be reordered so that the focused window is always at index 0
+    
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
 
       .filter(win => !(
@@ -381,6 +383,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         win.get_frame_type() !== Meta.FrameType.NORMAL ||
         TitleBlacklist.some(p => p.test(win.title ?? ""))
       ));
+    
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
       x: canvas.x + canvas.width * rect.x,
       y: canvas.y + canvas.height * rect.y,
@@ -418,7 +421,13 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     // Fit remaining windows in dynamic cells
     // Here we finally get to the dynamic cells specified in the AutoTile gridspec
     // @schnz's suggested possible solution is to reorder the windows array so that the focused window is always at index 0 when autotiling
-    // Now where the hell do we find the windows array?
+    const focusedIdxColTile = windows.findIndex(w => w.has_focus()); // save focused window's Idx for column autotiling
+    var tempArrayElement = windows[focusedIdxColTile];
+    windows[focusedIdxColTile] = windows[0];
+    windows[0] = tempArrayElement;
+    
+    
+    
     windows.splice(0, dedicated.length);
     for (let i = 0; i < dynamic.length; i++) {
       const mustFitAtLeastN = Math.floor(windows.length / dynamic.length);
