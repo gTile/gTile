@@ -391,6 +391,10 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     // Place focused window (if any) in the largest dedicated area
     const focusedIdx = windows.findIndex(w => w.has_focus());
     if (focusedIdx && dedicated.length > 0) {
+      // if statement condition never satisfied according to @schnz (https://github.com/gTile/gTile/issues/422)
+      // focusedIdx represents focused window -> This should be a value (unknown as of now, but probably positive)
+      // dedicated.length is NOT >0 when using autotile because autotile uses non-dedicated (regular) cols in its grid spec
+      
       const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
         rect.width * rect.height > accuArea
           ? [idx, rect.width * rect.height]
@@ -405,11 +409,16 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     }
 
     // Place windows in regular cells
+    // Still not the part triggered by Autotile - these are regular cells, which the autotile gridspec does not use
+    
     for (let i = 0; i < dedicated.length && i < windows.length; ++i) {
       this.#fit(windows[i], project(dedicated[i], workArea));
     }
 
     // Fit remaining windows in dynamic cells
+    // Here we finally get to the dynamic cells specified in the AutoTile gridspec
+    // @schnz's suggested possible solution is to reorder the windows array so that the focused window is always at index 0 when autotiling
+    // Now where the hell do we find the windows array?
     windows.splice(0, dedicated.length);
     for (let i = 0; i < dynamic.length; i++) {
       const mustFitAtLeastN = Math.floor(windows.length / dynamic.length);
