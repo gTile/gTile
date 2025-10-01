@@ -55,7 +55,7 @@
     </key>
     <key type="as" name="contract-down">
       <default><![CDATA[['<Shift>Up', '<Shift>k']]]></default>
-      <summary>Contract top window edge upwards</summary>
+      <summary>Contract bottom window edge upwards</summary>
     </key>
     <key type="as" name="expand-left">
       <default><![CDATA[[]]]></default>
