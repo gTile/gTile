@@ -205,9 +205,15 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     gridSize: GridSize,
     selection: GridSelection,
   ) {
-    const projectedArea = this.selectionToArea(selection, gridSize, monitorIdx);
+    if (seleciton.anchor.col == 1 && selection.anchor.row == 1 &&
+        selection.target.col == gridSize.cols &&
+        selection.target.row == gridSize.rows) {
+        target.maximize()
+    } else {
+      const projectedArea = this.selectionToArea(selection, gridSize, monitorIdx);
+      this.#fit(target, projectedArea);
+    }
 
-    this.#fit(target, projectedArea);
   }
 
   /**
