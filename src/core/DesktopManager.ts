@@ -304,6 +304,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     const collisionWindows = workspace.list_windows().filter(win => !(
       win === target ||
       win.minimized ||
+      win.is_above() ||
       win.get_frame_type() !== Meta.FrameType.NORMAL ||
       TitleBlacklist.some(p => p.test(win.title ?? "")) ||
       win.get_monitor() !== monitorIdx ||
@@ -378,6 +379,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
       .filter(win => !(
         win.minimized ||
+        win.is_above() ||
         win.get_monitor() !== monitorIdx ||
         win.get_frame_type() !== Meta.FrameType.NORMAL ||
         TitleBlacklist.some(p => p.test(win.title ?? ""))
