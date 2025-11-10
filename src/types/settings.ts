@@ -11,6 +11,7 @@ export type BoolSettingKey =
   | "follow-cursor"
   | "global-auto-tiling"
   | "global-presets"
+  | "auto-maximize"
   | "moveresize-enabled"
   | "show-grid-lines"
   | "show-icon"

@@ -205,7 +205,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     gridSize: GridSize,
     selection: GridSelection,
   ) {
-    if (selection.anchor.col == 0 && selection.anchor.row == 0 &&
+    if (this.#userPreferences.getAutoMaximize() == true &&
+        selection.anchor.col == 0 && selection.anchor.row == 0 &&
         selection.target.col == gridSize.cols -1 &&
         selection.target.row == gridSize.rows -1) {
         target.maximize()

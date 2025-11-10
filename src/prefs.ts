@@ -150,6 +150,7 @@ export default class extends ExtensionPreferences {
       page.add(group);
 
       group.add(this.#switchRow("global-presets"));
+      group.add(this.#switchRow("auto-maximize"));
       group.add(this.#switchRow("target-presets-to-monitor-of-mouse"));
     }
 

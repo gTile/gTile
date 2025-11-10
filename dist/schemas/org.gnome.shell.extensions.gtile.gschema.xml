@@ -497,6 +497,10 @@
       <default>true</default>
       <summary>Allow preset shortcut usage when the gTile UI is not visible</summary>
     </key>
+    <key type="b" name="auto-maximize">
+      <default>false</default>
+      <summary>Automatically maximize a window when resize covers entire screen</summary>
+    </key>
     <key type="b" name="target-presets-to-monitor-of-mouse">
       <default>false</default>
       <summary>Preset shortcuts will target the monitor of the mouse cursor</summary>

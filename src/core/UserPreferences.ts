@@ -7,6 +7,7 @@ import { ExtensionSettings } from "../types/settings.js";
 export interface UserPreferencesProvider {
   getInset(primary: boolean): Inset;
   getSpacing(): number;
+  getAutoMaximize(): boolean;
 }
 
 export interface UserPreferencesParams {
@@ -49,5 +50,14 @@ export default class implements UserPreferencesProvider {
    */
   getSpacing(): number {
     return this.#settings.get_int("window-spacing");
+  }
+
+  /**
+  * Whether windows should be automatically maximized when resized to fill
+  * the entire screen.
+  * * @returns True if windows should be auto-maximized, false otherwise.
+  */
+  getAutoMaximize(): boolean {
+    return this.#settings.get_boolean("auto-maximize");
   }
 }
