@@ -53,9 +53,7 @@ export default class implements UserPreferencesProvider {
   }
 
   /**
-  * Whether windows should be automatically maximized when resized to fill
-  * the entire screen.
-  * * @returns True if windows should be auto-maximized, false otherwise.
+  * @returns Whether to maximize windows when selection fills the entire grid.
   */
   getAutoMaximize(): boolean {
     return this.#settings.get_boolean("auto-maximize");
