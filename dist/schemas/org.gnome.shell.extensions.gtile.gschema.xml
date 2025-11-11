@@ -479,7 +479,7 @@
     </key>
     <key type="b" name="auto-maximize">
       <default>false</default>
-      <summary>Automatically maximize windows when resized to the cover entire grid</summary>
+      <summary>Automatically maximize windows that cover the entire grid</summary>
     </key>
     <key type="b" name="follow-cursor">
       <default>false</default>
