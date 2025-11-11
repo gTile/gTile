@@ -477,6 +477,10 @@
       <default>true</default>
       <summary>Close gTile after confirming an operation</summary>
     </key>
+    <key type="b" name="auto-maximize">
+      <default>false</default>
+      <summary>Automatically maximize windows when resized to the cover entire grid</summary>
+    </key>
     <key type="b" name="follow-cursor">
       <default>false</default>
       <summary>Place the gTile overlay near the mouse cursor</summary>
@@ -496,10 +500,6 @@
     <key type="b" name="global-presets">
       <default>true</default>
       <summary>Allow preset shortcut usage when the gTile UI is not visible</summary>
-    </key>
-    <key type="b" name="auto-maximize">
-      <default>false</default>
-      <summary>Automatically maximize a window when resize covers entire screen</summary>
     </key>
     <key type="b" name="target-presets-to-monitor-of-mouse">
       <default>false</default>
