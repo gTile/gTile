@@ -8,10 +8,10 @@ import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
  */
 export type BoolSettingKey =
   | "auto-close"
+  | "auto-maximize"
   | "follow-cursor"
   | "global-auto-tiling"
   | "global-presets"
-  | "auto-maximize"
   | "moveresize-enabled"
   | "show-grid-lines"
   | "show-icon"
