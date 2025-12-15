@@ -23,7 +23,8 @@ import { GridSpec } from "../util/parser.js";
 import { UserPreferencesProvider } from "./UserPreferences.js";
 
 // splits computed gridspec cell areas in non-dynamic and dynamic cells
-type GridSpecAreas = [dedicated: Rectangle[], dynamic: Rectangle[]];
+type Axis = 'x' | 'y';
+type GridSpecAreas = [dedicated: Rectangle[], dynamic: Rectangle[], dynamicAxes: Axis[]];
 
 type FrameSize = { width: number; height: number };
 
@@ -372,7 +373,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param monitorIdx The {@link Monitor.index} to apply the grid spec to.
    */
   autotile(spec: GridSpec, monitorIdx: number) {
-    const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
+    const [dedicated, dynamic, dynamicAxis] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
 
@@ -419,7 +420,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       const n = mustFitAtLeastN + (mustTakeOverflowWindow ? 1 : 0);
 
       let j = i;
-      for (const area of this.#splitN(dynamic[i], n)) {
+      for (const area of this.#splitN(dynamic[i], n, dynamicAxis[i])) {
         this.#fit(windows[j], project(area, workArea));
         j += dynamic.length;
       }
@@ -637,21 +638,25 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   #gridSpecToAreas(spec: GridSpec, x = 0, y = 0, w = 1, h = 1): GridSpecAreas {
     const regularCells: Rectangle[] = [];
     const dynamicCells: Rectangle[] = [];
+    const dynamixAxes: Axis[] = [];
     const totalWeight = spec.cells.reduce((sum, c) => sum + c.weight, 0);
 
     for (const cell of spec.cells) {
       const ratio = cell.weight / totalWeight;
       const width = spec.mode === "cols" ? w * ratio : w;
       const height = spec.mode === "rows" ? h * ratio : h;
+      const axis = spec.mode === "cols" ? 'x' : 'y';
 
       if (cell.child) {
-        const [dedicated, dynamic] =
+        const [dedicated, dynamic, dynamicAxes] =
           this.#gridSpecToAreas(cell.child, x, y, width, height);
 
         regularCells.push(...dedicated);
         dynamicCells.push(...dynamic);
+        dynamixAxes.push(...dynamicAxes);
       } else if (cell.dynamic) {
         dynamicCells.push({ x, y, width, height });
+        dynamixAxes.push(axis);
       } else {
         regularCells.push({ x, y, width, height });
       }
@@ -660,13 +665,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       if (spec.mode === "rows") y += height;
     }
 
-    return [regularCells, dynamicCells];
+    return [regularCells, dynamicCells, dynamixAxes];
   }
 
-  #splitN(rect: Rectangle, n: number, axis?: "x" | "y"): Rectangle[] {
+  #splitN(rect: Rectangle, n: number, axis: Axis): Rectangle[] {
     const result: Rectangle[] = [];
     const { width, height } = rect;
-    axis = axis ?? width > height ? "x" : "y";
 
     let i = n, { x, y } = rect;
     while (i--) {
