@@ -164,7 +164,7 @@ export default GObject.registerClass({
 
     // --- initialize ---
     this.#theme = theme;
-    this.#titleBar = new TitleBar({ theme, title });
+    this.#titleBar = new TitleBar({ theme, title, width: scaledWidth });
     this.#grid = new Grid({
       theme,
       gridSize: presets[0],

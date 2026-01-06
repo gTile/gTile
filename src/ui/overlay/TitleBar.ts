@@ -3,6 +3,7 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { Theme } from "../../types/theme.js"
+import Pango from "gi://Pango";
 
 export interface TitleBarParams extends St.Widget.ConstructorProperties {
   theme: Theme;
@@ -25,7 +26,7 @@ export default GObject.registerClass({
 }, class extends St.Widget {
   #label: St.Label;
 
-  constructor({ theme, title, ...params }: TitleBarParams) {
+  constructor({ theme, title, width, ...params }: TitleBarParams) {
     super({
       style_class: `gtile-testtest`,
       layout_manager: new Clutter.BoxLayout(),
@@ -43,7 +44,10 @@ export default GObject.registerClass({
     this.#label = new St.Label({
       style_class: `${theme}__title`,
       text: title,
+      x_expand: false,
+      width: width,
     });
+    this.#label.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
 
     // --- show  UI ---
     this.add_child(closeBtn);
