@@ -8,7 +8,7 @@
  */
 
 .gtile-default {
-    width: 320px;
+    /* width: 320px;*/
     border-radius: 10px;
     background-color: rgba(40, 40, 40, 1);
     box-shadow: 0 0 5px rgba(31, 31, 31, 0.2);
@@ -222,7 +222,7 @@
 .gtile-classic {
     background-color: rgba(10, 10, 10, 0.7);
     -webkit-filter: blur(2px);
-    width: 320px;
+    /* width: 320px;*/
     border-radius: 10px;
 }
 
@@ -427,7 +427,7 @@
 .gtile-minimal-dark {
     background-color: #2c2c2c;
     -webkit-filter: blur(2px);
-    width:320px;
+    /* width: 320px;*/
     border-radius: 10px;
     padding: 12px;
     padding-top: 6px;
@@ -637,7 +637,7 @@
 .gtile-minimal-light {
     background-color: #f6f5f4;
     -webkit-filter: blur(2px);
-    width:320px;
+    /* width: 320px;*/
     border-radius: 10px;
     padding: 12px;
     padding-top: 6px;

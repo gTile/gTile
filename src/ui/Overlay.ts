@@ -35,6 +35,14 @@ export interface OverlayParams extends St.BoxLayout.ConstructorProperties {
   gridAspectRatio: number;
 
   /**
+   * Optional. Display scale factor.
+   * Defaults to 1.0. (100%)
+   */
+  scale?: number;
+
+  /**
+
+  /**
    * Optional. The initial area of highlighted tiles in the grid.
    */
   gridSelection?: GridSelection | null;
@@ -136,6 +144,7 @@ export default GObject.registerClass({
     title,
     presets,
     gridAspectRatio,
+    scale = 1.0,
     gridSelection = null,
     animate = true,
     selectionTimeout = 200,
@@ -150,6 +159,9 @@ export default GObject.registerClass({
       ...params,
     });
 
+    const scaledWidth = TABLE_WIDTH * scale;
+    const scaledRowHeight = 36 * scale;
+
     // --- initialize ---
     this.#theme = theme;
     this.#titleBar = new TitleBar({ theme, title });
@@ -157,16 +169,18 @@ export default GObject.registerClass({
       theme,
       gridSize: presets[0],
       selection: gridSelection,
-      width: TABLE_WIDTH - 2,
-      height: TABLE_WIDTH / gridAspectRatio,
+      width: scaledWidth - 2,
+      height: scaledWidth / gridAspectRatio,
     });
     this.#presetButtons = ButtonBar.new_styled({
       style_class: `${theme}__preset`,
-      width: TABLE_WIDTH - 20,
+      width: scaledWidth - 20,
+      height: scaledRowHeight,
     });
     this.#actionButtons = ButtonBar.new_styled({
       style_class: `${theme}__action`,
-      width: TABLE_WIDTH - 20,
+      width: scaledWidth - 20,
+      height: scaledRowHeight,
     });
     this.#animate = animate;
     this.#selectionTimeout = selectionTimeout;

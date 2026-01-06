@@ -222,6 +222,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         title: "gTile",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
+        scale: monitor.scale,
         visible: false,
       });
       this.#gnomeSettings.bind(

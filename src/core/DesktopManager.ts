@@ -127,7 +127,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     return this.#layoutManager.monitors.map((m, index) => ({
       index: m.index,
-      scale: m.geometryScale,
+      scale: (m as any).geometry_scale, /* Trust me bro, double-checked */
       resolution: { x: m.x, y: m.y, width: m.width, height: m.height },
       workArea: {
         x: workAreas[index].x,
