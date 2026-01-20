@@ -374,8 +374,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   autotile(spec: GridSpec, monitorIdx: number) {
     const [dedicated, dynamic] = this.#gridSpecToAreas(spec);
     const workArea = this.#workArea(monitorIdx);
-    // windows array below: This needs to be reordered so that the focused window is always at index 0
-    
     const windows = this.#workspaceManager.get_active_workspace().list_windows()
 
       .filter(win => !(
@@ -410,7 +408,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     // Place focused window (if any) in the largest dedicated area
     const focusedIdx = windows.findIndex(w => w.has_focus());
-    if (focusedIdx && dedicated.length > 0) {      
+    if (focusedIdx && dedicated.length > 0) {
       const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
         rect.width * rect.height > accuArea
           ? [idx, rect.width * rect.height]
@@ -429,8 +427,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       this.#fit(windows[i], project(dedicated[i], workArea));
     }
 
-    // Fit remaining windows in dynamic cells    
-    
+    // Fit remaining windows in dynamic cells
     windows.splice(0, dedicated.length);
     for (let i = 0; i < dynamic.length; i++) {
       const mustFitAtLeastN = Math.floor(windows.length / dynamic.length);
