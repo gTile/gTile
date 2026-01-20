@@ -1,6 +1,14 @@
 CHANGE LOG
 ----------
 
+### 66
+- (BREAKING CHANGE) GridSpec semantics for autotiled windows have changed (#438)
+  - Windows inside a cols(...) GridSpec cell are now always arranged alongside the X-axis (i.e. left-to-right)
+  - Windows inside a rows(...) GridSpec cell are now always arranged alongside the Y-axis (i.e. top-to-bottom)
+  - Prior to this change, windows were always arranged alongside the more spacious axis (e.g. the X-axis when cell was wider than taller)
+- Add option to maximize window (instead of resizing) when it would fills the entire grid (#430)
+- During autotiling, when the GridSpec consists only of dynamic columns (e.g. cols(2d,2d)), the focused window is now preferably placed in the first cell (#422, #441)
+
 ### 65
 - Add support for Gnome 49 (extension is compatible without further code changes)
   - Due to a [breaking change in Gnome](https://gjs.guide/extensions/upgrading/gnome-shell-49.html#meta-window), this version is not backward-compatible with Gnome versions below 49
