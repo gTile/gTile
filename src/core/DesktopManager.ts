@@ -205,10 +205,11 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     gridSize: GridSize,
     selection: GridSelection,
   ) {
-    const gridArea = gridSize.cols * gridSize.rows
-    const selectionArea =
-      (Math.abs(selection.target.col - selection.anchor.col) + 1) *
-      (Math.abs(selection.target.row - selection.anchor.row) + 1)
+    const
+      gridArea = gridSize.cols * gridSize.rows,
+      selectionArea =
+        (Math.abs(selection.target.col - selection.anchor.col) + 1) *
+        (Math.abs(selection.target.row - selection.anchor.row) + 1);
 
     if (this.#userPreferences.getAutoMaximize() && gridArea === selectionArea) {
       target.maximize();
