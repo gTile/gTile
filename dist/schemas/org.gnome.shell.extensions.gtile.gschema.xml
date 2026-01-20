@@ -477,6 +477,10 @@
       <default>true</default>
       <summary>Close gTile after confirming an operation</summary>
     </key>
+    <key type="b" name="auto-maximize">
+      <default>false</default>
+      <summary>Automatically maximize windows that cover the entire grid</summary>
+    </key>
     <key type="b" name="follow-cursor">
       <default>false</default>
       <summary>Place the gTile overlay near the mouse cursor</summary>

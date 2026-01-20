@@ -7,6 +7,7 @@ import { ExtensionSettings } from "../types/settings.js";
 export interface UserPreferencesProvider {
   getInset(primary: boolean): Inset;
   getSpacing(): number;
+  getAutoMaximize(): boolean;
 }
 
 export interface UserPreferencesParams {
@@ -49,5 +50,12 @@ export default class implements UserPreferencesProvider {
    */
   getSpacing(): number {
     return this.#settings.get_int("window-spacing");
+  }
+
+  /**
+  * @returns Whether to maximize windows when selection fills the entire grid.
+  */
+  getAutoMaximize(): boolean {
+    return this.#settings.get_boolean("auto-maximize");
   }
 }
