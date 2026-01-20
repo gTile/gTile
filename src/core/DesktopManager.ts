@@ -383,7 +383,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         win.get_frame_type() !== Meta.FrameType.NORMAL ||
         TitleBlacklist.some(p => p.test(win.title ?? ""))
       ));
-    
     const project = (rect: Rectangle, canvas: Rectangle): Rectangle => ({
       x: canvas.x + canvas.width * rect.x,
       y: canvas.y + canvas.height * rect.y,
