@@ -1,6 +1,10 @@
 CHANGE LOG
 ----------
 
+### 65
+- Add support for Gnome 49 (extension is compatible without further code changes)
+  - Due to a [breaking change in Gnome](https://gjs.guide/extensions/upgrading/gnome-shell-49.html#meta-window), this version is not backward-compatible with Gnome versions below 49
+
 ### 64
 - Add support for Gnome 48 (extension is compatible without further code changes)
 

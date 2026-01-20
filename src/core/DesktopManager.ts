@@ -174,7 +174,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   moveToMonitor(target: Meta.Window, monitorIdx?: number) {
     monitorIdx = monitorIdx ?? (target.get_monitor() + 1) % this.monitors.length;
-    target.unmaximize(Meta.MaximizeFlags.BOTH);
+    target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
+    target.unmaximize();
     if (monitorIdx === target.get_monitor()) {
       return;
     }
@@ -379,6 +380,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
       .filter(win => !(
         win.minimized ||
+        win.is_above() ||
         win.get_monitor() !== monitorIdx ||
         win.get_frame_type() !== Meta.FrameType.NORMAL ||
         TitleBlacklist.some(p => p.test(win.title ?? ""))
@@ -526,7 +528,8 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #moveResize(target: Meta.Window, x: number, y: number, size?: FrameSize) {
-    target.unmaximize(Meta.MaximizeFlags.BOTH);
+    target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
+    target.unmaximize();
 
     // All internal calculations fictively operate as if the actual window frame
     // size would also incorporate the user-defined window spacing. Only when a
