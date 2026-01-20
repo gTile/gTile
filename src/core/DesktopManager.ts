@@ -393,27 +393,24 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       height: canvas.height * rect.height,
     });
 
-    const hasDedicatedCells = dedicated.length > 0;
+    // Fix for Autotile Window Ordering regression: https://github.com/gTile/gTile/issues/422
+    // For autotile with dynamic columns only, e.g. cols(3d,3d,3d) vs. cols(3,3,3d)
     
-    if (!hasDedicatedCells) {
+    if (dedicated.length==0) { // If we have no dedicated cells:
     
       // First find the focused window's index
       const focusedIdxColTile = windows.findIndex(w => w.has_focus()); // save focused window's Idx for column autotiling
       
-      // Swap the array elements    
-      var tempArrayElement = windows[focusedIdxColTile];  // create a temporary array element based on the index of the focused window
-      windows[focusedIdxColTile] = windows[0];  // overwrite the element at the index of the focused window with that of index 0 
-      windows[0] = tempArrayElement; // overwrite the element at index 0 with that of the focused window
-
+      // Swap the array elements
+      if (focusedIdxColTile > 0) {
+        [windows[0], windows[focusedIdxColTile]] = [windows[focusedIdxColTile], windows[0]];
+      }
     }
+    
 
     // Place focused window (if any) in the largest dedicated area
     const focusedIdx = windows.findIndex(w => w.has_focus());
-    if (focusedIdx && dedicated.length > 0) {
-      // if statement condition never satisfied according to @schnz (https://github.com/gTile/gTile/issues/422)
-      // focusedIdx represents focused window -> This should be a value (unknown as of now, but probably positive)
-      // dedicated.length is NOT >0 when using autotile because autotile uses non-dedicated (regular) cols in its grid spec
-      
+    if (focusedIdx && dedicated.length > 0) {      
       const [largestIdx] = dedicated.reduce(([accuIdx, accuArea], rect, idx) =>
         rect.width * rect.height > accuArea
           ? [idx, rect.width * rect.height]
@@ -428,14 +425,11 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     }
 
     // Place windows in regular cells
-    // Still not the part triggered by Autotile - these are regular cells, which the autotile gridspec does not use
-    
     for (let i = 0; i < dedicated.length && i < windows.length; ++i) {
       this.#fit(windows[i], project(dedicated[i], workArea));
     }
 
     // Fit remaining windows in dynamic cells    
-    
     
     windows.splice(0, dedicated.length);
     for (let i = 0; i < dynamic.length; i++) {
