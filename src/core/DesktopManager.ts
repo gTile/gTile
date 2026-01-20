@@ -393,6 +393,20 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       height: canvas.height * rect.height,
     });
 
+    const hasDedicatedCells = dedicated.length > 0;
+    
+    if (!hasDedicatedCells) {
+    
+      // First find the focused window's index
+      const focusedIdxColTile = windows.findIndex(w => w.has_focus()); // save focused window's Idx for column autotiling
+      
+      // Swap the array elements    
+      var tempArrayElement = windows[focusedIdxColTile];  // create a temporary array element based on the index of the focused window
+      windows[focusedIdxColTile] = windows[0];  // overwrite the element at the index of the focused window with that of index 0 
+      windows[0] = tempArrayElement; // overwrite the element at index 0 with that of the focused window
+
+    }
+
     // Place focused window (if any) in the largest dedicated area
     const focusedIdx = windows.findIndex(w => w.has_focus());
     if (focusedIdx && dedicated.length > 0) {
@@ -420,14 +434,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       this.#fit(windows[i], project(dedicated[i], workArea));
     }
 
-    // Fit remaining windows in dynamic cells
-    // Here we finally get to the dynamic cells specified in the AutoTile gridspec
-    // @schnz's suggested possible solution is to reorder the windows array so that the focused window is always at index 0 when autotiling
-    const focusedIdxColTile = windows.findIndex(w => w.has_focus()); // save focused window's Idx for column autotiling
-    var tempArrayElement = windows[focusedIdxColTile];
-    windows[focusedIdxColTile] = windows[0];
-    windows[0] = tempArrayElement;
-    
+    // Fit remaining windows in dynamic cells    
     
     
     windows.splice(0, dedicated.length);
