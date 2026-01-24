@@ -22,9 +22,9 @@ export const AutoTileLayouts = (cfg: ExtensionSettings) => {
 
   return ({
     "main": workspaceRatios.map(([main, minor]) =>
-      new GridSpecParser(`cols(${main}, ${minor}d)`).parse()!),
+      new GridSpecParser(`cols(${main}, ${minor}:rows(1d))`).parse()!),
     "main-inverted": workspaceRatios.map(([main, minor]) =>
-      new GridSpecParser(`cols(${minor}d, ${main})`).parse()!),
+      new GridSpecParser(`cols(${minor}:rows(1d), ${main})`).parse()!),
     "cols": {
       1: [new GridSpecParser(cfg.get_string("autotile-gridspec-1")!).parse()],
       2: [new GridSpecParser(cfg.get_string("autotile-gridspec-2")!).parse()],
