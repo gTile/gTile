@@ -1,6 +1,9 @@
 CHANGE LOG
 ----------
 
+### 67
+- Restore the old behavior of the autotile main layout after the breaking change in the last release
+
 ### 66
 - (BREAKING CHANGE) GridSpec semantics for autotiled windows have changed (#438)
   - Windows inside a cols(...) GridSpec cell are now always arranged alongside the X-axis (i.e. left-to-right)
