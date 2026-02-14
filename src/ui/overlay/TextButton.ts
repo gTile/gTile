@@ -30,7 +30,7 @@ export default GObject.registerClass({
     ),
   }
 }, class extends St.Button {
-  #active!: boolean;
+  private _active!: boolean;
 
   /**
    * @returns A generic text button with the default style.
@@ -61,17 +61,17 @@ export default GObject.registerClass({
    * Whether the button state is considered active.
    */
   set active(b: boolean) {
-    this.#active = b;
-    this.#updateState();
+    this._active = b;
+    this._updateState();
     this.notify("active");
   }
 
   get active(): boolean {
-    return this.#active;
+    return this._active;
   }
 
-  #updateState() {
-    if (this.#active) {
+  private _updateState() {
+    if (this._active) {
       this.add_style_pseudo_class("activate");
     } else {
       this.remove_style_pseudo_class("activate");
