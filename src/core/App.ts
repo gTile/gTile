@@ -139,6 +139,12 @@ export default class App implements GarbageCollector {
     this.#gc.defer(() => this.#panelIcon.destroy());
 
     // --- show  UI ---
+    // Remove any stale indicator from a previous enable/disable cycle
+    // (e.g. after screen lock/unlock) to avoid "Extension point conflict"
+    const existingIndicator = Main.panel.statusArea[extension.uuid];
+    if (existingIndicator) {
+      existingIndicator.destroy();
+    }
     Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
 
     // --- event handlers ---
