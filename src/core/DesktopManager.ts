@@ -213,6 +213,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
         (Math.abs(selection.target.row - selection.anchor.row) + 1);
 
     if (this.#userPreferences.getAutoMaximize() && gridArea === selectionArea) {
+      target.move_to_monitor(monitorIdx);
       target.maximize();
     } else {
       const projection = this.selectionToArea(selection, gridSize, monitorIdx);

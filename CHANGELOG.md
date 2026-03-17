@@ -1,6 +1,9 @@
 CHANGE LOG
 ----------
 
+### 68
+- Fix auto-maximize placing window on wrong monitor (#451)
+
 ### 67
 - Restore the old behavior of the autotile main layout after the breaking change in the last release
 
