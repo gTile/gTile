@@ -377,7 +377,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           frame = focusedWindow.get_frame_rect(),
           anchorX = Math.clamp(frame.x + frame.width / 2 - overlay.width / 2,
             workArea.x, xMax),
-          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.width / 2,
+          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.height / 2,
             workArea.y, yMax);
 
         overlay.placeAt(anchorX, anchorY);
