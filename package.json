@@ -21,8 +21,8 @@
     "@girs/pango-1.0": "^1.57.0-4.0.0-beta.38",
     "@girs/shell-17": "^17.0.0-4.0.0-beta.38",
     "@girs/st-17": "^17.0.0-4.0.0-beta.38",
-    "ava": "^6.4.1",
-    "typescript": "^5.9.3"
+    "ava": "^7.0.0",
+    "typescript": "^6.0.2"
   },
   "ava": {
     "typescript": {

@@ -44,9 +44,5 @@
 
     /* Interop Constraints */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
-
-    /* Type Checking */
-    "strict": true,                                      /* Enable all strict type-checking options. */
-    // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
   },
 }
