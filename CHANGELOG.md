@@ -1,6 +1,10 @@
 CHANGE LOG
 ----------
 
+### 69
+- Add support for Gnome 50 (extension is compatible without further code changes)
+  - Compatibility with Gnome 49 remains, as there are no breaking changes that affect this extension.
+
 ### 68
 - Fix auto-maximize placing window on wrong monitor (#451)
 
