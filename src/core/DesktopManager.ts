@@ -175,8 +175,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    */
   moveToMonitor(target: Meta.Window, monitorIdx?: number) {
     monitorIdx = monitorIdx ?? (target.get_monitor() + 1) % this.monitors.length;
-    target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
-    target.unmaximize();
+    // set_unmaximize_flags is only available in GNOME 49+
+    if (typeof target.set_unmaximize_flags === 'function') {
+      target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
+    }
+    // @ts-ignore - unmaximize signature differs between GNOME versions
+    target.unmaximize(Meta.MaximizeFlags.BOTH);
     if (monitorIdx === target.get_monitor()) {
       return;
     }
@@ -521,8 +525,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #moveResize(target: Meta.Window, x: number, y: number, size?: FrameSize) {
-    target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
-    target.unmaximize();
+    // set_unmaximize_flags is only available in GNOME 49+
+    if (typeof target.set_unmaximize_flags === 'function') {
+      target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
+    }
+    // @ts-ignore - unmaximize signature differs between GNOME versions
+    target.unmaximize(Meta.MaximizeFlags.BOTH);
 
     // All internal calculations fictively operate as if the actual window frame
     // size would also incorporate the user-defined window spacing. Only when a
