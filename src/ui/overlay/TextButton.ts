@@ -1,14 +1,8 @@
 import GObject from "gi://GObject";
 import St from "gi://St";
 
-import { Theme } from "../../types/theme.js";
-
 export interface ButtonParams extends Partial<St.Button.ConstructorProps> {
   active?: boolean;
-}
-
-export interface ThemedButtonParams extends ButtonParams {
-  theme: Theme;
 }
 
 export interface StyledButtonParams extends ButtonParams {
@@ -30,17 +24,7 @@ export default GObject.registerClass({
     ),
   }
 }, class extends St.Button {
-  private _active!: boolean;
-
-  /**
-   * @returns A generic text button with the default style.
-   */
-  static new_themed({ theme, ...params }: ThemedButtonParams) {
-    return this.new_styled({
-      ...params,
-      style_class: `${theme}__preset-button`,
-    });
-  }
+  _active!: boolean;
 
   /**
    * @returns A generic text button with a customized style.
@@ -70,7 +54,7 @@ export default GObject.registerClass({
     return this._active;
   }
 
-  private _updateState() {
+  _updateState() {
     if (this._active) {
       this.add_style_pseudo_class("activate");
     } else {

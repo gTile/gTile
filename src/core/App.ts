@@ -1,3 +1,4 @@
+import GLib from "gi://GLib";
 import Gio from "gi://Gio";
 import Shell from "gi://Shell";
 
@@ -15,7 +16,7 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
-import { Theme } from "../types/theme.js";
+import ThemeStore from "../util/ThemeStore.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
@@ -42,7 +43,6 @@ import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
 
 type PresetIndex = [index: number, subindex: number];
-type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type StartsWith<S extends string, Prefix extends string> =
   S extends `${Prefix}${string}` ? S : never;
 type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
@@ -57,7 +57,10 @@ type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
 export default class App implements GarbageCollector {
   static #instance: App;
 
-  #theme: Theme;
+  #themeStore: ThemeStore;
+  #uuid: string;
+  #showActionButtons: boolean;
+  #showPresetButtons: boolean;
   #gc: GarbageCollection;
   #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
@@ -89,15 +92,13 @@ export default class App implements GarbageCollector {
 
   private constructor(extension: ExtensionSettingsProvider) {
     // --- initialize ---
-    const mangledThemeName = extension.settings
-      .get_string("theme")!
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
-
-    this.#theme = `gtile-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
     this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
     this.#settings = extension.settings;
+    this.#uuid = extension.uuid;
+    this.#themeStore = new ThemeStore(this.#settings);
+    this.#showActionButtons = this.#settings.get_boolean("show-action-buttons");
+    this.#showPresetButtons = this.#settings.get_boolean("show-preset-buttons");
     this.#gridSpecs = AutoTileLayouts(this.#settings);
 
     this.#globalKeyBindingGroups = Object
@@ -112,7 +113,6 @@ export default class App implements GarbageCollector {
       settings: this.#settings,
       windowManager: Main.wm,
     });
-    this.#gc.defer(() => this.#hotkeyManager.release());
 
     this.#desktopManager = new DesktopManager({
       shell: Shell.Global.get(),
@@ -122,21 +122,29 @@ export default class App implements GarbageCollector {
       workspaceManager: Shell.Global.get().workspace_manager,
       userPreferences: new UserPreferences({ settings: this.#settings }),
     });
-    this.#gc.defer(() => this.#desktopManager.release());
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
-      theme: this.#theme,
+      themeStore: this.#themeStore,
       settings: this.#settings,
       gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
+      showActionButtons: this.#showActionButtons,
+      showPresetButtons: this.#showPresetButtons,
     });
-    this.#gc.defer(() => this.#overlayManager.release());
 
-    this.#panelIcon = new PanelButton({ theme: this.#theme });
-    this.#gc.defer(() => this.#panelIcon.destroy());
+    this.#panelIcon = new PanelButton(extension.path);
+
+    // LIFO teardown: overlayManager → desktopManager → hotkeyManager → panelIcon
+    this.#gc.defer(() => {
+      Gio.Settings.unbind(this.#panelIcon, "visible");
+      this.#panelIcon.destroy();
+    });
+    this.#gc.defer(() => this.#hotkeyManager.release());
+    this.#gc.defer(() => this.#desktopManager.release());
+    this.#gc.defer(() => this.#overlayManager.release());
 
     // --- show  UI ---
     Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
@@ -152,10 +160,19 @@ export default class App implements GarbageCollector {
     this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
     this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
+
+    // Force theme apply after stylesheet is loaded (CSS is parsed after enable())
+    let idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+      idleId = 0;
+      this.#themeStore.forceNotify();
+      return GLib.SOURCE_REMOVE;
+    });
+    this.#gc.defer(() => { if (idleId > 0) GLib.source_remove(idleId); });
   }
 
   release() {
     this.#gc.release();
+    this.#themeStore.release();
     this.#lastPresetIndex.release();
     App.#instance = undefined as any;
   }
@@ -215,6 +232,19 @@ export default class App implements GarbageCollector {
     isHotkeyRelated(key) && this.#onHotkeyGroupToggle(key);
     isAutotileRelated(key) && this.#onAutotileGridSpecChanged(key);
     key === "grid-sizes" && this.#onPresetsChanged();
+    key === "theme" && this.#themeStore.onSettingChanged();
+    key === "show-action-buttons" && this.#onShowActionButtonsChanged();
+    key === "show-preset-buttons" && this.#onShowPresetButtonsChanged();
+  }
+
+  #onShowActionButtonsChanged() {
+    this.#showActionButtons = this.#settings.get_boolean("show-action-buttons");
+    this.#overlayManager.showActionButtons = this.#showActionButtons;
+  }
+
+  #onShowPresetButtonsChanged() {
+    this.#showPresetButtons = this.#settings.get_boolean("show-preset-buttons");
+    this.#overlayManager.showPresetButtons = this.#showPresetButtons;
   }
 
   #onHotkeyGroupToggle(key: keyof typeof SettingKeyToKeyBindingGroupLUT) {
@@ -259,6 +289,26 @@ export default class App implements GarbageCollector {
         this.#hotkeyManager.setListeningGroups(action.visible
           ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
           : this.#globalKeyBindingGroups);
+        return;
+      case OverlayEventType.Settings:
+        Gio.DBus.session.call(
+          "org.gnome.Shell.Extensions",
+          "/org/gnome/Shell/Extensions",
+          "org.gnome.Shell.Extensions",
+          "OpenExtensionPrefs",
+          new GLib.Variant("(ssa{sv})", [this.#uuid, "", {}]),
+          null,
+          Gio.DBusCallFlags.NONE,
+          -1,
+          null,
+          (connection, result) => {
+            try {
+              connection?.call_finish(result);
+            } catch (e) {
+              console.error(`gTile: Failed to open preferences:`, e);
+            }
+          }
+        );
         return;
     }
 

@@ -509,6 +509,18 @@
       <default>true</default>
       <summary>Enable action shortcuts</summary>
     </key>
+    <key type="b" name="show-preset-buttons">
+      <default>true</default>
+      <summary>Show preset buttons in the overlay</summary>
+    </key>
+    <key type="b" name="show-action-buttons">
+      <default>true</default>
+      <summary>Show action buttons in the overlay</summary>
+    </key>
+    <key type="i" name="base-font-size">
+      <default>16</default>
+      <summary>Base font size in pixels for the overlay UI</summary>
+    </key>
     <key type="i" name="window-spacing">
       <default>0</default>
       <summary>Spacing between windows</summary>
@@ -554,12 +566,12 @@
       <summary>Bottom gap around border of screen for secondary monitor</summary>
     </key>
     <key type="s" name="theme">
-      <default>'Default'</default>
-      <summary>Active theme</summary>
+      <default>'gtile-default'</default>
+      <summary>Active theme CSS class</summary>
     </key>
     <key type="as" name="themes">
-      <default><![CDATA[['Default', 'Classic', 'Minimal Dark', 'Minimal Light']]]></default>
-      <summary>You can add or remove themes. Element classes are automatically changed by theme name</summary>
+      <default>['gtile-default', 'gtile-classic', 'gtile-minimal-dark', 'gtile-minimal-light']</default>
+      <summary>Available themes (CSS class names)</summary>
     </key>
   </schema>
 </schemalist>
