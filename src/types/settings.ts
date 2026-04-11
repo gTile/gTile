@@ -13,8 +13,10 @@ export type BoolSettingKey =
   | "global-auto-tiling"
   | "global-presets"
   | "moveresize-enabled"
+  | "show-action-buttons"
   | "show-grid-lines"
   | "show-icon"
+  | "show-preset-buttons"
   | "target-presets-to-monitor-of-mouse";
 
 /**

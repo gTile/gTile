@@ -509,6 +509,14 @@
       <default>true</default>
       <summary>Enable action shortcuts</summary>
     </key>
+    <key type="b" name="show-preset-buttons">
+      <default>true</default>
+      <summary>Show preset buttons in the overlay</summary>
+    </key>
+    <key type="b" name="show-action-buttons">
+      <default>true</default>
+      <summary>Show action buttons in the overlay</summary>
+    </key>
     <key type="i" name="base-font-size">
       <default>16</default>
       <summary>Base font size in pixels for the overlay UI</summary>
