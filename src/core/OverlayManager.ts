@@ -13,7 +13,6 @@ import {
   ExtensionSettings,
   NamedSettings,
 } from "../types/settings.js";
-import { Theme } from "../types/theme.js";
 import Overlay from "../ui/Overlay.js";
 import IconButton, { IconButtonParams } from "../ui/overlay/IconButton.js";
 import Preview from "../ui/Preview.js";
@@ -24,7 +23,6 @@ export type GnomeInterfaceSettings =
   NamedSettings<"enable-animations", never, never>;
 
 export interface OverlayManagerParams {
-  theme: Theme;
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
@@ -40,7 +38,6 @@ export interface OverlayManagerParams {
  * manipulate the overlay appearance.
  */
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
-  #theme: Theme;
   #settings: ExtensionSettings;
   #gnomeSettings: GnomeInterfaceSettings;
   #presets: GridSize[];
@@ -55,14 +52,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #syncInProgress: boolean;
 
   constructor({
-    theme,
     settings,
     gnomeSettings,
     presets,
     layoutManager,
     desktopManager,
   }: OverlayManagerParams) {
-    this.#theme = theme;
     this.#settings = settings;
     this.#gnomeSettings = gnomeSettings;
     this.#presets = presets;
@@ -72,7 +67,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#windowSubscriptionGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
-    this.#preview = new Preview({ theme: this.#theme });
+    this.#preview = new Preview({});
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
@@ -218,7 +213,6 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #renderOverlays() {
     for (const monitor of this.#desktopManager.monitors) {
       const overlay = new Overlay({
-        theme: this.#theme,
         title: "gTile",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
@@ -230,7 +224,6 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       type BSK = BoolSettingKey;
       for (const key of ["auto-close", "follow-cursor"] satisfies BSK[]) {
         const btn = new IconButton({
-          theme: this.#theme,
           symbol: key,
           active: this.#settings.get_boolean(key),
           can_focus: false,
@@ -244,7 +237,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       type IBP = IconButtonParams["symbol"];
       for (const symbol of ["main-and-list", "two-list"] satisfies IBP[]) {
-        const button = new IconButton({ theme: this.#theme, symbol });
+        const button = new IconButton({ symbol });
         overlay.addActionButton(button);
 
         const layout = symbol === "two-list" ? "main-inverted" : "main";
@@ -303,7 +296,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.cols; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `${this.#theme}__grid_lines_preview`,
+          style_class: `gtile-default gtile-grid-lines-preview`,
           x: workArea.x + tileWidth * i,
           y: workArea.y,
           width: 1,
@@ -316,7 +309,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.rows; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `${this.#theme}__grid_lines_preview`,
+          style_class: `gtile-default gtile-grid-lines-preview`,
           x: workArea.x,
           y: workArea.y + tileHeight * i,
           width: workArea.width,

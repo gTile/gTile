@@ -3,21 +3,15 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
-import { Theme } from "../types/theme.js";
-import { GarbageCollector } from "../util/gc.js";
 import ButtonBar from "./overlay/ButtonBar.js";
 import Container from "./overlay/Container.js";
 import Grid from "./overlay/Grid.js";
 import TextButton from "./overlay/TextButton.js";
 import TitleBar from "./overlay/TitleBar.js";
 
-const TABLE_WIDTH = 320;
-
-type TextButton = ReturnType<typeof TextButton.new_themed>;
+type TextButton = ReturnType<typeof TextButton.new_styled>;
 
 export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
-  theme: Theme;
-
   /**
    * Overlay title displayed next to the close button.
    */
@@ -76,7 +70,7 @@ export default GObject.registerClass({
     animate: GObject.ParamSpec.boolean(
       "animate",
       "Animate",
-      "Whether to anmiate UI position changes",
+      "Whether to animate UI position changes",
       GObject.ParamFlags.READWRITE,
       true,
     ),
@@ -121,8 +115,7 @@ export default GObject.registerClass({
      */
     selected: {},
   }
-}, class extends St.BoxLayout implements GarbageCollector {
-  #theme: Theme;
+}, class extends St.BoxLayout {
   #titleBar: InstanceType<typeof TitleBar>;
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
@@ -132,7 +125,6 @@ export default GObject.registerClass({
   #delayTimeoutID: GLib.Source | null = null;
 
   constructor({
-    theme,
     title,
     presets,
     gridAspectRatio,
@@ -142,7 +134,7 @@ export default GObject.registerClass({
     ...params
   }: OverlayParams) {
     super({
-      style_class: theme,
+      style_class: `gtile-overlay gtile-default`,
       vertical: true,
       reactive: true,
       can_focus: true,
@@ -151,22 +143,18 @@ export default GObject.registerClass({
     });
 
     // --- initialize ---
-    this.#theme = theme;
-    this.#titleBar = new TitleBar({ theme, title });
+    this.#titleBar = new TitleBar({ title });
     this.#grid = new Grid({
-      theme,
       gridSize: presets[0],
+      aspectRatio: gridAspectRatio,
       selection: gridSelection,
-      width: TABLE_WIDTH - 2,
-      height: TABLE_WIDTH / gridAspectRatio,
+      x_expand: true,
     });
     this.#presetButtons = ButtonBar.new_styled({
-      style_class: `${theme}__preset`,
-      width: TABLE_WIDTH - 20,
+      style_class: `gtile-preset`,
     });
     this.#actionButtons = ButtonBar.new_styled({
-      style_class: `${theme}__action`,
-      width: TABLE_WIDTH - 20,
+      style_class: `gtile-action`,
     });
     this.#animate = animate;
     this.#selectionTimeout = selectionTimeout;
@@ -176,19 +164,19 @@ export default GObject.registerClass({
 
     // --- show  UI ---
     this.add_child(Container.new_styled({
-      style_class: `${theme}__title-container`,
+      style_class: `gtile-title-container`,
       child: this.#titleBar,
     }));
     this.add_child(Container.new_styled({
-      style_class: `${theme}__tile-container`,
+      style_class: `gtile-tile-container`,
       child: this.#grid
     }));
     this.add_child(Container.new_styled({
-      style_class: `${theme}__preset-container`,
+      style_class: `gtile-preset-container`,
       child: this.#presetButtons
     }));
     this.add_child(Container.new_styled({
-      style_class: `${theme}__action-container`,
+      style_class: `gtile-action-container`,
       child: this.#actionButtons
     }));
 
@@ -308,8 +296,8 @@ export default GObject.registerClass({
     const { cols, rows } = this.gridSize;
     for (const preset of presets) {
       const isPresetActive = preset.cols === cols && preset.rows === rows;
-      const button = TextButton.new_themed({
-        theme: this.#theme,
+      const button = TextButton.new_styled({
+        style_class: `gtile-preset-button`,
         active: isPresetActive,
         label: `${preset.cols}x${preset.rows}`,
       });
