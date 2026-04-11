@@ -104,6 +104,13 @@ export default GObject.registerClass({
       "The currently hovered tile in the grid, if any",
       GObject.ParamFlags.READABLE,
     ),
+    "base-font-size": GObject.ParamSpec.double(
+      "base-font-size",
+      "Base font size",
+      "Root font size in pixels that scales all em-based dimensions",
+      GObject.ParamFlags.READWRITE,
+      4, 128, 16,
+    ),
     "selection-timeout": GObject.ParamSpec.int(
       "selection-timeout",
       "Selection timeout",
@@ -125,6 +132,7 @@ export default GObject.registerClass({
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
   #actionButtons: ReturnType<typeof ButtonBar.new_styled>;
+  #baseFontSize: number;
   #animate: boolean;
   #selectionTimeout: number;
   #delayTimeoutID: GLib.Source | null = null;
@@ -168,6 +176,7 @@ export default GObject.registerClass({
     this.#actionButtons = ButtonBar.new_styled({
       style_class: `gtile-action`,
     });
+    this.#baseFontSize = 16;
     this.#animate = animate;
     this.#selectionTimeout = selectionTimeout;
     this.#delayTimeoutID = null;
@@ -218,6 +227,17 @@ export default GObject.registerClass({
       clearTimeout(this.#delayTimeoutID);
       this.#delayTimeoutID = null;
     }
+  }
+
+  set baseFontSize(px: number) {
+    if (this.#baseFontSize === px) return;
+    this.#baseFontSize = px;
+    this.set_style(`font-size: ${px}px`);
+    this.notify("base-font-size");
+  }
+
+  get baseFontSize(): number {
+    return this.#baseFontSize;
   }
 
   /**
