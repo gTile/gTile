@@ -2,13 +2,11 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { Rectangle } from "../types/grid.js";
-import { Theme } from "../types/theme.js";
 
 export interface PreviewParams extends Omit<
   Partial<St.BoxLayout.ConstructorProps>,
   "visible"
 > {
-  theme: Theme;
   animate?: boolean;
 }
 
@@ -22,7 +20,7 @@ export default GObject.registerClass({
     animate: GObject.ParamSpec.boolean(
       "animate",
       "Animate",
-      "Whether to anmiate preview changes",
+      "Whether to animate preview changes",
       GObject.ParamFlags.READWRITE,
       true,
     ),
@@ -30,9 +28,9 @@ export default GObject.registerClass({
 }, class extends St.BoxLayout {
   #animate: boolean;
 
-  constructor({ theme, animate = true, ...params }: PreviewParams) {
+  constructor({ animate = true, ...params }: PreviewParams) {
     super({
-      style_class: `${theme}__preview`,
+      style_class: `gtile-preview gtile-default`,
       visible: false,
       ...params,
     });

@@ -15,7 +15,6 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
-import { Theme } from "../types/theme.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
@@ -42,7 +41,6 @@ import OverlayManager from "./OverlayManager.js";
 import UserPreferences from "./UserPreferences.js";
 
 type PresetIndex = [index: number, subindex: number];
-type StripPrefix<S extends string> = S extends `${string}-${infer U}` ? U : S;
 type StartsWith<S extends string, Prefix extends string> =
   S extends `${Prefix}${string}` ? S : never;
 type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
@@ -57,7 +55,6 @@ type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
 export default class App implements GarbageCollector {
   static #instance: App;
 
-  #theme: Theme;
   #gc: GarbageCollection;
   #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
@@ -89,12 +86,6 @@ export default class App implements GarbageCollector {
 
   private constructor(extension: ExtensionSettingsProvider) {
     // --- initialize ---
-    const mangledThemeName = extension.settings
-      .get_string("theme")!
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "-") as StripPrefix<Theme>;
-
-    this.#theme = `gtile-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
     this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
     this.#settings = extension.settings;
@@ -126,7 +117,6 @@ export default class App implements GarbageCollector {
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
-      theme: this.#theme,
       settings: this.#settings,
       gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
@@ -135,7 +125,7 @@ export default class App implements GarbageCollector {
     });
     this.#gc.defer(() => this.#overlayManager.release());
 
-    this.#panelIcon = new PanelButton({ theme: this.#theme });
+    this.#panelIcon = new PanelButton();
     this.#gc.defer(() => this.#panelIcon.destroy());
 
     // --- show  UI ---
