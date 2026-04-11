@@ -7,7 +7,6 @@ import { Rectangle } from "./grid.js";
  */
 export interface Screen {
   index: number;
-  scale: number;
   resolution: Rectangle;
   workArea: Rectangle;
 }

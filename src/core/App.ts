@@ -107,7 +107,6 @@ export default class App implements GarbageCollector {
       settings: this.#settings,
       windowManager: Main.wm,
     });
-    this.#gc.defer(() => this.#hotkeyManager.release());
 
     this.#desktopManager = new DesktopManager({
       shell: Shell.Global.get(),
@@ -117,7 +116,6 @@ export default class App implements GarbageCollector {
       workspaceManager: Shell.Global.get().workspace_manager,
       userPreferences: new UserPreferences({ settings: this.#settings }),
     });
-    this.#gc.defer(() => this.#desktopManager.release());
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
@@ -128,10 +126,17 @@ export default class App implements GarbageCollector {
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
     });
-    this.#gc.defer(() => this.#overlayManager.release());
 
     this.#panelIcon = new PanelButton(extension.path);
-    this.#gc.defer(() => this.#panelIcon.destroy());
+
+    // LIFO teardown: overlayManager → desktopManager → hotkeyManager → panelIcon
+    this.#gc.defer(() => {
+      Gio.Settings.unbind(this.#panelIcon, "visible");
+      this.#panelIcon.destroy();
+    });
+    this.#gc.defer(() => this.#hotkeyManager.release());
+    this.#gc.defer(() => this.#desktopManager.release());
+    this.#gc.defer(() => this.#overlayManager.release());
 
     // --- show  UI ---
     Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);

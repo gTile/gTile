@@ -98,11 +98,12 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     this.#keyBindingGroupMask = 0;
     this.#dispatchCallbacks = [];
 
-    this.#registerGlobalHotkeys();
-    this.#registerOverlayHotkeys();
-    this.#registerAutotileHotkeys();
-    this.#registerActionHotkeys();
-    this.#registerPresetHotkeys();
+    for (const bindings of Object.values(this.#bindings) as Set<string>[]) {
+      for (const name of bindings) {
+        this.#windowManager.removeKeybinding(name);
+      }
+      bindings.clear();
+    }
   }
 
   /**
@@ -127,8 +128,11 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     this.#registerPresetHotkeys();
   };
 
-  subscribe(fn: DispatchFn<HotkeyAction>) {
+  subscribe(fn: DispatchFn<HotkeyAction>): () => void {
     this.#dispatchCallbacks.push(fn);
+    return () => {
+      this.#dispatchCallbacks = this.#dispatchCallbacks.filter(cb => cb !== fn);
+    };
   }
 
   #dispatch(action: HotkeyAction) {

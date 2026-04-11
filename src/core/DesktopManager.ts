@@ -55,6 +55,7 @@ export interface DesktopManagerParams {
  * desktop-related actions and window manipulation.
  */
 export default class implements Publisher<DesktopEvent>, GarbageCollector {
+  #released = false;
   #gc: GarbageCollection;
   #shell: Shell.Global;
   #display: Meta.Display;
@@ -95,7 +96,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       const chid = layoutManager.overviewGroup.connect("notify::visible", g => {
         this.#dispatch({ type: Event.OVERVIEW, visible: g.visible });
       });
-      this.#gc.defer(() => layoutManager.disconnect(chid));
+      this.#gc.defer(() => layoutManager.overviewGroup.disconnect(chid));
     }
   }
 
@@ -104,12 +105,17 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * on the global Gnome singletons. The instance must not be used thereafter.
    */
   release() {
+    if (this.#released) return;
+    this.#released = true;
     this.#dispatchCallbacks = [];
     this.#gc.release();
   }
 
-  subscribe(fn: DispatchFn<DesktopEvent>) {
+  subscribe(fn: DispatchFn<DesktopEvent>): () => void {
     this.#dispatchCallbacks.push(fn);
+    return () => {
+      this.#dispatchCallbacks = this.#dispatchCallbacks.filter(cb => cb !== fn);
+    };
   }
 
   /**
@@ -132,7 +138,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     return this.#layoutManager.monitors.map((m, index) => ({
       index: m.index,
-      scale: m.geometryScale,
       resolution: { x: m.x, y: m.y, width: m.width, height: m.height },
       workArea: {
         x: workAreas[index].x,
@@ -519,6 +524,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #dispatch(event: DesktopEvent) {
+    if (this.#released) return;
     for (const cb of this.#dispatchCallbacks) {
       cb(event);
     }

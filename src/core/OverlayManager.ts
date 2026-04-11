@@ -47,6 +47,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
   #gridLineOverlayGc: GarbageCollection;
+  #overlayBindingsGc: GarbageCollection;
   #windowSubscriptionGc: GarbageCollection;
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
   #overlays: InstanceType<typeof Overlay>[];
@@ -55,6 +56,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #syncInProgress: boolean;
   #textScalingSignalId = 0;
   #baseFontSizeSignalId = 0;
+  #unsubscribeDesktop: () => void;
 
   constructor({
     themeStore,
@@ -71,6 +73,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#layoutManager = layoutManager;
     this.#desktopManager = desktopManager;
     this.#gridLineOverlayGc = new GarbageCollection();
+    this.#overlayBindingsGc = new GarbageCollection();
     this.#windowSubscriptionGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
@@ -78,7 +81,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
-    desktopManager.subscribe(this.#onDesktopEvent.bind(this));
+    this.#unsubscribeDesktop = desktopManager.subscribe(this.#onDesktopEvent.bind(this));
     gnomeSettings.bind(
       "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
     this.#textScalingSignalId = gnomeSettings.connect(
@@ -95,12 +98,15 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * overlays (hidden and visible). The instance must not be used thereafter.
    */
   release() {
+    this.#unsubscribeDesktop();
     this.#gnomeSettings.disconnect(this.#textScalingSignalId);
     this.#settings.disconnect(this.#baseFontSizeSignalId);
     this.#gridLineOverlayGc.release();
+    this.#overlayBindingsGc.release();
     this.#windowSubscriptionGc.release();
     this.#destroyOverlays();
     this.#preview.release();
+    Gio.Settings.unbind(this.#preview, "animate");
     this.#preview.destroy();
     this.#dispatchCallbacks = [];
   }
@@ -141,8 +147,11 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     return this.#activeIdx;
   }
 
-  subscribe(fn: DispatchFn<OverlayEvent>) {
+  subscribe(fn: DispatchFn<OverlayEvent>): () => void {
     this.#dispatchCallbacks.push(fn);
+    return () => {
+      this.#dispatchCallbacks = this.#dispatchCallbacks.filter(cb => cb !== fn);
+    };
   }
 
   /**
@@ -235,6 +244,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       });
       this.#gnomeSettings.bind(
         "enable-animations", overlay, "animate", Gio.SettingsBindFlags.GET);
+      this.#overlayBindingsGc.defer(
+        () => Gio.Settings.unbind(overlay, "animate"));
 
       type BSK = BoolSettingKey;
       for (const key of ["auto-close", "follow-cursor"] satisfies BSK[]) {
@@ -245,8 +256,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           track_hover: false,
         });
 
-        this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.DEFAULT);
-        btn.connect("clicked", () => { btn.active = !btn.active; });
+        this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.GET);
+        this.#overlayBindingsGc.defer(
+          () => Gio.Settings.unbind(btn, "active"));
+        btn.connect("clicked", () => { this.#settings.set_boolean(key, !btn.active); });
         overlay.addActionButton(btn);
       }
 
@@ -264,19 +277,21 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       // register event handlers
       this.#settings.bind("selection-timeout",
         overlay, "selection-timeout", Gio.SettingsBindFlags.GET);
-      overlay.connect("notify::visible", this.#onGridVisibleChanged.bind(this));
-      overlay.connect("notify::grid-size", this.#onGridSizeChanged.bind(this));
-      overlay.connect("notify::grid-selection",
-        this.#onGridSelectionChanged.bind(this));
-      overlay.connect("notify::grid-hover-tile",
-        this.#onGridHoverTileChanged.bind(this));
-      overlay.connect("selected", () => this.#dispatch({
-        type: Event.Selection,
-        monitorIdx: monitor.index,
-        gridSize: overlay.gridSize,
-        // Non-null assertion is safe - selection is set while handlers run
-        selection: overlay.gridSelection!,
-      }));
+      this.#overlayBindingsGc.defer(
+        () => Gio.Settings.unbind(overlay, "selection-timeout"));
+      overlay.connectObject(
+        "notify::visible", this.#onGridVisibleChanged.bind(this),
+        "notify::grid-size", this.#onGridSizeChanged.bind(this),
+        "notify::grid-selection", this.#onGridSelectionChanged.bind(this),
+        "notify::grid-hover-tile", this.#onGridHoverTileChanged.bind(this),
+        "selected", () => this.#dispatch({
+          type: Event.Selection,
+          monitorIdx: monitor.index,
+          gridSize: overlay.gridSize,
+          // Non-null assertion is safe - selection is set while handlers run
+          selection: overlay.gridSelection!,
+        }),
+        this);
 
       this.#layoutManager.addChrome(overlay);
 
@@ -294,12 +309,16 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }
 
   #destroyOverlays() {
-    let overlay: InstanceType<typeof Overlay>, wasVisible = false;
-    while (overlay = this.#overlays.pop()!) {
+    this.#overlayBindingsGc.release();
+    let wasVisible = false;
+    for (const overlay of this.#overlays) {
       wasVisible ||= overlay.visible;
       overlay.release();
+      overlay.disconnectObject(this);
+      this.#layoutManager.removeChrome(overlay);
       overlay.destroy();
     }
+    this.#overlays = [];
 
     if (wasVisible) {
       this.#dispatch({ type: Event.Visibility, visible: false });
