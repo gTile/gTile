@@ -21,7 +21,7 @@ import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import DesktopManager from "./DesktopManager.js";
 
 export type GnomeInterfaceSettings =
-  NamedSettings<"enable-animations", never, never>;
+  NamedSettings<"enable-animations", never, never, never, "text-scaling-factor">;
 
 export interface OverlayManagerParams {
   themeStore: ThemeStore;
@@ -53,6 +53,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #preview: InstanceType<typeof Preview>;
   #activeIdx: number | null;
   #syncInProgress: boolean;
+  #textScalingSignalId = 0;
+  #baseFontSizeSignalId = 0;
 
   constructor({
     themeStore,
@@ -79,6 +81,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     desktopManager.subscribe(this.#onDesktopEvent.bind(this));
     gnomeSettings.bind(
       "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
+    this.#textScalingSignalId = gnomeSettings.connect(
+      "changed::text-scaling-factor", () => this.#applyFontSize());
+    this.#baseFontSizeSignalId = settings.connect(
+      "changed::base-font-size", () => this.#applyFontSize());
 
     layoutManager.addTopChrome(this.#preview);
     this.#renderOverlays();
@@ -89,6 +95,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * overlays (hidden and visible). The instance must not be used thereafter.
    */
   release() {
+    this.#gnomeSettings.disconnect(this.#textScalingSignalId);
+    this.#settings.disconnect(this.#baseFontSizeSignalId);
     this.#gridLineOverlayGc.release();
     this.#windowSubscriptionGc.release();
     this.#destroyOverlays();
@@ -273,6 +281,15 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       this.#layoutManager.addChrome(overlay);
 
       this.#overlays.push(overlay);
+    }
+
+    this.#applyFontSize();
+  }
+
+  #applyFontSize() {
+    const px = this.#settings.get_int("base-font-size") * this.#gnomeSettings.get_double("text-scaling-factor");
+    for (const overlay of this.#overlays) {
+      overlay.baseFontSize = px;
     }
   }
 

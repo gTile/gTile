@@ -509,6 +509,10 @@
       <default>true</default>
       <summary>Enable action shortcuts</summary>
     </key>
+    <key type="i" name="base-font-size">
+      <default>16</default>
+      <summary>Base font size in pixels for the overlay UI</summary>
+    </key>
     <key type="i" name="window-spacing">
       <default>0</default>
       <summary>Spacing between windows</summary>

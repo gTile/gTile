@@ -85,6 +85,7 @@ export default class extends ExtensionPreferences {
       group.add(this.#spinRow("max-timeout", 500, 10000, 100));
       group.add(this.#spinRow("selection-timeout", 0, 5000, 50));
       group.add(this.#themeComboRow());
+      group.add(this.#spinRow("base-font-size", 8, 32, 1));
     }
 
     {

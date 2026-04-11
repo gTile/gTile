@@ -29,6 +29,7 @@ export type NumberSettingKey =
   | "insets-secondary-right"
   | "insets-secondary-bottom"
   | "insets-secondary-left"
+  | "base-font-size"
   | "max-timeout"
   | "selection-timeout"
   | "window-spacing";
@@ -231,9 +232,10 @@ export interface NamedSettings<
   N extends string,
   S extends string,
   A extends string = never,
-> extends ExtendedSettings<B | N | S | A> {
+  D extends string = never,
+> extends ExtendedSettings<B | N | S | A | D> {
   bind(
-    key: B | N | S | A,
+    key: B | N | S | A | D,
     object: GObject.Object,
     property: string,
     flags: Gio.SettingsBindFlags
@@ -242,6 +244,8 @@ export interface NamedSettings<
   set_boolean(key: B, value: boolean): boolean;
   get_int(key: N): number;
   set_int(key: N, value: number): boolean;
+  get_double(key: D): number;
+  set_double(key: D, value: number): boolean;
   get_string(key: S): string;
   set_string(key: S, value: string): boolean;
   get_strv(key: A): string[];
