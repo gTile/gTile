@@ -292,6 +292,9 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           selection: overlay.gridSelection!,
         }),
         this);
+      overlay.connect("settings", () => {
+        this.#dispatch({ type: Event.Settings });
+      });
 
       this.#layoutManager.addChrome(overlay);
 

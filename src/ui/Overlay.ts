@@ -124,6 +124,10 @@ export default GObject.registerClass({
      * Forwarded from {@link Grid}.
      */
     selected: {},
+    /**
+     * Emitted when the settings button is clicked.
+     */
+    "settings": {},
   }
 }, class extends St.BoxLayout {
   #cssClass: string;
@@ -202,7 +206,11 @@ export default GObject.registerClass({
     }));
 
     // --- event handlers ---
-    this.#titleBar.connect("closed", () => { this.visible = false; })
+    this.#titleBar.connect("closed", () => { this.visible = false; });
+    this.#titleBar.connect("settings", () => {
+      this.emit("settings");
+    });
+
     this.#grid.connect("notify::grid-size", () => {
       this.#onGridSizeChanged();
       this.notify("grid-size");

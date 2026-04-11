@@ -18,6 +18,11 @@ export const enum Event {
    * Visibility state of the gTile user interface has changed.
    */
   Visibility,
+
+  /**
+   * User requested to open the extension preferences.
+   */
+  Settings,
 }
 
 export interface UserSelectionEvent {
@@ -37,6 +42,10 @@ export interface VisibilityEvent {
   visible: boolean;
 }
 
+export interface SettingsEvent {
+  type: Event.Settings;
+}
+
 /**
  * A data structure that comprises of a discriminative {@link Event} and
  * associated meta information.
@@ -44,4 +53,5 @@ export interface VisibilityEvent {
 export type OverlayEvent =
   | UserSelectionEvent
   | AutotileEvent
-  | VisibilityEvent;
+  | VisibilityEvent
+  | SettingsEvent;

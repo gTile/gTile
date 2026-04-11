@@ -36,7 +36,9 @@
     text-overflow: ellipsis;
 }
 
-.gtile-close {
+/* Close and settings buttons — shared base dimensions */
+.gtile-close,
+.gtile-settings {
     width: 1.375em;
     height: 1.375em;
     background-size: 1em 1em;
@@ -115,6 +117,10 @@
     background-image: url("images/icons/light/32/close.png");
 }
 
+.gtile-settings {
+    background-image: url("images/icons/light/32/settings.png");
+}
+
 .gtile-action-button--auto-close {
     background-image: url("images/icons/light/32/auto-close.png");
 }
@@ -159,11 +165,13 @@
     padding: 0.3125em;
 }
 
-.gtile-default .gtile-close {
-    margin-right: 0.1875em;
+.gtile-default .gtile-close,
+.gtile-default .gtile-settings {
+    margin: 0 0.1875em;
 }
 
-.gtile-default .gtile-close:hover {
+.gtile-default .gtile-close:hover,
+.gtile-default .gtile-settings:hover {
     background-color: rgba(238, 238, 236, 0.1);
 }
 
@@ -236,7 +244,8 @@
     color: #ffffff;
 }
 
-.gtile-classic .gtile-close:hover {
+.gtile-classic .gtile-close:hover,
+.gtile-classic .gtile-settings:hover {
     background-color: rgba(238, 238, 236, 0.1);
 }
 
@@ -305,7 +314,9 @@
 }
 
 .gtile-minimal-dark .gtile-close,
-.gtile-minimal-light .gtile-close {
+.gtile-minimal-dark .gtile-settings,
+.gtile-minimal-light .gtile-close,
+.gtile-minimal-light .gtile-settings {
     background-size: 1.375em 1.375em;
     height: 1.25em;
     width: 1.25em;
@@ -357,7 +368,8 @@
     color: #ffffff;
 }
 
-.gtile-minimal-dark .gtile-close:hover {
+.gtile-minimal-dark .gtile-close:hover,
+.gtile-minimal-dark .gtile-settings:hover {
     background-color: #646464;
     border-color: #202020;
 }
@@ -401,7 +413,8 @@
     color: #111111;
 }
 
-.gtile-minimal-light .gtile-close:hover {
+.gtile-minimal-light .gtile-close:hover,
+.gtile-minimal-light .gtile-settings:hover {
     background-color: #cccac7;
     border-color: #cccac7;
 }
@@ -441,6 +454,10 @@
 
 .gtile-minimal-light .gtile-close {
     background-image: url("images/icons/dark/32/close.png");
+}
+
+.gtile-minimal-light .gtile-settings {
+    background-image: url("images/icons/dark/32/settings.png");
 }
 
 .gtile-minimal-light .gtile-action-button--auto-close {
