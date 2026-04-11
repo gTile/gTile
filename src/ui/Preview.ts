@@ -2,11 +2,13 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { Rectangle } from "../types/grid.js";
+import ThemeStore from "../util/ThemeStore.js";
 
 export interface PreviewParams extends Omit<
   Partial<St.BoxLayout.ConstructorProps>,
   "visible"
 > {
+  themeStore: ThemeStore;
   animate?: boolean;
 }
 
@@ -27,16 +29,32 @@ export default GObject.registerClass({
   }
 }, class extends St.BoxLayout {
   #animate: boolean;
+  #cssClass: string;
+  #unsubscribeTheme: () => void;
 
-  constructor({ animate = true, ...params }: PreviewParams) {
+  constructor({ themeStore, animate = true, ...params }: PreviewParams) {
     super({
-      style_class: `gtile-preview gtile-default`,
+      style_class: `gtile-preview ${themeStore.theme}`,
       visible: false,
       ...params,
     });
 
+    this.#cssClass = themeStore.theme;
     this.#animate = animate;
     this.add_style_pseudo_class("activate");
+
+    this.#unsubscribeTheme = themeStore.subscribe(theme => {
+      this.remove_style_class_name(this.#cssClass);
+      this.#cssClass = theme;
+      this.add_style_class_name(theme);
+    });
+  }
+
+  /**
+   * Releases resources not tied to the actor lifecycle.
+   */
+  release() {
+    this.#unsubscribeTheme();
   }
 
   /**

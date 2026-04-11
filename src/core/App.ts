@@ -1,3 +1,4 @@
+import GLib from "gi://GLib";
 import Gio from "gi://Gio";
 import Shell from "gi://Shell";
 
@@ -15,6 +16,7 @@ import {
   ExtensionSettingsProvider,
   SettingKey,
 } from "../types/settings.js";
+import ThemeStore from "../util/ThemeStore.js";
 import { Event as OverlayEventType, OverlayEvent } from "../types/overlay.js";
 import PanelButton from "../ui/PanelButton.js";
 import { GarbageCollection, GarbageCollector } from "../util/gc.js";
@@ -55,6 +57,7 @@ type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
 export default class App implements GarbageCollector {
   static #instance: App;
 
+  #themeStore: ThemeStore;
   #gc: GarbageCollection;
   #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
@@ -89,6 +92,7 @@ export default class App implements GarbageCollector {
     this.#gc = new GarbageCollection();
     this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
     this.#settings = extension.settings;
+    this.#themeStore = new ThemeStore(this.#settings);
     this.#gridSpecs = AutoTileLayouts(this.#settings);
 
     this.#globalKeyBindingGroups = Object
@@ -117,6 +121,7 @@ export default class App implements GarbageCollector {
 
     const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
     this.#overlayManager = new OverlayManager({
+      themeStore: this.#themeStore,
       settings: this.#settings,
       gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
@@ -125,7 +130,7 @@ export default class App implements GarbageCollector {
     });
     this.#gc.defer(() => this.#overlayManager.release());
 
-    this.#panelIcon = new PanelButton();
+    this.#panelIcon = new PanelButton(extension.path);
     this.#gc.defer(() => this.#panelIcon.destroy());
 
     // --- show  UI ---
@@ -142,10 +147,19 @@ export default class App implements GarbageCollector {
     this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
     this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
     this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
+
+    // Force theme apply after stylesheet is loaded (CSS is parsed after enable())
+    let idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+      idleId = 0;
+      this.#themeStore.forceNotify();
+      return GLib.SOURCE_REMOVE;
+    });
+    this.#gc.defer(() => { if (idleId > 0) GLib.source_remove(idleId); });
   }
 
   release() {
     this.#gc.release();
+    this.#themeStore.release();
     this.#lastPresetIndex.release();
     App.#instance = undefined as any;
   }
@@ -205,6 +219,7 @@ export default class App implements GarbageCollector {
     isHotkeyRelated(key) && this.#onHotkeyGroupToggle(key);
     isAutotileRelated(key) && this.#onAutotileGridSpecChanged(key);
     key === "grid-sizes" && this.#onPresetsChanged();
+    key === "theme" && this.#themeStore.onSettingChanged();
   }
 
   #onHotkeyGroupToggle(key: keyof typeof SettingKeyToKeyBindingGroupLUT) {

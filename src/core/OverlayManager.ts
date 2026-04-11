@@ -13,6 +13,7 @@ import {
   ExtensionSettings,
   NamedSettings,
 } from "../types/settings.js";
+import ThemeStore from "../util/ThemeStore.js";
 import Overlay from "../ui/Overlay.js";
 import IconButton, { IconButtonParams } from "../ui/overlay/IconButton.js";
 import Preview from "../ui/Preview.js";
@@ -23,6 +24,7 @@ export type GnomeInterfaceSettings =
   NamedSettings<"enable-animations", never, never>;
 
 export interface OverlayManagerParams {
+  themeStore: ThemeStore;
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
@@ -38,6 +40,7 @@ export interface OverlayManagerParams {
  * manipulate the overlay appearance.
  */
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
+  #themeStore: ThemeStore;
   #settings: ExtensionSettings;
   #gnomeSettings: GnomeInterfaceSettings;
   #presets: GridSize[];
@@ -52,12 +55,14 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #syncInProgress: boolean;
 
   constructor({
+    themeStore,
     settings,
     gnomeSettings,
     presets,
     layoutManager,
     desktopManager,
   }: OverlayManagerParams) {
+    this.#themeStore = themeStore;
     this.#settings = settings;
     this.#gnomeSettings = gnomeSettings;
     this.#presets = presets;
@@ -67,7 +72,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#windowSubscriptionGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
-    this.#preview = new Preview({});
+    this.#preview = new Preview({ themeStore: this.#themeStore });
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
@@ -86,8 +91,9 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   release() {
     this.#gridLineOverlayGc.release();
     this.#windowSubscriptionGc.release();
-    this.#preview.destroy();
     this.#destroyOverlays();
+    this.#preview.release();
+    this.#preview.destroy();
     this.#dispatchCallbacks = [];
   }
 
@@ -213,6 +219,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #renderOverlays() {
     for (const monitor of this.#desktopManager.monitors) {
       const overlay = new Overlay({
+        themeStore: this.#themeStore,
         title: "gTile",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
@@ -296,7 +303,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.cols; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `gtile-default gtile-grid-lines-preview`,
+          style_class: `${this.#themeStore.theme} gtile-grid-lines-preview`,
           x: workArea.x + tileWidth * i,
           y: workArea.y,
           width: 1,
@@ -309,7 +316,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.rows; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `gtile-default gtile-grid-lines-preview`,
+          style_class: `${this.#themeStore.theme} gtile-grid-lines-preview`,
           x: workArea.x,
           y: workArea.y + tileHeight * i,
           width: workArea.width,

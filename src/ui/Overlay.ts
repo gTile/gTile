@@ -3,6 +3,7 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
+import ThemeStore from "../util/ThemeStore.js";
 import ButtonBar from "./overlay/ButtonBar.js";
 import Container from "./overlay/Container.js";
 import Grid from "./overlay/Grid.js";
@@ -12,6 +13,8 @@ import TitleBar from "./overlay/TitleBar.js";
 type TextButton = ReturnType<typeof TextButton.new_styled>;
 
 export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
+  themeStore: ThemeStore;
+
   /**
    * Overlay title displayed next to the close button.
    */
@@ -116,6 +119,8 @@ export default GObject.registerClass({
     selected: {},
   }
 }, class extends St.BoxLayout {
+  #cssClass: string;
+  #unsubscribeTheme: () => void;
   #titleBar: InstanceType<typeof TitleBar>;
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
@@ -125,6 +130,7 @@ export default GObject.registerClass({
   #delayTimeoutID: GLib.Source | null = null;
 
   constructor({
+    themeStore,
     title,
     presets,
     gridAspectRatio,
@@ -134,7 +140,7 @@ export default GObject.registerClass({
     ...params
   }: OverlayParams) {
     super({
-      style_class: `gtile-overlay gtile-default`,
+      style_class: `gtile-overlay ${themeStore.theme}`,
       vertical: true,
       reactive: true,
       can_focus: true,
@@ -143,6 +149,12 @@ export default GObject.registerClass({
     });
 
     // --- initialize ---
+    this.#cssClass = themeStore.theme;
+    this.#unsubscribeTheme = themeStore.subscribe(theme => {
+      this.remove_style_class_name(this.#cssClass);
+      this.#cssClass = theme;
+      this.add_style_class_name(theme);
+    });
     this.#titleBar = new TitleBar({ title });
     this.#grid = new Grid({
       gridSize: presets[0],
@@ -195,7 +207,13 @@ export default GObject.registerClass({
     this.connect("notify::hover", this.#onHoverChanged.bind(this));
   }
 
+  /**
+   * Releases resources that are not tied to the actor lifecycle (e.g. theme
+   * subscriptions, pending timeouts). Must be called before destroy() or
+   * before the shell disposes the actor during shutdown.
+   */
   release(): void {
+    this.#unsubscribeTheme();
     if (this.#delayTimeoutID) {
       clearTimeout(this.#delayTimeoutID);
       this.#delayTimeoutID = null;
