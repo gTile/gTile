@@ -82,6 +82,13 @@ export type StringSettingKey =
   | "theme";
 
 /**
+ * Key names in the GSettings schema that reference a string array value.
+ */
+export type StringArraySettingKey =
+  | "themes"
+  | KeyBindingSettingKey;
+
+/**
  * Key names in the GSettings schema that reference keyboard shortcuts which are
  * always intercepted for as long as the extension is enabled.
  */
@@ -206,8 +213,8 @@ export type SettingKey =
   | BoolSettingKey
   | NumberSettingKey
   | StringSettingKey
-  | KeyBindingSettingKey
-  | "themes";
+  | StringArraySettingKey
+  | KeyBindingSettingKey;
 
 type ExtendedSettings<P extends string> = Gio.Settings & {
   // This is only a convenience signature that enables auto-completion. It does
@@ -222,10 +229,11 @@ type ExtendedSettings<P extends string> = Gio.Settings & {
 export interface NamedSettings<
   B extends string,
   N extends string,
-  S extends string
-> extends ExtendedSettings<B | N | S> {
+  S extends string,
+  A extends string = never,
+> extends ExtendedSettings<B | N | S | A> {
   bind(
-    key: B | N | S,
+    key: B | N | S | A,
     object: GObject.Object,
     property: string,
     flags: Gio.SettingsBindFlags
@@ -236,6 +244,8 @@ export interface NamedSettings<
   set_int(key: N, value: number): boolean;
   get_string(key: S): string;
   set_string(key: S, value: string): boolean;
+  get_strv(key: A): string[];
+  set_strv(key: A, value: string[]): boolean;
 }
 
 /**
@@ -244,7 +254,8 @@ export interface NamedSettings<
 export type ExtensionSettings = NamedSettings<
   BoolSettingKey,
   NumberSettingKey,
-  StringSettingKey
+  StringSettingKey,
+  StringArraySettingKey
 >;
 
 /**
