@@ -58,6 +58,7 @@ export default class App implements GarbageCollector {
   static #instance: App;
 
   #themeStore: ThemeStore;
+  #uuid: string;
   #gc: GarbageCollection;
   #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
@@ -92,6 +93,7 @@ export default class App implements GarbageCollector {
     this.#gc = new GarbageCollection();
     this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
     this.#settings = extension.settings;
+    this.#uuid = extension.uuid;
     this.#themeStore = new ThemeStore(this.#settings);
     this.#gridSpecs = AutoTileLayouts(this.#settings);
 
@@ -269,6 +271,26 @@ export default class App implements GarbageCollector {
         this.#hotkeyManager.setListeningGroups(action.visible
           ? this.#globalKeyBindingGroups | DefaultKeyBindingGroups
           : this.#globalKeyBindingGroups);
+        return;
+      case OverlayEventType.Settings:
+        Gio.DBus.session.call(
+          "org.gnome.Shell.Extensions",
+          "/org/gnome/Shell/Extensions",
+          "org.gnome.Shell.Extensions",
+          "OpenExtensionPrefs",
+          new GLib.Variant("(ssa{sv})", [this.#uuid, "", {}]),
+          null,
+          Gio.DBusCallFlags.NONE,
+          -1,
+          null,
+          (connection, result) => {
+            try {
+              connection?.call_finish(result);
+            } catch (e) {
+              console.error(`gTile: Failed to open preferences:`, e);
+            }
+          }
+        );
         return;
     }
 

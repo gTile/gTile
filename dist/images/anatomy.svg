@@ -207,11 +207,19 @@
     <rect
        style="opacity:1;fill:none;fill-opacity:1;stroke:#2a60ae;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
        id="rect1722"
-       width="109.67007"
+       width="88.354"
        height="15"
        x="62.358326"
        y="75.400719"
        ry="0.3650808" />
+    <rect
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#2a60ae;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       id="rect-settings"
+       width="16.1"
+       height="15"
+       x="153.512616"
+       y="75.400719"
+       ry="0.36036181" />
     <path
        style="fill:none;stroke:#2a60ae;stroke-width:1.07703;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DotM)"
        d="M 33.072916,64.029163 V 33.337497"
@@ -307,7 +315,7 @@
          id="tspan7219-0-3"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#2a60ae;fill-opacity:1;stroke:#e6e6e6;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt;paint-order:stroke fill markers"
          x="52.187756"
-         y="53.146683">close-container, close</tspan></text>
+         y="53.146683">close</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#2a60ae;fill-opacity:1;stroke:#e6e6e6;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;letter-spacing:0px;stroke-linejoin:round;stroke-linecap:butt;paint-order:stroke fill markers"
@@ -438,5 +446,19 @@
        style="fill:none;stroke:#2a60ae;stroke-width:0.952;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#DotM)"
        d="M 168.01042,25.929166 V 7.9375"
        id="path2963-5" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#2a60ae;fill-opacity:1;stroke:#e6e6e6;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;letter-spacing:0px;stroke-linejoin:round;stroke-linecap:butt;paint-order:stroke fill markers"
+       x="168.1"
+       y="57.0"
+       id="text-settings-label"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#2a60ae;fill-opacity:1;stroke:#e6e6e6;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt;paint-order:stroke fill markers"
+         x="168.1"
+         y="57.0">settings</tspan></text>
+    <path
+       style="fill:none;stroke:#2a60ae;stroke-width:1.11356;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DotM)"
+       d="M 163.444259,75.400719 V 55.329164"
+       id="path-settings-arrow" />
   </g>
 </svg>

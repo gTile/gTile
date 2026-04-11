@@ -8,18 +8,19 @@ export interface TitleBarParams extends Partial<St.Widget.ConstructorProps> {
 
 /**
  * A simple title bar for dialogs. It uses a horizontal box layout to display a
- * close button and a centered title like this:
+ * close button, a centered title, and a settings button like this:
  *
- * [x] ··· <Title> ···
+ * [x] ··· <Title> ··· [⚙]
  *
  * Two expanding spacers flank the label so it stays centered regardless of the
- * close button width. A `closed` signal is emitted when the user clicks the
- * close button.
+ * button widths. A `closed` signal is emitted when the user clicks the close
+ * button. A `settings` signal is emitted when the settings button is clicked.
  */
 export default GObject.registerClass({
   GTypeName: "GTileOverlayTitleBar",
   Signals: {
     closed: {},
+    "settings": {},
   }
 }, class extends St.Widget {
   #label: St.Label;
@@ -53,14 +54,20 @@ export default GObject.registerClass({
       x_expand: true,
     });
 
+    const settingsBtn = new St.Button({
+      style_class: `gtile-settings`,
+    });
+
     // --- show  UI ---
     this.add_child(closeBtn);
     this.add_child(leftSpacer);
     this.add_child(this.#label);
     this.add_child(rightSpacer);
+    this.add_child(settingsBtn);
 
     // --- event handlers ---
     closeBtn.connect("clicked", () => { this.emit("closed"); });
+    settingsBtn.connect("clicked", () => { this.emit("settings"); });
   }
 
   set title(title: string) {
