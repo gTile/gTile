@@ -30,6 +30,8 @@ export interface OverlayManagerParams {
   presets: GridSize[];
   layoutManager: LayoutManager;
   desktopManager: DesktopManager;
+  showActionButtons?: boolean;
+  showPresetButtons?: boolean;
 }
 
 /**
@@ -41,6 +43,8 @@ export interface OverlayManagerParams {
  */
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #themeStore: ThemeStore;
+  #showActionButtons: boolean;
+  #showPresetButtons: boolean;
   #settings: ExtensionSettings;
   #gnomeSettings: GnomeInterfaceSettings;
   #presets: GridSize[];
@@ -65,8 +69,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     presets,
     layoutManager,
     desktopManager,
+    showActionButtons = true,
+    showPresetButtons = true,
   }: OverlayManagerParams) {
     this.#themeStore = themeStore;
+    this.#showActionButtons = showActionButtons;
+    this.#showPresetButtons = showPresetButtons;
     this.#settings = settings;
     this.#gnomeSettings = gnomeSettings;
     this.#presets = presets;
@@ -109,6 +117,24 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     Gio.Settings.unbind(this.#preview, "animate");
     this.#preview.destroy();
     this.#dispatchCallbacks = [];
+  }
+
+  /**
+   * Whether to show action buttons. Hot-reloads by adding/removing container.
+   */
+  set showActionButtons(showActionButtons: boolean) {
+    if (this.#showActionButtons === showActionButtons) return;
+    this.#showActionButtons = showActionButtons;
+    this.#overlays.forEach(overlay => overlay.showActionButtons = showActionButtons);
+  }
+
+  /**
+   * Whether to show preset buttons. Hot-reloads by adding/removing container.
+   */
+  set showPresetButtons(showPresetButtons: boolean) {
+    if (this.#showPresetButtons === showPresetButtons) return;
+    this.#showPresetButtons = showPresetButtons;
+    this.#overlays.forEach(overlay => overlay.showPresetButtons = showPresetButtons);
   }
 
   /**
@@ -240,6 +266,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         title: "gTile",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
+        showActionButtons: this.#showActionButtons,
+        showPresetButtons: this.#showPresetButtons,
         visible: false,
       });
       this.#gnomeSettings.bind(

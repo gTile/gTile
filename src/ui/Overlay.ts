@@ -46,6 +46,16 @@ export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
    * cursor left the overlay.
    */
   selectionTimeout?: number;
+
+  /**
+   * Optional. Whether to show the action buttons bar.
+   */
+  showActionButtons?: boolean;
+
+  /**
+   * Optional. Whether to show the preset buttons bar.
+   */
+  showPresetButtons?: boolean;
 }
 
 /**
@@ -136,6 +146,8 @@ export default GObject.registerClass({
   #grid: InstanceType<typeof Grid>;
   #presetButtons: ReturnType<typeof ButtonBar.new_styled>;
   #actionButtons: ReturnType<typeof ButtonBar.new_styled>;
+  #presetButtonsContainer: ReturnType<typeof Container.new_styled>;
+  #actionButtonsContainer: ReturnType<typeof Container.new_styled>;
   #baseFontSize: number;
   #animate: boolean;
   #selectionTimeout: number;
@@ -149,6 +161,8 @@ export default GObject.registerClass({
     gridSelection = null,
     animate = true,
     selectionTimeout = 200,
+    showActionButtons = true,
+    showPresetButtons = true,
     ...params
   }: OverlayParams) {
     super({
@@ -196,14 +210,21 @@ export default GObject.registerClass({
       style_class: `gtile-tile-container`,
       child: this.#grid
     }));
-    this.add_child(Container.new_styled({
+    this.#presetButtonsContainer = Container.new_styled({
       style_class: `gtile-preset-container`,
       child: this.#presetButtons
-    }));
-    this.add_child(Container.new_styled({
+    });
+
+    this.#actionButtonsContainer = Container.new_styled({
       style_class: `gtile-action-container`,
       child: this.#actionButtons
-    }));
+    });
+
+    this.add_child(this.#presetButtonsContainer);
+    this.add_child(this.#actionButtonsContainer);
+
+    this.#presetButtonsContainer.visible = showPresetButtons;
+    this.#actionButtonsContainer.visible = showActionButtons;
 
     // --- event handlers ---
     this.#titleBar.connect("closed", () => { this.visible = false; });
@@ -303,6 +324,20 @@ export default GObject.registerClass({
 
   get selectionTimeout() {
     return this.#selectionTimeout;
+  }
+
+  /**
+   * Whether to show action buttons.
+   */
+  set showActionButtons(show: boolean) {
+    this.#actionButtonsContainer.visible = show;
+  }
+
+  /**
+   * Whether to show preset buttons.
+   */
+  set showPresetButtons(show: boolean) {
+    this.#presetButtonsContainer.visible = show;
   }
 
   /**

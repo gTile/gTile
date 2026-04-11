@@ -59,6 +59,8 @@ export default class App implements GarbageCollector {
 
   #themeStore: ThemeStore;
   #uuid: string;
+  #showActionButtons: boolean;
+  #showPresetButtons: boolean;
   #gc: GarbageCollection;
   #lastPresetIndex: VolatileStorage<PresetIndex>;
   #settings: ExtensionSettings;
@@ -95,6 +97,8 @@ export default class App implements GarbageCollector {
     this.#settings = extension.settings;
     this.#uuid = extension.uuid;
     this.#themeStore = new ThemeStore(this.#settings);
+    this.#showActionButtons = this.#settings.get_boolean("show-action-buttons");
+    this.#showPresetButtons = this.#settings.get_boolean("show-preset-buttons");
     this.#gridSpecs = AutoTileLayouts(this.#settings);
 
     this.#globalKeyBindingGroups = Object
@@ -127,6 +131,8 @@ export default class App implements GarbageCollector {
       presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
       layoutManager: Main.layoutManager,
       desktopManager: this.#desktopManager,
+      showActionButtons: this.#showActionButtons,
+      showPresetButtons: this.#showPresetButtons,
     });
 
     this.#panelIcon = new PanelButton(extension.path);
@@ -227,6 +233,18 @@ export default class App implements GarbageCollector {
     isAutotileRelated(key) && this.#onAutotileGridSpecChanged(key);
     key === "grid-sizes" && this.#onPresetsChanged();
     key === "theme" && this.#themeStore.onSettingChanged();
+    key === "show-action-buttons" && this.#onShowActionButtonsChanged();
+    key === "show-preset-buttons" && this.#onShowPresetButtonsChanged();
+  }
+
+  #onShowActionButtonsChanged() {
+    this.#showActionButtons = this.#settings.get_boolean("show-action-buttons");
+    this.#overlayManager.showActionButtons = this.#showActionButtons;
+  }
+
+  #onShowPresetButtonsChanged() {
+    this.#showPresetButtons = this.#settings.get_boolean("show-preset-buttons");
+    this.#overlayManager.showPresetButtons = this.#showPresetButtons;
   }
 
   #onHotkeyGroupToggle(key: keyof typeof SettingKeyToKeyBindingGroupLUT) {
