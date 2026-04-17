@@ -450,18 +450,18 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
           anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.height / 2,
             workArea.y, yMax);
 
-        overlay.placeAt(anchorX, anchorY);
+        overlay.placeAt(Math.round(anchorX), Math.round(anchorY));
       } else if (
         workArea.x <= mouseX && mouseX <= (workArea.x + workArea.width) &&
         workArea.y <= mouseY && mouseY <= (workArea.y + workArea.height)
       ) {
         overlay.placeAt(
-          Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax),
-          Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax));
+          Math.round(Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax)),
+          Math.round(Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax)));
       } else {
         // never animate overlays when placed in the center of the screen
-        overlay.x = workArea.x + workArea.width / 2 - overlay.width / 2;
-        overlay.y = workArea.y + workArea.height / 2 - overlay.height / 2;
+        overlay.x = Math.round(workArea.x + workArea.width / 2 - overlay.width / 2);
+        overlay.y = Math.round(workArea.y + workArea.height / 2 - overlay.height / 2);
       }
     }
   }
