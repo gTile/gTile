@@ -333,7 +333,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   }
 
   #applyFontSize() {
-    const px = this.#settings.get_int("base-font-size") * this.#gnomeSettings.get_double("text-scaling-factor");
+    const baseFontSize = this.#settings.get_int("base-font-size");
+    const textScalingFactor = this.#gnomeSettings.get_double("text-scaling-factor");
+    const px = Math.round(baseFontSize * textScalingFactor);
+
     for (const overlay of this.#overlays) {
       overlay.baseFontSize = px;
     }
