@@ -31,10 +31,14 @@ type FrameSize = { width: number; height: number };
 type MRect = Mtk.Rectangle;
 
 const TitleBlacklist: RegExp[] = [
-  // Desktop Icons NG (see https://github.com/gTile/gTile/issues/336#issuecomment-1804267328)
+  // Desktop Icons NG (see https://github.com/gTile/gTile/issues/336#issuecomment-1804267328) before June 2025
   // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopManager.js#L396
   // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/cfe944e2ce7a1d27e47b08c002cd100a1e2cb878/app/desktopGrid.js#L160
   /;BDHF$/,
+
+  // Desktop Icons NG (see https://github.com/gTile/gTile/issues/469) since Jun 2025
+  // https://gitlab.com/rastersoft/desktop-icons-ng/-/blob/2568cc5f04c5a4f0f95a4b38c4336e79224355d8/app/desktopManager.js#L392
+  /^Desktop Icons /,
 ];
 
 export interface DesktopManagerParams {
