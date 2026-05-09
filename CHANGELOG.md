@@ -1,6 +1,9 @@
 CHANGE LOG
 ----------
 
+### 70
+- Ignore invisible windows created by [Desktop Icons NG](https://gitlab.com/rastersoft/desktop-icons-ng/-/commit/6ed835afae029670db19312aabec6bda2d710b86) as of June 2025
+
 ### 69
 - Add support for Gnome 50 (extension is compatible without further code changes)
   - Compatibility with Gnome 49 remains, as there are no breaking changes that affect this extension.
