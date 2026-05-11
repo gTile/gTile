@@ -518,7 +518,7 @@
       <summary>Show action buttons in the overlay</summary>
     </key>
     <key type="i" name="base-font-size">
-      <default>16</default>
+      <default>11</default>
       <summary>Base font size in pixels for the overlay UI</summary>
     </key>
     <key type="i" name="window-spacing">

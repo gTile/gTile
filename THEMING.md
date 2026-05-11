@@ -33,9 +33,9 @@ There are three types of themed elements, each with a different selector pattern
 
 ### Relative units (em)
 
-All dimensions are in `em`, relative to the overlay root `font-size`. This means every size in the UI scales from a single value — the base font size — which is controlled by the `base-font-size` GSettings key (default: 16px) and multiplied by GNOME's `text-scaling-factor`.
+All dimensions are in `em`, relative to the overlay root `font-size`. This means every size in the UI scales from a single value — the base font size — which is controlled by the `base-font-size` GSettings key (default: 11px) and multiplied by GNOME's `text-scaling-factor`.
 
-Do not use `px` for any dimension. Use `em` fractions (e.g. `0.125em` instead of `2px` at 16px base).
+Do not use `px` for any dimension. Use `em` fractions (e.g. `0.125em` instead of `2px` at 11px base).
 
 ### Extension anatomy
 
