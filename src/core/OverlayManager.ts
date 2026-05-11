@@ -437,17 +437,25 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
     const [mouseX, mouseY] = this.#desktopManager.pointer;
     for (const { index, workArea } of monitors) {
+      const overlay = this.#overlays[index];
+
+      // Clutter does not lay out hidden actors, so overlay.width/height are 0
+      // until the first show(). Force a style+layout pass to get real dimensions.
+      overlay.ensure_style();
+      const [,, natWidth, natHeight] = overlay.get_preferred_size();
+      const overlayWidth = overlay.visible ? overlay.width : (natWidth ?? 0);
+      const overlayHeight = overlay.visible ? overlay.height : (natHeight ?? 0);
+
       const
-        overlay = this.#overlays[index],
-        xMax = workArea.x + workArea.width - overlay.width,
-        yMax = workArea.y + workArea.height - overlay.height;
+        xMax = workArea.x + workArea.width - overlayWidth,
+        yMax = workArea.y + workArea.height - overlayHeight;
 
       if (focusedWindow?.get_monitor() === index) {
         const
           frame = focusedWindow.get_frame_rect(),
-          anchorX = Math.clamp(frame.x + frame.width / 2 - overlay.width / 2,
+          anchorX = Math.clamp(frame.x + frame.width / 2 - overlayWidth / 2,
             workArea.x, xMax),
-          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.height / 2,
+          anchorY = Math.clamp(frame.y + frame.height / 2 - overlayHeight / 2,
             workArea.y, yMax);
 
         overlay.placeAt(Math.round(anchorX), Math.round(anchorY));
@@ -456,12 +464,12 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         workArea.y <= mouseY && mouseY <= (workArea.y + workArea.height)
       ) {
         overlay.placeAt(
-          Math.round(Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax)),
-          Math.round(Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax)));
+          Math.round(Math.clamp(mouseX - overlayWidth / 2, workArea.x, xMax)),
+          Math.round(Math.clamp(mouseY - overlayHeight / 2, workArea.y, yMax)));
       } else {
         // never animate overlays when placed in the center of the screen
-        overlay.x = Math.round(workArea.x + workArea.width / 2 - overlay.width / 2);
-        overlay.y = Math.round(workArea.y + workArea.height / 2 - overlay.height / 2);
+        overlay.x = Math.round(workArea.x + workArea.width / 2 - overlayWidth / 2);
+        overlay.y = Math.round(workArea.y + workArea.height / 2 - overlayHeight / 2);
       }
     }
   }
