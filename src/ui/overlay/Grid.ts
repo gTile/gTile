@@ -3,33 +3,76 @@ import GObject from "gi://GObject";
 import St from "gi://St";
 
 import { GridOffset, GridSize, GridSelection } from "../../types/grid.js";
-import { Theme } from "../../types/theme.js";
 import TextButton from "./TextButton.js";
 
 type TextButton = ReturnType<typeof TextButton.new_styled>;
 
-export interface GridParams extends Partial<St.Widget.ConstructorProps> {
-  theme: Theme
+const AspectRatioGridLayout = GObject.registerClass({
+  GTypeName: "GTileAspectRatioGridLayout",
+  Properties: {
+    "aspect-ratio": GObject.ParamSpec.double(
+      "aspect-ratio", "Aspect ratio", "Width / height ratio",
+      GObject.ParamFlags.READWRITE, 0.01, 100, 1,
+    ),
+    "cols": GObject.ParamSpec.int(
+      "cols", "Cols", "Number of columns",
+      GObject.ParamFlags.READWRITE, 1, 100, 1,
+    ),
+    "rows": GObject.ParamSpec.int(
+      "rows", "Rows", "Number of rows",
+      GObject.ParamFlags.READWRITE, 1, 100, 1,
+    ),
+  },
+}, class extends Clutter.LayoutManager {
+  "aspect-ratio": number = 1;
+  cols: number = 1;
+  rows: number = 1;
 
+  vfunc_get_preferred_width(_container: Clutter.Actor, _for_height: number): [number, number] {
+    return [0, 0];
+  }
+
+  vfunc_get_preferred_height(container: Clutter.Actor, for_width: number): [number, number] {
+    const w = for_width > 0 ? for_width : container.width;
+    const h = w / this["aspect-ratio"];
+    return [h, h];
+  }
+
+  vfunc_allocate(container: Clutter.Actor, box: Clutter.ActorBox): void {
+    const tileW = (box.x2 - box.x1) / this.cols;
+    const tileH = (box.y2 - box.y1) / this.rows;
+
+    let index = 0;
+    for (const child of container.get_children()) {
+      const col = index % this.cols;
+      const row = Math.floor(index / this.cols);
+      const childBox = new Clutter.ActorBox();
+      childBox.x1 = col * tileW;
+      childBox.y1 = row * tileH;
+      childBox.x2 = childBox.x1 + tileW;
+      childBox.y2 = childBox.y1 + tileH;
+      child.allocate(childBox);
+      index++;
+    }
+  }
+});
+
+export interface GridParams extends Partial<St.Widget.ConstructorProps> {
   /**
    * The dimensions of the grid in terms of columns and rows.
    */
   gridSize: GridSize;
 
   /**
+   * Width / height aspect ratio of the grid. Used to compute the natural
+   * height from the allocated width, keeping tiles square.
+   */
+  aspectRatio: number;
+
+  /**
    * Optional. The initial area of highlighted tiles in the grid.
    */
   selection?: GridSelection | null;
-
-  /**
-   * The width of the grid in pixels.
-   */
-  width: number;
-
-  /**
-   * The height of the grid in pixels.
-   */
-  height: number;
 }
 
 /**
@@ -71,25 +114,23 @@ export default GObject.registerClass({
     selected: {},
   }
 }, class extends St.Widget {
-  #theme: Theme;
   #gridSize!: GridSize;
   #selection!: GridSelection | null;
   #hoverTile: GridOffset | null;
 
-  constructor({ theme, gridSize, selection = null, ...params }: GridParams) {
+  constructor({ gridSize, aspectRatio, selection = null, ...params }: GridParams) {
+    const layoutManager = new AspectRatioGridLayout();
+    layoutManager["aspect-ratio"] = aspectRatio;
+
     super({
-      style_class: `${theme}__tile-table`,
+      style_class: `gtile-tile-table`,
       can_focus: true,
       track_hover: true,
       reactive: true,
-      layout_manager: new Clutter.GridLayout({
-        row_homogeneous: true,
-        column_homogeneous: true,
-      }),
+      layout_manager: layoutManager,
       ...params
     });
 
-    this.#theme = theme;
     this.gridSize = gridSize;
     this.selection = selection;
     this.#hoverTile = null;
@@ -137,25 +178,23 @@ export default GObject.registerClass({
   }
 
   get #layoutManager() {
-    return this.layout_manager as Clutter.GridLayout;
+    return this.layout_manager as InstanceType<typeof AspectRatioGridLayout>;
   }
 
   #renderGrid() {
-    const tileWidth = this.width / this.gridSize.cols;
-    const tileHeight = this.height / this.gridSize.rows;
+    this.#layoutManager.cols = this.gridSize.cols;
+    this.#layoutManager.rows = this.gridSize.rows;
 
-    for (let col = 0; col < this.gridSize.cols; ++col) {
-      for (let row = 0; row < this.gridSize.rows; ++row) {
+    for (let row = 0; row < this.gridSize.rows; ++row) {
+      for (let col = 0; col < this.gridSize.cols; ++col) {
         const tile = TextButton.new_styled({
-          style_class: `${this.#theme}__tile-table-item`,
-          width: tileWidth,
-          height: tileHeight,
+          style_class: `gtile-tile-table-item`,
         });
 
         tile.connect("clicked", this.#onTileClick.bind(this, col, row));
         tile.connect("notify::hover", this.#onTileHover.bind(this, col, row));
 
-        this.#layoutManager.attach(tile, col, row, 1, 1);
+        this.add_child(tile);
       }
     }
   }
@@ -167,18 +206,20 @@ export default GObject.registerClass({
     const colRange = [Math.min(startCol, endCol), Math.max(startCol, endCol)];
     const rowRange = [Math.min(startRow, endRow), Math.max(startRow, endRow)];
 
-    for (let row = 0; row < this.gridSize.rows; ++row) {
-      for (let col = 0; col < this.gridSize.cols; ++col) {
-        const tile = this.#layoutManager.get_child_at(col, row) as TextButton;
-        const isActive = (
-          colRange[0] <= col && col <= colRange[1] &&
-          rowRange[0] <= row && row <= rowRange[1]
-        );
+    let index = 0;
+    for (const child of this.get_children()) {
+      const tile = child as TextButton;
+      const col = index % this.gridSize.cols;
+      const row = Math.floor(index / this.gridSize.cols);
+      const isActive = (
+        colRange[0] <= col && col <= colRange[1] &&
+        rowRange[0] <= row && row <= rowRange[1]
+      );
 
-        if (tile.active !== isActive) {
-          tile.active = isActive;
-        }
+      if (tile.active !== isActive) {
+        tile.active = isActive;
       }
+      index++;
     }
   }
 

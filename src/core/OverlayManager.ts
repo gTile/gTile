@@ -13,7 +13,7 @@ import {
   ExtensionSettings,
   NamedSettings,
 } from "../types/settings.js";
-import { Theme } from "../types/theme.js";
+import ThemeStore from "../util/ThemeStore.js";
 import Overlay from "../ui/Overlay.js";
 import IconButton, { IconButtonParams } from "../ui/overlay/IconButton.js";
 import Preview from "../ui/Preview.js";
@@ -21,15 +21,17 @@ import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 import DesktopManager from "./DesktopManager.js";
 
 export type GnomeInterfaceSettings =
-  NamedSettings<"enable-animations", never, never>;
+  NamedSettings<"enable-animations", never, never, never, "text-scaling-factor">;
 
 export interface OverlayManagerParams {
-  theme: Theme;
+  themeStore: ThemeStore;
   settings: ExtensionSettings;
   gnomeSettings: GnomeInterfaceSettings;
   presets: GridSize[];
   layoutManager: LayoutManager;
   desktopManager: DesktopManager;
+  showActionButtons?: boolean;
+  showPresetButtons?: boolean;
 }
 
 /**
@@ -40,45 +42,60 @@ export interface OverlayManagerParams {
  * manipulate the overlay appearance.
  */
 export default class implements Publisher<OverlayEvent>, GarbageCollector {
-  #theme: Theme;
+  #themeStore: ThemeStore;
+  #showActionButtons: boolean;
+  #showPresetButtons: boolean;
   #settings: ExtensionSettings;
   #gnomeSettings: GnomeInterfaceSettings;
   #presets: GridSize[];
   #layoutManager: LayoutManager;
   #desktopManager: DesktopManager;
   #gridLineOverlayGc: GarbageCollection;
+  #overlayBindingsGc: GarbageCollection;
   #windowSubscriptionGc: GarbageCollection;
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
   #overlays: InstanceType<typeof Overlay>[];
   #preview: InstanceType<typeof Preview>;
   #activeIdx: number | null;
   #syncInProgress: boolean;
+  #textScalingSignalId = 0;
+  #baseFontSizeSignalId = 0;
+  #unsubscribeDesktop: () => void;
 
   constructor({
-    theme,
+    themeStore,
     settings,
     gnomeSettings,
     presets,
     layoutManager,
     desktopManager,
+    showActionButtons = true,
+    showPresetButtons = true,
   }: OverlayManagerParams) {
-    this.#theme = theme;
+    this.#themeStore = themeStore;
+    this.#showActionButtons = showActionButtons;
+    this.#showPresetButtons = showPresetButtons;
     this.#settings = settings;
     this.#gnomeSettings = gnomeSettings;
     this.#presets = presets;
     this.#layoutManager = layoutManager;
     this.#desktopManager = desktopManager;
     this.#gridLineOverlayGc = new GarbageCollection();
+    this.#overlayBindingsGc = new GarbageCollection();
     this.#windowSubscriptionGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
-    this.#preview = new Preview({ theme: this.#theme });
+    this.#preview = new Preview({ themeStore: this.#themeStore });
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
-    desktopManager.subscribe(this.#onDesktopEvent.bind(this));
+    this.#unsubscribeDesktop = desktopManager.subscribe(this.#onDesktopEvent.bind(this));
     gnomeSettings.bind(
       "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
+    this.#textScalingSignalId = gnomeSettings.connect(
+      "changed::text-scaling-factor", () => this.#applyFontSize());
+    this.#baseFontSizeSignalId = settings.connect(
+      "changed::base-font-size", () => this.#applyFontSize());
 
     layoutManager.addTopChrome(this.#preview);
     this.#renderOverlays();
@@ -89,11 +106,35 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * overlays (hidden and visible). The instance must not be used thereafter.
    */
   release() {
+    this.#unsubscribeDesktop();
+    this.#gnomeSettings.disconnect(this.#textScalingSignalId);
+    this.#settings.disconnect(this.#baseFontSizeSignalId);
     this.#gridLineOverlayGc.release();
+    this.#overlayBindingsGc.release();
     this.#windowSubscriptionGc.release();
-    this.#preview.destroy();
     this.#destroyOverlays();
+    this.#preview.release();
+    Gio.Settings.unbind(this.#preview, "animate");
+    this.#preview.destroy();
     this.#dispatchCallbacks = [];
+  }
+
+  /**
+   * Whether to show action buttons. Hot-reloads by adding/removing container.
+   */
+  set showActionButtons(showActionButtons: boolean) {
+    if (this.#showActionButtons === showActionButtons) return;
+    this.#showActionButtons = showActionButtons;
+    this.#overlays.forEach(overlay => overlay.showActionButtons = showActionButtons);
+  }
+
+  /**
+   * Whether to show preset buttons. Hot-reloads by adding/removing container.
+   */
+  set showPresetButtons(showPresetButtons: boolean) {
+    if (this.#showPresetButtons === showPresetButtons) return;
+    this.#showPresetButtons = showPresetButtons;
+    this.#overlays.forEach(overlay => overlay.showPresetButtons = showPresetButtons);
   }
 
   /**
@@ -132,8 +173,11 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     return this.#activeIdx;
   }
 
-  subscribe(fn: DispatchFn<OverlayEvent>) {
+  subscribe(fn: DispatchFn<OverlayEvent>): () => void {
     this.#dispatchCallbacks.push(fn);
+    return () => {
+      this.#dispatchCallbacks = this.#dispatchCallbacks.filter(cb => cb !== fn);
+    };
   }
 
   /**
@@ -218,33 +262,38 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #renderOverlays() {
     for (const monitor of this.#desktopManager.monitors) {
       const overlay = new Overlay({
-        theme: this.#theme,
+        themeStore: this.#themeStore,
         title: "gTile",
         presets: this.#presets,
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
+        showActionButtons: this.#showActionButtons,
+        showPresetButtons: this.#showPresetButtons,
         visible: false,
       });
       this.#gnomeSettings.bind(
         "enable-animations", overlay, "animate", Gio.SettingsBindFlags.GET);
+      this.#overlayBindingsGc.defer(
+        () => Gio.Settings.unbind(overlay, "animate"));
 
       type BSK = BoolSettingKey;
       for (const key of ["auto-close", "follow-cursor"] satisfies BSK[]) {
         const btn = new IconButton({
-          theme: this.#theme,
           symbol: key,
           active: this.#settings.get_boolean(key),
           can_focus: false,
           track_hover: false,
         });
 
-        this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.DEFAULT);
-        btn.connect("clicked", () => { btn.active = !btn.active; });
+        this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.GET);
+        this.#overlayBindingsGc.defer(
+          () => Gio.Settings.unbind(btn, "active"));
+        btn.connect("clicked", () => { this.#settings.set_boolean(key, !btn.active); });
         overlay.addActionButton(btn);
       }
 
       type IBP = IconButtonParams["symbol"];
       for (const symbol of ["main-and-list", "two-list"] satisfies IBP[]) {
-        const button = new IconButton({ theme: this.#theme, symbol });
+        const button = new IconButton({ symbol });
         overlay.addActionButton(button);
 
         const layout = symbol === "two-list" ? "main-inverted" : "main";
@@ -256,33 +305,54 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       // register event handlers
       this.#settings.bind("selection-timeout",
         overlay, "selection-timeout", Gio.SettingsBindFlags.GET);
-      overlay.connect("notify::visible", this.#onGridVisibleChanged.bind(this));
-      overlay.connect("notify::grid-size", this.#onGridSizeChanged.bind(this));
-      overlay.connect("notify::grid-selection",
-        this.#onGridSelectionChanged.bind(this));
-      overlay.connect("notify::grid-hover-tile",
-        this.#onGridHoverTileChanged.bind(this));
-      overlay.connect("selected", () => this.#dispatch({
-        type: Event.Selection,
-        monitorIdx: monitor.index,
-        gridSize: overlay.gridSize,
-        // Non-null assertion is safe - selection is set while handlers run
-        selection: overlay.gridSelection!,
-      }));
+      this.#overlayBindingsGc.defer(
+        () => Gio.Settings.unbind(overlay, "selection-timeout"));
+      overlay.connectObject(
+        "notify::visible", this.#onGridVisibleChanged.bind(this),
+        "notify::grid-size", this.#onGridSizeChanged.bind(this),
+        "notify::grid-selection", this.#onGridSelectionChanged.bind(this),
+        "notify::grid-hover-tile", this.#onGridHoverTileChanged.bind(this),
+        "selected", () => this.#dispatch({
+          type: Event.Selection,
+          monitorIdx: monitor.index,
+          gridSize: overlay.gridSize,
+          // Non-null assertion is safe - selection is set while handlers run
+          selection: overlay.gridSelection!,
+        }),
+        this);
+      overlay.connect("settings", () => {
+        this.#dispatch({ type: Event.Settings });
+      });
 
       this.#layoutManager.addChrome(overlay);
 
       this.#overlays.push(overlay);
     }
+
+    this.#applyFontSize();
+  }
+
+  #applyFontSize() {
+    const baseFontSize = this.#settings.get_int("base-font-size");
+    const textScalingFactor = this.#gnomeSettings.get_double("text-scaling-factor");
+    const px = Math.round(baseFontSize * textScalingFactor);
+
+    for (const overlay of this.#overlays) {
+      overlay.baseFontSize = px;
+    }
   }
 
   #destroyOverlays() {
-    let overlay: InstanceType<typeof Overlay>, wasVisible = false;
-    while (overlay = this.#overlays.pop()!) {
+    this.#overlayBindingsGc.release();
+    let wasVisible = false;
+    for (const overlay of this.#overlays) {
       wasVisible ||= overlay.visible;
       overlay.release();
+      overlay.disconnectObject(this);
+      this.#layoutManager.removeChrome(overlay);
       overlay.destroy();
     }
+    this.#overlays = [];
 
     if (wasVisible) {
       this.#dispatch({ type: Event.Visibility, visible: false });
@@ -303,7 +373,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.cols; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `${this.#theme}__grid_lines_preview`,
+          style_class: `${this.#themeStore.theme} gtile-grid-lines-preview`,
           x: workArea.x + tileWidth * i,
           y: workArea.y,
           width: 1,
@@ -316,7 +386,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       for (let i = 1; i < gridSize.rows; ++i) {
         const gridLine = new St.BoxLayout({
-          style_class: `${this.#theme}__grid_lines_preview`,
+          style_class: `${this.#themeStore.theme} gtile-grid-lines-preview`,
           x: workArea.x,
           y: workArea.y + tileHeight * i,
           width: workArea.width,
@@ -367,31 +437,39 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
     const [mouseX, mouseY] = this.#desktopManager.pointer;
     for (const { index, workArea } of monitors) {
+      const overlay = this.#overlays[index];
+
+      // Clutter does not lay out hidden actors, so overlay.width/height are 0
+      // until the first show(). Force a style+layout pass to get real dimensions.
+      overlay.ensure_style();
+      const [,, natWidth, natHeight] = overlay.get_preferred_size();
+      const overlayWidth = overlay.visible ? overlay.width : (natWidth ?? 0);
+      const overlayHeight = overlay.visible ? overlay.height : (natHeight ?? 0);
+
       const
-        overlay = this.#overlays[index],
-        xMax = workArea.x + workArea.width - overlay.width,
-        yMax = workArea.y + workArea.height - overlay.height;
+        xMax = workArea.x + workArea.width - overlayWidth,
+        yMax = workArea.y + workArea.height - overlayHeight;
 
       if (focusedWindow?.get_monitor() === index) {
         const
           frame = focusedWindow.get_frame_rect(),
-          anchorX = Math.clamp(frame.x + frame.width / 2 - overlay.width / 2,
+          anchorX = Math.clamp(frame.x + frame.width / 2 - overlayWidth / 2,
             workArea.x, xMax),
-          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.width / 2,
+          anchorY = Math.clamp(frame.y + frame.height / 2 - overlayHeight / 2,
             workArea.y, yMax);
 
-        overlay.placeAt(anchorX, anchorY);
+        overlay.placeAt(Math.round(anchorX), Math.round(anchorY));
       } else if (
         workArea.x <= mouseX && mouseX <= (workArea.x + workArea.width) &&
         workArea.y <= mouseY && mouseY <= (workArea.y + workArea.height)
       ) {
         overlay.placeAt(
-          Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax),
-          Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax));
+          Math.round(Math.clamp(mouseX - overlayWidth / 2, workArea.x, xMax)),
+          Math.round(Math.clamp(mouseY - overlayHeight / 2, workArea.y, yMax)));
       } else {
         // never animate overlays when placed in the center of the screen
-        overlay.x = workArea.x + workArea.width / 2 - overlay.width / 2;
-        overlay.y = workArea.y + workArea.height / 2 - overlay.height / 2;
+        overlay.x = Math.round(workArea.x + workArea.width / 2 - overlayWidth / 2);
+        overlay.y = Math.round(workArea.y + workArea.height / 2 - overlayHeight / 2);
       }
     }
   }

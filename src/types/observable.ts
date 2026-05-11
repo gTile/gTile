@@ -13,5 +13,5 @@ export interface Publisher<T> {
    * @param fn The callback that is invoked whenever the publisher dispatches a
    *   new event of type {@link T}.
    */
-  subscribe(fn: DispatchFn<T>): void;
+  subscribe(fn: DispatchFn<T>): () => void;
 }

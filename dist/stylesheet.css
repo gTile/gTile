@@ -1,844 +1,477 @@
-* {
+/**
+ * gTile Stylesheet
+ *
+ * This stylesheet uses relative units (em) for all dimensions to ensure
+ * proper scaling with GNOME's display scaling and text scaling settings.
+ *
+ * All dimensions use em units relative to this base size.
+ *
+ * Structure:
+ * 1. Base/Common styles (all themes)
+ * 2. Icon themes (light/dark icons)
+ * 3. Theme-specific styles
+ *    - Default theme
+ *    - Classic theme
+ *    - Minimal themes (shared)
+ *    - Minimal Dark
+ *    - Minimal Light
+ */
+
+
+/* =============================================================================
+ * 1. BASE/COMMON STYLES (all themes)
+ * ============================================================================= */
+
+/* Main overlay container — shared defaults for the overlay widget only */
+.gtile-overlay {
     z-index: 99;
+    width: 30em;
+    border-radius: 0.625em;
 }
 
-/**
- * Default style start
- * Main container
- */
-
-.gtile-default {
-    width: 320px;
-    border-radius: 10px;
-    background-color: rgba(40, 40, 40, 1);
-    box-shadow: 0 0 5px rgba(31, 31, 31, 0.2);
+/* Title bar — layout handled by Clutter.BoxLayout */
+.gtile-title {
+    font-size: 0.75em;
+    padding: 0.5em;
+    text-overflow: ellipsis;
 }
 
-
-/**
- * Title bar
- */
-
-.gtile-default__title-container {
-    padding: 15px 15px 15px 15px;
+/* Close and settings buttons — shared base dimensions */
+.gtile-close,
+.gtile-settings {
+    width: 1.375em;
+    height: 1.375em;
+    background-size: 1em 1em;
+    border-radius: 1.375em;
 }
 
-.gtile-default__title {
-    font-size: 12px;
-    color: rgba(238, 238, 236, 1);
-    padding: 5px;
-    text-align: left;
+/* Tile table (grid) */
+.gtile-tile-table {
+    spacing-rows: 0.125em;
+    spacing-columns: 0.125em;
 }
 
-.gtile-default__close-container {
-    margin-right: 3px;
+.gtile-tile-table-item {
+    margin: 0.0625em;
+    border-radius: 0.125em;
 }
 
-.gtile-default__close {
-    width: 22px;
-    height: 22px;
-    background-image: url("images/icons/light/32/close.png");
-    background-size: 16px 16px;
-    border-radius: 22px;
+/* Preset buttons bar */
+.gtile-preset {
+    spacing-rows: 0;
+    spacing-columns: 0.125em;
 }
 
-.gtile-default__close:hover {
-    background-color: rgba(238, 238, 236, 0.1);
+.gtile-preset-button {
+    height: 2.125em;
+    font-size: 0.75em;
+    line-height: 0.75em;
 }
 
-
-/**
- * Tile container
- */
-
-.gtile-default__tile-container {
-    padding: 10px;
-    background-color: rgba(238, 238, 236, 0.1);
-}
-
-.gtile-default__tile-table {
-    spacing-rows: 2px;
-    spacing-columns: 2px;
-}
-
-.gtile-default__tile-table-item {
-    background-color: rgba(238, 238, 236, 0.3);
-    margin: 1px;
-    border-radius: 2px;
-}
-
-.gtile-default__tile-table-item:activate {
-    background-color: rgba(240, 240, 240, 0.5);
-}
-
-
-/**
- * Preset container
- */
-
-.gtile-default__preset-container {
-    background-color: rgba(238, 238, 236, 0.05);
-    padding: 10px;
-}
-
-.gtile-default__preset {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-}
-
-.gtile-default__preset-button {
-    border: 1px solid rgba(31, 31, 31, 1);
-    color: rgba(238, 238, 236, 1);
-    background-color: rgba(238, 238, 236, 0.1);
-    border-radius: 20px;
-    padding: 0;
-    margin: 0 0 0 5px;
-    font-size: 12px;
-    line-height: 12px;
-    height: 34px;
-}
-
-.gtile-default__preset-button:first-child {
+.gtile-preset-button:first-child {
     margin-left: 0;
 }
 
-.gtile-default__preset-button:hover,
-.gtile-default__preset-button:activate {
-    background-color: rgba(238, 238, 236, 0.3);
+/* Action buttons bar */
+.gtile-action {
+    spacing-rows: 0;
+    spacing-columns: 0.125em;
 }
 
-
-/**
- * Actions container
- */
-
-.gtile-default__action-button--auto-close {
-    background-image: url("images/icons/light/32/auto-close.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
+.gtile-action-button {
+    height: 2.125em;
+    width: 2.125em;
+    background-size: 2em 2em;
 }
 
-.gtile-default__action-button--follow-cursor {
-    background-image: url("images/icons/light/32/followcursor.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
-}
-
-.gtile-default__action-button--main-and-list {
-    background-image: url("images/icons/light/32/auto-tile-0.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
-}
-
-.gtile-default__action-button--two-list {
-    background-image: url("images/icons/light/32/auto-tile-1.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
-}
-
-.gtile-default__action-button--scale {
-    background-image: url("images/icons/light/32/scale.png");
-    background-size: 24px 24px;
-    height: 32px;
-    width: 32px;
-}
-
-.gtile-default__action {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-    padding: 0px 0px 15px 32px;
-    margin: 15px 0 32px;
-}
-
-.gtile-default__action-button {
-    margin-right: 32px;
-    height: 33px;
-    border: 2px solid rgba(238,237,236,0);
-}
-
-.gtile-default__action-button:hover,
-.gtile-default__action-button:activate {
-    border: 2px solid rgba(27, 106, 203, 1);
-    background-color: rgba(27, 106, 203, 1);
-    border-radius: 50px;
-}
-
-.gtile-default__action-button:hover{
-    border: 2px solid rgba(238,237,236,0.1);
-}
-
-.gtile-default__grid_lines_preview {
-    background-color: rgba(0,0,0,0);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-/**
- * Grid preview
- */
-
-.gtile-default__preview {
-    background-color: rgba(238, 238, 236, 0);
-    border: 2px solid rgba(238, 238, 236, 0);
-    border-radius: 10px;
-    box-shadow: 0 0 3px rgba(40, 40, 40, 0);
+/* Grid lines preview */
+.gtile-grid-lines-preview {
+    background-color: rgba(0, 0, 0, 0);
+    border: 0.0625em solid rgba(217, 108, 59, 0.8);
     z-index: 90;
 }
 
-.gtile-default__preview:activate {
+/* Selection/hover preview rectangle */
+.gtile-preview {
+    background-color: rgba(238, 238, 236, 0);
+    border: 0.125em solid rgba(238, 238, 236, 0);
+    border-radius: 0.625em;
+    box-shadow: 0 0 0.1875em rgba(40, 40, 40, 0);
+    z-index: 90;
+}
+
+.gtile-preview:activate {
     background-color: rgba(238, 238, 236, 0.1);
-    border: 2px solid rgba(238, 238, 236, 0.4);
-    box-shadow: 0 0 3px rgba(40, 40, 40, 0.2);
+    border: 0.125em solid rgba(238, 238, 236, 0.4);
+    box-shadow: 0 0 0.1875em rgba(40, 40, 40, 0.2);
 }
 
 
-/**
- * Panel icon
- */
+/* =============================================================================
+ * 2. ICON THEMES
+ * ============================================================================= */
 
-.gtile-default__icon {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/launcher/light/16/default.png");
-    background-size: 16px 16px;
-}
-.gtile-default__icon:hover {
-    background-image: url("images/launcher/light/16/hover.png");
+
+/* Base icons (light, for dark backgrounds) */
+.gtile-close {
+    background-image: url("images/icons/light/32/close.png");
 }
 
-.gtile-default__icon:activate {
-    background-image: url("images/launcher/light/16/active.png");
+.gtile-settings {
+    background-image: url("images/icons/light/32/settings.png");
 }
 
+.gtile-action-button--auto-close {
+    background-image: url("images/icons/light/32/auto-close.png");
+}
 
-/**
- * Classic style start
- * Main container
- */
+.gtile-action-button--follow-cursor {
+    background-image: url("images/icons/light/32/followcursor.png");
+}
 
-.gtile-classic {
+.gtile-action-button--main-and-list {
+    background-image: url("images/icons/light/32/auto-tile-0.png");
+}
+
+.gtile-action-button--two-list {
+    background-image: url("images/icons/light/32/auto-tile-1.png");
+}
+
+/* =============================================================================
+ * 3. THEME-SPECIFIC STYLES
+ *
+ * Compound selectors (.gtile-overlay.gtile-<theme>) are used here because theme
+ * classes are also applied to non-overlay chrome actors (e.g. grid line
+ * previews) to allow per-theme customization. Without the .gtile-overlay
+ * qualifier, overlay-specific properties like background-color, padding and
+ * box-shadow would leak onto those actors.
+ * ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+ * DEFAULT THEME
+ * ----------------------------------------------------------------------------- */
+
+.gtile-overlay.gtile-default {
+    background-color: rgba(40, 40, 40, 1);
+    box-shadow: 0 0 0.3125em rgba(31, 31, 31, 0.2);
+}
+
+.gtile-default .gtile-title-container {
+    padding: 0.9375em;
+}
+
+.gtile-default .gtile-title {
+    color: rgba(238, 238, 236, 1);
+    padding: 0.3125em;
+}
+
+.gtile-default .gtile-close,
+.gtile-default .gtile-settings {
+    margin: 0 0.1875em;
+}
+
+.gtile-default .gtile-close:hover,
+.gtile-default .gtile-settings:hover {
+    background-color: rgba(238, 238, 236, 0.1);
+}
+
+.gtile-default .gtile-tile-container {
+    padding: 0.625em;
+    background-color: rgba(238, 238, 236, 0.1);
+}
+
+.gtile-default .gtile-tile-table-item {
+    background-color: rgba(238, 238, 236, 0.3);
+}
+
+.gtile-default .gtile-tile-table-item:activate {
+    background-color: rgba(240, 240, 240, 0.5);
+}
+
+.gtile-default .gtile-preset-container {
+    background-color: rgba(238, 238, 236, 0.05);
+    padding: 0.625em;
+}
+
+.gtile-default .gtile-preset-button {
+    border: 0.0625em solid rgba(31, 31, 31, 1);
+    color: rgba(238, 238, 236, 1);
+    background-color: rgba(238, 238, 236, 0.1);
+    border-radius: 1.25em;
+    padding: 0;
+    margin: 0 0 0 0.3125em;
+}
+
+.gtile-default .gtile-preset-button:hover,
+.gtile-default .gtile-preset-button:activate {
+    background-color: rgba(238, 238, 236, 0.3);
+}
+
+.gtile-default .gtile-action-container {
+    padding: 0.625em 0 0.9375em 2em;
+    background-color: rgba(238, 238, 236, 0.05);
+}
+
+.gtile-default .gtile-action-button {
+    margin-right: 2em;
+    border: 0.125em solid rgba(238, 237, 236, 0);
+}
+
+.gtile-default .gtile-action-button:hover {
+    border: 0.125em solid rgba(238, 237, 236, 0.1);
+}
+
+.gtile-default .gtile-action-button:activate {
+    border: 0.125em solid rgba(27, 106, 203, 1);
+    background-color: rgba(27, 106, 203, 1);
+    border-radius: 3.125em;
+}
+
+/* -----------------------------------------------------------------------------
+ * CLASSIC THEME
+ * ----------------------------------------------------------------------------- */
+
+.gtile-overlay.gtile-classic {
     background-color: rgba(10, 10, 10, 0.7);
-    -webkit-filter: blur(2px);
-    width: 320px;
-    border-radius: 10px;
 }
 
-
-/**
-  * Title bar
-  */
-
-.gtile-classic__title-container {
-    padding: 3px;
+.gtile-classic .gtile-title-container {
+    padding: 0.1875em;
 }
 
-.gtile-classic__title {
-    font-size: 12px;
+.gtile-classic .gtile-title {
     font-weight: bold;
     color: #ffffff;
-    padding: .5em;
-    text-align: center;
 }
 
-.gtile-classic__close-container {
-    background-color: rgba(0, 120, 255, 0);
-}
-
-.gtile-classic__close {
-    width: 22px;
-    height: 22px;
-    background-image: url("images/icons/light/32/close.png");
-    background-size: 16px 16px;
-    border-radius: 22px;
-}
-
-.gtile-classic__close:hover {
+.gtile-classic .gtile-close:hover,
+.gtile-classic .gtile-settings:hover {
     background-color: rgba(238, 238, 236, 0.1);
 }
 
-
-/**
-  * Tile container
-  */
-
-.gtile-classic__tile-container {}
-
-.gtile-classic__tile-table {
-    spacing-rows: 2px;
-    spacing-columns: 2px;
-}
-
-.gtile-classic__tile-table-item {
+.gtile-classic .gtile-tile-table-item {
     background-color: rgba(240, 240, 240, 0.4);
-    margin: 1px;
 }
 
-.gtile-classic__tile-table-item:activate {
+.gtile-classic .gtile-tile-table-item:activate {
     background-color: rgba(240, 240, 240, 0.8);
 }
 
-
-/**
-  * Preset container
-  */
-
-.gtile-classic__preset-container {
+.gtile-classic .gtile-preset-container {
     background-color: rgba(238, 238, 236, 0.05);
-    padding: 10px;
+    padding: 0.625em 0 0 0;
 }
 
-.gtile-classic__preset {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-}
-
-.gtile-classic__preset-container {
-    padding: 10px 0px 0px 0px;
-}
-
-.gtile-classic__preset-button {
+.gtile-classic .gtile-preset-button {
     background-color: rgba(0, 120, 255, 0.4);
     color: rgba(255, 255, 255, 0.4);
-    border-radius: 0px;
-    border: 1px rgba(0, 200, 255, 0.4);
-    height: 34px;
+    border-radius: 0;
+    border: 0.0625em rgba(0, 200, 255, 0.4);
 }
 
-.gtile-classic__preset-button:hover,
-.gtile-classic__preset-button:activate {
+.gtile-classic .gtile-preset-button:hover,
+.gtile-classic .gtile-preset-button:activate {
     background-color: rgba(0, 120, 255, 0.7);
     color: rgba(255, 255, 255, 1);
-    border: 1px rgba(0, 200, 255, 0.7);
+    border: 0.0625em rgba(0, 200, 255, 0.7);
 }
 
-
-/**
-  * Actions container
-  */
-
-.gtile-classic__action-button--auto-close {
-    background-image: url("images/icons/light/32/auto-close.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
+.gtile-classic .gtile-action-container {
+    padding: 0.125em 0 0.625em 0;
 }
 
-.gtile-classic__action-button--follow-cursor {
-    background-image: url("images/icons/light/32/followcursor.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
-}
-
-.gtile-classic__action-button--main-and-list {
-    background-image: url("images/icons/light/32/auto-tile-0.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
-}
-
-.gtile-classic__action-button--two-list {
-    background-image: url("images/icons/light/32/auto-tile-1.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
-}
-
-.gtile-classic__action-button--scale {
-    background-image: url("images/icons/light/32/scale.png");
-    background-size: 36px 36px;
-    height: 36px;
-    width: 36px;
-}
-
-.gtile-classic__action {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-}
-
-.gtile-classic__action-container {
-    padding: 2px 0px 10px 0px;
-}
-
-.gtile-classic__action-button {
+.gtile-classic .gtile-action-button {
     background-color: rgba(0, 120, 255, 0.4);
     color: rgba(255, 255, 255, 0.4);
-    border-radius: 0px;
-    border: 1px rgba(0, 200, 255, 0.4);
+    border-radius: 0;
+    border: 0.0625em rgba(0, 200, 255, 0.4);
+    background-size: 2.25em 2.25em;
+    height: 2.25em;
+    width: 2.25em;
 }
 
-.gtile-classic__action-button:hover,
-.gtile-classic__action-button:activate {
+.gtile-classic .gtile-action-button:hover,
+.gtile-classic .gtile-action-button:activate {
     background-color: rgba(0, 120, 255, 0.7);
     color: rgba(255, 255, 255, 1);
-    border: 1px rgba(0, 200, 255, 0.7);
+    border: 0.0625em rgba(0, 200, 255, 0.7);
 }
 
-.gtile-classic__grid_lines_preview {
-    background-color: rgba(0,0,0,0);
-    border: 1px solid rgba(217,108,59,0.8);
+/* -----------------------------------------------------------------------------
+ * MINIMAL THEMES (shared styles)
+ * ----------------------------------------------------------------------------- */
+
+.gtile-overlay.gtile-minimal-dark,
+.gtile-overlay.gtile-minimal-light {
+    padding: 0.375em 0.75em 0.75em 0.75em;
+    box-shadow: 0 0.375em 1.25em 0 rgba(0, 0, 0, 0.397);
+    border-width: 0.0625em;
 }
 
-
-/**
-  * Grid preview
-  */
-
-.gtile-classic__preview {
-    background-color: rgba(241, 122, 73, 0.0);
-    border: rgba(217, 108, 59, 0.0);
+.gtile-minimal-dark .gtile-title-container,
+.gtile-minimal-light .gtile-title-container {
+    padding: 0.1875em;
 }
 
-.gtile-classic__preview:activate {
-    background-color: rgba(241, 122, 73, 0.4);
-    border: 1px solid rgba(217, 108, 59, 0.8);
+.gtile-minimal-dark .gtile-close,
+.gtile-minimal-dark .gtile-settings,
+.gtile-minimal-light .gtile-close,
+.gtile-minimal-light .gtile-settings {
+    background-size: 1.375em 1.375em;
+    height: 1.25em;
+    width: 1.25em;
+    padding: 0.125em;
+    padding-left: 0.3125em;
+    border-radius: 3.125em;
+    border-width: 0.0625em;
 }
 
-
-/**
-  * Panel icon
-  */
-
-.gtile-classic__icon {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/launcher/light/16/default.png");
-    background-size: 16px 16px;
+.gtile-minimal-dark .gtile-tile-container,
+.gtile-minimal-light .gtile-tile-container {
+    padding: 0.25em;
 }
 
-.gtile-classic__icon:hover {
-    background-image: url("images/launcher/light/16/hover.png");
+.gtile-minimal-dark .gtile-preset-container,
+.gtile-minimal-light .gtile-preset-container {
+    padding: 0.625em 0.3125em;
 }
 
-.gtile-classic__icon:activate {
-    background-image: url("images/launcher/light/16/active.png");
+.gtile-minimal-dark .gtile-preset-button,
+.gtile-minimal-light .gtile-preset-button {
+    border-radius: 0.5em;
+    padding: 0 0.25em;
+    margin: 0 0 0 0.25em;
 }
 
+.gtile-minimal-dark .gtile-action-container,
+.gtile-minimal-light .gtile-action-container {
+    padding: 0.625em 0.3125em 0.3125em 0.3125em;
+}
 
+.gtile-minimal-dark .gtile-action-button,
+.gtile-minimal-light .gtile-action-button {
+    border-radius: 0.5em;
+    margin: 0.25em;
+    padding: 0.25em;
+}
 
-/**
- * Minimal dark style start
- * Main container
- */
+/* -----------------------------------------------------------------------------
+ * MINIMAL DARK THEME
+ * ----------------------------------------------------------------------------- */
 
-.gtile-minimal-dark {
+.gtile-overlay.gtile-minimal-dark {
     background-color: #2c2c2c;
-    -webkit-filter: blur(2px);
-    width:320px;
-    border-radius: 10px;
-    padding: 12px;
-    padding-top: 6px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
     border-color: #1b1b1b;
-    border-width: 1px;
 }
 
-
-/**
-* Title bar
-*/
-
-.gtile-minimal-dark__title-container {
-  padding: 3px;
-}
-
-.gtile-minimal-dark__title {
-    font-size: 12px;
+.gtile-minimal-dark .gtile-title {
     color: #ffffff;
-    padding: .5em;
-    text-align: center;
 }
 
-.gtile-minimal-dark__close-container {
-    background-color: rgba(0,120,255,0);
-}
-
-.gtile-minimal-dark__close {
-    background-size: 22px 22px;
-    height: 20px;
-    width: 20px;
-    background-image: url("images/icons/light/32/close.png");
-    padding: 2px;
-    padding-left: 5px;
-    border-radius: 50px;
-    border-width: 1px;
-}
-
-.gtile-minimal-dark__close:hover {
+.gtile-minimal-dark .gtile-close:hover,
+.gtile-minimal-dark .gtile-settings:hover {
     background-color: #646464;
     border-color: #202020;
 }
 
-
-/**
-* Tile container
-*/
-
-.gtile-minimal-dark__tile-container {}
-
-.gtile-minimal-dark__tile-table {
-    spacing-rows: 2px;
-    spacing-columns: 2px;
-    padding: 4px;
-}
-
-.gtile-minimal-dark__tile-table-item {
+.gtile-minimal-dark .gtile-tile-table-item {
     background-color: #4b4b4b;
-    margin: 1px;
-    border-radius: 2px;
 }
 
-.gtile-minimal-dark__tile-table-item:activate {
+.gtile-minimal-dark .gtile-tile-table-item:activate {
     background-color: #646464;
 }
 
-
-/**
-* Preset container
-*/
-
-.gtile-minimal-dark__preset-container {
-}
-
-.gtile-minimal-dark__preset {
-  spacing-rows: 0px;
-  spacing-columns: 2px;
-}
-
-.gtile-minimal-dark__preset-container {
-  padding: 10px 5px 10px 5px;
-}
-
-.gtile-minimal-dark__preset-button {
+.gtile-minimal-dark .gtile-preset-button {
     background-color: #4b4b4b;
-    border-radius: 8px;
-    padding: 0 4px;
-    margin: 0 0 0 4px;
-    height: 34px;
 }
 
-.gtile-minimal-dark__preset-button:first-child {
-    margin-left: 0;
-}
-
-.gtile-minimal-dark__preset-button:hover,
-.gtile-minimal-dark__preset-button:activate {
+.gtile-minimal-dark .gtile-preset-button:hover,
+.gtile-minimal-dark .gtile-preset-button:activate {
     background-color: #707070;
 }
 
-
-/**
-* Actions container
-*/
-.gtile-minimal-dark__action-button--auto-close,
-.gtile-minimal-dark__action-button--follow-cursor,
-.gtile-minimal-dark__action-button--main-and-list,
-.gtile-minimal-dark__action-button--two-list{
-    background-size: 32px 32px;
-    height:34px;
-    width:34px;
-}
-
-.gtile-minimal-dark__action-button--auto-close {
-    background-image: url("images/icons/light/32/auto-close.png");
-}
-
-.gtile-minimal-dark__action-button--follow-cursor {
-    background-image: url("images/icons/light/32/followcursor.png");
-}
-
-.gtile-minimal-dark__action-button--main-and-list {
-    background-image: url("images/icons/light/32/auto-tile-0.png");
-}
-
-.gtile-minimal-dark__action-button--two-list {
-    background-image: url("images/icons/light/32/auto-tile-1.png");
-}
-
-.gtile-minimal-dark__action-button--scale {
-    background-image: url("images/icons/dark/32/scale.png");
-    background-size: 36px 36px;
-    height:36px;
-    width:36px;
-}
-
-.gtile-minimal-dark__action {
-  spacing-rows: 0px;
-  spacing-columns: 2px;
-}
-
-.gtile-minimal-dark__action-container {
-    padding: 2px 0px 10px 0px;
-    margin-bottom: 20px;
-}
-
-.gtile-minimal-dark__action-button {
+.gtile-minimal-dark .gtile-action-button {
     background-color: #4b4b4b;
-    border-radius: 8px;
-    margin: 4px;
-    padding: 4px;
 }
 
-.gtile-minimal-dark__action-button:hover,
-.gtile-minimal-dark__action-button:activate {
+.gtile-minimal-dark .gtile-action-button:hover,
+.gtile-minimal-dark .gtile-action-button:activate {
     background-color: #707070;
 }
 
+/* -----------------------------------------------------------------------------
+ * MINIMAL LIGHT THEME
+ * ----------------------------------------------------------------------------- */
 
-/**
-* Grid preview
-*/
-
-.gtile-minimal-dark__preview {
-    background-color: rgba(241,122,73,0.0);
-    border: rgba(217,108,59,0.0);
-}
-
-.gtile-minimal-dark__preview:activate {
-    background-color: rgba(241,0,0,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-.gtile-minimal-dark__grid_lines_preview {
-    background-color: rgba(0,0,0,0);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-
-/**
-* Panel icon
-*/
-
-.gtile-minimal-dark__icon {
-  width: 24px;
-  height: 24px;
-  background-image: url("images/launcher/light/16/default.png");
-  background-size: 16px 16px;
-}
-
-.gtile-minimal-dark__icon:hover {
-  background-image: url("images/launcher/light/16/hover.png");
-}
-
-.gtile-minimal-dark__icon:activate {
-  background-image: url("images/launcher/light/16/active.png");
-}
-
-
-
-/**
- * Minimal light style start
- * Main container
- */
-
-.gtile-minimal-light {
+.gtile-overlay.gtile-minimal-light {
     background-color: #f6f5f4;
-    -webkit-filter: blur(2px);
-    width:320px;
-    border-radius: 10px;
-    padding: 12px;
-    padding-top: 6px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.397);
     border-color: #cdc7c2;
-    border-width: 1px;
 }
 
-
-/**
-* Title bar
-*/
-
-.gtile-minimal-light__title-container {
-    padding: 3px;
-}
-
-.gtile-minimal-light__title {
-    font-size: 12px;
+.gtile-minimal-light .gtile-title {
     color: #111111;
-    padding: .5em;
-    text-align: center;
 }
 
-.gtile-minimal-light__close-container {
-    background-color: rgba(0,120,255,0);
-}
-
-.gtile-minimal-light__close {
-    background-size: 22px 22px;
-    height: 20px;
-    width: 20px;
-    background-image: url("images/icons/dark/32/close.png");
-    padding: 2px;
-    padding-left: 5px;
-    border-radius: 50px;
-    border-width: 1px;
-}
-
-.gtile-minimal-light__close:hover {
+.gtile-minimal-light .gtile-close:hover,
+.gtile-minimal-light .gtile-settings:hover {
     background-color: #cccac7;
     border-color: #cccac7;
 }
 
-
-/**
-* Tile container
-*/
-
-.gtile-minimal-light__tile-container {}
-
-.gtile-minimal-light__tile-table {
-    spacing-rows: 2px;
-    spacing-columns: 2px;
-    padding: 4px;
-  }
-
-.gtile-minimal-light__tile-table-item {
+.gtile-minimal-light .gtile-tile-table-item {
     background-color: #b1aca9;
-    margin: 1px;
-    border-radius: 2px;
 }
 
-.gtile-minimal-light__tile-table-item:activate {
+.gtile-minimal-light .gtile-tile-table-item:activate {
     background-color: #928f8c;
 }
 
-
-/**
-* Preset container
-*/
-
-.gtile-minimal-light__preset-container {
-}
-
-.gtile-minimal-light__preset {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-}
-
-.gtile-minimal-light__preset-container {
-    padding: 10px 5px 10px 5px;
-}
-
-.gtile-minimal-light__preset-button {
+.gtile-minimal-light .gtile-preset-button {
     color: #111111;
     background-color: #f7f6f6;
-    border-radius: 8px;
-    border-width: 1px;
+    border-width: 0.0625em;
     border-color: #c9c3bd;
-    padding: 0 4px;
-    margin: 0 0 0 4px;
-    height: 34px;
 }
 
-.gtile-minimal-light__preset-button:first-child {
-    margin-left: 0;
+.gtile-minimal-light .gtile-preset-button:hover,
+.gtile-minimal-light .gtile-preset-button:activate {
+    background-color: #e8e6e3;
 }
 
-.gtile-minimal-light__preset-button:hover,
-.gtile-minimal-light__preset-button:activate {
+.gtile-minimal-light .gtile-action-button {
+    color: #111111;
+    background-color: #f7f6f6;
+    border-width: 0.0625em;
+    border-color: #c9c3bd;
+}
+
+.gtile-minimal-light .gtile-action-button:hover,
+.gtile-minimal-light .gtile-action-button:activate {
     background-color: #e8e6e3;
 }
 
 
-/**
-* Actions container
-*/
-.gtile-minimal-light__action-button--auto-close,
-.gtile-minimal-light__action-button--follow-cursor,
-.gtile-minimal-light__action-button--main-and-list,
-.gtile-minimal-light__action-button--two-list{
-    background-size: 32px 32px;
-    height:34px;
-    width:34px;
+.gtile-minimal-light .gtile-close {
+    background-image: url("images/icons/dark/32/close.png");
 }
 
-.gtile-minimal-light__action-button--auto-close {
+.gtile-minimal-light .gtile-settings {
+    background-image: url("images/icons/dark/32/settings.png");
+}
+
+.gtile-minimal-light .gtile-action-button--auto-close {
     background-image: url("images/icons/dark/32/auto-close.png");
 }
 
-.gtile-minimal-light__action-button--follow-cursor {
+.gtile-minimal-light .gtile-action-button--follow-cursor {
     background-image: url("images/icons/dark/32/followcursor.png");
 }
 
-.gtile-minimal-light__action-button--main-and-list {
+.gtile-minimal-light .gtile-action-button--main-and-list {
     background-image: url("images/icons/dark/32/auto-tile-0.png");
 }
 
-.gtile-minimal-light__action-button--two-list {
+.gtile-minimal-light .gtile-action-button--two-list {
     background-image: url("images/icons/dark/32/auto-tile-1.png");
-}
-
-.gtile-minimal-light__action-button--scale {
-    background-image: url("images/icons/dark/32/scale.png");
-    background-size: 36px 36px;
-    height:36px;
-    width:36px;
-}
-
-.gtile-minimal-light__action {
-    spacing-rows: 0px;
-    spacing-columns: 2px;
-}
-
-.gtile-minimal-light__action-container {
-    padding: 2px 0px 10px 0px;
-    margin-bottom: 20px;
-}
-
-.gtile-minimal-light__action-button {
-    color: #111111;
-    background-color: #f7f6f6;
-    border-radius: 8px;
-    border-width: 1px;
-    border-color: #c9c3bd;
-    margin: 4px;
-    padding: 4px;
-}
-
-.gtile-minimal-light__action-button:hover,
-.gtile-minimal-light__action-button:activate {
-    background-color: #e8e6e3;
-}
-
-.gtile-minimal-light__grid_lines_preview {
-    background-color: rgba(0,0,0,0);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-
-/**
-* Grid preview
-*/
-
-.gtile-minimal-light__preview {
-    background-color: rgba(241,122,73,0.0);
-    border: rgba(217,108,59,0.0);
-}
-
-.gtile-minimal-light__preview:activate {
-    background-color: rgba(241,122,73,0.4);
-    border: 1px solid rgba(217,108,59,0.8);
-}
-
-
-/**
-* Panel icon
-*/
-
-.gtile-minimal-light__icon {
-    width: 24px;
-    height: 24px;
-    background-image: url("images/launcher/dark/16/default.png");
-    background-size: 16px 16px;
-}
-
-.gtile-minimal-light__icon:hover {
-    background-image: url("images/launcher/dark/16/hover.png");
-}
-
-.gtile-minimal-light__icon:activate {
-    background-image: url("images/launcher/dark/16/active.png");
 }

@@ -18,6 +18,12 @@ import {
   StringSettingKey,
 } from "./types/settings.js";
 import { GarbageCollection, GarbageCollector } from "./util/gc.js";
+import {
+  DEFAULT_THEME,
+  getActiveTheme,
+  validateThemes,
+  themeLabel,
+} from "./util/theme.js";
 
 export default class extends ExtensionPreferences {
   #gc!: GarbageCollection;
@@ -76,9 +82,12 @@ export default class extends ExtensionPreferences {
       group.add(this.#switchRow("follow-cursor"));
       group.add(this.#switchRow("show-icon"));
       group.add(this.#switchRow("show-grid-lines"));
+      group.add(this.#switchRow("show-preset-buttons"));
+      group.add(this.#switchRow("show-action-buttons"));
       group.add(this.#spinRow("max-timeout", 500, 10000, 100));
       group.add(this.#spinRow("selection-timeout", 0, 5000, 50));
       group.add(this.#themeComboRow());
+      group.add(this.#spinRow("base-font-size", 8, 32, 1));
     }
 
     {
@@ -101,7 +110,7 @@ export default class extends ExtensionPreferences {
       group.add(this.#spinRow("insets-secondary-bottom", 0, 500, 1));
     }
 
-   return page;
+    return page;
   }
 
   #buildOverlayShortcutsPage() {
@@ -397,35 +406,25 @@ export default class extends ExtensionPreferences {
   }
 
   #themeComboRow() {
-    const entries = Gtk.StringList.new(
-      this.#settings.get_default_value("themes")!.get_strv());
+    const themes = validateThemes(this.#settings.get_strv("themes"));
+    const entries = Gtk.StringList.new(themes.map(t => themeLabel(t)));
     const row = new Adw.ComboRow({
       title: "Theme",
-      subtitle: "The extension requires a restart in order for the new theme " +
-        "to take effect.",
       model: entries,
     });
 
-    for (let i = 0; i < entries.get_n_items(); ++i) {
-      const ut = this.#settings.get_string("theme");
-      if (entries.get_string(i) === ut) {
-        row.selected = i;
-        break;
-      }
-    }
+    const activeTheme = getActiveTheme(themes, this.#settings.get_string("theme"));
+    row.selected = Math.max(0, themes.indexOf(activeTheme));
 
     row.connect("notify::selected", () => {
-      this.#settings.set_string("theme", entries.get_string(row.selected)!);
+      this.#settings.set_string("theme", themes[row.selected]);
     });
 
     const chid = this.#settings.connect("changed::theme", () => {
-      const newTheme = this.#settings.get_string("theme");
-
-      for (let i = 0; i < entries.get_n_items(); ++i) {
-        if (newTheme === entries.get_string(i)) {
-          row.selected = i;
-          break;
-        }
+      const active = getActiveTheme(themes, this.#settings.get_string("theme"));
+      const idx = themes.indexOf(active);
+      if (idx >= 0) {
+        row.selected = idx;
       }
     });
     this.#gc.defer(() => this.#settings.disconnect(chid));
@@ -441,7 +440,7 @@ interface KeyPressEvent {
 
 interface ShortcutParams extends Partial<Adw.ActionRow.ConstructorProps> {
   settings: ExtensionSettings;
-  schemaKey: SettingKey;
+  schemaKey: KeyBindingSettingKey;
   window: Gtk.Window;
 }
 
@@ -456,7 +455,7 @@ const ShortcutRow = GObject.registerClass({
 
   #gc: GarbageCollection;
   #settings: ExtensionSettings;
-  #schemaKey: SettingKey;
+  #schemaKey: KeyBindingSettingKey;
   #window: Gtk.Window;
 
   constructor({ settings, schemaKey, window, ...config }: ShortcutParams) {
