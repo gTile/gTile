@@ -1,3 +1,4 @@
+import Clutter from "gi://Clutter";
 import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 import St from "gi://St";
@@ -143,7 +144,7 @@ export default GObject.registerClass({
   }: OverlayParams) {
     super({
       style_class: theme,
-      vertical: true,
+      orientation: Clutter.Orientation.VERTICAL,
       reactive: true,
       can_focus: true,
       track_hover: true,
