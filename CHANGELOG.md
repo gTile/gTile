@@ -1,6 +1,11 @@
 CHANGE LOG
 ----------
 
+### 71
+- Add support for Gnome 51
+  - Replace the `vertical` property of `St.BoxLayout`, which was [removed in Gnome 51](https://gjs.guide/extensions/upgrading/gnome-shell-51.html#st-widgets), with `orientation`
+  - Compatibility with Gnome 49 and 50 remains
+
 ### 70
 - Ignore invisible windows created by [Desktop Icons NG](https://gitlab.com/rastersoft/desktop-icons-ng/-/commit/6ed835afae029670db19312aabec6bda2d710b86) as of June 2025
 
