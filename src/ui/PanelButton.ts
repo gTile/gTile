@@ -1,4 +1,5 @@
-import GObject from "gi://GObject"
+import Clutter from "gi://Clutter";
+import GObject from "gi://GObject";
 import St from "gi://St";
 
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
@@ -10,28 +11,46 @@ interface PanelButtonParams extends Partial<GObject.Object.ConstructorProps> {
 /**
  * The button thats displayed in the Gnome panel and allows to toggle gTile.
  *
- * Note that this class extends PanelMenu.Button which has no `clicked` signal
- * because it extends St.Widget (as opposed to St.Button). Instead, the
- * `button-press-event` has to be listened on.
+ * Emits `activated` for pointer, touch, and keyboard activation. GNOME 51
+ * uses Clutter controllers for panel input instead of raw event handlers.
  */
-export default GObject.registerClass({
-  GTypeName: "GTilePanelButton",
-}, class extends PanelMenu.Button {
-  // @ts-ignore
-  constructor(params: PanelButtonParams);
+export default class PanelButton extends PanelMenu.Button {
+  declare connect: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    activated: () => void;
+  }>["connect"];
+  declare emit: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    activated: () => void;
+  }>["emit"];
+  static {
+    GObject.registerClass({
+      GTypeName: "GTilePanelButton",
+      Signals: { activated: {} },
+    }, this);
+  }
 
-  _init() {
-    super._init(.0, "gTile", true);
-
-    // Workaround to avoid messing up the the method signature of _init which
-    // TypeScript expects to stay compatible with those of the parent classes.
-    // The current way to extend these classes however is to override _init with
-    // the desired constructor signature. This breaks polymorphism and will
-    // hopefully be deprecated soon in favor of the regular constructor.
-    const { theme } = arguments[0] as PanelButtonParams;
+  constructor({ theme }: PanelButtonParams) {
+    super(0, "gTile", true);
 
     const icon = new St.Icon({ style_class: "system-status-icon" });
     this.add_child(icon);
     this.add_style_class_name(`${theme}__icon`);
+
+    // Actions belong to the actor and are released when it is destroyed.
+    const click = new Clutter.ClickGesture();
+    click.set_recognize_on_press(true);
+    click.connect("recognize", () => this.emit("activated"));
+    this.add_action(click);
+
+    const key = new Clutter.KeyController();
+    key.connect("key-press", () => {
+      const [, symbol] = key.get_key();
+      if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_KP_Enter ||
+          symbol === Clutter.KEY_space) {
+        this.emit("activated");
+        return Clutter.EVENT_STOP;
+      }
+      return Clutter.EVENT_PROPAGATE;
+    });
+    this.add_action(key);
   }
-});
+};

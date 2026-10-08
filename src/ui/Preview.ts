@@ -16,18 +16,22 @@ export interface PreviewParams extends Omit<
  * A simple overlay that is used to visualize the window placement preview on
  * the screen which corresponds to the currently selected tiles of the grid.
  */
-export default GObject.registerClass({
-  GTypeName: "GTilePreview",
-  Properties: {
-    animate: GObject.ParamSpec.boolean(
-      "animate",
-      "Animate",
-      "Whether to anmiate preview changes",
-      GObject.ParamFlags.READWRITE,
-      true,
-    ),
+export default class Preview extends St.BoxLayout {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTilePreview",
+      Properties: {
+        animate: GObject.ParamSpec.boolean(
+          "animate",
+          "Animate",
+          "Whether to anmiate preview changes",
+          GObject.ParamFlags.READWRITE,
+          true,
+        ),
+      }
+    }, this);
   }
-}, class extends St.BoxLayout {
+
   #animate: boolean;
 
   constructor({ theme, animate = true, ...params }: PreviewParams) {
@@ -70,4 +74,4 @@ export default GObject.registerClass({
       this.animate && this.restore_easing_state();
     }
   }
-});
+};

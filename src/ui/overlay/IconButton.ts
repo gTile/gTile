@@ -15,9 +15,13 @@ export interface IconButtonParams extends Omit<
 /**
  * Simple wrapper to display a button with a custom (CSS-defined) icon.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayIconButton",
-}, class extends TextButton {
+export default class IconButton extends TextButton {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayIconButton",
+    }, this);
+  }
+
   constructor({ theme, symbol, ...params }: IconButtonParams) {
     super({
       ...params,
@@ -30,4 +34,4 @@ export default GObject.registerClass({
       }),
     });
   }
-});
+};

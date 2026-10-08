@@ -34,9 +34,13 @@ export interface StyledButtonBarParams extends ButtonBarParams {
 /**
  * A styled container for {@link St.Button} elements.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayButtonBar"
-}, class extends St.Widget {
+export default class ButtonBar extends St.Widget {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayButtonBar"
+    }, this);
+  }
+
   #rowHeight: number = this.height ?? ROW_HEIGHT;
 
   /**
@@ -98,4 +102,4 @@ export default GObject.registerClass({
   get #layout() {
     return this.layout_manager as Clutter.GridLayout;
   }
-})
+}

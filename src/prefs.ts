@@ -2,6 +2,7 @@ import Adw from "gi://Adw";
 import Gdk from "gi://Gdk";
 import GObject from "gi://GObject";
 import Gio from "gi://Gio";
+import GLib from "gi://GLib";
 import Gtk from "gi://Gtk";
 import Pango from "gi://Pango";
 
@@ -44,9 +45,12 @@ export default class extends ExtensionPreferences {
   }
 
   #release() {
-    this.#gc.release();
-    this.#gc = undefined!;
-    this.#settings = undefined!;
+    try {
+      this.#gc?.release();
+    } finally {
+      this.#gc = undefined!;
+      this.#settings = undefined!;
+    }
     // do NOT set #window to undefined! This would cause the GC to dereference
     // and cleanup resources before GJS expects them to be gone (even long after
     // the preference window was closed). Would cause errors like these:
@@ -445,9 +449,13 @@ interface ShortcutParams extends Partial<Adw.ActionRow.ConstructorProps> {
   window: Gtk.Window;
 }
 
-const ShortcutRow = GObject.registerClass({
-  GTypeName: "GTileShortcutActionRow",
-}, class extends Adw.ActionRow implements GarbageCollector {
+class ShortcutRow extends Adw.ActionRow implements GarbageCollector {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileShortcutActionRow",
+    }, this);
+  }
+
   static helpText =
     "Note: This dialog only detects shortcuts that are not actively " +
     "intercepted by Gnome shell, e.g., natively or through an extension.\n\n" +
@@ -508,10 +516,8 @@ const ShortcutRow = GObject.registerClass({
   }
 
   #escape(s: string) {
-    return s.replace(/(<|>)/g, (c) => ({
-      "<": "&lt;",
-      ">": "&gt;",
-    }[c]!));
+    // GSettings strings may contain arbitrary markup, including ampersands.
+    return GLib.markup_escape_text(s, -1);
   }
 
   #label() {
@@ -562,7 +568,7 @@ const ShortcutRow = GObject.registerClass({
     dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE);
     dialog.set_response_enabled("replace", false);
 
-    dialog.connect("response", (_, response: "add" | "replace" | "close") => {
+    dialog.connect("response", (_, response) => {
       if (acceleratorName === null) {
         this.#unsetKeybinding();
       } else if (acceleratorName) {
@@ -681,4 +687,4 @@ const ShortcutRow = GObject.registerClass({
 
     return { keyval: unmodifiedKeyval, modifier: usedModifiers };
   }
-});
+};

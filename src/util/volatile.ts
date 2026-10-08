@@ -26,6 +26,7 @@ export class VolatileStorage<T> implements VolatileStore<T>, GarbageCollector {
 
   release(): void {
     this.#gc.release();
+    this.#stored = null;
   }
 
   /**
@@ -34,6 +35,7 @@ export class VolatileStorage<T> implements VolatileStore<T>, GarbageCollector {
   set store(t: T | null) {
     this.#gc.release();
     this.#stored = t;
+    if (t === null) return;
     const id = setTimeout(() => this.#stored = null, this.#timeout);
     this.#gc.defer(() => clearTimeout(id));
   }

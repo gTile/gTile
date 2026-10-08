@@ -18,18 +18,22 @@ export interface StyledButtonParams extends ButtonParams {
 /**
  * A simple styled text button that has the notion of an `active` state.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayTextButton",
-  Properties: {
-    "active": GObject.ParamSpec.boolean(
-      "active",
-      "Active",
-      "Whether the button state is active",
-      GObject.ParamFlags.READWRITE,
-      false,
-    ),
+export default class TextButton extends St.Button {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayTextButton",
+      Properties: {
+        "active": GObject.ParamSpec.boolean(
+          "active",
+          "Active",
+          "Whether the button state is active",
+          GObject.ParamFlags.READWRITE,
+          false,
+        ),
+      }
+    }, this);
   }
-}, class extends St.Button {
+
   private _active!: boolean;
 
   /**
@@ -77,4 +81,4 @@ export default GObject.registerClass({
       this.remove_style_pseudo_class("activate");
     }
   }
-});
+};

@@ -14,7 +14,7 @@ import {
   KeyBindingGroupDefaultSettingKey,
   KeyBindingGroupPresetSettingKey,
 } from "../types/settings.js";
-import { GarbageCollector } from "../util/gc.js";
+import { GarbageCollection, GarbageCollector } from "../util/gc.js";
 
 type KeyBindingGroupSettingKeys<G extends number> =
   G extends KeyBindingGroup.Global ? KeyBindingGlobalSettingKey :
@@ -97,12 +97,16 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
   release() {
     this.#keyBindingGroupMask = 0;
     this.#dispatchCallbacks = [];
-
-    this.#registerGlobalHotkeys();
-    this.#registerOverlayHotkeys();
-    this.#registerAutotileHotkeys();
-    this.#registerActionHotkeys();
-    this.#registerPresetHotkeys();
+    const cleanup = new GarbageCollection();
+    for (const bindings of Object.values(this.#bindings)) {
+      for (const name of bindings) {
+        cleanup.defer(() => {
+          this.#windowManager.removeKeybinding(name);
+          bindings.delete(name);
+        });
+      }
+    }
+    cleanup.release();
   }
 
   /**
@@ -283,8 +287,8 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
     // keybinding group inactive -> unregister binding if it was registered
     if ((group & this.#keyBindingGroupMask) !== group) {
       if (this.#bindings[group].has(name)) {
-        this.#bindings[group].delete(name);
         this.#windowManager.removeKeybinding(name);
+        this.#bindings[group].delete(name);
       }
 
       return;
@@ -292,13 +296,15 @@ export default class implements Publisher<HotkeyAction>, GarbageCollector {
 
     // register keybinding
     if (!this.#bindings[group].has(name)) {
-      this.#bindings[group].add(name);
-      this.#windowManager.addKeybinding(
+      const action = this.#windowManager.addKeybinding(
         name,
         this.#settings,
         Meta.KeyBindingFlags.NONE,
         Shell.ActionMode.NORMAL,
         handler);
+      if (action !== Meta.KeyBindingAction.NONE) {
+        this.#bindings[group].add(name);
+      }
     }
   }
 }

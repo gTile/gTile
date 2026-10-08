@@ -10,14 +10,14 @@ export interface GarbageCollector {
 }
 
 export class GarbageCollection implements GarbageCollector {
-  #routines: Function[] = [];
+  #routines: (() => void)[] = [];
 
   /**
    * Registers a cleanup routine that runs when {@link release} is called.
    *
    * @param fn The cleanup routine.
    */
-  defer(fn: Function) {
+  defer(fn: () => void) {
     this.#routines.push(fn);
   }
 
@@ -25,8 +25,18 @@ export class GarbageCollection implements GarbageCollector {
    * Executes all deferred cleanup routines in reverse order, i.e., LIFO.
    */
   release() {
+    const errors: unknown[] = [];
     while (this.#routines.length > 0) {
-      this.#routines.pop()!();
+      try {
+        this.#routines.pop()!();
+      } catch (error) {
+        // One broken teardown must not leave shortcuts, signals, or actors
+        // attached to Shell. Report failures after all resources are released.
+        errors.push(error);
+      }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, "Failed to release gTile resources");
     }
   }
 }

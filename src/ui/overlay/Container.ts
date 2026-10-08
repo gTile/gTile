@@ -14,9 +14,13 @@ export interface StyledContainerParams extends Partial<St.Bin.ConstructorProps> 
 /**
  * A generic container used for styling purposes.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayContainer"
-}, class extends St.Bin {
+export default class Container extends St.Bin {
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayContainer"
+    }, this);
+  }
+
   /**
    * @returns A generic container with the default style.
    */
@@ -38,4 +42,4 @@ export default GObject.registerClass({
       ...params,
     });
   }
-})
+}

@@ -1,4 +1,4 @@
-import GLib from "gi://GLib";
+import Clutter from "gi://Clutter";
 import GObject from "gi://GObject";
 import St from "gi://St";
 
@@ -13,7 +13,6 @@ import TitleBar from "./overlay/TitleBar.js";
 
 const TABLE_WIDTH = 320;
 
-type TextButton = ReturnType<typeof TextButton.new_themed>;
 
 export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
   theme: Theme;
@@ -70,58 +69,68 @@ export interface OverlayParams extends Partial<St.BoxLayout.ConstructorProps> {
  *
  * The overlay forwards the GObject properties and signals from {@link Grid}.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlay",
-  Properties: {
-    animate: GObject.ParamSpec.boolean(
-      "animate",
-      "Animate",
-      "Whether to anmiate UI position changes",
-      GObject.ParamFlags.READWRITE,
-      true,
-    ),
-    /**
-     * Forwarded from {@link Grid}.
-     */
-    "grid-size": GObject.ParamSpec.jsobject(
-      "grid-size",
-      "Grid size",
-      "The dimension of the grid in terms of columns and rows",
-      GObject.ParamFlags.READWRITE,
-    ),
-    /**
-     * Forwarded from {@link Grid}.
-     */
-    "grid-selection": GObject.ParamSpec.jsobject(
-      "grid-selection",
-      "Grid selection",
-      "A rectangular tile selection within the grid",
-      GObject.ParamFlags.READWRITE,
-    ),
-    /**
-     * Forwarded from {@link Grid}.
-     */
-    "grid-hover-tile": GObject.ParamSpec.jsobject(
-      "grid-hover-tile",
-      "Grid hover tile",
-      "The currently hovered tile in the grid, if any",
-      GObject.ParamFlags.READABLE,
-    ),
-    "selection-timeout": GObject.ParamSpec.int(
-      "selection-timeout",
-      "Selection timeout",
-      "Grace period before a selection is unset when the cursor loses focus.",
-      GObject.ParamFlags.READWRITE,
-      0, 5000, 200
-    )
-  },
-  Signals: {
-    /**
-     * Forwarded from {@link Grid}.
-     */
-    selected: {},
+export default class Overlay extends St.BoxLayout implements GarbageCollector {
+  declare connect: GObject.SignalMethods<this, St.BoxLayout.SignalSignatures & {
+    selected: () => void;
+  }>["connect"];
+  declare emit: GObject.SignalMethods<this, St.BoxLayout.SignalSignatures & {
+    selected: () => void;
+  }>["emit"];
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlay",
+      Properties: {
+        animate: GObject.ParamSpec.boolean(
+          "animate",
+          "Animate",
+          "Whether to anmiate UI position changes",
+          GObject.ParamFlags.READWRITE,
+          true,
+        ),
+        /**
+         * Forwarded from {@link Grid}.
+         */
+        "grid-size": GObject.ParamSpec.jsobject(
+          "grid-size",
+          "Grid size",
+          "The dimension of the grid in terms of columns and rows",
+          GObject.ParamFlags.READWRITE,
+        ),
+        /**
+         * Forwarded from {@link Grid}.
+         */
+        "grid-selection": GObject.ParamSpec.jsobject(
+          "grid-selection",
+          "Grid selection",
+          "A rectangular tile selection within the grid",
+          GObject.ParamFlags.READWRITE,
+        ),
+        /**
+         * Forwarded from {@link Grid}.
+         */
+        "grid-hover-tile": GObject.ParamSpec.jsobject(
+          "grid-hover-tile",
+          "Grid hover tile",
+          "The currently hovered tile in the grid, if any",
+          GObject.ParamFlags.READABLE,
+        ),
+        "selection-timeout": GObject.ParamSpec.int(
+          "selection-timeout",
+          "Selection timeout",
+          "Grace period before a selection is unset when the cursor loses focus.",
+          GObject.ParamFlags.READWRITE,
+          0, 5000, 200
+        )
+      },
+      Signals: {
+        /**
+         * Forwarded from {@link Grid}.
+         */
+        selected: {},
+      }
+    }, this);
   }
-}, class extends St.BoxLayout implements GarbageCollector {
+
   #theme: Theme;
   #titleBar: InstanceType<typeof TitleBar>;
   #grid: InstanceType<typeof Grid>;
@@ -129,7 +138,7 @@ export default GObject.registerClass({
   #actionButtons: ReturnType<typeof ButtonBar.new_styled>;
   #animate: boolean;
   #selectionTimeout: number;
-  #delayTimeoutID: GLib.Source | null = null;
+  #delayTimeoutID: ReturnType<typeof setTimeout> | null = null;
 
   constructor({
     theme,
@@ -143,7 +152,7 @@ export default GObject.registerClass({
   }: OverlayParams) {
     super({
       style_class: theme,
-      vertical: true,
+      orientation: Clutter.Orientation.VERTICAL,
       reactive: true,
       can_focus: true,
       track_hover: true,
@@ -205,6 +214,8 @@ export default GObject.registerClass({
     this.#grid.connect("selected", () => this.emit("selected"));
     this.connect("notify::visible", () => { this.gridSelection = null; });
     this.connect("notify::hover", this.#onHoverChanged.bind(this));
+    // Cancel callbacks even when Shell destroys the actor directly.
+    this.connect("destroy", () => this.release());
   }
 
   release(): void {
@@ -303,6 +314,7 @@ export default GObject.registerClass({
    *     contains a preset that matches the currently selected grid size
    */
   set presets(presets: GridSize[]) {
+    if (presets.length === 0) return;
     this.#presetButtons.removeButtons();
 
     const { cols, rows } = this.gridSize;
@@ -316,6 +328,9 @@ export default GObject.registerClass({
 
       this.#presetButtons.addButton(button);
       button.connect("clicked", () => { this.#grid.gridSize = preset; });
+    }
+    if (!presets.some(preset => preset.cols === cols && preset.rows === rows)) {
+      this.gridSize = presets[0];
     }
   }
 
@@ -379,8 +394,9 @@ export default GObject.registerClass({
 
     if (!this.hover && this.#grid.selection) {
       this.#delayTimeoutID = setTimeout(() => {
+        this.#delayTimeoutID = null;
         this.#grid.selection = null;
       }, this.#selectionTimeout);
     }
   }
-});
+};

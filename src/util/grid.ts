@@ -1,3 +1,4 @@
+import { clamp } from "./math.js";
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
 import { AutoTileAction, CardinalDirection } from "../types/hotkeys.js";
 import { ExtensionSettings } from "../types/settings.js";
@@ -12,13 +13,20 @@ export const DefaultGridSizes: GridSize[] = [
 export const AutoTileLayouts = (cfg: ExtensionSettings) => {
   const
     fractionScaleFactor = 1024,
-    workspaceRatios = cfg
+    configuredRatios = cfg
       .get_string('autotile-main-window-ratios')
+      .slice(0, 8192)
       .split(',')
-      .map(frac => parseFloat(frac))
-      .filter(frac => !isNaN(frac))
-      .map(frac => Math.round(Math.clamp(frac, 0, 1) * fractionScaleFactor))
-      .map(n => [n, fractionScaleFactor - n] as const);
+      .slice(0, 64)
+      .map(frac => Number(frac))
+      .filter(frac => Number.isFinite(frac) && frac > 0 && frac < 1)
+      .map(frac => clamp(Math.round(frac * fractionScaleFactor),
+        1, fractionScaleFactor - 1))
+      .map(n => [n, fractionScaleFactor - n] as const),
+    // Invalid settings must not create zero-weight cells or empty preset lists.
+    workspaceRatios = configuredRatios.length > 0
+      ? configuredRatios
+      : [[512, 512] as const];
 
   return ({
     "main": workspaceRatios.map(([main, minor]) =>
@@ -59,10 +67,10 @@ export function pan (
     rowOffset = dir === "south" ? 1 : dir === "north" ? -1 : 0,
     maxCol = bounds.cols - 1,
     maxRow = bounds.rows - 1,
-    anchorCol = Math.clamp(selection.anchor.col + colOffset, 0, maxCol),
-    anchorRow = Math.clamp(selection.anchor.row + rowOffset, 0, maxRow),
-    targetCol = Math.clamp(selection.target.col + colOffset, 0, maxCol),
-    targetRow = Math.clamp(selection.target.row + rowOffset, 0, maxRow);
+    anchorCol = clamp(selection.anchor.col + colOffset, 0, maxCol),
+    anchorRow = clamp(selection.anchor.row + rowOffset, 0, maxRow),
+    targetCol = clamp(selection.target.col + colOffset, 0, maxCol),
+    targetRow = clamp(selection.target.row + rowOffset, 0, maxRow);
 
   return {
     anchor: { col: anchorCol, row: anchorRow },
@@ -105,16 +113,16 @@ export function adjust(
 
   switch (dir) {
     case "north":
-      anchor.row = Math.clamp(anchor.row + rel, 0, target.row);
+      anchor.row = clamp(anchor.row + rel, 0, target.row);
       break;
     case "east":
-      target.col = Math.clamp(target.col + rel, anchor.col, bounds.cols - 1);
+      target.col = clamp(target.col + rel, anchor.col, bounds.cols - 1);
       break;
     case "south":
-      target.row = Math.clamp(target.row + rel, anchor.row, bounds.rows - 1);
+      target.row = clamp(target.row + rel, anchor.row, bounds.rows - 1);
       break;
     case "west":
-      anchor.col = Math.clamp(anchor.col + rel, 0, target.col);
+      anchor.col = clamp(anchor.col + rel, 0, target.col);
       break;
   }
 

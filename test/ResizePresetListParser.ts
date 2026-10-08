@@ -24,8 +24,8 @@ const testSemanticEquivalence = (
 test("parses short notation",
   testSemanticEquivalence,
   [
-    "3x3 1:1 2:2, 2x2 1:1 1:1     2:2 2:2",
-    "3x3 1:1 2:2, 2x2 1:1 1:1 2x2 2:2 2:2",
+    "3x3 1:1 2:2, 2x2 1:1 1:1,     2:2 2:2",
+    "3x3 1:1 2:2, 2x2 1:1 1:1, 2x2 2:2 2:2",
   ],
   [
     "3x3 1:1 2:2,     1:1 1:1, 4x4 1:1 1:1,     1:3 4:4",

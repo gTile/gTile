@@ -4,6 +4,7 @@ import St from "gi://St";
 
 import type { LayoutManager } from "resource:///org/gnome/shell/ui/layout.js";
 
+import { clamp } from "../util/math.js";
 import { Event as DesktopEventType, DesktopEvent } from "../types/desktop.js";
 import { GridSelection, GridSize } from "../types/grid.js";
 import { DispatchFn, Publisher } from "../types/observable.js";
@@ -48,11 +49,14 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
   #desktopManager: DesktopManager;
   #gridLineOverlayGc: GarbageCollection;
   #windowSubscriptionGc: GarbageCollection;
+  #overlayBindingsGc: GarbageCollection;
   #dispatchCallbacks: DispatchFn<OverlayEvent>[];
   #overlays: InstanceType<typeof Overlay>[];
   #preview: InstanceType<typeof Preview>;
   #activeIdx: number | null;
   #syncInProgress: boolean;
+  #unsubscribeDesktop: () => void;
+  #released = false;
 
   constructor({
     theme,
@@ -70,18 +74,28 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#desktopManager = desktopManager;
     this.#gridLineOverlayGc = new GarbageCollection();
     this.#windowSubscriptionGc = new GarbageCollection();
+    this.#overlayBindingsGc = new GarbageCollection();
     this.#dispatchCallbacks = [];
     this.#overlays = [];
     this.#preview = new Preview({ theme: this.#theme });
     this.#activeIdx = null;
     this.#syncInProgress = false;
 
-    desktopManager.subscribe(this.#onDesktopEvent.bind(this));
-    gnomeSettings.bind(
-      "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
-
-    layoutManager.addTopChrome(this.#preview);
-    this.#renderOverlays();
+    this.#unsubscribeDesktop =
+      desktopManager.subscribe(this.#onDesktopEvent.bind(this));
+    try {
+      gnomeSettings.bind(
+        "enable-animations", this.#preview, "animate", Gio.SettingsBindFlags.GET);
+      layoutManager.addTopChrome(this.#preview);
+      this.#renderOverlays();
+    } catch (error) {
+      try {
+        this.release();
+      } catch (cleanupError) {
+        console.error(cleanupError);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -89,11 +103,18 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * overlays (hidden and visible). The instance must not be used thereafter.
    */
   release() {
-    this.#gridLineOverlayGc.release();
-    this.#windowSubscriptionGc.release();
-    this.#preview.destroy();
-    this.#destroyOverlays();
+    if (this.#released) return;
+    this.#released = true;
     this.#dispatchCallbacks = [];
+    this.#unsubscribeDesktop();
+
+    const cleanup = new GarbageCollection();
+    cleanup.defer(() => this.#preview.destroy());
+    cleanup.defer(() => Gio.Settings.unbind(this.#preview, "animate"));
+    cleanup.defer(() => this.#destroyOverlays());
+    cleanup.defer(() => this.#windowSubscriptionGc.release());
+    cleanup.defer(() => this.#gridLineOverlayGc.release());
+    cleanup.release();
   }
 
   /**
@@ -120,7 +141,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * The current size of the grid that is shown in the overlays.
    */
   get gridSize(): GridSize {
-    return this.#overlays[0].gridSize;
+    return this.#overlays[0]?.gridSize ?? this.#presets[0];
   }
 
   /**
@@ -185,7 +206,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * @param monitorIdx The targeted monitor whose overlay will be updated.
    */
   setSelection(selection: GridSelection | null, monitorIdx: number) {
-    this.#overlays[monitorIdx].gridSelection = selection;
+    const overlay = this.#overlays[monitorIdx];
+    if (overlay) overlay.gridSelection = selection;
   }
 
   /**
@@ -195,7 +217,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
    * @returns The tile selection, if any.
    */
   getSelection(monitorIdx: number): GridSelection | null {
-    return this.#overlays[monitorIdx].gridSelection;
+    return this.#overlays[monitorIdx]?.gridSelection ?? null;
   }
 
   /**
@@ -206,7 +228,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
     this.#overlays.forEach(overlay => overlay.iteratePreset());
     this.#syncInProgress = false;
 
-    this.#renderGridPreview(this.#overlays[0].gridSize);
+    this.#renderGridPreview(this.gridSize);
   }
 
   #dispatch(event: OverlayEvent) {
@@ -224,8 +246,11 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         gridAspectRatio: monitor.workArea.width / monitor.workArea.height,
         visible: false,
       });
+      // Own the actor before binding settings so initialization can roll back.
+      this.#overlays.push(overlay);
       this.#gnomeSettings.bind(
         "enable-animations", overlay, "animate", Gio.SettingsBindFlags.GET);
+      this.#overlayBindingsGc.defer(() => Gio.Settings.unbind(overlay, "animate"));
 
       type BSK = BoolSettingKey;
       for (const key of ["auto-close", "follow-cursor"] satisfies BSK[]) {
@@ -238,6 +263,7 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         });
 
         this.#settings.bind(key, btn, "active", Gio.SettingsBindFlags.DEFAULT);
+        this.#overlayBindingsGc.defer(() => Gio.Settings.unbind(btn, "active"));
         btn.connect("clicked", () => { btn.active = !btn.active; });
         overlay.addActionButton(btn);
       }
@@ -256,6 +282,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       // register event handlers
       this.#settings.bind("selection-timeout",
         overlay, "selection-timeout", Gio.SettingsBindFlags.GET);
+      this.#overlayBindingsGc.defer(() =>
+        Gio.Settings.unbind(overlay, "selection-timeout"));
       overlay.connect("notify::visible", this.#onGridVisibleChanged.bind(this));
       overlay.connect("notify::grid-size", this.#onGridSizeChanged.bind(this));
       overlay.connect("notify::grid-selection",
@@ -272,17 +300,24 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
 
       this.#layoutManager.addChrome(overlay);
 
-      this.#overlays.push(overlay);
     }
   }
 
   #destroyOverlays() {
-    let overlay: InstanceType<typeof Overlay>, wasVisible = false;
-    while (overlay = this.#overlays.pop()!) {
+    // St actors can be disposed before GSettings drops its native bindings.
+    // Unbind while the wrappers are alive, before destroying their children.
+    this.#activeIdx = null;
+    this.#preview.previewArea = null;
+    const cleanup = new GarbageCollection();
+    let wasVisible = false;
+    while (this.#overlays.length > 0) {
+      const overlay = this.#overlays.pop()!;
       wasVisible ||= overlay.visible;
-      overlay.release();
-      overlay.destroy();
+      cleanup.defer(() => overlay.destroy());
+      cleanup.defer(() => overlay.release());
     }
+    cleanup.defer(() => this.#overlayBindingsGc.release());
+    cleanup.release();
 
     if (wasVisible) {
       this.#dispatch({ type: Event.Visibility, visible: false });
@@ -375,9 +410,9 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
       if (focusedWindow?.get_monitor() === index) {
         const
           frame = focusedWindow.get_frame_rect(),
-          anchorX = Math.clamp(frame.x + frame.width / 2 - overlay.width / 2,
+          anchorX = clamp(frame.x + frame.width / 2 - overlay.width / 2,
             workArea.x, xMax),
-          anchorY = Math.clamp(frame.y + frame.height / 2 - overlay.width / 2,
+          anchorY = clamp(frame.y + frame.height / 2 - overlay.width / 2,
             workArea.y, yMax);
 
         overlay.placeAt(anchorX, anchorY);
@@ -386,8 +421,8 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         workArea.y <= mouseY && mouseY <= (workArea.y + workArea.height)
       ) {
         overlay.placeAt(
-          Math.clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax),
-          Math.clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax));
+          clamp(mouseX + overlay.popupOffsetX, workArea.x, xMax),
+          clamp(mouseY + overlay.popupOffsetY, workArea.y, yMax));
       } else {
         // never animate overlays when placed in the center of the screen
         overlay.x = workArea.x + workArea.width / 2 - overlay.width / 2;
@@ -464,8 +499,10 @@ export default class implements Publisher<OverlayEvent>, GarbageCollector {
         return;
 
       case DesktopEventType.MONITORS_CHANGED:
+        this.#gridLineOverlayGc.release();
         this.#destroyOverlays();
         this.#renderOverlays();
+        this.#syncTitleWithWindow(this.#desktopManager.focusedWindow);
         return;
 
       case DesktopEventType.OVERVIEW:

@@ -1,3 +1,4 @@
+import { clamp } from "./math.js";
 import { GridOffset, GridSelection, GridSize } from "../types/grid.js";
 import { LexicalError, Literal, Scanner, Token } from "./scanner.js";
 
@@ -37,12 +38,41 @@ export interface GridCellSpec {
 
 class ParseError extends Error {}
 
+// Settings are user-controlled and parsed on Shell's main thread. Bound the
+// work before scanning or descending recursively so malformed input cannot
+// freeze the desktop or overflow the JavaScript stack.
+const MAX_INPUT_LENGTH = 8192;
+const MAX_GRID_DEPTH = 32;
+const MAX_GRID_CELLS = 1024;
+const MAX_NUMBER = 1_000_000_000;
+
 abstract class Parser {
   protected scanner: Scanner;
   protected token!: Token;
 
   constructor(input: string) {
     this.scanner = new Scanner(input);
+  }
+
+  protected begin() {
+    if (this.scanner.input.length > MAX_INPUT_LENGTH) {
+      throw new ParseError("Configuration exceeds 8192 characters");
+    }
+    this.token = this.scanner.scan();
+  }
+
+  protected finish() {
+    if (this.token.kind !== Literal.$) {
+      throw new ParseError("Unexpected trailing input");
+    }
+  }
+
+  protected parseNumber(): number {
+    const value = Number(this.accept({ kind: Literal.Number }));
+    if (!Number.isSafeInteger(value) || value < 1 || value > MAX_NUMBER) {
+      throw new ParseError("Number must be an integer between 1 and 1000000000");
+    }
+    return value;
   }
 
   /**
@@ -117,13 +147,14 @@ export class GridSizeListParser extends Parser {
    */
   parse(): GridSize[] | null {
     try {
-      this.token = this.scanner.scan();
-
-      return this.#parseList();
+      this.begin();
+      const result = this.#parseList();
+      this.finish();
+      return result;
     } catch (e) {
       if (e instanceof LexicalError || e instanceof ParseError) {
         console.warn(
-          `Failed to parse grid-size list. Input: "${this.scanner.input}".`,
+          `Failed to parse grid-size list.`,
           `Error: ${e.message}`,
         );
         return null;
@@ -152,9 +183,9 @@ export class GridSizeListParser extends Parser {
   }
 
   #parseGridSize(): GridSize {
-    const cols = Math.clamp(this.#parseNumber(), 1, 64);
+    const cols = clamp(this.parseNumber(), 1, 64);
     this.accept({ kind: Literal.Keyword, raw: "x" });
-    const rows = Math.clamp(this.#parseNumber(), 1, 64);
+    const rows = clamp(this.parseNumber(), 1, 64);
 
     return { cols, rows };
   }
@@ -216,13 +247,21 @@ export class ResizePresetListParser extends Parser {
    */
   parse(): Preset[] | null {
     try {
-      this.token = this.scanner.scan();
-
-      return this.#parseList();
+      this.begin();
+      const result = this.#parseList();
+      this.finish();
+      for (const { gridSize, selection } of result) {
+        for (const { col, row } of [selection.anchor, selection.target]) {
+          if (col >= gridSize.cols || row >= gridSize.rows) {
+            throw new ParseError("Resize preset coordinates exceed its grid");
+          }
+        }
+      }
+      return result;
     } catch (e) {
       if (e instanceof LexicalError || e instanceof ParseError) {
         console.warn(
-          `Failed to parse preset list. Input: "${this.scanner.input}".`,
+          `Failed to parse preset list.`,
           `Error: ${e.message}`,
         );
         return null;
@@ -264,12 +303,12 @@ export class ResizePresetListParser extends Parser {
   }
 
   #parsePresetOrSelection(): Preset | GridSelection {
-    const num = this.#parseNumber();
+    const num = this.parseNumber();
 
     switch (this.token.kind) {
       case Literal.Keyword:
         this.accept({ kind: Literal.Keyword, raw: "x" });
-        const rows = this.#parseNumber();
+        const rows = this.parseNumber();
         const selection = this.#parseSelection();
 
         return {
@@ -278,7 +317,7 @@ export class ResizePresetListParser extends Parser {
         } satisfies Preset;
       case Literal.Colon:
         this.accept();
-        const row = this.#parseNumber();
+        const row = this.parseNumber();
         const target = this.#parseOffset();
 
         return {
@@ -300,9 +339,9 @@ export class ResizePresetListParser extends Parser {
   }
 
   #parseGridSize(): GridSize {
-    const cols = this.#parseNumber();
+    const cols = this.parseNumber();
     this.accept({ kind: Literal.Keyword, raw: "x" });
-    const rows = this.#parseNumber();
+    const rows = this.parseNumber();
 
     return { cols, rows };
   }
@@ -310,15 +349,11 @@ export class ResizePresetListParser extends Parser {
   #parseOffset(): GridOffset {
     // Revise by -1 due to 0-based index that is used throughout the code.
     // Note that a number is defined as being >=1 in the lexer grammar.
-    const col = this.#parseNumber() - 1;
+    const col = this.parseNumber() - 1;
     this.accept({ kind: Literal.Colon });
-    const row = this.#parseNumber() - 1;
+    const row = this.parseNumber() - 1;
 
     return { col, row };
-  }
-
-  #parseNumber(): number {
-    return Number(this.accept({ kind: Literal.Number }));
   }
 
   #isPreset(o: Preset | GridSelection): o is Preset {
@@ -344,6 +379,9 @@ export class ResizePresetListParser extends Parser {
  * - "cols(2:rows(1,2d,1), 2:rows(1,2:rows(1,1),1))"
  */
 export class GridSpecParser extends Parser {
+  #depth = 0;
+  #cells = 0;
+
   /**
    * Parses the input provided during instance creation.
    *
@@ -351,13 +389,16 @@ export class GridSpecParser extends Parser {
    */
   parse(): GridSpec | null {
     try {
-      this.token = this.scanner.scan();
-
-      return this.#parseGridSpec();
+      this.#depth = 0;
+      this.#cells = 0;
+      this.begin();
+      const result = this.#parseGridSpec();
+      this.finish();
+      return result;
     } catch (e) {
       if (e instanceof LexicalError || e instanceof ParseError) {
         console.warn(
-          `Failed to parse GridSpec. Input: "${this.scanner.input}".`,
+          `Failed to parse GridSpec.`,
           `Error: ${e.message}`,
         );
         return null;
@@ -370,7 +411,7 @@ export class GridSpecParser extends Parser {
   #parseGridSpec(): GridSpec {
     switch (this.token.kind) {
       case Literal.$:
-        return { mode: "cols", cells: [] };
+        return { mode: "cols", cells: [{ weight: 1, dynamic: false }] };
       case Literal.Keyword:
         return this.#parseColRowSpec();
     }
@@ -380,32 +421,42 @@ export class GridSpecParser extends Parser {
   }
 
   #parseColRowSpec(): GridSpec {
-    switch (this.token.kind) {
-      case Literal.Keyword:
-        const mode = this.token.raw;
-        if (mode !== "cols" && mode !== "rows") {
-          break;
-        }
-
-        this.accept();
-        this.accept({ kind: Literal.LParen });
-
-        const cells: GridCellSpec[] = [];
-        do {
-          cells.push(this.#parseCellSpec());
-        } while (this.acceptIf(Literal.Separator));
-
-        this.accept({ kind: Literal.RParen });
-
-        return { mode, cells };
+    if (++this.#depth > MAX_GRID_DEPTH) {
+      throw new ParseError("Grid nesting exceeds 32 levels");
     }
+    try {
+      switch (this.token.kind) {
+        case Literal.Keyword:
+          const mode = this.token.raw;
+          if (mode !== "cols" && mode !== "rows") {
+            break;
+          }
 
-    throw new ParseError(`Unexpected token "${this.token.raw}" ` +
-      `(type: ${this.token.kind}) at pos ${this.token.position}.`);
+          this.accept();
+          this.accept({ kind: Literal.LParen });
+
+          const cells: GridCellSpec[] = [];
+          do {
+            cells.push(this.#parseCellSpec());
+          } while (this.acceptIf(Literal.Separator));
+
+          this.accept({ kind: Literal.RParen });
+
+          return { mode, cells };
+      }
+
+      throw new ParseError(`Unexpected token "${this.token.raw}" ` +
+        `(type: ${this.token.kind}) at pos ${this.token.position}.`);
+    } finally {
+      --this.#depth;
+    }
   }
 
   #parseCellSpec(): GridCellSpec {
-    const weight = this.#parseNumber();
+    if (++this.#cells > MAX_GRID_CELLS) {
+      throw new ParseError("Grid exceeds 1024 cells");
+    }
+    const weight = this.parseNumber();
     let dynamic = false;
     let child: GridSpec | undefined;
 
@@ -419,7 +470,4 @@ export class GridSpecParser extends Parser {
     return { weight, dynamic, child };
   }
 
-  #parseNumber(): number {
-    return Number(this.accept({ kind: Literal.Number }));
-  }
 }

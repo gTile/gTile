@@ -8,9 +8,9 @@
     /*
      * Set the JavaScript language version for emitted JavaScript and include compatible library declarations.
      *
-     * This extension only supports Gnome versions >= 49 which implies that the
-     * GJS runtime is at least v1.86 which in turn is based on SpiderMonkey-140
-     * which features support for ECMAScript 2024 aka ES15.
+     * This extension targets Gnome 51. Its GJS runtime supports ECMAScript 2024
+     * (and newer language features); the conservative target below
+     * keeps emitted code compatible with ECMAScript 2024 aka ES15.
      */
     "target": "ES2024",
 

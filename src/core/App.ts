@@ -55,7 +55,7 @@ type GridSpecSettingKey = StartsWith<SettingKey, "autotile-gridspec-">;
  * (2) listen & react to relevant events, e.g., user inputs, window focus, etc.
  */
 export default class App implements GarbageCollector {
-  static #instance: App;
+  static #instance: App | undefined;
 
   #theme: Theme;
   #gc: GarbageCollection;
@@ -97,67 +97,82 @@ export default class App implements GarbageCollector {
     this.#theme = `gtile-${mangledThemeName}`;
     this.#gc = new GarbageCollection();
     this.#lastPresetIndex = new VolatileStorage<PresetIndex>(2000);
+    this.#gc.defer(() => this.#lastPresetIndex.release());
     this.#settings = extension.settings;
-    this.#gridSpecs = AutoTileLayouts(this.#settings);
 
-    this.#globalKeyBindingGroups = Object
-      .entries(SettingKeyToKeyBindingGroupLUT)
-      .reduce((mask, [key, group]) =>
-        this.#settings.get_boolean(key as BoolSettingKey)
-          ? mask | group
-          : mask,
-        0);
+    try {
+      this.#gridSpecs = AutoTileLayouts(this.#settings);
 
-    this.#hotkeyManager = new HotkeyManager({
-      settings: this.#settings,
-      windowManager: Main.wm,
-    });
-    this.#gc.defer(() => this.#hotkeyManager.release());
+      this.#globalKeyBindingGroups = Object
+        .entries(SettingKeyToKeyBindingGroupLUT)
+        .reduce((mask, [key, group]) =>
+          this.#settings.get_boolean(key as BoolSettingKey)
+            ? mask | group
+            : mask,
+          0);
 
-    this.#desktopManager = new DesktopManager({
-      shell: Shell.Global.get(),
-      display: Shell.Global.get().display,
-      layoutManager: Main.layoutManager,
-      monitorManager: Shell.Global.get().backend.get_monitor_manager(),
-      workspaceManager: Shell.Global.get().workspace_manager,
-      userPreferences: new UserPreferences({ settings: this.#settings }),
-    });
-    this.#gc.defer(() => this.#desktopManager.release());
+      this.#hotkeyManager = new HotkeyManager({
+        settings: this.#settings,
+        windowManager: Main.wm,
+      });
+      this.#gc.defer(() => this.#hotkeyManager.release());
 
-    const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
-    this.#overlayManager = new OverlayManager({
-      theme: this.#theme,
-      settings: this.#settings,
-      gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
-      presets: new GridSizeListParser(gridSizeConf).parse() ?? DefaultGridSizes,
-      layoutManager: Main.layoutManager,
-      desktopManager: this.#desktopManager,
-    });
-    this.#gc.defer(() => this.#overlayManager.release());
+      this.#desktopManager = new DesktopManager({
+        shell: Shell.Global.get(),
+        display: Shell.Global.get().display,
+        layoutManager: Main.layoutManager,
+        workspaceManager: Shell.Global.get().workspace_manager,
+        userPreferences: new UserPreferences({ settings: this.#settings }),
+      });
+      this.#gc.defer(() => this.#desktopManager.release());
 
-    this.#panelIcon = new PanelButton({ theme: this.#theme });
-    this.#gc.defer(() => this.#panelIcon.destroy());
+      const gridSizeConf = this.#settings.get_string("grid-sizes") ?? "";
+      const gridSizes = new GridSizeListParser(gridSizeConf).parse();
+      this.#overlayManager = new OverlayManager({
+        theme: this.#theme,
+        settings: this.#settings,
+        gnomeSettings: extension.getSettings("org.gnome.desktop.interface"),
+        presets: gridSizes?.length ? gridSizes : DefaultGridSizes,
+        layoutManager: Main.layoutManager,
+        desktopManager: this.#desktopManager,
+      });
+      this.#gc.defer(() => this.#overlayManager.release());
 
-    // --- show  UI ---
-    Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
+      this.#panelIcon = new PanelButton({ theme: this.#theme });
+      this.#gc.defer(() => this.#panelIcon.destroy());
 
-    // --- event handlers ---
-    this.#panelIcon.connect("button-press-event",
-      () => this.#onUserAction({ type: Action.TOGGLE }));
-    this.#settings.bind("show-icon", this.#panelIcon, "visible",
-      Gio.SettingsBindFlags.GET);
-    const chid = this.#settings.connect("changed",
-      (_, key: SettingKey) => this.#onSettingsChanged(key));
-    this.#gc.defer(() => this.#settings.disconnect(chid));
-    this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
-    this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
-    this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
+      // --- show  UI ---
+      Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
+
+      // --- event handlers ---
+      this.#panelIcon.connect("activated",
+        () => this.#onUserAction({ type: Action.TOGGLE }));
+      this.#settings.bind("show-icon", this.#panelIcon, "visible",
+        Gio.SettingsBindFlags.GET);
+      this.#gc.defer(() => Gio.Settings.unbind(this.#panelIcon, "visible"));
+      const chid = this.#settings.connect("changed",
+        (_, key) => this.#onSettingsChanged(key as SettingKey));
+      this.#gc.defer(() => this.#settings.disconnect(chid));
+      this.#overlayManager.subscribe(this.#onOverlayEvent.bind(this));
+      this.#hotkeyManager.subscribe(this.#onUserAction.bind(this));
+      this.#hotkeyManager.setListeningGroups(this.#globalKeyBindingGroups);
+    } catch (error) {
+      // Roll back partially enabled extensions without hiding the cause.
+      try {
+        this.#gc.release();
+      } catch (cleanupError) {
+        console.error(cleanupError);
+      }
+      throw error;
+    }
   }
 
   release() {
-    this.#gc.release();
-    this.#lastPresetIndex.release();
-    App.#instance = undefined as any;
+    try {
+      this.#gc.release();
+    } finally {
+      App.#instance = undefined;
+    }
   }
 
   #getResizePreset(index: LoopPresetAction["preset"]): Preset | null {
@@ -284,6 +299,8 @@ export default class App implements GarbageCollector {
     const dm = this.#desktopManager;
     const window = dm.focusedWindow; if (!window) return;
     const monitorIdx = om.activeMonitor ?? window.get_monitor();
+    // A focused window can briefly outlive its monitor during hotplug.
+    if (!dm.monitors.some(monitor => monitor.index === monitorIdx)) return;
     const selection = om.getSelection(monitorIdx);
 
     // events that require a window target

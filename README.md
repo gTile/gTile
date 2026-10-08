@@ -1,6 +1,8 @@
 # gTile
 
-### The Gnome 45 version of gTile has undergone a rewrite! If you experience any regressions please check PR #341 for a summary of breaking changes. If you experience an undocumented regression please open a new issue.
+This branch targets **GNOME Shell 51**. See [INSTALL.md](INSTALL.md) for
+installation, building, and desktop checks, and [SECURITY.md](SECURITY.md) for
+the safety changes and dependency audit limitations.
 
 - Gnome-shell extension that improves window tiling capabilities of stock gnome-shell.
 - gTile is used to move/resize windows on a configurable grid scheme.
@@ -41,16 +43,18 @@
 
 ### Install via Gnome Extensions
 The preferred installation is through [Gnome Extensions](https://extensions.gnome.org/extension/28/gtile/).
+For the GNOME 51 port in this checkout, use the archive and instructions in
+[INSTALL.md](INSTALL.md).
 
 ### Install Latest Build
-Alternatively, the most recent stable version may also be downloaded as a distributable archive (`gtile.dist.tgz`) through the [GitHub releases page](https://github.com/gTile/gTile/releases).
+Alternatively, the most recent stable version may also be downloaded as a distributable archive (`gtile.dist.zip`) through the [GitHub releases page](https://github.com/gTile/gTile/releases).
 
 ```shell
 # Replace `VERSION` with the most recent release.
-wget https://github.com/gTile/gTile/releases/download/VERSION/gtile.dist.tgz
+wget https://github.com/gTile/gTile/releases/download/VERSION/gtile.dist.zip
 
 # The `-f` flag will perform an upgrade, if necessary.
-gnome-extensions install -f ~/Downloads/gtile.dist.tgz
+gnome-extensions install -f ~/Downloads/gtile.dist.zip
 
 # The changes only become effective once the shell session was restarted.
 # In case the extension was installed for the first time it must be enabled afterwards.
@@ -61,8 +65,8 @@ gnome-extensions enable gTile@vibou
 Alternatively, you can build and install the latest version from GitHub. Make sure to have a working `git` and `npm` installation.
 
 ```shell
-git clone https://github.com/gTile/gTile.git
-cd gTile
+# Start in the updated checkout containing the GNOME 51 port.
+cd /path/to/gTile
 npm ci
 npm run build:dist
 npm run install:extension
@@ -225,13 +229,14 @@ Shortcut | Description
 # Developer Documentation
 
 ## Prerequisites
-To build and develop the extension `node`, `npm`, `git` and a few standard GNU utilities are required. Check the `scripts` section of `package.json` to see which GNU utilities are used.
+To build and develop the extension, use Node 24.12+ within the 24.x series,
+npm, Git, `zip`, and GNU `tar`. Check the `scripts` section of `package.json`
+for the build commands.
 
 To get started, checkout the repository and install the required dependencies:
 
 ```shell
-git clone https://github.com/gTile/gTile.git
-cd gTile
+cd /path/to/gTile
 npm ci
 ```
 
@@ -242,7 +247,7 @@ Testing changes can be tedious at times because an extension cannot be updated i
 ```json
 {
   "scripts": {
-    "install:remote": "scp gtile.dist.tgz remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/gtile.dist.tgz",
+    "install:remote": "scp gtile.dist.zip remotehost:~/Downloads && ssh remotehost gnome-extensions install -f ~/Downloads/gtile.dist.zip",
   }
 }
 ```
@@ -287,11 +292,13 @@ Term   | Meaning
 ## Code Structure
 
 ```
-dist                - Contents will be distributed 1:1 whenever the extension is build
+dist                - Tracked metadata, schemas, stylesheets, and image assets
 ├── images          - Assets that are referenced in the CSS stylesheet
 ├── schemas         - Contains the GSettings definitions. Required for reading/writing settings
 ├── metadata.json   - The extension metadata.json as recognized by Gnome
 └── stylesheet.css  - The stylesheets file as recognized by Gnome
+
+out/extension       - Generated extension staging directory (npm run build)
 
 src                 - The TypeScript root directory
 ├── core            - Contains the main orchestration classes that are instantiated as singleton
@@ -305,7 +312,7 @@ src                 - The TypeScript root directory
 test                - Tests are kept separate from src/ and are not transpiled by "npm run build"
 ```
 
-Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `dist/types/` (as emited by `tsc` during transpilation) are deleted by the `postbuild` script in `package.json`.
+Note that `src/types/` must not contain any files that emit actual JS runtime code. Transpiled files in `out/extension/types/` are excluded by the build helper in `scripts/build.mjs`.
 
 ## Design Principles
 The code base follows the [SOLID](https://en.wikipedia.org/wiki/SOLID) paradigm __up to an extent__. Although it doesn't strictly follow the paradigm it is definitely architectured with these principles in mind. Try to stick with these principles when changing the architecture, e.g., to ease [adaptation for different desktop environments](https://github.com/gTile/gTile/issues/103).

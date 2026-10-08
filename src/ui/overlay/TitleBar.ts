@@ -17,17 +17,26 @@ export interface TitleBarParams extends Partial<St.Widget.ConstructorProps> {
  *
  * A `closed` signal is emitted when the user clicks the close button.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayTitleBar",
-  Signals: {
-    closed: {},
+export default class TitleBar extends St.Widget {
+  declare connect: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    closed: () => void;
+  }>["connect"];
+  declare emit: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    closed: () => void;
+  }>["emit"];
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayTitleBar",
+      Signals: {
+        closed: {},
+      }
+    }, this);
   }
-}, class extends St.Widget {
+
   #label: St.Label;
 
   constructor({ theme, title, ...params }: TitleBarParams) {
     super({
-      style_class: `gtile-testtest`,
       layout_manager: new Clutter.BoxLayout(),
       ...params,
     });
@@ -60,4 +69,4 @@ export default GObject.registerClass({
   get title(): string {
     return this.#label.text ?? "";
   }
-});
+};

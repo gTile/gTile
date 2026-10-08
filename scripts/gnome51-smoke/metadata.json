@@ -1,0 +1,6 @@
+{
+  "uuid": "gtile-smoke@local",
+  "name": "gTile integration test harness",
+  "description": "Only enable inside the disposable headless test session",
+  "shell-version": ["51"]
+}

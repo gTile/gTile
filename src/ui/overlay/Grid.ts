@@ -6,7 +6,6 @@ import { GridOffset, GridSize, GridSelection } from "../../types/grid.js";
 import { Theme } from "../../types/theme.js";
 import TextButton from "./TextButton.js";
 
-type TextButton = ReturnType<typeof TextButton.new_styled>;
 
 export interface GridParams extends Partial<St.Widget.ConstructorProps> {
   theme: Theme
@@ -45,36 +44,48 @@ export interface GridParams extends Partial<St.Widget.ConstructorProps> {
  * r/w access of regular properties. It also exposes a dedicated signal
  * (`selected`) that is fired when the user completes a grid selection.
  */
-export default GObject.registerClass({
-  GTypeName: "GTileOverlayGrid",
-  Properties: {
-    "grid-size": GObject.ParamSpec.jsobject(
-      "grid-size",
-      "Grid size",
-      "The dimension of the grid in terms of columns and rows",
-      GObject.ParamFlags.READWRITE,
-    ),
-    selection: GObject.ParamSpec.jsobject(
-      "selection",
-      "Selection",
-      "A rectangular tile selection within the grid",
-      GObject.ParamFlags.READWRITE,
-    ),
-    "hover-tile": GObject.ParamSpec.jsobject(
-      "hover-tile",
-      "Hover tile",
-      "The currently hovered tile in the grid, if any",
-      GObject.ParamFlags.READABLE,
-    ),
-  },
-  Signals: {
-    selected: {},
+export default class Grid extends St.Widget {
+  declare connect: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    selected: () => void;
+  }>["connect"];
+  declare emit: GObject.SignalMethods<this, St.Widget.SignalSignatures & {
+    selected: () => void;
+  }>["emit"];
+  static {
+    GObject.registerClass({
+      GTypeName: "GTileOverlayGrid",
+      Properties: {
+        "grid-size": GObject.ParamSpec.jsobject(
+          "grid-size",
+          "Grid size",
+          "The dimension of the grid in terms of columns and rows",
+          GObject.ParamFlags.READWRITE,
+        ),
+        selection: GObject.ParamSpec.jsobject(
+          "selection",
+          "Selection",
+          "A rectangular tile selection within the grid",
+          GObject.ParamFlags.READWRITE,
+        ),
+        "hover-tile": GObject.ParamSpec.jsobject(
+          "hover-tile",
+          "Hover tile",
+          "The currently hovered tile in the grid, if any",
+          GObject.ParamFlags.READABLE,
+        ),
+      },
+      Signals: {
+        selected: {},
+      }
+    }, this);
   }
-}, class extends St.Widget {
+
   #theme: Theme;
   #gridSize!: GridSize;
   #selection!: GridSelection | null;
   #hoverTile: GridOffset | null;
+  #rebuilding = false;
+  #destroyed = false;
 
   constructor({ theme, gridSize, selection = null, ...params }: GridParams) {
     super({
@@ -90,6 +101,7 @@ export default GObject.registerClass({
     });
 
     this.#theme = theme;
+    this.connect("destroy", () => { this.#destroyed = true; });
     this.gridSize = gridSize;
     this.selection = selection;
     this.#hoverTile = null;
@@ -106,8 +118,15 @@ export default GObject.registerClass({
     }
 
     this.#gridSize = gridSize;
-    this.destroy_all_children();
-    this.#renderGrid();
+    // Destroying hovered tiles emits notify::hover during native disposal.
+    // Ignore those callbacks until the replacement grid is fully constructed.
+    this.#rebuilding = true;
+    try {
+      this.destroy_all_children();
+      this.#renderGrid();
+    } finally {
+      this.#rebuilding = false;
+    }
     this.notify("grid-size");
   }
 
@@ -198,6 +217,7 @@ export default GObject.registerClass({
   }
 
   #onTileHover(col: number, row: number, tile: TextButton) {
+    if (this.#rebuilding || this.#destroyed) return;
     // no ongoing selection
     if (!this.selection) {
       tile.active = tile.hover;
@@ -234,4 +254,4 @@ export default GObject.registerClass({
       };
     }
   }
-});
+};

@@ -19,9 +19,12 @@ export default class extends Extension implements ExtensionSettingsProvider {
   }
 
   disable() {
-    this.#app?.release();
-    this.#app = undefined;
-    this.#settings = undefined;
+    try {
+      this.#app?.release();
+    } finally {
+      this.#app = undefined;
+      this.#settings = undefined;
+    }
   }
 
   get settings(): ExtensionSettings {

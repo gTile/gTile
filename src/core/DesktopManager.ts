@@ -7,6 +7,7 @@ import type {
   Monitor
 } from "resource:///org/gnome/shell/ui/layout.js";
 
+import { clamp } from "../util/math.js";
 import { DesktopEvent, Event, Screen } from "../types/desktop.js";
 import {
   GridOffset,
@@ -45,7 +46,6 @@ export interface DesktopManagerParams {
   shell: Shell.Global;
   display: Meta.Display;
   layoutManager: LayoutManager;
-  monitorManager: Meta.MonitorManager;
   workspaceManager: Meta.WorkspaceManager;
   userPreferences: UserPreferencesProvider;
 }
@@ -67,7 +67,6 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     shell,
     display,
     layoutManager,
-    monitorManager,
     workspaceManager,
     userPreferences,
   }: DesktopManagerParams) {
@@ -80,10 +79,12 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     this.#dispatchCallbacks = [];
 
     {
-      const chid = monitorManager.connect("monitors-changed", () => {
+      // Shell updates its monitor list before emitting this signal. Mutter's
+      // earlier signal can otherwise rebuild overlays with stale geometry.
+      const chid = layoutManager.connect("monitors-changed", () => {
         this.#dispatch({ type: Event.MONITORS_CHANGED });
       });
-      this.#gc.defer(() => monitorManager.disconnect(chid));
+      this.#gc.defer(() => layoutManager.disconnect(chid));
     }
     {
       const chid = display.connect("notify::focus-window", () => {
@@ -95,7 +96,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       const chid = layoutManager.overviewGroup.connect("notify::visible", g => {
         this.#dispatch({ type: Event.OVERVIEW, visible: g.visible });
       });
-      this.#gc.defer(() => layoutManager.disconnect(chid));
+      this.#gc.defer(() => layoutManager.overviewGroup.disconnect(chid));
     }
   }
 
@@ -110,6 +111,9 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
   subscribe(fn: DispatchFn<DesktopEvent>) {
     this.#dispatchCallbacks.push(fn);
+    return () => {
+      this.#dispatchCallbacks = this.#dispatchCallbacks.filter(cb => cb !== fn);
+    };
   }
 
   /**
@@ -132,7 +136,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
 
     return this.#layoutManager.monitors.map((m, index) => ({
       index: m.index,
-      scale: m.geometryScale,
+      scale: m.geometry_scale,
       resolution: { x: m.x, y: m.y, width: m.width, height: m.height },
       workArea: {
         x: workAreas[index].x,
@@ -178,6 +182,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
    * @param monitorIdx Optional. When not given, rotate amongst monitors.
    */
   moveToMonitor(target: Meta.Window, monitorIdx?: number) {
+    if (this.monitors.length === 0) return;
     monitorIdx = monitorIdx ?? (target.get_monitor() + 1) % this.monitors.length;
     target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
     target.unmaximize();
@@ -525,15 +530,20 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
   }
 
   #moveResize(target: Meta.Window, x: number, y: number, size?: FrameSize) {
+    const spacing = this.#userPreferences.getSpacing();
+    const width = size ? Math.max(1, Math.round(size.width - spacing * 2)) : 0;
+    const height = size ? Math.max(1, Math.round(size.height - spacing * 2)) : 0;
+    if (![x, y, width, height].every(Number.isFinite)) return;
+
     target.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
     target.unmaximize();
 
     // All internal calculations fictively operate as if the actual window frame
     // size would also incorporate the user-defined window spacing. Only when a
     // window is actually moved this spacing gets deducted.
-    const spacing = this.#userPreferences.getSpacing();
-    x += spacing;
-    y += spacing;
+    // Mutter requires integer coordinates and positive frame dimensions.
+    x = Math.round(x + spacing);
+    y = Math.round(y + spacing);
 
     // As of Nov '23 the `move_resize_frame` works for almost all application
     // windows. However, a user report pointed out that for gVim, the window is
@@ -544,8 +554,7 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     // https://github.com/gTile/gTile/issues/336#issuecomment-1803025082
     target.move_frame(true, x, y);
     if (size) {
-      const { width: w, height: h } = size;
-      target.move_resize_frame(true, x, y, w - spacing * 2, h - spacing * 2);
+      target.move_resize_frame(true, x, y, width, height);
     }
   }
 
@@ -572,10 +581,10 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
       workArea = this.#workspaceManager
         .get_active_workspace()
         .get_work_area_for_monitor(monitorIdx),
-      top = Math.clamp(inset.top, 0, Math.floor(workArea.height / 2)),
-      bottom = Math.clamp(inset.bottom, 0, Math.floor(workArea.height / 2)),
-      left = Math.clamp(inset.left, 0, Math.floor(workArea.width / 2)),
-      right = Math.clamp(inset.right, 0, Math.floor(workArea.width / 2)),
+      top = clamp(inset.top, 0, Math.floor(workArea.height / 2)),
+      bottom = clamp(inset.bottom, 0, Math.floor(workArea.height / 2)),
+      left = clamp(inset.left, 0, Math.floor(workArea.width / 2)),
+      right = clamp(inset.right, 0, Math.floor(workArea.width / 2)),
       spacing = this.#userPreferences.getSpacing();
 
     // The fictitious expansion of the workarea by the user-configured spacing
@@ -598,10 +607,10 @@ export default class implements Publisher<DesktopEvent>, GarbageCollector {
     const
       roundNear = (n: number, ε: number) =>
         Math.abs(n - Math.round(n)) <= ε ? Math.round(n) : n,
-      exactNwX = Math.clamp(roundNear(cols * x, ε), 0, cols - 1),
-      exactNwY = Math.clamp(roundNear(rows * y, ε), 0, rows - 1),
-      exactSeX = Math.clamp(roundNear(cols * (x + width), ε), 1, cols),
-      exactSeY = Math.clamp(roundNear(rows * (y + height), ε), 1, rows);
+      exactNwX = clamp(roundNear(cols * x, ε), 0, cols - 1),
+      exactNwY = clamp(roundNear(rows * y, ε), 0, rows - 1),
+      exactSeX = clamp(roundNear(cols * (x + width), ε), 1, cols),
+      exactSeY = clamp(roundNear(rows * (y + height), ε), 1, rows);
 
     const discretize =
       snap === "shrink" ? Math.floor : snap === "grow" ? Math.ceil : Math.round;
