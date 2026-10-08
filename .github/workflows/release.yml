@@ -1,23 +1,36 @@
+name: Build release archives
 run-name: Create release (${{ github.ref_name }})
 on:
   push:
     tags:
       - "V*"
+  release:
+    types: [published]
+permissions:
+  contents: read
+# Publishing a release can also create its tag. Serialize the two events so
+# only one run updates that release's assets at a time.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   build:
+    if: startsWith(github.ref_name, 'V')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - run: npm ci
       - run: npm run test
       - run: npm run build:dist
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
-          body: Release ${{ github.ref_name }}
           files: |
             gtile.dist.tgz
             gtile.dist.zip

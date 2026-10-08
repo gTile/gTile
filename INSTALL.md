@@ -12,8 +12,9 @@ Check your desktop version:
 gnome-shell --version
 ```
 
-It must report `GNOME Shell 51.x`. Save `gtile.dist.zip` from this build to
-your Downloads directory, then run as your normal desktop user:
+It must report `GNOME Shell 51.x`. Download **gtile.dist.zip** from **Assets**
+on the GNOME 51 release on [GitHub Releases](https://github.com/Shane-96/gTile/releases).
+Save it to your Downloads directory, then run as your normal desktop user:
 
 ```sh
 gnome-extensions install --force ~/Downloads/gtile.dist.zip
@@ -97,3 +98,22 @@ an active systemd seat. This harness does not enable Shell's unsafe D-Bus Eval.
 
 Headless checks do not replace physical monitor hotplug, fractional scaling,
 touchscreen, or GPU testing on your own desktop.
+
+## Publish a downloadable ZIP on GitHub
+
+The release workflow builds the ZIP on GitHub and attaches it to the release.
+You do not need to download a ZIP from the cloud workspace or upload it yourself.
+
+1. Open the fork's **Actions** tab. If GitHub asks you to enable workflows for
+   this fork, enable them.
+2. Open **Releases**, then **Draft a new release**.
+3. Under **Choose a tag**, type `V71` and select **Create new tag: V71 on publish**.
+   Set **Target** to `gnome-51-port` and the title to `gTile 71 — GNOME 51`.
+4. Click **Publish release**. In **Actions**, wait for **Build release archives**
+   to finish successfully.
+5. Refresh the release page and download **gtile.dist.zip** under **Assets**.
+
+Release tags must begin with an uppercase `V`. For later releases, choose a new,
+unused tag and target the branch containing the changes you want to distribute.
+If a run fails to upload assets, check **Settings → Actions → General** for a
+repository or organization policy restricting workflow write permissions.
