@@ -1,3 +1,4 @@
+import Clutter from "gi://Clutter";
 import Gio from "gi://Gio";
 import Shell from "gi://Shell";
 
@@ -142,8 +143,10 @@ export default class App implements GarbageCollector {
     Main.panel.addToStatusArea(extension.uuid, this.#panelIcon);
 
     // --- event handlers ---
-    this.#panelIcon.connect("button-press-event",
+    const clickGesture = new Clutter.ClickGesture({ recognize_on_press: true });
+    clickGesture.connect("recognize",
       () => this.#onUserAction({ type: Action.TOGGLE }));
+    this.#panelIcon.add_action(clickGesture);
     this.#settings.bind("show-icon", this.#panelIcon, "visible",
       Gio.SettingsBindFlags.GET);
     const chid = this.#settings.connect("changed",

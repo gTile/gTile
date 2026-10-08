@@ -7,7 +7,7 @@
   "author": "Markus Schanz <markus@schanz.id>",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
-    "@ava/typescript": "^6.0.0",
+    "@ava/typescript": "^7.0.0",
     "@girs/adw-1": "^1.10.0-4.0.0-rc.1",
     "@girs/clutter-18": "^18.0.0-4.0.0-rc.1",
     "@girs/gdk-4.0": "^4.0.0-4.0.0-rc.1",
@@ -22,8 +22,8 @@
     "@girs/pango-1.0": "^1.57.1-4.0.0-rc.1",
     "@girs/shell-18": "^18.0.0-4.0.0-rc.1",
     "@girs/st-18": "^18.0.0-4.0.0-rc.1",
-    "ava": "^7.0.0",
-    "typescript": "^6.0.2"
+    "ava": "^8.0.1",
+    "typescript": "^7.0.2"
   },
   "ava": {
     "typescript": {
